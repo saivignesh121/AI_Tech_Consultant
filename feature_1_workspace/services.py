@@ -11,6 +11,7 @@ from sqlalchemy import delete, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from feature_1_workspace.auth import hash_password, verify_password
+from feature_1_workspace.roles_service import ensure_default_roles
 from feature_1_workspace.models import (
     AgentRole,
     Business,
@@ -127,6 +128,7 @@ async def signup_tenant(
     await db.refresh(user)
     await db.refresh(business)
 
+    await ensure_default_roles(db, business.id)
     return user, business
 
 

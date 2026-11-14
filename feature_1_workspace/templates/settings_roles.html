@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% block title %}Agent Roles & Live Editor — Settings{% endblock %}
+{% block content %}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+  <div class="flex gap-8 items-start">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="w-56 flex-shrink-0">
+      <div class="sticky top-24">
+        <p class="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-3 px-2">Settings</p>
+        <nav class="flex flex-col space-y-1">
+          <a href="/settings/business"
+             class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition">
+            Business Profile
+          </a>
+          <a href="/settings/connections"
+             class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition">
+            Keys &amp; Connections
+          </a>
+          <a href="/settings/prompts"
+             class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition">
+            Prompts &amp; Caching
+          </a>
+          <a href="/settings/roles"
+             class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium bg-slate-800 text-white border border-slate-700 shadow-inner">
+            Agent Roles
+            <span class="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          </a>
+          <a href="/settings/logs"
+             class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition">
+            Logs, Cost &amp; Jobs
+          </a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-white">Agent Roles &amp; Live Role Editor</h1>
+          <p class="text-sm text-slate-400 mt-1">
+            Configure how each role thinks, speaks, uses skills, and hands over to humans—and test edits side by side before saving.
+          </p>
+        </div>
+        <a href="/settings/roles?new=true"
+           class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-sm font-semibold text-white transition">
+          + New Custom Role
+        </a>
+      </div>
+
+      {% if saved_notice %}
+      <div class="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+        {{ saved_notice }}
+      </div>
+      {% endif %}
+
+      <!-- ROLE SELECTOR TABS -->
+      <div class="flex flex-wrap gap-2">
+        {% for r in roles %}
+        <a href="/settings/roles?role_id={{ r.id }}"
+           class="px-3.5 py-2 rounded-lg text-xs font-semibold border transition {{ 'bg-indigo-600 text-white border-indigo-500' if (selected_role and selected_role.id == r.id and not is_new_role) else 'bg-slate-900 text-slate-300 border-slate-800 hover:border-slate-700' }}">
+          {{ r.name }}
+          <span class="ml-1.5 opacity-75">({{ r.tone }})</span>
+        </a>
+        {% endfor %}
+      </div>
+
+      <!-- SPLIT ROLE EDITOR + LIVE TEST CHAT -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- LEFT: ROLE EDITOR -->
+        <form id="role-editor-form"
+              method="post"
+              action="/settings/roles/save"
+              class="lg:col-span-7 rounded-xl border border-slate-800 bg-slate-900/70 p-6 space-y-5">
+          <input type="hidden" name="role_id" value="{{ selected_role.id if selected_role and not is_new_role else '' }}" />
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Role Name</label>
+              <input type="text" name="name" required
+                     value="{{ selected_role.name if selected_role and not is_new_role else '' }}"
+                     placeholder="e.g., Enterprise Onboarding Specialist"
+                     class="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm text-white" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Tone Profile</label>
+              {% set cur_tone = selected_role.tone if selected_role and not is_new_role else 'friendly' %}
+              <select name="tone" class="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm text-white">
+                <option value="technical" {% if cur_tone == 'technical' %}selected{% endif %}>Technical (Step-by-step &amp; code)</option>
+                <option value="friendly" {% if cur_tone == 'friendly' %}selected{% endif %}>Friendly (Warm &amp; simple)</option>
+                <option value="consultative" {% if cur_tone == 'consultative' %}selected{% endif %}>Consultative (Sales &amp; solution-oriented)</option>
+                <option value="formal" {% if cur_tone == 'formal' %}selected{% endif %}>Formal (Executive &amp; concise)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Role Goal</label>
+            <input type="text" name="description"
+                   value="{{ selected_role.description or '' if selected_role and not is_new_role else '' }}"
+                   placeholder="What outcome should this role achieve on every conversation?"
+                   class="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm text-white" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Role System Prompt</label>
+            <textarea name="system_prompt" rows="5" required
+                      class="w-full rounded-lg bg-slate-950 border border-slate-800 p-3 font-mono text-xs text-slate-100">{{ selected_role.system_prompt if selected_role and not is_new_role else default_starter_prompt }}</textarea>
+          </div>
+
+          <!-- STYLE SLIDERS -->
+          {% set v_val = selected_role.verbosity if selected_role and not is_new_role else 3 %}
+          {% set d_val = selected_role.technical_depth if selected_role and not is_new_role else 3 %}
+          {% set p_val = selected_role.politeness if selected_role and not is_new_role else 4 %}
+          <div class="grid grid-cols-3 gap-4 rounded-lg border border-slate-800 bg-slate-950 p-3">
+            <div>
+              <label class="block text-xs text-slate-400">Verbosity (1–5)</label>
+              <input type="number" name="verbosity" min="1" max="5" value="{{ v_val }}"
+                     class="mt-1 w-full rounded bg-slate-900 border border-slate-700 px-2 py-1 text-sm text-white" />
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400">Tech Depth (1–5)</label>
+              <input type="number" name="technical_depth" min="1" max="5" value="{{ d_val }}"
+                     class="mt-1 w-full rounded bg-slate-900 border border-slate-700 px-2 py-1 text-sm text-white" />
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400">Politeness (1–5)</label>
+              <input type="number" name="politeness" min="1" max="5" value="{{ p_val }}"
+                     class="mt-1 w-full rounded bg-slate-900 border border-slate-700 px-2 py-1 text-sm text-white" />
+            </div>
+          </div>
+
+          <!-- ALLOWED SKILLS -->
+          {% set active_skills = (selected_role.permitted_skills or []) if selected_role and not is_new_role else ['search_knowledge_brain', 'draft_customer_reply'] %}
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-2">Allowed Skills</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {% for sk in available_skills %}
+              <label class="flex items-start gap-2 rounded-lg border border-slate-800 bg-slate-950 p-2.5 text-xs cursor-pointer">
+                <input type="checkbox" name="permitted_skills" value="{{ sk.id }}"
+                       {% if sk.id in active_skills %}checked{% endif %}
+                       class="mt-0.5 rounded border-slate-700 bg-slate-900 text-emerald-500" />
+                <span>
+                  <strong class="text-slate-200 block">{{ sk.label }}</strong>
+                  <span class="text-slate-500">{{ sk.description }}</span>
+                </span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- ASSIGNED MODEL & HANDOVER TRIGGERS -->
+          {% set hc = (selected_role.handover_criteria or {}) if selected_role and not is_new_role else {} %}
+          {% set cur_model = hc.get('assigned_model', 'gemma4:e4b') %}
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Default Model</label>
+              <select name="assigned_model" class="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-xs text-white">
+                {% for m in available_models %}
+                <option value="{{ m.id }}" {% if m.id == cur_model %}selected{% endif %}>
+                  {{ m.display_name }} ({{ m.provider }})
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Custom Handover Keywords</label>
+              <input type="text" name="custom_triggers"
+                     value="{{ (hc.get('custom_triggers', []) | join(', ')) }}"
+                     placeholder="e.g., enterprise SLA, cancel account"
+                     class="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-xs text-white" />
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-4 text-xs text-slate-300">
+            <label class="flex items-center gap-1.5">
+              <input type="checkbox" name="auto_handover_on_refund" {% if hc.get('auto_handover_on_refund', True) %}checked{% endif %} />
+              Hand over on refund/billing disputes
+            </label>
+            <label class="flex items-center gap-1.5">
+              <input type="checkbox" name="auto_handover_on_legal" {% if hc.get('auto_handover_on_legal', True) %}checked{% endif %} />
+              Hand over on legal/compliance threats
+            </label>
+            <label class="flex items-center gap-1.5">
+              <input type="checkbox" name="auto_handover_on_angry" {% if hc.get('auto_handover_on_angry', True) %}checked{% endif %} />
+              Hand over on angry sentiment
+            </label>
+          </div>
+
+          <div class="pt-2">
+            <button type="submit"
+                    class="w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold text-white transition">
+              Save Role Configuration
+            </button>
+          </div>
+        </form>
+
+        <!-- RIGHT: LIVE SIDE-BY-SIDE TEST CHAT -->
+        <section class="lg:col-span-5 rounded-xl border border-slate-800 bg-slate-900/70 p-6 space-y-4 sticky top-24">
+          <div>
+            <h2 class="text-lg font-semibold text-white">Live Role Test Chat</h2>
+            <p class="text-xs text-slate-400 mt-1">
+              Test your unsaved prompt, tone, sliders, and handover rules immediately before saving.
+            </p>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-xs font-medium text-slate-300">Customer Question or Pasted Email</label>
+            <textarea id="test-chat-input"
+                      name="test_message"
+                      rows="4"
+                      placeholder="How do I connect my custom domain and enable SSL?"
+                      class="w-full rounded-lg bg-slate-950 border border-slate-800 p-3 text-sm text-white">How do I connect my custom domain and enable SSL?</textarea>
+          </div>
+
+          <button type="button"
+                  hx-post="/settings/roles/test-chat"
+                  hx-include="#role-editor-form, #test-chat-input"
+                  hx-target="#test-chat-output"
+                  hx-swap="innerHTML"
+                  class="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-sm font-semibold text-white transition">
+            Test This Role Now
+          </button>
+
+          <div id="test-chat-output" class="pt-2">
+            <div class="rounded-lg border border-dashed border-slate-800 p-4 text-xs text-slate-500 text-center">
+              Click <strong>Test This Role Now</strong> to preview how this role responds with your current edits.
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}
