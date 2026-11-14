@@ -240,6 +240,10 @@ async def _create_test_tenant(
         )
         session.add(biz)
         await session.flush()
+        await session.execute(
+            text("SELECT set_config('app.current_business_id', :bid, true)"),
+            {"bid": str(biz.id)},
+        )
 
         user = User(
             business_id=biz.id,
@@ -281,6 +285,10 @@ async def _create_test_tenant(
         session.add(conn)
 
         await session.commit()
+        await session.execute(
+            text("SELECT set_config('app.current_business_id', :bid, true)"),
+            {"bid": str(biz.id)},
+        )
         await session.refresh(biz)
         await session.refresh(user)
         await session.refresh(role)
@@ -294,6 +302,10 @@ async def _delete_tenant_if_exists(business_id: uuid.UUID) -> None:
     async with AsyncSessionLocal() as session:
         session.info["is_admin"] = True
         try:
+            await session.execute(
+                text("SELECT set_config('app.current_business_id', :bid, true)"),
+                {"bid": str(business_id)},
+            )
             from sqlalchemy import delete as sa_delete
             from feature_1_workspace.models import Business as Biz
             await session.execute(sa_delete(Biz).where(Biz.id == business_id))
@@ -528,6 +540,10 @@ class TestCrossTenantWriteIsolation:
         # Verify the name was not actually changed in the DB
         async with AsyncSessionLocal() as admin_session:
             admin_session.info["is_admin"] = True
+            await admin_session.execute(
+                text("SELECT set_config('app.current_business_id', :bid, true)"),
+                {"bid": str(biz_b.id)},
+            )
             result = await admin_session.execute(
                 select(AgentRole).where(AgentRole.id == role_b.id)
             )

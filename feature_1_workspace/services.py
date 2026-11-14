@@ -78,6 +78,10 @@ async def signup_tenant(
     )
     db.add(business)
     await db.flush()
+    await db.execute(
+        text("SELECT set_config('app.current_business_id', :bid, true)"),
+        {"bid": str(business.id)},
+    )
 
     # 4. Create User (Owner)
     hashed_pwd = hash_password(password)
