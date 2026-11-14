@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}Prompts & Caching — Settings{% endblock %}
+{% block content %}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+  <div class="flex gap-8 items-start">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="w-56 flex-shrink-0">
+      <div class="sticky top-24">
+        <p class="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-3 px-2">Settings</p>
+        <nav class="flex flex-col space-y-1">
+          <a href="/settings/business"
+             class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition">
+            Business Profile
+          </a>
+          <a href="/settings/connections"
+             class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition">
+            Keys &amp; Connections
+          </a>
+          <a href="/settings/prompts"
+             class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium bg-slate-800 text-white border border-slate-700 shadow-inner">
+            Prompts &amp; Caching
+            <span class="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          </a>
+          <a href="/settings/roles"
+             class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition">
+            Agent Roles
+          </a>
+          <a href="/settings/logs"
+             class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition">
+            Logs, Cost &amp; Jobs
+          </a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 space-y-8">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Prompts, Versioning &amp; Caching</h1>
+        <p class="text-sm text-slate-400 mt-1">
+          Every pipeline prompt lives in PostgreSQL with required variable validation, version history, 1-click rollback, and Anthropic prompt caching.
+        </p>
+      </div>
+
+      {% if saved_notice %}
+      <div class="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+        {{ saved_notice }}
+      </div>
+      {% endif %}
+
+      {% if error_notice %}
+      <div class="rounded-lg border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+        {{ error_notice }}
+      </div>
+      {% endif %}
+
+      <!-- ANTHROPIC PROMPT CACHING PROOF -->
+      <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-semibold text-white">Anthropic Prompt Caching Proof (100 Tasks)</h2>
+            <p class="text-xs text-slate-400 mt-1">
+              Tags static system/role prompt prefixes (&ge;2,200 tokens) with <code class="text-emerald-400">cache_control: {"type": "ephemeral"}</code> and compares 100 runs with caching OFF vs ON.
+            </p>
+          </div>
+          <form method="post" action="/settings/prompts/benchmark-caching">
+            <input type="hidden" name="task_count" value="100" />
+            <button type="submit"
+                    class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-sm font-semibold text-white transition">
+              Run 100-Task Caching Proof
+            </button>
+          </form>
+        </div>
+
+        {% if benchmark %}
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="rounded-lg border border-slate-800 bg-slate-950 p-4">
+            <p class="text-xs uppercase tracking-wider text-slate-400">Caching OFF (100 Tasks)</p>
+            <p class="text-2xl font-bold text-rose-400 mt-1">${{ "%.5f"|format(benchmark.caching_off.cost_usd) }}</p>
+            <p class="text-xs text-slate-500 mt-1">{{ benchmark.caching_off.total_input_tokens }} input tokens billed at 100%</p>
+          </div>
+          <div class="rounded-lg border border-slate-800 bg-slate-950 p-4">
+            <p class="text-xs uppercase tracking-wider text-slate-400">Caching ON (Ephemeral)</p>
+            <p class="text-2xl font-bold text-emerald-400 mt-1">${{ "%.5f"|format(benchmark.caching_on.cost_usd) }}</p>
+            <p class="text-xs text-slate-500 mt-1">{{ benchmark.caching_on.cached_read_tokens }} tokens read at 90% discount</p>
+          </div>
+          <div class="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-4">
+            <p class="text-xs uppercase tracking-wider text-emerald-300">Total Saved</p>
+            <p class="text-2xl font-bold text-white mt-1">{{ benchmark.saved_pct }}% (${{ "%.5f"|format(benchmark.saved_usd) }})</p>
+            <p class="text-xs text-slate-400 mt-1">Static prefix: {{ benchmark.static_prefix_tokens }} tokens ({{ benchmark.model }})</p>
+          </div>
+        </div>
+        {% endif %}
+      </section>
+
+      <!-- PROMPT EDITORS -->
+      {% for ptype in prompt_types %}
+      {% set item = states[ptype] %}
+      {% set active = item.active %}
+      <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-6 space-y-4">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2.5">
+              <h2 class="text-lg font-semibold text-white">{{ item.spec.label }}</h2>
+              <span class="px-2 py-0.5 rounded text-xs font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                v{{ active.version_number }} active
+              </span>
+              <span class="text-xs font-mono text-slate-500">{{ ptype }}</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-1">{{ item.spec.description }}</p>
+          </div>
+
+          <!-- 1-CLICK ROLLBACK -->
+          <div class="flex items-center gap-2">
+            {% if item.versions|length > 1 %}
+            <form method="post" action="/settings/prompts/{{ ptype }}/rollback" class="flex items-center gap-2">
+              <select name="version_number"
+                      class="rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-1.5 text-xs text-slate-200">
+                {% for ver in item.versions %}
+                <option value="{{ ver.version_number }}" {% if ver.is_active %}selected{% endif %}>
+                  v{{ ver.version_number }}{% if ver.is_active %} (active){% endif %} — {{ ver.change_summary or 'Saved' }}
+                </option>
+                {% endfor %}
+              </select>
+              <button type="submit"
+                      class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-200 transition">
+                Rollback
+              </button>
+            </form>
+            {% endif %}
+
+            {% if active.version_number != 1 %}
+            <form method="post" action="/settings/prompts/{{ ptype }}/rollback">
+              <input type="hidden" name="version_number" value="1" />
+              <button type="submit"
+                      class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-amber-300 transition">
+                Reset to v1 Default
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- REQUIRED PLACEHOLDERS -->
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <span class="text-slate-400">Required variables:</span>
+          {% for req_var in item.spec.required_variables %}
+          <code class="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-indigo-300">{{ "{" }}{{ req_var }}{{ "}" }}</code>
+          {% endfor %}
+        </div>
+
+        <!-- SAVE NEW VERSION FORM -->
+        <form method="post" action="/settings/prompts/{{ ptype }}/save" class="space-y-3">
+          <textarea name="template_text"
+                    rows="7"
+                    class="w-full rounded-lg bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:outline-none p-3 font-mono text-xs text-slate-100 leading-relaxed">{{ active.template_text }}</textarea>
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <input type="text"
+                   name="change_summary"
+                   placeholder="Change summary (e.g., Clarified escalation rule for billing)"
+                   class="flex-1 min-w-[240px] rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-xs text-slate-200" />
+            <button type="submit"
+                    class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition">
+              Save as v{{ item.versions[0].version_number + 1 }}
+            </button>
+          </div>
+        </form>
+
+        <!-- DIFF AGAINST PREVIOUS VERSION -->
+        {% if item.versions|length > 1 %}
+        <details class="rounded-lg border border-slate-800 bg-slate-950/80 p-3">
+          <summary class="cursor-pointer text-xs font-medium text-slate-300">
+            View Diff vs Previous Version
+          </summary>
+          <pre class="mt-2 overflow-x-auto text-xs font-mono text-slate-300 whitespace-pre-wrap">{{ item.diff_text }}</pre>
+        </details>
+        {% endif %}
+      </section>
+      {% endfor %}
+    </main>
+
+  </div>
+</div>
+{% endblock %}
