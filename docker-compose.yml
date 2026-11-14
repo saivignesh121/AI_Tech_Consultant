@@ -1,0 +1,67 @@
+services:
+  db:
+    image: pgvector/pgvector:0.8.7-pg18
+    container_name: ai_tech_consultant_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ai_tech_consultant
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./migrations/0001_initial_schema.sql:/docker-entrypoint-initdb.d/01_init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ai_tech_consultant"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai_tech_consultant_web
+    restart: unless-stopped
+    command: uvicorn shared.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/ai_tech_consultant
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+    volumes:
+      - .:/app
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai_tech_consultant_worker
+    restart: unless-stopped
+    command: sh -c "procrastinate --app=shared.worker.app schema --apply && procrastinate --app=shared.worker.app worker"
+    depends_on:
+      db:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/ai_tech_consultant
+      - PROCRASTINATE_APP=shared.worker.app
+      - PGHOST=db
+      - PGPORT=5432
+      - PGUSER=postgres
+      - PGPASSWORD=postgres
+      - PGDATABASE=ai_tech_consultant
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+    volumes:
+      - .:/app
+
+volumes:
+  pgdata:
