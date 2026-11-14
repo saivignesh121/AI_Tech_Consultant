@@ -1,0 +1,20 @@
+# Environment and Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+client_secret*.json
+
+# Data and Uploads
+uploads/
+screenshots/
+pgdata/
+
+# Python and Virtual Environments
+.venv/
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
