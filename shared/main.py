@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from feature_1_workspace.connections_migration import generate_migration_sql
 from feature_1_workspace.connections_router import router as connections_router
 from feature_1_workspace.prompts_router import router as prompts_router
-from feature_1_workspace.roles_router import router as roles_router
+from feature_1_workspace.roles_router import router as roles_router\nfrom feature_1_workspace.logs_router import router as logs_router
 
 
 class Settings(BaseSettings):
@@ -64,7 +64,7 @@ app = FastAPI(
 
 app.include_router(connections_router)
 app.include_router(prompts_router)
-app.include_router(roles_router)
+app.include_router(roles_router)\napp.include_router(logs_router)
 
 
 @app.get("/health")
