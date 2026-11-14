@@ -18,6 +18,9 @@ dependencies = [
     "jinja2",
     "httpx",
     "pydantic-settings",
+    "argon2-cffi",
+    "pytest",
+    "pytest-asyncio",
 ]
 
 [tool.setuptools.packages.find]
