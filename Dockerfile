@@ -21,6 +21,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy application repository
 COPY . /app/
 
+# Explicitly copy tests directory (ensures it is present even if .dockerignore is adjusted)
+COPY tests/ /app/tests/
+
 # Install application package
 RUN pip install --no-cache-dir --no-deps -e .
 
