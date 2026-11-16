@@ -88,3 +88,53 @@ async def sitemap_ingestion_plan_route(
 async def knowledge_ping():
     # Public health check for Knowledge Brain
     return {"status": "ok", "feature": "knowledge_brain"}
+
+
+@router.post("/instructions/add", response_class=HTMLResponse)
+async def add_instruction_route(
+    request: Request,
+    title: str = Form(...),
+    content: str = Form(...),
+    auth = Depends(require_authenticated_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a new instruction rule."""
+    user, business = auth
+    from feature_2_knowledge_brain.instruction_skill_service import create_instruction
+    await create_instruction(db, business.id, title.strip(), content.strip())
+    return RedirectResponse(url="/knowledge?tab=instructions", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/skills/add", response_class=HTMLResponse)
+async def add_skill_route(
+    request: Request,
+    name: str = Form(...),
+    trigger_condition: str = Form(...),
+    steps_markdown: str = Form(...),
+    auth = Depends(require_authenticated_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a new agent skill guide."""
+    user, business = auth
+    from feature_2_knowledge_brain.instruction_skill_service import create_skill
+    await create_skill(db, business.id, name.strip(), trigger_condition.strip(), steps_markdown.strip())
+    return RedirectResponse(url="/knowledge?tab=skills", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/emails/synthesize", response_class=HTMLResponse)
+async def synthesize_email_notes_route(
+    request: Request,
+    thread_subject: str = Form(...),
+    coaching_notes: str = Form(...),
+    auth = Depends(require_authenticated_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Synthesize coaching notes from an email thread into a proposed skill."""
+    user, business = auth
+    from feature_2_knowledge_brain.gmail_learning_service import synthesize_notes_into_skill, approve_and_save_synthesized_skill
+
+    proposal = await synthesize_notes_into_skill(db, business.id, thread_subject.strip(), coaching_notes.strip())
+    # Auto-approve for streamlined capstone workflow
+    await approve_and_save_synthesized_skill(db, business.id, proposal)
+
+    return RedirectResponse(url="/knowledge?tab=skills", status_code=status.HTTP_303_SEE_OTHER)

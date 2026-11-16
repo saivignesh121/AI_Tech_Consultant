@@ -1,3 +1,5 @@
+from feature_3_chat.router import router as chat_router
+import feature_3_chat.models
 """Main FastAPI application for AI Tech Consultant."""
 
 from __future__ import annotations
@@ -64,6 +66,7 @@ app.include_router(prompts_router)
 app.include_router(roles_router)
 app.include_router(logs_router)
 app.include_router(knowledge_router)
+app.include_router(chat_router)
 
 
 @app.get("/health")
