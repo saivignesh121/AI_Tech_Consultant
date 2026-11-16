@@ -1,4 +1,4 @@
-"""Sitemap recursive parsing, duplicate detection, and pre-crawl estimation."""
+"""Sitemap recursive parsing and pre-crawl estimation."""
 
 from __future__ import annotations
 
@@ -9,8 +9,7 @@ import httpx
 
 
 async def fetch_and_parse_sitemap(sitemap_url: str) -> Dict[str, Any]:
-    """Recursively fetch XML sitemap or sitemap index, extracting all URLs and nested sitemaps."""
-    headers = {"User-Agent": "AITechConsultantBot/1.0 (+https://aitechconsultant.local)"}
+    headers = {"User-Agent": "AITechConsultantBot/1.0"}
     async with httpx.AsyncClient(timeout=20.0, follow_redirects=True) as client:
         resp = await client.get(sitemap_url, headers=headers)
         if resp.status_code != 200:
@@ -35,15 +34,10 @@ async def fetch_and_parse_sitemap(sitemap_url: str) -> Dict[str, Any]:
             else:
                 urls_found.append(loc)
 
-    return {
-        "sitemap_url": sitemap_url,
-        "urls": urls_found,
-        "nested_sitemaps": nested_sitemaps,
-    }
+    return {"sitemap_url": sitemap_url, "urls": urls_found, "nested_sitemaps": nested_sitemaps}
 
 
 async def generate_ingestion_plan(sitemap_urls: List[str]) -> Dict[str, Any]:
-    """Recursively traverse sitemaps, detect duplicates, and compute pre-crawl metrics & ETA."""
     all_sitemaps_meta: List[Dict[str, Any]] = []
     url_to_sitemaps: Dict[str, Set[str]] = {}
     queue = list(sitemap_urls)
@@ -74,11 +68,7 @@ async def generate_ingestion_plan(sitemap_urls: List[str]) -> Dict[str, Any]:
                 if nested not in visited_sitemaps:
                     queue.append(nested)
         except Exception as exc:
-            all_sitemaps_meta.append({
-                "sitemap_url": current_url,
-                "error": str(exc),
-                "url_count": 0,
-            })
+            all_sitemaps_meta.append({"sitemap_url": current_url, "error": str(exc), "url_count": 0})
 
     unique_urls = list(url_to_sitemaps.keys())
     total_urls = len(unique_urls)
@@ -86,8 +76,6 @@ async def generate_ingestion_plan(sitemap_urls: List[str]) -> Dict[str, Any]:
 
     seconds_estimated = total_urls * 2.0
     hours_estimated = seconds_estimated / 3600.0
-    pages_per_hour = 1800
-    pages_per_day = pages_per_hour * 24
 
     return {
         "total_sitemaps": len(visited_sitemaps),
@@ -97,8 +85,8 @@ async def generate_ingestion_plan(sitemap_urls: List[str]) -> Dict[str, Any]:
         "first_url": unique_urls[0] if unique_urls else None,
         "last_url": unique_urls[-1] if unique_urls else None,
         "estimates": {
-            "pages_per_hour": pages_per_hour,
-            "pages_per_day": pages_per_day,
+            "pages_per_hour": 1800,
+            "pages_per_day": 43200,
             "estimated_hours": round(hours_estimated, 2),
             "estimated_days": round(hours_estimated / 24.0, 2),
         },

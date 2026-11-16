@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Knowledge Brain — AI Tech Consultant{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full space-y-8">
+  <div>
+    <h1 class="text-2xl font-bold text-white">The Knowledge Brain</h1>
+    <p class="text-sm text-slate-400 mt-1">Manage sitemaps, page health, operational instructions, and agent skills.</p>
+  </div>
+  <div class="border-b border-slate-800 flex gap-6 text-sm font-medium">
+    <a href="/knowledge?tab=sitemaps" class="pb-3 border-b-2 {{ 'border-emerald-500 text-white' if active_tab == 'sitemaps' else 'border-transparent text-slate-400' }}">Sitemaps</a>
+    <a href="/knowledge?tab=pages" class="pb-3 border-b-2 {{ 'border-emerald-500 text-white' if active_tab == 'pages' else 'border-transparent text-slate-400' }}">Page URLs</a>
+    <a href="/knowledge?tab=instructions" class="pb-3 border-b-2 {{ 'border-emerald-500 text-white' if active_tab == 'instructions' else 'border-transparent text-slate-400' }}">Instructions</a>
+    <a href="/knowledge?tab=skills" class="pb-3 border-b-2 {{ 'border-emerald-500 text-white' if active_tab == 'skills' else 'border-transparent text-slate-400' }}">Skills</a>
+  </div>
+  {% if active_tab == 'sitemaps' %}
+  <div class="space-y-6">
+    <div class="rounded-xl border border-slate-800 bg-slate-900 p-6 space-y-4">
+      <h2 class="text-lg font-semibold text-white">Add Sitemap URL</h2>
+      <form method="post" action="/knowledge/sitemaps/plan" class="flex gap-3">
+        <input type="url" name="sitemap_url" required value="{{ entered_url or 'https://support.brilliantdirectories.com/support/sitemap.xml' }}" class="flex-1 rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm text-white" />
+        <button type="submit" class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-sm font-semibold text-white transition">Analyze Sitemap</button>
+      </form>
+    </div>
+    {% if plan_result %}
+    <div class="rounded-xl border border-emerald-500/40 bg-slate-900 p-6 space-y-6">
+      <h3 class="text-lg font-bold text-white">Pre-Crawl Ingestion Summary</h3>
+      <div class="grid grid-cols-4 gap-4">
+        <div class="bg-slate-950 p-4 rounded border border-slate-800"><p class="text-xs text-slate-400">Total Sitemaps</p><p class="text-2xl font-bold text-white mt-1">{{ plan_result.total_sitemaps }}</p></div>
+        <div class="bg-slate-950 p-4 rounded border border-slate-800"><p class="text-xs text-slate-400">Total URLs</p><p class="text-2xl font-bold text-emerald-400 mt-1">{{ plan_result.total_unique_urls }}</p></div>
+        <div class="bg-slate-950 p-4 rounded border border-slate-800"><p class="text-xs text-slate-400">Duplicates</p><p class="text-2xl font-bold text-amber-400 mt-1">{{ plan_result.total_duplicate_instances }}</p></div>
+        <div class="bg-slate-950 p-4 rounded border border-slate-800"><p class="text-xs text-slate-400">Est. Hours</p><p class="text-2xl font-bold text-indigo-400 mt-1">{{ plan_result.estimates.estimated_hours }}</p></div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
