@@ -205,7 +205,8 @@ async def get_db(request: Request) -> AsyncGenerator[AsyncSession, None]:
 
         if biz_str:
             try:
-                await session.execute(text("SET ROLE ai_app_user;"))
+                async with session.begin_nested():
+                    await session.execute(text("SET ROLE ai_app_user;"))
             except Exception:
                 pass
             await session.execute(

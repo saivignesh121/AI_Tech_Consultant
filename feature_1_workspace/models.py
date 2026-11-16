@@ -64,27 +64,22 @@ class Business(Base):
     )
 
     # Relationships cascading from business
-    users: Mapped[List["User"]] = relationship(
-        "User", back_populates="business", cascade="all, delete-orphan", passive_deletes=True
+    users: Mapped[List["User"]] = relationship("feature_1_workspace.models.User", back_populates="business", cascade="all, delete-orphan", passive_deletes=True
     )
-    onboarding: Mapped[Optional["OnboardingStatus"]] = relationship(
-        "OnboardingStatus",
+    onboarding: Mapped[Optional["feature_1_workspace.models.OnboardingStatus"]] = relationship(
+        "feature_1_workspace.models.OnboardingStatus",
         back_populates="business",
         uselist=False,
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
-    roles: Mapped[List["AgentRole"]] = relationship(
-        "AgentRole", back_populates="business", cascade="all, delete-orphan", passive_deletes=True
+    roles: Mapped[List["AgentRole"]] = relationship("feature_1_workspace.models.AgentRole", back_populates="business", cascade="all, delete-orphan", passive_deletes=True
     )
-    connections: Mapped[List["Connection"]] = relationship(
-        "Connection", back_populates="business", cascade="all, delete-orphan", passive_deletes=True
+    connections: Mapped[List["Connection"]] = relationship("feature_1_workspace.models.Connection", back_populates="business", cascade="all, delete-orphan", passive_deletes=True
     )
-    knowledge_pages: Mapped[List["KnowledgePage"]] = relationship(
-        "KnowledgePage", back_populates="business", cascade="all, delete-orphan", passive_deletes=True
+    knowledge_pages: Mapped[List["KnowledgePage"]] = relationship("feature_1_workspace.models.KnowledgePage", back_populates="business", cascade="all, delete-orphan", passive_deletes=True
     )
-    knowledge_chunks: Mapped[List["KnowledgeChunk"]] = relationship(
-        "KnowledgeChunk", back_populates="business", cascade="all, delete-orphan", passive_deletes=True
+    knowledge_chunks: Mapped[List["KnowledgeChunk"]] = relationship("feature_1_workspace.models.KnowledgeChunk", back_populates="business", cascade="all, delete-orphan", passive_deletes=True
     )
 
 
@@ -118,7 +113,7 @@ class User(Base):
         CheckConstraint("role IN ('owner', 'admin', 'member')", name="ck_users_role"),
     )
 
-    business: Mapped["Business"] = relationship("Business", back_populates="users")
+    business: Mapped["Business"] = relationship("feature_1_workspace.models.Business", back_populates="users")
 
 
 class OnboardingStatus(Base):
@@ -164,7 +159,7 @@ class OnboardingStatus(Base):
         ),
     )
 
-    business: Mapped["Business"] = relationship("Business", back_populates="onboarding")
+    business: Mapped["Business"] = relationship("feature_1_workspace.models.Business", back_populates="onboarding")
 
 
 class AgentRole(Base):
@@ -212,7 +207,7 @@ class AgentRole(Base):
         ),
     )
 
-    business: Mapped["Business"] = relationship("Business", back_populates="roles")
+    business: Mapped["Business"] = relationship("feature_1_workspace.models.Business", back_populates="roles")
 
 
 class Connection(Base):
@@ -258,7 +253,7 @@ class Connection(Base):
         ),
     )
 
-    business: Mapped["Business"] = relationship("Business", back_populates="connections")
+    business: Mapped["Business"] = relationship("feature_1_workspace.models.Business", back_populates="connections")
 
 
 class KnowledgePage(Base):
@@ -293,9 +288,8 @@ class KnowledgePage(Base):
         UniqueConstraint("business_id", "normalized_url", name="uq_knowledge_pages_biz_norm_url"),
     )
 
-    business: Mapped["Business"] = relationship("Business", back_populates="knowledge_pages")
-    page_versions: Mapped[List["PageVersion"]] = relationship(
-        "PageVersion", back_populates="knowledge_page", cascade="all, delete-orphan", passive_deletes=True
+    business: Mapped["Business"] = relationship("feature_1_workspace.models.Business", back_populates="knowledge_pages")
+    page_versions: Mapped[List["PageVersion"]] = relationship("feature_1_workspace.models.PageVersion", back_populates="knowledge_page", cascade="all, delete-orphan", passive_deletes=True
     )
 
 
@@ -334,8 +328,7 @@ class PageVersion(Base):
         UniqueConstraint("knowledge_page_id", "version_number", name="uq_page_versions_page_ver"),
     )
 
-    knowledge_page: Mapped["KnowledgePage"] = relationship(
-        "KnowledgePage", back_populates="page_versions"
+    knowledge_page: Mapped["KnowledgePage"] = relationship("feature_1_workspace.models.KnowledgePage", back_populates="page_versions"
     )
 
 
@@ -375,4 +368,4 @@ class KnowledgeChunk(Base):
         DateTime(timezone=True), nullable=False, default=utc_now
     )
 
-    business: Mapped["Business"] = relationship("Business", back_populates="knowledge_chunks")
+    business: Mapped["Business"] = relationship("feature_1_workspace.models.Business", back_populates="knowledge_chunks")

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Go Live in 15 Minutes — AI Tech Consultant{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-6 py-8 space-y-6">
+  <div class="flex flex-wrap justify-between items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-white">Go Live in 15 Minutes (Live Readiness Gate)</h1>
+      <p class="text-sm text-slate-400">Score is computed live from your real Knowledge Brain, Chat, and Eval Lab database state (Threshold: {{ readiness.threshold }}%).</p>
+    </div>
+    <form method="post" action="/go-live/verify">
+      <button type="submit" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold rounded-lg text-xs">Run Live Readiness Check</button>
+    </form>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+      <div class="text-xs uppercase text-slate-400">Current Wizard Step</div>
+      <div class="text-2xl font-bold text-white mt-1">Step {{ status.step_completed }} of 5</div>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+      <div class="text-xs uppercase text-slate-400">Real Readiness Gate Score</div>
+      <div class="text-2xl font-bold {{ 'text-emerald-400' if readiness.is_live else 'text-amber-400' }} mt-1">{{ readiness.score }}%</div>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+      <div class="text-xs uppercase text-slate-400">Deployment Status</div>
+      <div class="text-2xl font-bold {% if readiness.is_live %}text-emerald-400{% else %}text-amber-400{% endif %} mt-1">
+        {% if readiness.is_live %}LIVE & ACTIVE{% else %}GATE LOCKED (< {{ readiness.threshold }}%){% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-4">
+    <form method="post" action="/go-live/step">
+      <select name="step" onchange="this.form.submit()" class="bg-slate-900 border border-slate-700 text-white rounded-lg px-4 py-2.5 text-sm">
+        <option value="1" {% if status.step_completed == 1 %}selected{% endif %}>Step 1: Workspace & API Keys</option>
+        <option value="2" {% if status.step_completed == 2 %}selected{% endif %}>Step 2: Sitemap & Knowledge Ingestion</option>
+        <option value="3" {% if status.step_completed == 3 %}selected{% endif %}>Step 3: Agent Roles & Instructions</option>
+        <option value="4" {% if status.step_completed == 4 %}selected{% endif %}>Step 4: Ask & Teach Verification</option>
+        <option value="5" {% if status.step_completed == 5 %}selected{% endif %}>Step 5: Final Readiness Gate & Go Live</option>
+      </select>
+    </form>
+
+    <form method="post" action="/go-live/advance">
+      <button type="submit" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg text-sm border border-slate-700">
+        {% if status.step_completed < 5 %}Next Step →{% else %}Review Gate ✓{% endif %}
+      </button>
+    </form>
+  </div>
+
+  <!-- Live 5-Gate Telemetry Checklist -->
+  <div class="bg-slate-900 border border-slate-800 rounded-xl divide-y divide-slate-800">
+    <div class="p-4 font-semibold text-sm text-white">Live Tenant Readiness Telemetry</div>
+    {% for g in readiness.gates %}
+    <div class="p-4 flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase {{ 'bg-emerald-950 text-emerald-400 border border-emerald-800' if g.passed else 'bg-amber-950 text-amber-400 border border-amber-800' }}">
+            {{ 'PASSED' if g.passed else 'ACTION NEEDED' }}
+          </span>
+          <span class="font-semibold text-sm text-white">Gate {{ g.step }}: {{ g.name }}</span>
+        </div>
+        <div class="text-xs text-slate-400 mt-1">{{ g.detail }}</div>
+      </div>
+      <a href="{{ g.action_url }}" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-white">{{ g.action_label }} →</a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

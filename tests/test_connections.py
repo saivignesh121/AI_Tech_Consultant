@@ -27,7 +27,7 @@ from feature_1_workspace.connections_crypto import (
 # Helpers
 # ---------------------------------------------------------------------------
 
-pytestmark = pytest.mark.asyncio  # asyncio_mode="auto" in pyproject.toml / pytest.ini
+# pytestmark removed  # asyncio_mode="auto" in pyproject.toml / pytest.ini
 
 
 def _tamper(encrypted: str) -> str:

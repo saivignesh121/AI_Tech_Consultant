@@ -189,7 +189,8 @@ async def tenant_session(
 
         if biz_str and not is_admin:
             try:
-                await session.execute(text("SET ROLE ai_app_user;"))
+                async with session.begin_nested():
+                    await session.execute(text("SET ROLE ai_app_user;"))
             except Exception:
                 pass
             await session.execute(

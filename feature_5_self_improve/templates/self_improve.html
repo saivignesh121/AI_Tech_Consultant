@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Self-Improve Loop — AI Tech Consultant{% endblock %}
+{% block content %}
+<div class="p-8 max-w-7xl mx-auto space-y-8">
+  <div class="flex flex-wrap justify-between items-center gap-4 border-b border-slate-800 pb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-white">The Self-Improve Loop (Autonomous Repair & Human Gate)</h1>
+      <p class="text-sm text-slate-400 mt-1">Stages isolated git branches and Knowledge Brain patches; clicking <strong>Approve</strong> activates the rule live.</p>
+    </div>
+    <form method="post" action="/self-improve/trigger" class="flex gap-3 items-center">
+      <input type="text" name="failing_summary" required placeholder="Describe failing eval case or paste weakness..." class="rounded-lg bg-slate-900 border border-slate-800 text-xs text-white px-3 py-2 w-72" />
+      <button type="submit" class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 font-semibold text-white text-xs">Dispatch to Opus</button>
+    </form>
+  </div>
+
+  {% if low_evals %}
+  <div class="bg-slate-900 border border-amber-900/50 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
+    <div class="text-xs text-amber-300">
+      <strong>Detected Low-Scoring Eval Run:</strong> {{ low_evals[0].model_name }} scored {{ low_evals[0].quality_score }}% — {{ low_evals[0].judge_rationale }}
+    </div>
+    <form method="post" action="/self-improve/trigger">
+      <input type="hidden" name="failing_summary" value="{{ low_evals[0].judge_rationale }}" />
+      <button type="submit" class="px-3 py-1.5 rounded bg-amber-500 text-slate-950 font-semibold text-xs">Auto-Fix This Failure</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+    <div class="p-4 border-b border-slate-800 font-semibold text-sm text-white">Autonomous Repair Runs</div>
+    <table class="w-full text-left text-xs">
+      <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800">
+        <tr><th class="p-4">Failing Case & Staged Patch</th><th class="p-4">Git Branch</th><th class="p-4">Score Before → After</th><th class="p-4">Cost / Rounds</th><th class="p-4">Status</th><th class="p-4 text-right">Human Gate</th></tr>
+      </thead>
+      <tbody class="divide-y divide-slate-800 text-slate-300">
+        {% for r in runs %}
+        <tr>
+          <td class="p-4 font-medium text-white max-w-md">{{ r.failing_test_summary }}</td>
+          <td class="p-4 font-mono text-emerald-400">{{ r.opus_branch_name }}</td>
+          <td class="p-4 font-bold">{{ r.score_before }}% → <span class="text-emerald-400">{{ r.score_after }}%</span></td>
+          <td class="p-4">${{ "%.4f"|format(r.cost_usd) }} / {{ r.rounds_used }} rds</td>
+          <td class="p-4">
+            <span class="px-2 py-1 rounded uppercase font-bold text-[10px] {{ 'bg-emerald-950 text-emerald-400' if r.status == 'merged' else 'bg-amber-950 text-amber-400' if r.status == 'pending_review' else 'bg-slate-800 text-slate-400' }}">{{ r.status }}</span>
+          </td>
+          <td class="p-4 text-right space-x-2">
+            {% if r.status == 'pending_review' %}
+            <form method="post" action="/self-improve/runs/{{ r.id }}/action" class="inline"><input type="hidden" name="action" value="merge" /><button type="submit" class="px-3 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">Approve & Activate</button></form>
+            <form method="post" action="/self-improve/runs/{{ r.id }}/action" class="inline"><input type="hidden" name="action" value="rollback" /><button type="submit" class="px-3 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">Rollback</button></form>
+            {% elif r.status == 'merged' %}
+            <form method="post" action="/self-improve/runs/{{ r.id }}/action" class="inline"><input type="hidden" name="action" value="rollback" /><button type="submit" class="px-3 py-1 rounded bg-rose-950 text-rose-300">Undo Merge</button></form>
+            {% else %}Rolled Back{% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="p-8 text-center text-slate-500">No self-improvement runs recorded yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

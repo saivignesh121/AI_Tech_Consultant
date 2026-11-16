@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI Tech Consultant{% endblock %}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- HTMX CDN -->
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#ecfdf5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        },
+                        accent: {
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .htmx-indicator {
+            display: none;
+        }
+        .htmx-request .htmx-indicator {
+            display: inline-block;
+        }
+        .htmx-request.htmx-indicator {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body class="min-h-full flex flex-col font-sans bg-slate-950 text-slate-100 antialiased selection:bg-emerald-500 selection:text-white">
+
+    <!-- Persistent Top Navigation Bar -->
+    <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+            <!-- Left: Logo & Workspace Switcher -->
+            <div class="flex items-center space-x-4">
+                <a href="/" class="flex items-center space-x-2 font-bold text-lg tracking-tight">
+                    <span class="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-500 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 font-mono text-sm">AG</span>
+                    <span class="bg-gradient-to-r from-emerald-400 to-indigo-400 bg-clip-text text-transparent">AI Tech Consultant</span>
+                </a>
+                {% if business %}
+                <div class="hidden sm:flex items-center space-x-2 px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-xs text-slate-300">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span class="font-medium truncate max-w-[140px]">{{ business.name }}</span>
+                    <span class="text-slate-500 font-mono text-[10px]">({{ business.slug }})</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Center: Navigation Links -->
+            {% if user %}
+            <nav class="hidden md:flex items-center space-x-1 text-sm font-medium text-slate-300">
+                <a href="/dashboard" class="px-3 py-2 rounded-md hover:text-white hover:bg-slate-800 transition">Dashboard</a>
+                <a href="/knowledge" class="px-3 py-2 rounded-md hover:text-white hover:bg-slate-800 transition">Knowledge</a>
+                <a href="/chat" class="px-3 py-2 rounded-md hover:text-white hover:bg-slate-800 transition">Ask &amp; Teach</a>
+                <a href="/eval-lab" class="px-3 py-2 rounded-md hover:text-white hover:bg-slate-800 transition">Eval Lab</a>
+                <a href="/self-improve" class="px-3 py-2 rounded-md hover:text-white hover:bg-slate-800 transition">Self-Improve</a>
+            </nav>
+            {% endif %}
+
+            <!-- Right: Health, User & Settings / Auth -->
+            <div class="flex items-center space-x-3">
+                {% if user %}
+                <a href="/settings/business" class="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span>Settings</span>
+                </a>
+                <form action="/logout" method="POST" class="inline">
+                    <button type="submit" class="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-white transition">Sign Out</button>
+                </form>
+                {% else %}
+                <a href="/login" class="px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white">Sign In</a>
+                <a href="/signup" class="px-3.5 py-1.5 text-xs font-medium rounded-md bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-sm shadow-emerald-500/20">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Global Toast / Alert Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-900 bg-slate-950 py-4 text-center text-xs text-slate-600">
+        AI Tech Consultant &bull; Enterprise Multi-Tenant Autonomous Agent Platform &bull; PostgreSQL 18 RLS Enforced
+    </footer>
+
+</body>
+</html>

@@ -1,140 +1,183 @@
-"""FastAPI router for Feature 2: Knowledge Brain."""
-
 from __future__ import annotations
-
-from pathlib import Path
-from fastapi import APIRouter, Depends, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse
+import re
+import urllib.parse
+import urllib.request
+import xml.etree.ElementTree as ET
+from fastapi import APIRouter, Depends, Form, Query, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from feature_1_workspace.auth import get_db, require_authenticated_user
-from feature_2_knowledge_brain.models import Instruction, KnowledgePage, Skill, Sitemap
-from feature_2_knowledge_brain.sitemap_service import generate_ingestion_plan
+from feature_2_knowledge_brain.models import Instruction, KnowledgePage, Sitemap
 
-_TEMPLATES_DIR = Path(__file__).parent / "templates"
-templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
+router = APIRouter(prefix="/knowledge", tags=["Knowledge Brain"])
+templates = Jinja2Templates(directory=["feature_2_knowledge_brain/templates", "feature_1_workspace/templates"])
 
-router = APIRouter(prefix="/knowledge", tags=["knowledge-brain"])
+
+def _discover_urls(target_url: str) -> list[tuple[str, str]]:
+    url = target_url.strip()
+    if not url.startswith(("http://", "https://")):
+        url = "https://" + url
+
+    candidates = [url] if url.endswith(".xml") else [url.rstrip("/") + "/sitemap.xml", url]
+    headers = {"User-Agent": "Mozilla/5.0 (AI-Tech-Consultant-Crawler/1.0)"}
+
+    for candidate in candidates:
+        try:
+            req = urllib.request.Request(candidate, headers=headers)
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                body = resp.read().decode("utf-8", errors="ignore")
+                if "<urlset" in body or "<sitemapindex" in body:
+                    root = ET.fromstring(body)
+                    locs = [el.text.strip() for el in root.iter() if el.tag.endswith("loc") and el.text]
+                    if locs:
+                        results = []
+                        seen_norms = set()
+                        for u in locs:
+                            norm = u.lower().rstrip("/")
+                            if norm not in seen_norms:
+                                seen_norms.add(norm)
+                                title = u.rstrip("/").split("/")[-1].replace("-", " ").title() or "Home"
+                                results.append((u, title))
+                            if len(results) >= 25:
+                                break
+                        return results
+                else:
+                    title_m = re.search(r"<title[^>]*>(.*?)</title>", body, re.I | re.S)
+                    page_title = re.sub(r"\s+", " ", title_m.group(1)).strip() if title_m else url
+                    hrefs = re.findall(r'href=["\'](https?://[^"\'#]+|/[^"\'#]*)["\']', body, re.I)
+                    base = url.rstrip("/")
+                    found = [(url, page_title)]
+                    seen = {url.lower().rstrip("/")}
+                    for h in hrefs:
+                        full = h if h.startswith("http") else base + ("/" if not h.startswith("/") else "") + h
+                        norm = full.lower().rstrip("/")
+                        if full.startswith(base) and norm not in seen and not any(full.lower().endswith(ext) for ext in (".png", ".jpg", ".css", ".js", ".svg", ".ico")):
+                            seen.add(norm)
+                            slug = full.rstrip("/").split("/")[-1].replace("-", " ").title() or "Overview"
+                            found.append((full, slug))
+                        if len(found) >= 15:
+                            break
+                    return found
+        except Exception:
+            continue
+
+    return [(url, url.rstrip("/").split("/")[-1].replace("-", " ").title() or "Indexed Page")]
 
 
 @router.get("", response_class=HTMLResponse)
-async def knowledge_hub_page(
+async def knowledge_index(
     request: Request,
-    tab: str = "sitemaps",
-    auth=Depends(require_authenticated_user),
+    tab: str = Query("sitemaps"),
+    error: str | None = Query(None),
     db: AsyncSession = Depends(get_db),
+    auth=Depends(require_authenticated_user),
 ):
     user, business = auth
-    sitemaps = (await db.execute(select(Sitemap).where(Sitemap.business_id == business.id).order_by(Sitemap.created_at.desc()))).scalars().all()
-    pages = (await db.execute(select(KnowledgePage).where(KnowledgePage.business_id == business.id).limit(100))).scalars().all()
-    instructions = (await db.execute(select(Instruction).where(Instruction.business_id == business.id))).scalars().all()
-    skills = (await db.execute(select(Skill).where(Skill.business_id == business.id))).scalars().all()
-
+    sitemaps = (await db.execute(select(Sitemap).where(Sitemap.business_id == user.business_id).order_by(Sitemap.created_at.desc()))).scalars().all()
+    pages = (await db.execute(select(KnowledgePage).where(KnowledgePage.business_id == user.business_id).order_by(KnowledgePage.created_at.desc()))).scalars().all()
+    instructions = (await db.execute(select(Instruction).where(Instruction.business_id == user.business_id).order_by(Instruction.created_at.desc()))).scalars().all()
     return templates.TemplateResponse(
         request=request,
         name="knowledge.html",
         context={
+            "request": request,
             "user": user,
             "business": business,
             "active_tab": tab,
-            "sitemaps": list(sitemaps),
-            "pages": list(pages),
-            "instructions": list(instructions),
-            "skills": list(skills),
-            "plan_result": None,
+            "error": error,
+            "sitemaps": sitemaps,
+            "pages": pages,
+            "instructions": instructions,
         },
     )
 
 
-@router.post("/sitemaps/plan", response_class=HTMLResponse)
-async def sitemap_ingestion_plan_route(
-    request: Request,
+@router.get("/urls")
+async def urls_tab_redirect():
+    return RedirectResponse(url="/knowledge?tab=urls", status_code=303)
+
+
+@router.get("/instructions")
+async def instructions_tab_redirect():
+    return RedirectResponse(url="/knowledge?tab=instructions", status_code=303)
+
+
+@router.get("/skills")
+async def skills_tab_redirect():
+    return RedirectResponse(url="/knowledge?tab=skills", status_code=303)
+
+
+@router.post("/sitemaps/plan")
+async def plan_sitemap(
     sitemap_url: str = Form(...),
-    auth=Depends(require_authenticated_user),
     db: AsyncSession = Depends(get_db),
+    auth=Depends(require_authenticated_user),
 ):
-    user, business = auth
-    clean_url = sitemap_url.strip()
-    if not clean_url:
-        raise HTTPException(status_code=422, detail="Sitemap URL is required.")
+    user, _ = auth
+    clean_url = sitemap_url.strip()[:1000]
+    if not clean_url.startswith(("http://", "https://")):
+        clean_url = "https://" + clean_url
 
-    plan = await generate_ingestion_plan([clean_url])
+    try:
+        discovered = _discover_urls(clean_url)
+        sm_stmt = (
+            pg_insert(Sitemap)
+            .values(
+                business_id=user.business_id,
+                url=clean_url,
+                status="completed",
+                total_urls_found=len(discovered),
+            )
+            .on_conflict_do_update(
+                constraint="uq_sitemaps_biz_url",
+                set_={"status": "completed", "total_urls_found": len(discovered)},
+            )
+            .returning(Sitemap.id)
+        )
+        sm_id = (await db.execute(sm_stmt)).scalar_one()
 
-    sitemaps = (await db.execute(select(Sitemap).where(Sitemap.business_id == business.id))).scalars().all()
-    pages = (await db.execute(select(KnowledgePage).where(KnowledgePage.business_id == business.id).limit(100))).scalars().all()
-    instructions = (await db.execute(select(Instruction).where(Instruction.business_id == business.id))).scalars().all()
-    skills = (await db.execute(select(Skill).where(Skill.business_id == business.id))).scalars().all()
+        for page_url, page_title in discovered:
+            norm = page_url.lower().rstrip("/")[:2000]
+            page_stmt = (
+                pg_insert(KnowledgePage)
+                .values(
+                    business_id=user.business_id,
+                    sitemap_id=sm_id,
+                    url=page_url[:1000],
+                    normalized_url=norm,
+                    title=(page_title or page_url)[:500],
+                )
+                .on_conflict_do_nothing()
+            )
+            await db.execute(page_stmt)
 
-    return templates.TemplateResponse(
-        request=request,
-        name="knowledge.html",
-        context={
-            "user": user,
-            "business": business,
-            "active_tab": "sitemaps",
-            "sitemaps": list(sitemaps),
-            "pages": list(pages),
-            "instructions": list(instructions),
-            "skills": list(skills),
-            "plan_result": plan,
-            "entered_url": clean_url,
-        },
-    )
-
-
-@router.get("/ping")
-async def knowledge_ping():
-    # Public health check for Knowledge Brain
-    return {"status": "ok", "feature": "knowledge_brain"}
+        await db.commit()
+        return RedirectResponse(url="/knowledge?tab=sitemaps", status_code=303)
+    except Exception as exc:
+        await db.rollback()
+        msg = urllib.parse.quote(str(exc)[:180])
+        return RedirectResponse(url=f"/knowledge?tab=sitemaps&error={msg}", status_code=303)
 
 
-@router.post("/instructions/add", response_class=HTMLResponse)
-async def add_instruction_route(
-    request: Request,
+@router.post("/instructions")
+async def create_instruction(
     title: str = Form(...),
     content: str = Form(...),
-    auth = Depends(require_authenticated_user),
     db: AsyncSession = Depends(get_db),
+    auth=Depends(require_authenticated_user),
 ):
-    """Create a new instruction rule."""
-    user, business = auth
-    from feature_2_knowledge_brain.instruction_skill_service import create_instruction
-    await create_instruction(db, business.id, title.strip(), content.strip())
-    return RedirectResponse(url="/knowledge?tab=instructions", status_code=status.HTTP_303_SEE_OTHER)
-
-
-@router.post("/skills/add", response_class=HTMLResponse)
-async def add_skill_route(
-    request: Request,
-    name: str = Form(...),
-    trigger_condition: str = Form(...),
-    steps_markdown: str = Form(...),
-    auth = Depends(require_authenticated_user),
-    db: AsyncSession = Depends(get_db),
-):
-    """Create a new agent skill guide."""
-    user, business = auth
-    from feature_2_knowledge_brain.instruction_skill_service import create_skill
-    await create_skill(db, business.id, name.strip(), trigger_condition.strip(), steps_markdown.strip())
-    return RedirectResponse(url="/knowledge?tab=skills", status_code=status.HTTP_303_SEE_OTHER)
-
-
-@router.post("/emails/synthesize", response_class=HTMLResponse)
-async def synthesize_email_notes_route(
-    request: Request,
-    thread_subject: str = Form(...),
-    coaching_notes: str = Form(...),
-    auth = Depends(require_authenticated_user),
-    db: AsyncSession = Depends(get_db),
-):
-    """Synthesize coaching notes from an email thread into a proposed skill."""
-    user, business = auth
-    from feature_2_knowledge_brain.gmail_learning_service import synthesize_notes_into_skill, approve_and_save_synthesized_skill
-
-    proposal = await synthesize_notes_into_skill(db, business.id, thread_subject.strip(), coaching_notes.strip())
-    # Auto-approve for streamlined capstone workflow
-    await approve_and_save_synthesized_skill(db, business.id, proposal)
-
-    return RedirectResponse(url="/knowledge?tab=skills", status_code=status.HTTP_303_SEE_OTHER)
+    user, _ = auth
+    db.add(
+        Instruction(
+            business_id=user.business_id,
+            title=title.strip()[:250],
+            content=content.strip(),
+            is_active=True,
+        )
+    )
+    await db.commit()
+    return RedirectResponse(url="/knowledge?tab=instructions", status_code=303)

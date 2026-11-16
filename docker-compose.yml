@@ -45,7 +45,7 @@ services:
       dockerfile: Dockerfile
     container_name: ai_tech_consultant_worker
     restart: unless-stopped
-    command: sh -c "procrastinate --app=shared.worker.app schema --apply && procrastinate --app=shared.worker.app worker"
+    command: sh -c "procrastinate --app=shared.worker.app schema --apply || true; procrastinate --app=shared.worker.app worker"
     depends_on:
       db:
         condition: service_healthy

@@ -1,37 +1,96 @@
 {% extends "base.html" %}
 {% block title %}Knowledge Brain — AI Tech Consultant{% endblock %}
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full space-y-8">
+<div class="max-w-6xl mx-auto px-6 py-8 space-y-6">
   <div>
     <h1 class="text-2xl font-bold text-white">The Knowledge Brain</h1>
-    <p class="text-sm text-slate-400 mt-1">Manage sitemaps, page health, operational instructions, and agent skills.</p>
+    <p class="text-sm text-slate-400">Manage sitemaps, page health, operational instructions, and agent skills.</p>
   </div>
-  <div class="border-b border-slate-800 flex gap-6 text-sm font-medium">
-    <a href="/knowledge?tab=sitemaps" class="pb-3 border-b-2 {{ 'border-emerald-500 text-white' if active_tab == 'sitemaps' else 'border-transparent text-slate-400' }}">Sitemaps</a>
-    <a href="/knowledge?tab=pages" class="pb-3 border-b-2 {{ 'border-emerald-500 text-white' if active_tab == 'pages' else 'border-transparent text-slate-400' }}">Page URLs</a>
-    <a href="/knowledge?tab=instructions" class="pb-3 border-b-2 {{ 'border-emerald-500 text-white' if active_tab == 'instructions' else 'border-transparent text-slate-400' }}">Instructions</a>
-    <a href="/knowledge?tab=skills" class="pb-3 border-b-2 {{ 'border-emerald-500 text-white' if active_tab == 'skills' else 'border-transparent text-slate-400' }}">Skills</a>
+
+  {% if error %}<div class="bg-red-500/10 border border-red-500/40 text-red-300 px-4 py-3 rounded-lg text-sm">{{ error }}</div>{% endif %}
+  <div class="flex gap-6 border-b border-slate-800 text-sm font-medium">
+    <a href="/knowledge?tab=sitemaps" class="pb-3 border-b-2 {% if active_tab == 'sitemaps' %}border-emerald-400 text-white{% else %}border-transparent text-slate-400 hover:text-white{% endif %}">Sitemaps ({{ sitemaps|length }})</a>
+    <a href="/knowledge?tab=urls" class="pb-3 border-b-2 {% if active_tab == 'urls' %}border-emerald-400 text-white{% else %}border-transparent text-slate-400 hover:text-white{% endif %}">Page URLs ({{ pages|length }})</a>
+    <a href="/knowledge?tab=instructions" class="pb-3 border-b-2 {% if active_tab == 'instructions' %}border-emerald-400 text-white{% else %}border-transparent text-slate-400 hover:text-white{% endif %}">Instructions ({{ instructions|length }})</a>
+    <a href="/knowledge?tab=skills" class="pb-3 border-b-2 {% if active_tab == 'skills' %}border-emerald-400 text-white{% else %}border-transparent text-slate-400 hover:text-white{% endif %}">Skills (3)</a>
   </div>
+
   {% if active_tab == 'sitemaps' %}
-  <div class="space-y-6">
-    <div class="rounded-xl border border-slate-800 bg-slate-900 p-6 space-y-4">
-      <h2 class="text-lg font-semibold text-white">Add Sitemap URL</h2>
-      <form method="post" action="/knowledge/sitemaps/plan" class="flex gap-3">
-        <input type="url" name="sitemap_url" required value="{{ entered_url or 'https://support.brilliantdirectories.com/support/sitemap.xml' }}" class="flex-1 rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm text-white" />
-        <button type="submit" class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-sm font-semibold text-white transition">Analyze Sitemap</button>
-      </form>
+  <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4">
+    <h2 class="text-base font-semibold text-white">Add Sitemap URL</h2>
+    <form method="post" action="/knowledge/sitemaps/plan" class="flex gap-3">
+      <input type="url" name="sitemap_url" required placeholder="https://docs.yourcompany.com/sitemap.xml" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white" />
+      <button type="submit" class="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold rounded-lg text-sm">Analyze Sitemap</button>
+    </form>
+  </div>
+  <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+    <table class="w-full text-left text-sm">
+      <thead class="bg-slate-950 text-slate-400 uppercase text-xs">
+        <tr><th class="px-6 py-3">Sitemap URL</th><th class="px-6 py-3">URLs Found</th><th class="px-6 py-3">Status</th></tr>
+      </thead>
+      <tbody class="divide-y divide-slate-800">
+        {% for sm in sitemaps %}
+        <tr><td class="px-6 py-4 text-slate-200">{{ sm.url }}</td><td class="px-6 py-4 text-emerald-400 font-semibold">{{ sm.total_urls_found }}</td><td class="px-6 py-4 uppercase text-xs text-slate-400">{{ sm.status }}</td></tr>
+        {% else %}
+        <tr><td colspan="3" class="px-6 py-6 text-center text-slate-500">No sitemaps indexed yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% elif active_tab == 'urls' %}
+  <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+    <table class="w-full text-left text-sm">
+      <thead class="bg-slate-950 text-slate-400 uppercase text-xs">
+        <tr><th class="px-6 py-3">Page Title</th><th class="px-6 py-3">URL</th><th class="px-6 py-3">Health</th><th class="px-6 py-3">Status</th></tr>
+      </thead>
+      <tbody class="divide-y divide-slate-800">
+        {% for pg in pages %}
+        <tr><td class="px-6 py-4 font-medium text-white">{{ pg.title }}</td><td class="px-6 py-4 text-slate-400">{{ pg.url }}</td><td class="px-6 py-4 text-emerald-400">{{ pg.health_level|upper }}</td><td class="px-6 py-4 uppercase text-xs text-slate-400">{{ pg.health_status }}</td></tr>
+        {% else %}
+        <tr><td colspan="4" class="px-6 py-6 text-center text-slate-500">No pages crawled yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% elif active_tab == 'instructions' %}
+  <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4">
+    <h2 class="text-base font-semibold text-white">Add Operational Instruction</h2>
+    <form method="post" action="/knowledge/instructions" class="space-y-3">
+      <input type="text" name="title" required placeholder="Rule Title (e.g., Strict Citation Policy)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white" />
+      <textarea name="content" rows="2" required placeholder="Instruction details for the autonomous consultant..." class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white"></textarea>
+      <button type="submit" class="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold rounded-lg text-sm">Save Instruction</button>
+    </form>
+  </div>
+  <div class="space-y-3">
+    {% for inst in instructions %}
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+      <div class="flex justify-between items-center"><h3 class="font-semibold text-white">{{ inst.title }}</h3><span class="text-xs px-2 py-1 rounded bg-emerald-500/10 text-emerald-400">ACTIVE</span></div>
+      <p class="text-sm text-slate-400 mt-1">{{ inst.content }}</p>
     </div>
-    {% if plan_result %}
-    <div class="rounded-xl border border-emerald-500/40 bg-slate-900 p-6 space-y-6">
-      <h3 class="text-lg font-bold text-white">Pre-Crawl Ingestion Summary</h3>
-      <div class="grid grid-cols-4 gap-4">
-        <div class="bg-slate-950 p-4 rounded border border-slate-800"><p class="text-xs text-slate-400">Total Sitemaps</p><p class="text-2xl font-bold text-white mt-1">{{ plan_result.total_sitemaps }}</p></div>
-        <div class="bg-slate-950 p-4 rounded border border-slate-800"><p class="text-xs text-slate-400">Total URLs</p><p class="text-2xl font-bold text-emerald-400 mt-1">{{ plan_result.total_unique_urls }}</p></div>
-        <div class="bg-slate-950 p-4 rounded border border-slate-800"><p class="text-xs text-slate-400">Duplicates</p><p class="text-2xl font-bold text-amber-400 mt-1">{{ plan_result.total_duplicate_instances }}</p></div>
-        <div class="bg-slate-950 p-4 rounded border border-slate-800"><p class="text-xs text-slate-400">Est. Hours</p><p class="text-2xl font-bold text-indigo-400 mt-1">{{ plan_result.estimates.estimated_hours }}</p></div>
-      </div>
+    {% else %}
+    <p class="text-sm text-slate-500">No operational instructions configured yet.</p>
+    {% endfor %}
+  </div>
+
+  {% elif active_tab == 'skills' %}
+  <div class="grid md:grid-cols-3 gap-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2">
+      <span class="text-xs uppercase text-emerald-400 font-semibold">Core Skill</span>
+      <h3 class="font-semibold text-white">Grounded RAG Citation</h3>
+      <p class="text-sm text-slate-400">Retrieves tenant-isolated Knowledge Brain chunks and attaches source URLs to every technical answer.</p>
     </div>
-    {% endif %}
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2">
+      <span class="text-xs uppercase text-emerald-400 font-semibold">Core Skill</span>
+      <h3 class="font-semibold text-white">PII Redaction & Guardrails</h3>
+      <p class="text-sm text-slate-400">Automatically scrubs API keys, emails, and customer identifiers before LLM inference.</p>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2">
+      <span class="text-xs uppercase text-emerald-400 font-semibold">Core Skill</span>
+      <h3 class="font-semibold text-white">Autonomous Eval Repair</h3>
+      <p class="text-sm text-slate-400">Dispatches failing benchmark cases to Claude Opus 5.5 on isolated git branches.</p>
+    </div>
   </div>
   {% endif %}
 </div>
