@@ -85,12 +85,11 @@ def receive_after_begin(session: Session, transaction, connection) -> None:
     is_admin = session.info.get("is_admin", False)
 
     if biz_id and not is_admin:
-        try:
-            # Switch role to non-superuser ai_app_user so RLS is enforced
+        role_exists = connection.execute(
+            text("SELECT 1 FROM pg_roles WHERE rolname = 'ai_app_user'")
+        ).scalar()
+        if role_exists:
             connection.execute(text("SET ROLE ai_app_user;"))
-        except Exception:
-            # Fallback if role is not available or connection already restricted
-            pass
 
         # PostgreSQL transaction-local setting (is_local=true)
         connection.execute(

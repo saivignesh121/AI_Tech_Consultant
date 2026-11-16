@@ -1,33 +1,42 @@
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "ai-tech-consultant"
-version = "0.1.0"
-description = "AI Tech Consultant Capstone"
-requires-python = ">=3.14"
+version = "1.0.0"
+description = "Multi-tenant AI Tech Consultant SaaS"
 dependencies = [
-    "fastapi",
-    "uvicorn[standard]",
-    "sqlalchemy[asyncio]",
-    "asyncpg",
-    "alembic",
-    "pgvector",
-    "procrastinate[psycopg]",
-    "jinja2",
-    "httpx",
-    "pydantic-settings",
-    "argon2-cffi",
-    "pytest",
-    "pytest-asyncio",
-    "cryptography",
-    "python-multipart",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "sqlalchemy[asyncio]>=2.0.30",
+    "greenlet>=3.0.0",
+    "asyncpg>=0.29.0",
+    "pydantic>=2.7.0",
+    "pydantic[email]>=2.7.0",
+    "email-validator>=2.1.0",
+    "psycopg2-binary>=2.9.9",
+    "pgvector>=0.2.5",
+    "httpx>=0.27.0",
+    "jinja2>=3.1.0",
+    "python-multipart>=0.0.9",
+    "procrastinate>=3.0.0",
+    "cryptography>=42.0.0",
+    "argon2-cffi>=23.1.0",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0"
 ]
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["shared*", "features*", "feature_*"]
+[build-system]
+requires = ["setuptools>=68.0.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = [
+    "shared",
+    "feature_1_workspace",
+    "feature_2_knowledge_brain",
+    "feature_3_ask_teach_chat",
+    "feature_4_eval_lab",
+    "feature_5_self_improve",
+    "feature_6_go_live"
+]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
