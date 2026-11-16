@@ -82,3 +82,9 @@ async def sitemap_ingestion_plan_route(
             "entered_url": clean_url,
         },
     )
+
+
+@router.get("/ping")
+async def knowledge_ping():
+    # Public health check for Knowledge Brain
+    return {"status": "ok", "feature": "knowledge_brain"}
