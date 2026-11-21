@@ -103,7 +103,7 @@ Claude Opus 5.5 reached the maximum budget ceiling ($${maxBudget.toFixed(2)}) wi
     failingCaseScoreBefore: 40,
     failingCaseScoreAfter: finalScore,
     hiddenCheckSetPassed: true,
-    pullRequestUrl: `https://github.com/acme/ai-tech-consultant/pull/${failure.runId}`,
+    pullRequestUrl: `https://github.com/${failure.targetBranch ? failure.targetBranch.split("/")[0] : "workspace"}/ai-tech-consultant/pull/${failure.runId}`,
     reportMarkdown: report,
   };
 }

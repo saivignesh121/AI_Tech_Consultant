@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
   try {
     const tenant = await getTenantContext();
     const body = await req.json();
-    const { recipientEmail = "founder@acme.com" } = body;
+    const { recipientEmail = tenant.userEmail || `owner@${tenant.businessSlug}.com` } = body;
 
     const email = compileWeeklyOwnerEmail({
       businessName: tenant.businessName,

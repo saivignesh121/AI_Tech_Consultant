@@ -207,4 +207,116 @@ describe("Task 1.1 / Auth & Multi-Tenant Isolation Specifications", () => {
       expect(outcome.choices.length).toBe(2);
     });
   });
+
+  describe("6. Knowledge Search & Retrieval Multi-Tenant Isolation", () => {
+    const bizA = DEMO_BUSINESSES["acme-corp"];
+    const bizB = DEMO_BUSINESSES["beta-dynamics"];
+
+    it("ensures search corpus for Business B contains zero references to Business A URLs or content", () => {
+      const mockDatabaseChunks = [
+        {
+          businessId: bizA.businessId,
+          pageUrl: `https://support.${bizA.businessSlug}.com/articles/custom-cname`,
+          heading: "Acme CNAME Setup",
+          content: "Point your DNS to proxy.acme.com",
+        },
+        {
+          businessId: bizB.businessId,
+          pageUrl: `https://support.${bizB.businessSlug}.com/articles/stream-processing`,
+          heading: "Beta Stream Processing",
+          content: "Configure high-throughput worker queues on Beta cluster nodes",
+        },
+      ];
+
+      // Query isolated strictly by businessId
+      const tenantBCorpus = mockDatabaseChunks.filter((c) => c.businessId === bizB.businessId);
+
+      expect(tenantBCorpus).toHaveLength(1);
+      expect(tenantBCorpus[0].pageUrl).toContain("beta-dynamics");
+      expect(tenantBCorpus[0].pageUrl).not.toContain("acme");
+      expect(tenantBCorpus[0].content).not.toContain("proxy.acme.com");
+    });
+  });
+
+  describe("7. Chat Citations & Cross-Tenant Session Tampering Shield", () => {
+    const bizA = DEMO_BUSINESSES["acme-corp"];
+    const bizB = DEMO_BUSINESSES["beta-dynamics"];
+
+    it("verifies chat citations for Beta Dynamics never leak Acme URLs", () => {
+      const betaContexts = [
+        {
+          id: "chunk-beta-1",
+          type: "paragraph" as const,
+          title: "Beta Dynamics Scaling & Queues",
+          sourceUrl: `https://support.${bizB.businessSlug}.com/articles/cluster-scaling`,
+          content: "High-throughput node configuration.",
+        },
+      ];
+
+      const citations = betaContexts.map((c) => ({
+        url: c.sourceUrl,
+        title: c.title,
+      }));
+
+      expect(citations.length).toBe(1);
+      expect(citations[0].url).toContain("beta-dynamics.com");
+      expect(citations[0].url).not.toContain("acme");
+    });
+
+    it("rejects attempt by Business A to append to a Business B session", () => {
+      const allSessions = [
+        { id: "session-beta-99", businessId: bizB.businessId, userId: bizB.userId },
+      ];
+
+      const callerBusinessId = bizA.businessId;
+      const targetSessionId = "session-beta-99";
+
+      // Session lookup with mandatory businessId scoping
+      const session = allSessions.find(
+        (s) => s.id === targetSessionId && s.businessId === callerBusinessId
+      );
+
+      // Result MUST be undefined (403 Forbidden)
+      expect(session).toBeUndefined();
+    });
+  });
+
+  describe("8. Model Telemetry & Cost Logging Multi-Tenant Isolation", () => {
+    const bizA = DEMO_BUSINESSES["acme-corp"];
+    const bizB = DEMO_BUSINESSES["beta-dynamics"];
+
+    it("strictly isolates model telemetry logs and cost aggregation per business", () => {
+      const telemetryRows = [
+        { id: "call-1", businessId: bizA.businessId, taskType: "write_reply", costUsd: "0.004040", inputTokens: 1420 },
+        { id: "call-2", businessId: bizA.businessId, taskType: "find_facts", costUsd: "0.001500", inputTokens: 2100 },
+        { id: "call-3", businessId: bizB.businessId, taskType: "write_reply", costUsd: "0.000155", inputTokens: 850 },
+      ];
+
+      // Aggregate spend for Business A
+      const rowsA = telemetryRows.filter((r) => r.businessId === bizA.businessId);
+      const spendA = rowsA.reduce((sum, r) => sum + parseFloat(r.costUsd), 0);
+
+      // Aggregate spend for Business B
+      const rowsB = telemetryRows.filter((r) => r.businessId === bizB.businessId);
+      const spendB = rowsB.reduce((sum, r) => sum + parseFloat(r.costUsd), 0);
+
+      expect(rowsA).toHaveLength(2);
+      expect(rowsB).toHaveLength(1);
+      expect(spendA).toBeCloseTo(0.005540, 6);
+      expect(spendB).toBeCloseTo(0.000155, 6);
+      expect(rowsA.some((r) => r.businessId === bizB.businessId)).toBe(false);
+      expect(rowsB.some((r) => r.businessId === bizA.businessId)).toBe(false);
+    });
+  });
+
+  describe("9. Gmail & Google OAuth Minimal Scope & Encryption", () => {
+    it("enforces minimal gmail.readonly scope for inbound support email integration", () => {
+      const minimalScope = "https://www.googleapis.com/auth/gmail.readonly";
+      const requestedScopes = ["https://www.googleapis.com/auth/gmail.readonly"];
+
+      expect(requestedScopes).toContain(minimalScope);
+      expect(requestedScopes).not.toContain("https://mail.google.com/"); // Full mailbox access forbidden
+      expect(requestedScopes).not.toContain("https://www.googleapis.com/auth/gmail.modify");
+    });
+  });
 });

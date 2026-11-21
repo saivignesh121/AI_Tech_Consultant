@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
         }))
       : [
           {
-            url: "https://docs.acme.com/cloud/ssl",
+            url: `https://docs.${tenant.businessSlug}.com/cloud/ssl`,
             content: {
               title: "SSL/TLS Full Encryption Setup",
               headings: ["Full Mode Configuration", "Strict Certificate Verification", "Origin Rules"],
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
             },
           },
           {
-            url: "https://docs.acme.com/database/pooling",
+            url: `https://docs.${tenant.businessSlug}.com/database/pooling`,
             content: {
               title: "PostgreSQL Connection Pooling",
               headings: ["pg_isready Healthcheck", "Max Client Connections", "Port 5432 Routing"],
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       ? pages
       : [
           {
-            url: "https://docs.acme.com/cloud/ssl",
+            url: `https://docs.${tenant.businessSlug}.com/cloud/ssl`,
             content: {
               title: "SSL/TLS Full Encryption Setup",
               headings: ["Full Mode Configuration", "Strict Certificate Verification"],

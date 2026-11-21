@@ -67,10 +67,19 @@ export default function SelfImprovePage() {
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [digestEmailHtml, setDigestEmailHtml] = useState<string>("");
   const [digestSubject, setDigestSubject] = useState<string>("");
+  const [ownerEmail, setOwnerEmail] = useState<string>("founder@company.com");
 
   useEffect(() => {
     fetchRuns();
     fetchDigest();
+    fetch("/api/auth/context")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.currentTenant?.userEmail) {
+          setOwnerEmail(d.currentTenant.userEmail);
+        }
+      })
+      .catch(console.error);
   }, []);
 
   async function fetchRuns() {
@@ -629,8 +638,8 @@ export default function SelfImprovePage() {
               <button
                 onClick={async () => {
                   try {
-                    await fetch("/api/self-improve/digest", { method: "POST", body: JSON.stringify({}) });
-                    setActionMessage("Test weekly digest email dispatched to founder@acme.com.");
+                    await fetch("/api/self-improve/digest", { method: "POST", body: JSON.stringify({ recipientEmail: ownerEmail }) });
+                    setActionMessage(`Test weekly digest email dispatched to ${ownerEmail}.`);
                   } catch (err) {
                     console.error("Failed to send test digest", err);
                   }
@@ -646,7 +655,7 @@ export default function SelfImprovePage() {
             <div className="max-w-2xl mx-auto border border-gray-300 rounded-xl overflow-hidden shadow-md">
               <div className="bg-gray-100 px-4 py-3 border-b border-gray-300 text-xs text-gray-600">
                 <div><strong>Subject:</strong> {digestSubject || "AI Tech Consultant Weekly Report"}</div>
-                <div><strong>To:</strong> founder@acme.com</div>
+                <div><strong>To:</strong> {ownerEmail}</div>
               </div>
               <div
                 className="p-6 bg-white"

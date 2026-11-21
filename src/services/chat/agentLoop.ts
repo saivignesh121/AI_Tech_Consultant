@@ -29,14 +29,14 @@ const DEFAULT_MOCK_CONTEXTS = [
     id: "chunk-101",
     type: "paragraph" as const,
     title: "Custom CNAME Subdomains & SSL Setup",
-    sourceUrl: "https://support.acme.com/articles/custom-cname-setup",
+    sourceUrl: "https://support.example.com/articles/custom-cname-setup",
     content: "To configure your custom domain, point your CNAME record to proxy cluster. Ensure Cloudflare proxy status is verified.",
   },
   {
     id: "chunk-102",
     type: "paragraph" as const,
     title: "Cloudflare Flexible vs Full Strict SSL",
-    sourceUrl: "https://support.acme.com/articles/ssl-cloudflare-handshake",
+    sourceUrl: "https://support.example.com/articles/ssl-cloudflare-handshake",
     content: "Set Cloudflare SSL/TLS encryption mode to Full (Strict) to prevent redirect loops.",
   },
 ];

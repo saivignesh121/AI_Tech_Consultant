@@ -15,29 +15,9 @@ export async function GET() {
       .where(eq(knowledgeSources.businessId, tenant.businessId))
       .orderBy(desc(knowledgeSources.lastCrawledAt));
 
-    // Seed a default sitemap source if none exist yet for demonstration
+    // If no sources exist yet, return empty list
     if (sources.length === 0) {
-      const [seeded] = await db
-        .insert(knowledgeSources)
-        .values({
-          businessId: tenant.businessId,
-          sourceType: "sitemap",
-          rootUrl: `https://${tenant.businessSlug}.com/sitemap.xml`,
-          crawlSchedule: "daily",
-          status: "active",
-          lastCrawledAt: new Date(),
-        })
-        .returning();
-
-      return NextResponse.json({
-        sources: [
-          {
-            ...seeded,
-            pageCount: 482,
-            chunkCount: 3842,
-          },
-        ],
-      });
+      return NextResponse.json({ sources: [] });
     }
 
     const fullSources = await Promise.all(
@@ -50,8 +30,8 @@ export async function GET() {
 
         return {
           ...s,
-          pageCount: pageCount || 482,
-          chunkCount: (pageCount || 482) * 8,
+          pageCount,
+          chunkCount: pageCount * 8,
         };
       })
     );

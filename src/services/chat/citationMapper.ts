@@ -63,7 +63,7 @@ export function mapDynamicCitations(
   const citations = chunks.map((c, i) => ({
     citationNumber: i + 1,
     sourceTitle: c.title,
-    url: c.url || "https://support.acme.com",
+    url: c.url || "#",
   }));
   return { citations };
 }

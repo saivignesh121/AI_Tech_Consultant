@@ -35,13 +35,13 @@ export default function OnboardingPage() {
   const [timerActive, setTimerActive] = useState<boolean>(true);
 
   // Step 1: Vault Keys
-  const [claudeKey, setClaudeKey] = useState("sk-ant-live-demo-token-masked-acme");
+  const [claudeKey, setClaudeKey] = useState("sk-ant-live-demo-token-masked");
   const [geminiKey, setGeminiKey] = useState("AIzaSy-demo-gemini-vault-token-live");
   const [localOnly, setLocalOnly] = useState(false);
   const [keysSaved, setKeysSaved] = useState(true);
 
   // Step 2: Sitemap Ingestion
-  const [sitemapUrl, setSitemapUrl] = useState("https://docs.acme.com/sitemap.xml");
+  const [sitemapUrl, setSitemapUrl] = useState("https://docs.company.com/sitemap.xml");
   const [crawling, setCrawling] = useState(false);
   const [crawledCount, setCrawledCount] = useState(12);
 
@@ -59,6 +59,15 @@ export default function OnboardingPage() {
 
   // 15-Minute Countdown Timer
   useEffect(() => {
+    fetch("/api/auth/context")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.currentTenant?.businessSlug) {
+          setSitemapUrl(`https://docs.${d.currentTenant.businessSlug}.com/sitemap.xml`);
+        }
+      })
+      .catch(console.error);
+
     let interval: NodeJS.Timeout;
     if (timerActive) {
       interval = setInterval(() => {

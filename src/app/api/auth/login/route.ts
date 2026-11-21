@@ -114,12 +114,12 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      const isProduction = process.env.NODE_ENV === "production";
+      const isSecure = process.env.COOKIE_SECURE === "true";
 
       response.cookies.set("session_token", token, {
         path: "/",
         httpOnly: true,
-        secure: isProduction,
+        secure: isSecure,
         sameSite: "lax",
         expires: expiresAt,
       });
@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
       response.cookies.set("active_tenant_slug", targetBiz.businessSlug, {
         path: "/",
         httpOnly: false,
-        secure: isProduction,
+        secure: isSecure,
         sameSite: "lax",
         expires: expiresAt,
       });

@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
           .update(selfImproveRuns)
           .set({
             status: "merged",
-            prUrl: existing[0].prUrl || "https://github.com/acme-corp/ai-consultant/pull/44",
+            prUrl: existing[0].prUrl || `https://github.com/${tenant.businessSlug}/ai-consultant/pull/44`,
           })
           .where(eq(selfImproveRuns.id, runId));
       }
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       runId,
       status: "merged",
       message: "Branch successfully merged into main. Production prompt updated with zero regressions.",
-      prUrl: "https://github.com/acme-corp/ai-consultant/pull/44",
+      prUrl: `https://github.com/${tenant.businessSlug}/ai-consultant/pull/44`,
     });
   } catch (error) {
     return NextResponse.json(

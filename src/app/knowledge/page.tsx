@@ -74,7 +74,7 @@ export default function KnowledgeBrainPage() {
 
   // --- Sitemaps Tab State ---
   const [sources, setSources] = useState<SitemapSource[]>([]);
-  const [newSitemapUrl, setNewSitemapUrl] = useState("https://docs.acme.com/sitemap.xml");
+  const [newSitemapUrl, setNewSitemapUrl] = useState("https://docs.company.com/sitemap.xml");
   const [loadingSources, setLoadingSources] = useState(false);
   const [previewSummary, setPreviewSummary] = useState<{
     sitemapUrl: string;
@@ -120,6 +120,14 @@ export default function KnowledgeBrainPage() {
     fetchHealth();
     fetchSkills();
     executeSearch("How do I configure custom CNAME subdomains?");
+    fetch("/api/auth/context")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.currentTenant?.businessSlug) {
+          setNewSitemapUrl(`https://docs.${d.currentTenant.businessSlug}.com/sitemap.xml`);
+        }
+      })
+      .catch(console.error);
   }, []);
 
   const fetchSitemaps = async () => {

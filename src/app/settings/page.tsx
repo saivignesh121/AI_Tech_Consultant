@@ -87,7 +87,7 @@ export default function SettingsPage() {
   const [retryingJobId, setRetryingJobId] = useState<string | null>(null);
 
   // --- Workspace Danger Zone State ---
-  const [currentTenantSlug, setCurrentTenantSlug] = useState("acme-corp");
+  const [currentTenantSlug, setCurrentTenantSlug] = useState("");
   const [confirmSlugInput, setConfirmSlugInput] = useState("");
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -271,7 +271,7 @@ export default function SettingsPage() {
     },
     google: {
       title: "Google OAuth & Gmail Integration",
-      desc: "Inbound customer tech support email polling and webhook notification dispatcher.",
+      desc: "Inbound customer tech support email polling (scope: gmail.readonly) and webhook notification dispatcher.",
       placeholder: "oauth2:ya29.••••••••••••••••••••••••",
     },
   };

@@ -20,14 +20,14 @@ export async function POST(req: NextRequest) {
             id: "synth-001",
             question: "Where is the SSL encryption toggle located?",
             expectedAnswer: "Under the SSL/TLS tab, select 'Full' encryption mode from the radio options.",
-            sourceUrl: "https://docs.acme.com/ssl",
+            sourceUrl: `https://docs.${tenant.businessSlug}.com/ssl`,
             sourceTitle: "SSL Setup",
           },
           {
             id: "synth-002",
             question: "What port number is used for PostgreSQL database connections?",
             expectedAnswer: "Port 5432 is the standard PostgreSQL port.",
-            sourceUrl: "https://docs.acme.com/database",
+            sourceUrl: `https://docs.${tenant.businessSlug}.com/database`,
             sourceTitle: "Database Settings",
           },
         ];

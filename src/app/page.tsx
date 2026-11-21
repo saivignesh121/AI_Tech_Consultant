@@ -25,11 +25,25 @@ export default function DashboardPage() {
     avgLatencyMs: number;
     cacheHitPercentage: number;
   }>({
-    totalSpendUsd: 0.015245,
-    totalCalls: 5,
-    avgLatencyMs: 412,
-    cacheHitPercentage: 42.8,
+    totalSpendUsd: 0,
+    totalCalls: 0,
+    avgLatencyMs: 0,
+    cacheHitPercentage: 0,
   });
+
+  const [health, setHealth] = useState<{
+    total: number;
+    active: number;
+    quarantined: number;
+    healthyPercent: number;
+  }>({
+    total: 0,
+    active: 0,
+    quarantined: 0,
+    healthyPercent: 100,
+  });
+
+  const [tenantName, setTenantName] = useState<string>("Workspace");
 
   useEffect(() => {
     fetch("/api/telemetry")
@@ -42,6 +56,29 @@ export default function DashboardPage() {
             avgLatencyMs: d.summary.avgLatencyMs,
             cacheHitPercentage: d.summary.cacheHitPercentage,
           });
+        }
+      })
+      .catch(console.error);
+
+    fetch("/api/brain/health")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.summary) {
+          setHealth({
+            total: d.summary.total,
+            active: d.summary.active,
+            quarantined: d.summary.quarantined,
+            healthyPercent: d.summary.healthyPercent,
+          });
+        }
+      })
+      .catch(console.error);
+
+    fetch("/api/auth/context")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.currentTenant?.businessName) {
+          setTenantName(d.currentTenant.businessName);
         }
       })
       .catch(console.error);
@@ -86,10 +123,10 @@ export default function DashboardPage() {
               <Brain className="h-4 w-4 text-indigo-400" />
             </div>
             <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-white tracking-tight">482</span>
-              <span className="text-xs text-emerald-400 font-medium">100% Synced</span>
+              <span className="text-3xl font-bold text-white tracking-tight">{health.total}</span>
+              <span className="text-xs text-emerald-400 font-medium">{health.healthyPercent}% Synced</span>
             </div>
-            <p className="text-xs text-gray-400 mt-2">3,842 semantic vector chunks embedded</p>
+            <p className="text-xs text-gray-400 mt-2">{health.total * 8} semantic vector chunks embedded</p>
           </div>
 
           {/* Metric 2 */}
@@ -102,7 +139,9 @@ export default function DashboardPage() {
               <span className="text-3xl font-bold text-white tracking-tight font-mono">
                 ${telemetry.totalSpendUsd.toFixed(4)}
               </span>
-              <span className="text-xs text-emerald-400 font-medium">-38.4% via Router</span>
+              <span className="text-xs text-emerald-400 font-medium">
+                {telemetry.totalCalls > 0 ? `${telemetry.totalCalls} calls logged` : "0 calls"}
+              </span>
             </div>
             <p className="text-xs text-gray-400 mt-2">{telemetry.cacheHitPercentage}% prompt cache hit rate</p>
           </div>

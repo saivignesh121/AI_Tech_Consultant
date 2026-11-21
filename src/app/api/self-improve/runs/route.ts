@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
             costAccumulatedUsd: "1.700000",
             maxBudgetUsd: "5.000000",
             status: "merged",
-            prUrl: "https://github.com/acme-corp/ai-consultant/pull/42",
+            prUrl: `https://github.com/${tenant.businessSlug}/ai-consultant/pull/42`,
             failingCasesSummary: {
               caseId: "kb-dns-042",
               question: "What A-record should I point to if I use Cloudflare proxying with an external registrar?",
@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
             costAccumulatedUsd: "0.850000",
             maxBudgetUsd: "5.000000",
             status: "passed",
-            prUrl: "https://github.com/acme-corp/ai-consultant/pull/43",
+            prUrl: `https://github.com/${tenant.businessSlug}/ai-consultant/pull/43`,
             failingCasesSummary: {
               caseId: "chat-ref-019",
               question: "Can I get a refund if I subscribed 45 days ago?",

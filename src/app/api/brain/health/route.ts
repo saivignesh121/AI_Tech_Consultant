@@ -14,19 +14,20 @@ export async function GET() {
       .from(knowledgePages)
       .where(eq(knowledgePages.businessId, tenant.businessId));
 
-    const activeCount = pages.filter((p) => p.healthStatus === "active").length || 468;
-    const watchCount = pages.filter((p) => p.healthStatus === "watch").length || 10;
-    const quarantinedCount = pages.filter((p) => p.healthStatus === "quarantined").length || 3;
-    const archivedCount = pages.filter((p) => p.healthStatus === "archived").length || 1;
+    const activeCount = pages.filter((p) => p.healthStatus === "active").length;
+    const watchCount = pages.filter((p) => p.healthStatus === "watch").length;
+    const quarantinedCount = pages.filter((p) => p.healthStatus === "quarantined").length;
+    const archivedCount = pages.filter((p) => p.healthStatus === "archived").length;
+    const total = activeCount + watchCount + quarantinedCount + archivedCount;
 
     return NextResponse.json({
       summary: {
-        total: activeCount + watchCount + quarantinedCount + archivedCount,
+        total,
         active: activeCount,
         watch: watchCount,
         quarantined: quarantinedCount,
         archived: archivedCount,
-        healthyPercent: Number(((activeCount / (activeCount + watchCount + quarantinedCount + archivedCount)) * 100).toFixed(1)),
+        healthyPercent: total > 0 ? Number(((activeCount / total) * 100).toFixed(1)) : 100,
       },
     });
   } catch (error) {
