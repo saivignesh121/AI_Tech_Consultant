@@ -1,4 +1,4 @@
-import { PgBoss } from "pg-boss";
+import PgBoss from "pg-boss";
 import { db } from "@/db";
 import { failedJobs } from "@/db/schema";
 
