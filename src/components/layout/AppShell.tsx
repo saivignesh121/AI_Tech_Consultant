@@ -152,13 +152,15 @@ export default function AppShell({
       <aside className="w-64 border-r border-gray-800 bg-[#0E1322] flex flex-col justify-between p-4 flex-shrink-0">
         <div>
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 px-2 py-3 mb-6 border-b border-gray-800">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-500/20">
-              <Sparkles className="h-5 w-5" />
+          <Link href="/" className="flex items-center gap-3 px-2 py-3 mb-6 border-b border-gray-800 group">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-black border border-gray-700 text-white font-serif text-xl font-bold shadow-md shadow-cyan-500/20 group-hover:border-cyan-400 transition">
+              α
             </div>
             <div>
-              <h1 className="text-sm font-semibold tracking-wide text-white">AI Tech Consultant</h1>
-              <span className="text-[11px] text-gray-400">Enterprise SaaS</span>
+              <h1 className="text-sm font-bold tracking-tight text-white group-hover:text-cyan-300 transition">
+                AI Technologies &amp; Consulting
+              </h1>
+              <span className="text-[10px] font-mono text-cyan-400">Enterprise Operations</span>
             </div>
           </Link>
 

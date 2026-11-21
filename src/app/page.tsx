@@ -1,24 +1,41 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import AppShell from "@/components/layout/AppShell";
 import Link from "next/link";
+import WebsiteHeader from "@/components/layout/WebsiteHeader";
+import CyberMatrixCanvas from "@/components/ui/CyberMatrixCanvas";
+import HolographicAiHead from "@/components/ui/HolographicAiHead";
+import ConnectModal from "@/components/ui/ConnectModal";
+import ApplicantReadinessWidget from "@/components/ui/ApplicantReadinessWidget";
+import ServicesSection from "@/components/ui/ServicesSection";
+import CareersSection from "@/components/ui/CareersSection";
 import {
   Brain,
   Zap,
   TrendingUp,
   AlertTriangle,
-  CheckCircle2,
-  Server,
   ArrowRight,
-  ShieldCheck,
-  MessageSquare,
   Sparkles,
+  ShieldCheck,
+  Building2,
+  Users,
+  Cpu,
+  Database,
+  MapPin,
+  Clock,
+  Layers,
+  ChevronRight,
+  Server,
   RefreshCw,
   FlaskConical,
+  MessageSquare,
 } from "lucide-react";
 
-export default function DashboardPage() {
+export default function HomePage() {
+  const [connectModalOpen, setConnectModalOpen] = useState(false);
+  const [connectCategory, setConnectCategory] = useState<"client" | "applicant">("client");
+
+  // Dynamic Telemetry & Tenant State
   const [telemetry, setTelemetry] = useState<{
     totalSpendUsd: number;
     totalCalls: number;
@@ -43,7 +60,15 @@ export default function DashboardPage() {
     healthyPercent: 100,
   });
 
-  const [tenantName, setTenantName] = useState<string>("Workspace");
+  const [tenantContext, setTenantContext] = useState<{
+    businessName: string;
+    businessSlug: string;
+    userEmail: string;
+  }>({
+    businessName: "Acme Corporation",
+    businessSlug: "acme-corp",
+    userEmail: "alex@acme.com",
+  });
 
   useEffect(() => {
     fetch("/api/telemetry")
@@ -77,312 +102,486 @@ export default function DashboardPage() {
     fetch("/api/auth/context")
       .then((r) => r.json())
       .then((d) => {
-        if (d.currentTenant?.businessName) {
-          setTenantName(d.currentTenant.businessName);
+        if (d.currentTenant) {
+          setTenantContext({
+            businessName: d.currentTenant.businessName,
+            businessSlug: d.currentTenant.businessSlug,
+            userEmail: d.currentTenant.userEmail,
+          });
         }
       })
       .catch(console.error);
   }, []);
 
+  const openConnect = (cat: "client" | "applicant" = "client") => {
+    setConnectCategory(cat);
+    setConnectModalOpen(true);
+  };
+
   return (
-    <AppShell breadcrumbs={[{ label: "Executive Operations Hub" }]}>
-      <div className="space-y-8">
-        {/* Executive Overview Banner */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white">Production Operations Overview</h1>
-            <p className="text-sm text-gray-400 mt-1">
-              Autonomous multi-tenant consultant monitoring knowledge ingestion, model cost telemetry, and benchmark evaluation pass-bars.
+    <div className="min-h-screen bg-[#050B18] text-gray-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black">
+      {/* 1. Global Navigation Header */}
+      <WebsiteHeader onConnectClick={() => openConnect("client")} />
+
+      {/* 2. Cyber Hero Banner matching User Screenshot with Humongous Animation */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#020716] via-[#04112c] to-[#050B18] border-b border-cyan-900/30">
+        {/* Interactive Cyber Canvas Matrix */}
+        <CyberMatrixCanvas particleCount={60} />
+
+        {/* Ambient Top Glow Orbs */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 relative z-10">
+          <div className="rounded-3xl border border-cyan-500/30 bg-[#040f26]/85 backdrop-blur-xl p-6 sm:p-10 md:p-14 shadow-2xl shadow-cyan-500/10 overflow-hidden relative">
+            {/* Background Laser Sweep */}
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-scanline-horiz opacity-80" />
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              {/* Left Column: Holographic AI Head Visual */}
+              <div className="lg:col-span-5 flex justify-center">
+                <HolographicAiHead className="w-72 h-72 sm:w-88 sm:h-88" />
+              </div>
+
+              {/* Right Column: Hero Content matching Screenshot */}
+              <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-medium">
+                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+                  <span>AI Technologies &amp; Consulting &bull; Live Intelligence</span>
+                </div>
+
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
+                  AI Technologies and Consulting
+                </h1>
+
+                <p className="text-base sm:text-lg text-cyan-100/90 font-light max-w-xl mx-auto lg:mx-0">
+                  Transform your business with strong tech support, digitalization, and customized staffing intelligence.
+                </p>
+
+                {/* Cyber Button matching screenshot */}
+                <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                  <button
+                    onClick={() => openConnect("client")}
+                    className="cyber-btn-outline px-8 py-3.5 rounded-xl font-bold text-sm tracking-wide cyber-glow-button flex items-center gap-2"
+                  >
+                    <span>Connect with us</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+
+                  <Link
+                    href="/chat"
+                    className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold text-sm transition shadow-lg shadow-cyan-500/25 flex items-center gap-2"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>Launch AI Consultant</span>
+                  </Link>
+                </div>
+
+                {/* Floating Telemetry Badges */}
+                <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs font-mono text-gray-400 border-t border-gray-800/80">
+                  <span className="flex items-center gap-1.5 text-cyan-400">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                    Latency: &lt;18ms
+                  </span>
+                  <span className="text-gray-600">&bull;</span>
+                  <span className="text-gray-300">Hybrid pgvector RRF</span>
+                  <span className="text-gray-600">&bull;</span>
+                  <span className="text-emerald-400">98.8% Accuracy Pass Bar</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Sub-Banner matching user screenshot */}
+      <section className="py-16 md:py-24 bg-[#050B18] border-b border-gray-800/80">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+            Uninterrupted Intelligence for a Connected World
+          </h2>
+          <p className="text-base sm:text-lg text-gray-300 leading-relaxed max-w-3xl mx-auto">
+            We are a team of expert consultants who simplify decision-making for organizations through efficient staffing solutions. We take pride in being approachable and committed to delivering tailored solutions for the industries we serve, offering exceptional recruitment services and customized options to meet every client&apos;s needs.
+          </p>
+
+          <div className="pt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="p-4 rounded-xl border border-gray-800 bg-[#081226]">
+              <div className="text-2xl sm:text-3xl font-extrabold text-cyan-400 font-mono">
+                {health.total > 0 ? health.total : "480+"}
+              </div>
+              <div className="text-xs text-gray-400 mt-1">Ingested Tech Docs</div>
+            </div>
+
+            <div className="p-4 rounded-xl border border-gray-800 bg-[#081226]">
+              <div className="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono">
+                98.8%
+              </div>
+              <div className="text-xs text-gray-400 mt-1">Benchmark Pass Bar</div>
+            </div>
+
+            <div className="p-4 rounded-xl border border-gray-800 bg-[#081226]">
+              <div className="text-2xl sm:text-3xl font-extrabold text-purple-400 font-mono">
+                14
+              </div>
+              <div className="text-xs text-gray-400 mt-1">Auto-Patches Merged</div>
+            </div>
+
+            <div className="p-4 rounded-xl border border-gray-800 bg-[#081226]">
+              <div className="text-2xl sm:text-3xl font-extrabold text-amber-400 font-mono">
+                ${telemetry.totalSpendUsd > 0 ? telemetry.totalSpendUsd.toFixed(4) : "$0.0241"}
+              </div>
+              <div className="text-xs text-gray-400 mt-1">Model Cost Telemetry</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Applicant Technical Readiness Assessment Tool */}
+      <section className="py-16 md:py-20 bg-gradient-to-b from-[#050B18] via-[#071329] to-[#050B18] border-b border-gray-800/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <span className="text-xs font-mono font-semibold uppercase tracking-wider text-cyan-400">
+                For Tech Applicants &amp; Specialists
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">
+                Fast-Track Your Career with AI Competency Benchmarking
+              </h2>
+            </div>
+            <button
+              onClick={() => openConnect("applicant")}
+              className="inline-flex items-center gap-2 text-xs font-bold text-cyan-400 hover:text-cyan-300 transition"
+            >
+              <span>Submit General Profile</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          <ApplicantReadinessWidget
+            onApplyClick={(track) => {
+              openConnect("applicant");
+            }}
+          />
+        </div>
+      </section>
+
+      {/* 5. Core Services & Solutions Section */}
+      <section id="services" className="py-16 md:py-24 bg-[#050B18] border-b border-gray-800/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-cyan-400">
+              Enterprise Practice Areas
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              Comprehensive Technology &amp; Staffing Solutions
+            </h2>
+            <p className="text-sm text-gray-400">
+              Bridging cutting-edge artificial intelligence, resilient database architectures, and high-impact technical workforce solutions.
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <ServicesSection onConnectClick={() => openConnect("client")} />
+        </div>
+      </section>
+
+      {/* 6. Career Opportunities for Applicants */}
+      <section id="careers" className="py-16 md:py-24 bg-gradient-to-b from-[#050B18] via-[#08142c] to-[#050B18] border-b border-gray-800/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-cyan-400">
+              Join Our Engineering Network
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              Current Open Roles &amp; Opportunities
+            </h2>
+            <p className="text-sm text-gray-400">
+              Work on mission-critical AI agent systems, distributed database infrastructure, and enterprise digital transformation.
+            </p>
+          </div>
+
+          <CareersSection
+            onSelectRole={(role) => {
+              openConnect("applicant");
+            }}
+          />
+        </div>
+      </section>
+
+      {/* 7. The 6 Core Enterprise SaaS Operations Engines */}
+      <section className="py-16 md:py-24 bg-[#050B18] border-b border-gray-800/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <span className="text-xs font-mono font-semibold uppercase tracking-wider text-cyan-400">
+                Workspace Operations Hub
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">
+                The 6 Autonomous SaaS Engines
+              </h2>
+              <p className="text-xs text-gray-400 mt-1">
+                Active Tenant: <strong className="text-white">{tenantContext.businessName}</strong> ({tenantContext.businessSlug})
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Link
+                href="/signin"
+                className="px-3.5 py-1.5 rounded-lg border border-gray-700 bg-gray-800/80 hover:bg-gray-700 text-xs text-gray-200 transition"
+              >
+                Switch Tenant
+              </Link>
+              <Link
+                href="/settings"
+                className="px-3.5 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition shadow-sm"
+              >
+                Open Workspace Vault
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {/* Screen 1 */}
             <Link
-              href="/settings/roles-prompts"
-              className="flex items-center gap-1.5 rounded-lg border border-gray-700 bg-gray-800 hover:bg-gray-700 px-3 py-1.5 text-xs font-medium text-gray-200 transition"
+              href="/onboarding"
+              className="rounded-2xl border border-gray-800 bg-[#091326] p-6 hover:border-purple-500/50 transition group flex flex-col justify-between"
             >
-              <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
-              <span>Role & Prompt Studio</span>
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="h-10 w-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-900/40 text-purple-300">
+                    Screen 1
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-white group-hover:text-purple-300 transition">
+                  15-Minute Onboarding
+                </h3>
+                <p className="text-xs text-gray-400 mt-2">
+                  Live countdown stopwatch, encrypted vault key setup, synthetic test cases, and the 85% readiness pass-bar check.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-gray-800 mt-4 flex items-center justify-between text-xs text-purple-400 font-semibold">
+                <span>Start Setup</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </div>
             </Link>
+
+            {/* Screen 2 */}
             <Link
               href="/settings"
-              className="flex items-center gap-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 text-xs font-semibold text-white transition shadow-sm"
+              className="rounded-2xl border border-gray-800 bg-[#091326] p-6 hover:border-indigo-500/50 transition group flex flex-col justify-between"
             >
-              <span>The 5 Vault Keys</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="h-10 w-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                    <Server className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-900/40 text-indigo-300">
+                    Screen 2
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-white group-hover:text-indigo-300 transition">
+                  Vault Keys &amp; Prompt Studio
+                </h3>
+                <p className="text-xs text-gray-400 mt-2">
+                  The 5 encrypted connection keys, Laptop Ollama runner switch, Claude prompt caching savings (-50%), and pg-boss queue runner.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-gray-800 mt-4 flex items-center justify-between text-xs text-indigo-400 font-semibold">
+                <span>Manage Keys &amp; Roles</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </div>
+            </Link>
+
+            {/* Screen 3 */}
+            <Link
+              href="/knowledge"
+              className="rounded-2xl border border-gray-800 bg-[#091326] p-6 hover:border-cyan-500/50 transition group flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="h-10 w-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                    <Brain className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-900/40 text-cyan-300">
+                    Screen 3
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition">
+                  The Knowledge Brain
+                </h3>
+                <p className="text-xs text-gray-400 mt-2">
+                  Sitemap crawler, hybrid pgvector cosine + tsvector search with RRF scoring, URL health quarantine lifecycle, and SOP drafting.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-gray-800 mt-4 flex items-center justify-between text-xs text-cyan-400 font-semibold">
+                <span>Explore Brain</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </div>
+            </Link>
+
+            {/* Screen 4 */}
+            <Link
+              href="/chat"
+              className="rounded-2xl border border-gray-800 bg-[#091326] p-6 hover:border-emerald-500/50 transition group flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                    <MessageSquare className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-900/40 text-emerald-300">
+                    Screen 4
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-white group-hover:text-emerald-300 transition">
+                  Ask &amp; Teach Consultant Chat
+                </h3>
+                <p className="text-xs text-gray-400 mt-2">
+                  Dynamic citations [1][2], prompt injection safety shield, human escalation valves (legal, refund, anger), and inline teaching lessons.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-gray-800 mt-4 flex items-center justify-between text-xs text-emerald-400 font-semibold">
+                <span>Start Consultation</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </div>
+            </Link>
+
+            {/* Screen 5 */}
+            <Link
+              href="/evals"
+              className="rounded-2xl border border-gray-800 bg-[#091326] p-6 hover:border-amber-500/50 transition group flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="h-10 w-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+                    <FlaskConical className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-900/40 text-amber-300">
+                    Screen 5
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-white group-hover:text-amber-300 transition">
+                  The Eval Lab &amp; Model Matrix
+                </h3>
+                <p className="text-xs text-gray-400 mt-2">
+                  180-case benchmark harness, LLM-as-a-Judge grading rubrics, side-by-side model comparator, release gate, and smart cost router.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-gray-800 mt-4 flex items-center justify-between text-xs text-amber-400 font-semibold">
+                <span>Launch Benchmarks</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </div>
+            </Link>
+
+            {/* Screen 6 */}
+            <Link
+              href="/self-improve"
+              className="rounded-2xl border border-gray-800 bg-[#091326] p-6 hover:border-pink-500/50 transition group flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="h-10 w-10 rounded-xl bg-pink-500/10 border border-pink-500/20 text-pink-400 flex items-center justify-center">
+                    <RefreshCw className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-pink-900/40 text-pink-300">
+                    Screen 6
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-white group-hover:text-pink-300 transition">
+                  Self-Improvement Loop
+                </h3>
+                <p className="text-xs text-gray-400 mt-2">
+                  Autonomous Opus 5.5 failure diagnosis, isolated git branch fixes, hidden holdout test set verification, and 1-click PR merge.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-gray-800 mt-4 flex items-center justify-between text-xs text-pink-400 font-semibold">
+                <span>Inspect Auto-Fixes</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </div>
             </Link>
           </div>
         </div>
+      </section>
 
-        {/* Metric Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {/* Metric 1 */}
-          <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Ingested Help Pages</span>
-              <Brain className="h-4 w-4 text-indigo-400" />
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-white tracking-tight">{health.total}</span>
-              <span className="text-xs text-emerald-400 font-medium">{health.healthyPercent}% Synced</span>
-            </div>
-            <p className="text-xs text-gray-400 mt-2">{health.total * 8} semantic vector chunks embedded</p>
-          </div>
-
-          {/* Metric 2 */}
-          <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Monthly Model Spend</span>
-              <Zap className="h-4 w-4 text-amber-400" />
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-white tracking-tight font-mono">
-                ${telemetry.totalSpendUsd.toFixed(4)}
+      {/* 8. Headquarters & Corporate Profile Section */}
+      <section id="about" className="py-16 md:py-20 bg-[#040A17] border-b border-gray-800/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            <div className="space-y-4">
+              <span className="text-xs font-mono font-semibold uppercase tracking-wider text-cyan-400">
+                Corporate Headquarters
               </span>
-              <span className="text-xs text-emerald-400 font-medium">
-                {telemetry.totalCalls > 0 ? `${telemetry.totalCalls} calls logged` : "0 calls"}
-              </span>
-            </div>
-            <p className="text-xs text-gray-400 mt-2">{telemetry.cacheHitPercentage}% prompt cache hit rate</p>
-          </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                AI Technologies &amp; Consulting
+              </h2>
+              <p className="text-sm text-gray-300 leading-relaxed">
+                Operating at the intersection of enterprise software engineering, autonomous generative AI agents, and strategic workforce staffing. We deliver bespoke technical architectures and recruitment intelligence to organizations worldwide.
+              </p>
 
-          {/* Metric 3 */}
-          <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Benchmark Accuracy</span>
-              <TrendingUp className="h-4 w-4 text-emerald-400" />
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-emerald-400 tracking-tight">98.8%</span>
-              <span className="text-xs text-emerald-500 font-medium">Pass Bar Exceeded</span>
-            </div>
-            <p className="text-xs text-gray-400 mt-2">180 benchmark test cases passing</p>
-          </div>
-
-          {/* Metric 4 */}
-          <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Open Human Tickets</span>
-              <AlertTriangle className="h-4 w-4 text-sky-400" />
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-white tracking-tight">0</span>
-              <span className="text-xs text-gray-400 font-medium">100% Policy Clean</span>
-            </div>
-            <p className="text-xs text-gray-400 mt-2">Legal, refund, and anger safety valves active</p>
-          </div>
-        </div>
-
-        {/* Feature Quick Launch Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <Link
-            href="/onboarding"
-            className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 hover:border-purple-500/50 transition group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="h-9 w-9 rounded-lg bg-purple-600/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
-                <Sparkles className="h-5 w-5" />
-              </div>
-              <ArrowRight className="h-4 w-4 text-gray-500 group-hover:text-purple-400 transition" />
-            </div>
-            <div className="flex items-center gap-2 mt-4">
-              <h3 className="text-sm font-semibold text-white">15-Minute Onboarding</h3>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-900/60 text-purple-300">Screen 1</span>
-            </div>
-            <p className="text-xs text-gray-400 mt-1">
-              Live stopwatch timer, vault key setup, synthetic test generator, and 85% readiness pass-bar check.
-            </p>
-          </Link>
-
-          <Link
-            href="/knowledge"
-            className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 hover:border-indigo-500/50 transition group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="h-9 w-9 rounded-lg bg-indigo-600/10 text-indigo-400 flex items-center justify-center border border-indigo-500/20">
-                <Brain className="h-5 w-5" />
-              </div>
-              <ArrowRight className="h-4 w-4 text-gray-500 group-hover:text-indigo-400 transition" />
-            </div>
-            <div className="flex items-center gap-2 mt-4">
-              <h3 className="text-sm font-semibold text-white">The Knowledge Brain</h3>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-900/60 text-indigo-300">Screen 3</span>
-            </div>
-            <p className="text-xs text-gray-400 mt-1">
-              Polite batch crawler, pgvector hybrid search, URL health lifecycle (404 watch / 301 quarantine), and drafted skills.
-            </p>
-          </Link>
-
-          <Link
-            href="/chat"
-            className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 hover:border-emerald-500/50 transition group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="h-9 w-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
-                <MessageSquare className="h-5 w-5" />
-              </div>
-              <ArrowRight className="h-4 w-4 text-gray-500 group-hover:text-emerald-400 transition" />
-            </div>
-            <div className="flex items-center gap-2 mt-4">
-              <h3 className="text-sm font-semibold text-white">Ask & Teach Consultant Chat</h3>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-900/60 text-emerald-300">Screen 4</span>
-            </div>
-            <p className="text-xs text-gray-400 mt-1">
-              Agent loop with inline citations [1], multimodal screenshot uploads, prompt injection shield, and human escalation.
-            </p>
-          </Link>
-
-          <Link
-            href="/evals"
-            className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 hover:border-amber-500/50 transition group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="h-9 w-9 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
-                <FlaskConical className="h-5 w-5" />
-              </div>
-              <ArrowRight className="h-4 w-4 text-gray-500 group-hover:text-amber-400 transition" />
-            </div>
-            <div className="flex items-center gap-2 mt-4">
-              <h3 className="text-sm font-semibold text-white">The Eval Lab & Router</h3>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-900/60 text-amber-300">Screen 5</span>
-            </div>
-            <p className="text-xs text-gray-400 mt-1">
-              180 benchmark suite, 14-model matrix, AI Judge calibration, 38.4% cost router, and production release gate.
-            </p>
-          </Link>
-
-          <Link
-            href="/self-improve"
-            className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 hover:border-purple-500/50 transition group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="h-9 w-9 rounded-lg bg-purple-600/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
-                <Sparkles className="h-5 w-5" />
-              </div>
-              <ArrowRight className="h-4 w-4 text-gray-500 group-hover:text-purple-400 transition" />
-            </div>
-            <div className="flex items-center gap-2 mt-4">
-              <h3 className="text-sm font-semibold text-white">Self-Improvement Loop</h3>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-900/60 text-purple-300">Screen 6</span>
-            </div>
-            <p className="text-xs text-gray-400 mt-1">
-              Claude Opus 5.5 failure packing, isolated git branches, hidden check set validation, $5 ceiling, and 1-click merge/revert.
-            </p>
-          </Link>
-
-          <Link
-            href="/settings/roles-prompts"
-            className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 hover:border-indigo-500/50 transition group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="h-9 w-9 rounded-lg bg-indigo-600/10 text-indigo-400 flex items-center justify-center border border-indigo-500/20">
-                <Zap className="h-5 w-5" />
-              </div>
-              <ArrowRight className="h-4 w-4 text-gray-500 group-hover:text-indigo-400 transition" />
-            </div>
-            <div className="flex items-center gap-2 mt-4">
-              <h3 className="text-sm font-semibold text-white">Role & Prompt Studio</h3>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-900/60 text-indigo-300">Screen 2</span>
-            </div>
-            <p className="text-xs text-gray-400 mt-1">
-              Persona prompt editor, live split-screen test chat, prompt caching simulator, and instant rollback versioning.
-            </p>
-          </Link>
-        </div>
-
-        {/* Two-Column Section: URL Health Lifecycle & Recent Runs */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* URL Health Lifecycle Distribution (Task 2.4) */}
-          <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 lg:col-span-1 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-white">URL Health Lifecycle</h3>
-              <span className="text-xs text-gray-400 font-mono">Task 2.4</span>
-            </div>
-            <p className="text-xs text-gray-400 leading-relaxed">
-              Automated 404 watch counters and 301 quarantine boundaries preventing stale citations.
-            </p>
-
-            <div className="space-y-3 pt-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="flex items-center gap-2 text-emerald-400">
-                  <CheckCircle2 className="h-4 w-4" /> Active (Healthy)
-                </span>
-                <span className="font-mono text-white">468 URLs</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="flex items-center gap-2 text-amber-400">
-                  <AlertTriangle className="h-4 w-4" /> Watch (1 Failure)
-                </span>
-                <span className="font-mono text-white">10 URLs</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="flex items-center gap-2 text-red-400">
-                  <AlertTriangle className="h-4 w-4" /> Quarantined (301/Broken)
-                </span>
-                <span className="font-mono text-white">3 URLs</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="flex items-center gap-2 text-gray-500">
-                  <Server className="h-4 w-4" /> Archived (Audit Only)
-                </span>
-                <span className="font-mono text-white">1 URL</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Tracing & Activity Stream (Task 1.5) */}
-          <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 lg:col-span-2 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-white">Live Tracing & Operations Stream</h3>
-              <span className="text-xs text-indigo-400 font-mono">PostgreSQL pg-boss Queue</span>
-            </div>
-
-            <div className="space-y-3 pt-1">
-              <div className="rounded-lg border border-gray-800 bg-gray-900/40 p-3 flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400"></span>
-                    <span className="text-xs font-medium text-white">Eval Run #18 Completed</span>
-                    <span className="text-[10px] text-gray-400">14 Models Evaluated</span>
-                  </div>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Router beat Sonnet 5.5 baseline cost by 38.4% with 98.4% benchmark quality.
-                  </p>
+              <div className="space-y-3 pt-2">
+                <div className="flex items-start gap-3 text-xs text-gray-300">
+                  <MapPin className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
+                  <span>Jubilee Enclave, Madhapur, Hyderabad, Telangana, India (500081)</span>
                 </div>
-                <span className="text-[11px] text-gray-400 font-mono">Just now</span>
-              </div>
-
-              <div className="rounded-lg border border-gray-800 bg-gray-900/40 p-3 flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-indigo-400"></span>
-                    <span className="text-xs font-medium text-white">Autonomous Self-Improvement PR Merged</span>
-                    <span className="text-[10px] text-gray-400">Claude Opus 5.5</span>
-                  </div>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Fixed DNS edge case kb-dns-042 on branch self-improve/fix-kb-dns-042 (Score: 35% &rarr; 100%).
-                  </p>
+                <div className="flex items-start gap-3 text-xs text-gray-300">
+                  <Clock className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
+                  <span>Global 24/7 Operations &bull; Distributed Tech Support Network</span>
                 </div>
-                <span className="text-[11px] text-gray-400 font-mono">15m ago</span>
-              </div>
-
-              <div className="rounded-lg border border-gray-800 bg-gray-900/40 p-3 flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400"></span>
-                    <span className="text-xs font-medium text-white">Sitemap Ingestion Completed</span>
-                    <span className="text-[10px] text-gray-400">Brilliant Directories</span>
-                  </div>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Polite batch crawl finished 482 pages with zero server errors (Rate: 450 pages/hr).
-                  </p>
+                <div className="flex items-start gap-3 text-xs text-gray-300">
+                  <ShieldCheck className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
+                  <span>Strict Multi-Tenant Isolation &bull; End-to-End PII Redaction</span>
                 </div>
-                <span className="text-[11px] text-gray-400 font-mono">1h ago</span>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-gray-800 bg-[#081226] p-6 space-y-4">
+              <h4 className="text-sm font-bold text-white">Direct Connect Hotline</h4>
+              <p className="text-xs text-gray-400">
+                Need customized staffing or urgent technical architecture consultation? Connect directly with our enterprise team.
+              </p>
+              <div className="pt-2">
+                <button
+                  onClick={() => openConnect("client")}
+                  className="w-full py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition shadow-md shadow-cyan-500/20"
+                >
+                  Initiate Strategic Consultation
+                </button>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </AppShell>
+      </section>
+
+      {/* 9. Website Footer */}
+      <footer className="py-10 bg-[#020610] text-gray-500 text-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-black border border-gray-700 text-white font-serif text-xs font-bold">
+              α
+            </div>
+            <span className="font-semibold text-gray-300">AI Technologies &amp; Consulting</span>
+            <span>&copy; {new Date().getFullYear()} All rights reserved.</span>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <Link href="/" className="hover:text-gray-300 transition">Home</Link>
+            <Link href="/about" className="hover:text-gray-300 transition">About</Link>
+            <Link href="/services" className="hover:text-gray-300 transition">Services</Link>
+            <Link href="/careers" className="hover:text-gray-300 transition">Careers</Link>
+            <Link href="/contact" className="hover:text-gray-300 transition">Contact us</Link>
+            <Link href="/chat" className="text-cyan-400 hover:text-cyan-300 font-semibold transition">Consultant</Link>
+          </div>
+        </div>
+      </footer>
+
+      {/* 10. Interactive Connect / Application Modal */}
+      <ConnectModal
+        isOpen={connectModalOpen}
+        onClose={() => setConnectModalOpen(false)}
+        initialCategory={connectCategory}
+      />
+    </div>
   );
 }

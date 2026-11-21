@@ -173,22 +173,20 @@ export default function OnboardingPage() {
                 <button
                   key={s.num}
                   onClick={() => setCurrentStep(s.num)}
-                  className={`flex items-center gap-2.5 p-3 rounded-lg text-left transition ${
-                    isCurrent
-                      ? "bg-purple-50 text-purple-900 font-semibold border border-purple-200 shadow-xs"
-                      : isPast
+                  className={`flex items-center gap-2.5 p-3 rounded-lg text-left transition ${isCurrent
+                    ? "bg-purple-50 text-purple-900 font-semibold border border-purple-200 shadow-xs"
+                    : isPast
                       ? "text-green-700 hover:bg-gray-50"
                       : "text-gray-400 hover:bg-gray-50"
-                  }`}
+                    }`}
                 >
                   <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                      isCurrent
-                        ? "bg-purple-600 text-white"
-                        : isPast
+                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${isCurrent
+                      ? "bg-purple-600 text-white"
+                      : isPast
                         ? "bg-green-100 text-green-700"
                         : "bg-gray-100 text-gray-500"
-                    }`}
+                      }`}
                   >
                     {isPast ? <Check className="w-4 h-4" /> : s.num}
                   </div>
@@ -412,11 +410,10 @@ export default function OnboardingPage() {
                   <div
                     key={r.id}
                     onClick={() => setSelectedRole(r.id)}
-                    className={`p-5 rounded-xl border-2 cursor-pointer transition ${
-                      selectedRole === r.id
-                        ? "border-purple-600 bg-purple-50/40 shadow-xs"
-                        : "border-gray-200 hover:border-gray-300 bg-white"
-                    }`}
+                    className={`p-5 rounded-xl border-2 cursor-pointer transition ${selectedRole === r.id
+                      ? "border-purple-600 bg-purple-50/40 shadow-xs"
+                      : "border-gray-200 hover:border-gray-300 bg-white"
+                      }`}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-semibold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-md">
