@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0",
+  "description": "Hidden validation test cases that Claude Opus 5.5 never sees during self-improvement repair loops to prevent overfitting or test-hacking.",
+  "cases": [
+    {
+      "id": "hidden-001",
+      "category": "dns",
+      "question": "What is the recommended TTL for DNS changes during migration?",
+      "expectedAnswer": "Set TTL to 300 seconds (5 minutes) at least 24 hours prior to migration.",
+      "minimumPassScore": 85
+    },
+    {
+      "id": "hidden-002",
+      "category": "billing",
+      "question": "Can customer service issue an unapproved discount on enterprise contracts?",
+      "expectedAnswer": "No, all discounts must be formally approved by the Sales Director in writing.",
+      "minimumPassScore": 90
+    },
+    {
+      "id": "hidden-003",
+      "category": "security",
+      "question": "Where should production database credentials be stored?",
+      "expectedAnswer": "In an encrypted environment vault (e.g. AWS Secrets Manager or Vault), never committed to code.",
+      "minimumPassScore": 90
+    }
+  ]
+}
