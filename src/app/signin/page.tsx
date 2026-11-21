@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Sparkles,
@@ -27,11 +27,32 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [selectedDemo, setSelectedDemo] = useState("acme");
+  const [activeSession, setActiveSession] = useState<{
+    userEmail: string;
+    businessName: string;
+    userRole: string;
+  } | null>(null);
 
   // Multi-Business Picker Modal State
   const [businessPickerOpen, setBusinessPickerOpen] = useState(false);
   const [businessChoices, setBusinessChoices] = useState<BusinessChoice[]>([]);
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check if user is already authenticated
+    fetch("/api/auth/context")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.currentTenant && d.currentTenant.userEmail) {
+          setActiveSession({
+            userEmail: d.currentTenant.userEmail,
+            businessName: d.currentTenant.businessName,
+            userRole: d.currentTenant.userRole,
+          });
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   // Fast demo credential pre-fills
   const selectDemoAccount = (account: "acme" | "beta" | "multi") => {
@@ -112,7 +133,7 @@ export default function SignInPage() {
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-indigo-600/10 blur-[120px] rounded-full"></div>
       </div>
 
-      <div className="relative max-w-md w-full space-y-6">
+      <div className="relative max-w-md w-full space-y-5">
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-white font-bold shadow-xl shadow-indigo-500/20 mb-2">
@@ -123,6 +144,43 @@ export default function SignInPage() {
             Sign in to access your tenant-isolated Knowledge Brain and Agent Studios.
           </p>
         </div>
+
+        {/* Tab Toggle: Sign In vs Register (Sign Up) */}
+        <div className="flex rounded-xl bg-gray-900/80 p-1 border border-gray-800">
+          <Link
+            href="/signin"
+            className="flex-1 py-2 text-center text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow transition"
+          >
+            Sign In
+          </Link>
+          <Link
+            href="/signup"
+            className="flex-1 py-2 text-center text-xs font-semibold rounded-lg text-gray-400 hover:text-white transition"
+          >
+            Create Workspace (Sign Up)
+          </Link>
+        </div>
+
+        {/* Already Logged In / User Present Notification */}
+        {activeSession && (
+          <div className="p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/30 flex items-center justify-between">
+            <div>
+              <div className="text-xs text-gray-300">
+                Active session: <strong className="text-white">{activeSession.userEmail}</strong>
+              </div>
+              <div className="text-[11px] text-indigo-400 font-medium mt-0.5">
+                {activeSession.businessName} &bull; <span className="capitalize">{activeSession.userRole}</span>
+              </div>
+            </div>
+            <Link
+              href="/"
+              className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow-sm shrink-0"
+            >
+              <span>Go to Dashboard</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        )}
 
         {/* Demo Logins Quick-Select Selector */}
         <div className="space-y-2">
@@ -244,9 +302,9 @@ export default function SignInPage() {
 
           <div className="mt-4 pt-4 border-t border-gray-800 text-center">
             <p className="text-xs text-gray-400">
-              Need a new workspace?{" "}
+              Need to register a new company?{" "}
               <Link href="/signup" className="font-semibold text-indigo-400 hover:text-indigo-300 transition">
-                Create an account &rarr;
+                Create new business workspace &rarr;
               </Link>
             </p>
           </div>
@@ -261,7 +319,7 @@ export default function SignInPage() {
         </div>
       </div>
 
-      {/* Multi-Business Picker Modal (Task Rule: Show a business picker if user belongs to multiple businesses) */}
+      {/* Multi-Business Picker Modal */}
       {businessPickerOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
           <div className="bg-[#0E1322] border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -17,7 +17,9 @@ import {
   ChevronDown,
   Check,
   LogOut,
-  ExternalLink,
+  User,
+  PlusCircle,
+  ArrowRight,
 } from "lucide-react";
 
 interface TenantContext {
@@ -26,6 +28,7 @@ interface TenantContext {
   businessSlug: string;
   userEmail: string;
   userRole: string;
+  userId?: string;
 }
 
 export default function AppShell({
@@ -46,8 +49,12 @@ export default function AppShell({
   });
   const [allTenants, setAllTenants] = useState<TenantContext[]>([]);
   const [tenantDropdownOpen, setTenantDropdownOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [localOnlyMode, setLocalOnlyMode] = useState(false);
   const [switching, setSwitching] = useState(false);
+
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const tenantMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Fetch auth context
@@ -66,6 +73,18 @@ export default function AppShell({
         if (typeof data.localOnlyMode === "boolean") setLocalOnlyMode(data.localOnlyMode);
       })
       .catch(console.error);
+
+    // Click outside listener
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+      if (tenantMenuRef.current && !tenantMenuRef.current.contains(event.target as Node)) {
+        setTenantDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const switchTenant = async (slug: string) => {
@@ -89,6 +108,16 @@ export default function AppShell({
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      window.location.href = "/signin";
+    }
+  };
+
   const toggleLocalMode = async () => {
     const nextVal = !localOnlyMode;
     setLocalOnlyMode(nextVal);
@@ -98,6 +127,12 @@ export default function AppShell({
       body: JSON.stringify({ enabled: nextVal }),
     });
     router.refresh();
+  };
+
+  const getInitials = (emailStr: string) => {
+    if (!emailStr) return "AI";
+    const prefix = emailStr.split("@")[0].replace(/[^a-zA-Z]/g, "");
+    return prefix.substring(0, 2).toUpperCase() || "AI";
   };
 
   const navItems = [
@@ -127,8 +162,8 @@ export default function AppShell({
             </div>
           </Link>
 
-          {/* Active Workspace Pill & Dropdown */}
-          <div className="relative mb-6">
+          {/* Active Workspace Selector in Sidebar */}
+          <div className="relative mb-6" ref={tenantMenuRef}>
             <button
               onClick={() => setTenantDropdownOpen(!tenantDropdownOpen)}
               className="w-full text-left rounded-lg border border-gray-800 bg-gray-900/60 p-2.5 hover:border-gray-700 transition flex items-center justify-between"
@@ -152,9 +187,9 @@ export default function AppShell({
 
             {/* Dropdown Menu */}
             {tenantDropdownOpen && (
-              <div className="absolute left-0 right-0 top-full mt-2 rounded-lg border border-gray-700 bg-[#141A2D] p-2 shadow-2xl z-50">
+              <div className="absolute left-0 right-0 top-full mt-2 rounded-xl border border-gray-700 bg-[#141A2D] p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
                 <div className="text-[10px] font-semibold text-gray-400 px-2 py-1 uppercase tracking-wider">
-                  Switch Tenant (Zero Leakage)
+                  Switch Tenant Workspace
                 </div>
                 {allTenants.map((t) => {
                   const isActive = t.businessSlug === currentTenant.businessSlug;
@@ -163,27 +198,36 @@ export default function AppShell({
                       key={t.businessSlug}
                       onClick={() => switchTenant(t.businessSlug)}
                       disabled={switching}
-                      className={`w-full flex items-center justify-between px-2.5 py-2 text-xs rounded-md transition ${
+                      className={`w-full flex items-center justify-between px-2.5 py-2 text-xs rounded-lg transition ${
                         isActive
                           ? "bg-indigo-600/20 text-indigo-300 font-medium border border-indigo-500/30"
                           : "text-gray-300 hover:bg-gray-800/80"
                       }`}
                     >
-                      <div className="text-left">
-                        <div className="font-medium">{t.businessName}</div>
-                        <div className="text-[10px] text-gray-500">{t.userEmail}</div>
+                      <div className="text-left truncate mr-2">
+                        <div className="font-semibold text-white truncate">{t.businessName}</div>
+                        <div className="text-[10px] text-gray-400 font-mono truncate">{t.businessSlug}</div>
                       </div>
-                      {isActive && <Check className="h-4 w-4 text-indigo-400" />}
+                      {isActive && <Check className="h-4 w-4 text-indigo-400 shrink-0" />}
                     </button>
                   );
                 })}
-                <div className="border-t border-gray-700/60 my-1 pt-1">
+                <div className="border-t border-gray-700/60 my-1 pt-1 space-y-1">
                   <Link
                     href="/signin"
-                    className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-gray-400 hover:text-white rounded hover:bg-gray-800"
+                    onClick={() => setTenantDropdownOpen(false)}
+                    className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-indigo-300 hover:text-white rounded-lg hover:bg-indigo-950/30 transition"
                   >
-                    <LogOut className="h-3.5 w-3.5" />
-                    Switch or Sign In
+                    <Building2 className="h-3.5 w-3.5" />
+                    <span>Workspace Picker / Sign In</span>
+                  </Link>
+                  <Link
+                    href="/signup"
+                    onClick={() => setTenantDropdownOpen(false)}
+                    className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-emerald-300 hover:text-white rounded-lg hover:bg-emerald-950/30 transition"
+                  >
+                    <PlusCircle className="h-3.5 w-3.5" />
+                    <span>Create New Workspace</span>
                   </Link>
                 </div>
               </div>
@@ -246,42 +290,144 @@ export default function AppShell({
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         {/* Top Header */}
-        <header className="h-16 border-b border-gray-800 px-8 flex items-center justify-between bg-[#0E1322]/50 backdrop-blur sticky top-0 z-40">
+        <header className="h-16 border-b border-gray-800 px-8 flex items-center justify-between bg-[#0E1322]/80 backdrop-blur sticky top-0 z-40">
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-gray-400">{currentTenant.businessName}</span>
+            <span className="text-gray-400 font-medium">{currentTenant.businessName}</span>
             <span className="text-gray-600">/</span>
             {breadcrumbs.map((bc, idx) => (
               <React.Fragment key={bc.label}>
                 {idx > 0 && <span className="text-gray-600">/</span>}
                 {bc.href ? (
-                  <Link href={bc.href} className="text-gray-400 hover:text-white">
+                  <Link href={bc.href} className="text-gray-400 hover:text-white transition">
                     {bc.label}
                   </Link>
                 ) : (
-                  <span className="font-medium text-white">{bc.label}</span>
+                  <span className="font-semibold text-white">{bc.label}</span>
                 )}
               </React.Fragment>
             ))}
             {breadcrumbs.length === 0 && (
-              <span className="font-medium text-white">Executive Operations Hub</span>
+              <span className="font-semibold text-white">Executive Operations Hub</span>
             )}
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-400 border border-indigo-500/20">
+            <span className="hidden md:inline-flex items-center gap-1.5 rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-400 border border-indigo-500/20">
               <ShieldCheck className="h-3.5 w-3.5 text-indigo-400" />
               Prompt Injection Shield Active
             </span>
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-xs text-white shadow-md">
-                {currentTenant.businessSlug === "acme-corp" ? "AC" : "BD"}
-              </div>
-              <div className="hidden sm:block text-left">
-                <div className="text-xs font-medium text-white">{currentTenant.userEmail}</div>
-                <div className="text-[10px] text-gray-400 uppercase tracking-wider capitalize">
-                  {currentTenant.userRole}
+
+            {/* Interactive User Account Section & Dropdown Menu */}
+            <div className="relative" ref={userMenuRef}>
+              <button
+                type="button"
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center gap-2.5 p-1.5 px-2.5 rounded-xl border border-gray-800 bg-gray-900/80 hover:border-indigo-500/50 hover:bg-gray-800 transition focus:outline-none"
+              >
+                <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center font-bold text-xs text-white shadow-md">
+                  {getInitials(currentTenant.userEmail)}
                 </div>
-              </div>
+                <div className="hidden sm:block text-left">
+                  <div className="text-xs font-semibold text-white leading-tight">
+                    {currentTenant.userEmail}
+                  </div>
+                  <div className="text-[10px] text-gray-400 capitalize flex items-center gap-1.5 mt-0.5">
+                    <span className="text-indigo-400 font-medium truncate max-w-[100px]">{currentTenant.businessName}</span>
+                    <span>&bull;</span>
+                    <span className="text-emerald-400 font-semibold">{currentTenant.userRole}</span>
+                  </div>
+                </div>
+                <ChevronDown className={`h-3.5 w-3.5 text-gray-400 transition-transform ${userMenuOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {/* User Account Dropdown Menu */}
+              {userMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl border border-gray-700 bg-[#141A2D] p-3 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
+                  {/* Account Header */}
+                  <div className="pb-3 mb-2 border-b border-gray-700/80">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-9 w-9 rounded-xl bg-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow">
+                        {getInitials(currentTenant.userEmail)}
+                      </div>
+                      <div className="overflow-hidden">
+                        <div className="text-xs font-bold text-white truncate">{currentTenant.userEmail}</div>
+                        <div className="text-[11px] text-gray-400 truncate">{currentTenant.businessName}</div>
+                      </div>
+                    </div>
+                    <div className="mt-2.5 flex items-center gap-2">
+                      <span className="inline-flex items-center rounded-md bg-indigo-500/20 px-2 py-0.5 text-[10px] font-semibold text-indigo-300 border border-indigo-500/30">
+                        {currentTenant.businessSlug}
+                      </span>
+                      <span className="inline-flex items-center rounded-md bg-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-300 border border-emerald-500/30 uppercase">
+                        {currentTenant.userRole}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Navigation Links */}
+                  <div className="space-y-1">
+                    <Link
+                      href="/"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-2.5 py-2 text-xs text-gray-300 hover:text-white rounded-lg hover:bg-gray-800 transition"
+                    >
+                      <LayoutDashboard className="h-4 w-4 text-indigo-400" />
+                      <span>Dashboard Hub</span>
+                    </Link>
+
+                    <Link
+                      href="/settings"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-2.5 py-2 text-xs text-gray-300 hover:text-white rounded-lg hover:bg-gray-800 transition"
+                    >
+                      <Settings className="h-4 w-4 text-gray-400" />
+                      <span>Workspace Settings & Keys</span>
+                    </Link>
+
+                    <Link
+                      href="/onboarding"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-2.5 py-2 text-xs text-gray-300 hover:text-white rounded-lg hover:bg-gray-800 transition"
+                    >
+                      <Sparkles className="h-4 w-4 text-amber-400" />
+                      <span>15-Minute Setup Wizard</span>
+                    </Link>
+                  </div>
+
+                  {/* Registration and Sign In Options */}
+                  <div className="border-t border-gray-700/80 my-2 pt-2 space-y-1">
+                    <Link
+                      href="/signin"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-2.5 py-2 text-xs text-indigo-300 hover:text-white rounded-lg hover:bg-indigo-950/40 transition"
+                    >
+                      <Building2 className="h-4 w-4 text-indigo-400" />
+                      <span>Switch Workspace / Sign In</span>
+                    </Link>
+
+                    <Link
+                      href="/signup"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-2.5 py-2 text-xs text-emerald-300 hover:text-white rounded-lg hover:bg-emerald-950/40 transition"
+                    >
+                      <PlusCircle className="h-4 w-4 text-emerald-400" />
+                      <span>Register New Workspace (Sign Up)</span>
+                    </Link>
+                  </div>
+
+                  {/* Sign Out */}
+                  <div className="border-t border-gray-700/80 my-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      className="w-full flex items-center gap-2.5 px-2.5 py-2 text-xs text-red-400 hover:text-red-300 rounded-lg hover:bg-red-950/30 transition text-left"
+                    >
+                      <LogOut className="h-4 w-4 text-red-400" />
+                      <span>Sign Out (Logout)</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </header>

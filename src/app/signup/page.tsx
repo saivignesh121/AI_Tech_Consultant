@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ShieldCheck,
@@ -22,6 +22,27 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [activeSession, setActiveSession] = useState<{
+    userEmail: string;
+    businessName: string;
+    userRole: string;
+  } | null>(null);
+
+  useEffect(() => {
+    // Check if user is already authenticated
+    fetch("/api/auth/context")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.currentTenant && d.currentTenant.userEmail) {
+          setActiveSession({
+            userEmail: d.currentTenant.userEmail,
+            businessName: d.currentTenant.businessName,
+            userRole: d.currentTenant.userRole,
+          });
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +105,44 @@ export default function SignUpPage() {
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
+      <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md px-4 space-y-4">
+        {/* Tab Toggle: Sign In vs Register (Sign Up) */}
+        <div className="flex rounded-xl bg-gray-900/80 p-1 border border-gray-800">
+          <Link
+            href="/signin"
+            className="flex-1 py-2 text-center text-xs font-semibold rounded-lg text-gray-400 hover:text-white transition"
+          >
+            Sign In
+          </Link>
+          <Link
+            href="/signup"
+            className="flex-1 py-2 text-center text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow transition"
+          >
+            Create Workspace (Sign Up)
+          </Link>
+        </div>
+
+        {/* Already Logged In / User Present Notification */}
+        {activeSession && (
+          <div className="p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/30 flex items-center justify-between">
+            <div>
+              <div className="text-xs text-gray-300">
+                Signed in as: <strong className="text-white">{activeSession.userEmail}</strong>
+              </div>
+              <div className="text-[11px] text-indigo-400 font-medium mt-0.5">
+                {activeSession.businessName} &bull; <span className="capitalize">{activeSession.userRole}</span>
+              </div>
+            </div>
+            <Link
+              href="/"
+              className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow-sm shrink-0"
+            >
+              <span>Dashboard</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        )}
+
         <div className="bg-[#0E1322] py-8 px-6 shadow-2xl rounded-2xl border border-gray-800 sm:px-10">
           {errorMsg && (
             <div className="mb-5 p-3.5 rounded-xl bg-red-950/40 border border-red-500/30 text-red-300 text-xs flex items-center gap-2">
@@ -200,7 +258,7 @@ export default function SignUpPage() {
         </div>
 
         {/* Security & Isolation Guarantee Note */}
-        <div className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-500 text-center">
+        <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-500 text-center">
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
           <span>Atomic registration in 1 transaction with owner role & Postgres session scoping.</span>
         </div>
