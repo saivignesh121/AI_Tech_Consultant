@@ -6,34 +6,25 @@ import WebsiteHeader from "@/components/layout/WebsiteHeader";
 import CyberMatrixCanvas from "@/components/ui/CyberMatrixCanvas";
 import HolographicAiHead from "@/components/ui/HolographicAiHead";
 import ConnectModal from "@/components/ui/ConnectModal";
-import ApplicantReadinessWidget from "@/components/ui/ApplicantReadinessWidget";
 import ServicesSection from "@/components/ui/ServicesSection";
-import CareersSection from "@/components/ui/CareersSection";
 import {
   Brain,
-  Zap,
-  TrendingUp,
-  AlertTriangle,
-  ArrowRight,
   Sparkles,
   ShieldCheck,
   Building2,
-  Users,
-  Cpu,
-  Database,
-  MapPin,
-  Clock,
-  Layers,
   ChevronRight,
   Server,
   RefreshCw,
   FlaskConical,
   MessageSquare,
+  MapPin,
+  Clock,
+  ArrowRight,
 } from "lucide-react";
 
 export default function HomePage() {
   const [connectModalOpen, setConnectModalOpen] = useState(false);
-  const [connectCategory, setConnectCategory] = useState<"client" | "applicant">("client");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Dynamic Telemetry & Tenant State
   const [telemetry, setTelemetry] = useState<{
@@ -67,7 +58,7 @@ export default function HomePage() {
   }>({
     businessName: "Acme Corporation",
     businessSlug: "acme-corp",
-    userEmail: "alex@acme.com",
+    userEmail: "",
   });
 
   useEffect(() => {
@@ -102,26 +93,24 @@ export default function HomePage() {
     fetch("/api/auth/context")
       .then((r) => r.json())
       .then((d) => {
-        if (d.currentTenant) {
+        if (d.currentTenant && d.currentTenant.userEmail) {
+          setIsAuthenticated(true);
           setTenantContext({
             businessName: d.currentTenant.businessName,
             businessSlug: d.currentTenant.businessSlug,
             userEmail: d.currentTenant.userEmail,
           });
+        } else {
+          setIsAuthenticated(false);
         }
       })
       .catch(console.error);
   }, []);
 
-  const openConnect = (cat: "client" | "applicant" = "client") => {
-    setConnectCategory(cat);
-    setConnectModalOpen(true);
-  };
-
   return (
     <div className="min-h-screen bg-[#050B18] text-gray-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black">
       {/* 1. Global Navigation Header */}
-      <WebsiteHeader onConnectClick={() => openConnect("client")} />
+      <WebsiteHeader onConnectClick={() => setConnectModalOpen(true)} />
 
       {/* 2. Cyber Hero Banner matching User Screenshot with Humongous Animation */}
       <section className="relative overflow-hidden bg-gradient-to-b from-[#020716] via-[#04112c] to-[#050B18] border-b border-cyan-900/30">
@@ -155,13 +144,13 @@ export default function HomePage() {
                 </h1>
 
                 <p className="text-base sm:text-lg text-cyan-100/90 font-light max-w-xl mx-auto lg:mx-0">
-                  Transform your business with strong tech support, digitalization, and customized staffing intelligence.
+                  Transform your business with strong tech support and digitalization.
                 </p>
 
                 {/* Cyber Button matching screenshot */}
                 <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
                   <button
-                    onClick={() => openConnect("client")}
+                    onClick={() => setConnectModalOpen(true)}
                     className="cyber-btn-outline px-8 py-3.5 rounded-xl font-bold text-sm tracking-wide cyber-glow-button flex items-center gap-2"
                   >
                     <span>Connect with us</span>
@@ -169,13 +158,27 @@ export default function HomePage() {
                   </button>
 
                   <Link
-                    href="/chat"
+                    href={isAuthenticated ? "/chat" : "/signup?redirect=/chat"}
                     className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold text-sm transition shadow-lg shadow-cyan-500/25 flex items-center gap-2"
                   >
                     <Sparkles className="w-4 h-4" />
                     <span>Launch AI Consultant</span>
                   </Link>
                 </div>
+
+                {/* Registration / Login helper text */}
+                {!isAuthenticated && (
+                  <p className="text-xs text-gray-400 pt-1">
+                    New enterprise?{" "}
+                    <Link href="/signup?redirect=/chat" className="text-cyan-400 hover:underline font-semibold">
+                      Register Workspace
+                    </Link>{" "}
+                    &bull; Already registered?{" "}
+                    <Link href="/signin?redirect=/chat" className="text-cyan-400 hover:underline font-semibold">
+                      Sign In &rarr;
+                    </Link>
+                  </p>
+                )}
 
                 {/* Floating Telemetry Badges */}
                 <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs font-mono text-gray-400 border-t border-gray-800/80">
@@ -236,36 +239,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. Applicant Technical Readiness Assessment Tool */}
-      <section className="py-16 md:py-20 bg-gradient-to-b from-[#050B18] via-[#071329] to-[#050B18] border-b border-gray-800/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <div>
-              <span className="text-xs font-mono font-semibold uppercase tracking-wider text-cyan-400">
-                For Tech Applicants &amp; Specialists
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">
-                Fast-Track Your Career with AI Competency Benchmarking
-              </h2>
-            </div>
-            <button
-              onClick={() => openConnect("applicant")}
-              className="inline-flex items-center gap-2 text-xs font-bold text-cyan-400 hover:text-cyan-300 transition"
-            >
-              <span>Submit General Profile</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          <ApplicantReadinessWidget
-            onApplyClick={(track) => {
-              openConnect("applicant");
-            }}
-          />
-        </div>
-      </section>
-
-      {/* 5. Core Services & Solutions Section */}
+      {/* 4. Core Services & Solutions Section */}
       <section id="services" className="py-16 md:py-24 bg-[#050B18] border-b border-gray-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
@@ -280,34 +254,11 @@ export default function HomePage() {
             </p>
           </div>
 
-          <ServicesSection onConnectClick={() => openConnect("client")} />
+          <ServicesSection onConnectClick={() => setConnectModalOpen(true)} />
         </div>
       </section>
 
-      {/* 6. Career Opportunities for Applicants */}
-      <section id="careers" className="py-16 md:py-24 bg-gradient-to-b from-[#050B18] via-[#08142c] to-[#050B18] border-b border-gray-800/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          <div className="text-center max-w-3xl mx-auto space-y-3">
-            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-cyan-400">
-              Join Our Engineering Network
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-              Current Open Roles &amp; Opportunities
-            </h2>
-            <p className="text-sm text-gray-400">
-              Work on mission-critical AI agent systems, distributed database infrastructure, and enterprise digital transformation.
-            </p>
-          </div>
-
-          <CareersSection
-            onSelectRole={(role) => {
-              openConnect("applicant");
-            }}
-          />
-        </div>
-      </section>
-
-      {/* 7. The 6 Core Enterprise SaaS Operations Engines */}
+      {/* 5. The 6 Core Enterprise SaaS Operations Engines */}
       <section className="py-16 md:py-24 bg-[#050B18] border-b border-gray-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -343,7 +294,7 @@ export default function HomePage() {
             {/* Screen 1 */}
             <Link
               href="/onboarding"
-              className="rounded-2xl border border-gray-800 bg-[#091326] p-6 hover:border-purple-500/50 transition group flex flex-col justify-between"
+              className="rounded-2xl border border-gray-800 bg-[#091326] p-6 hover:border-cyan-500/50 transition group flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -354,14 +305,14 @@ export default function HomePage() {
                     Screen 1
                   </span>
                 </div>
-                <h3 className="text-base font-bold text-white group-hover:text-purple-300 transition">
+                <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition">
                   15-Minute Onboarding
                 </h3>
                 <p className="text-xs text-gray-400 mt-2">
                   Live countdown stopwatch, encrypted vault key setup, synthetic test cases, and the 85% readiness pass-bar check.
                 </p>
               </div>
-              <div className="pt-4 border-t border-gray-800 mt-4 flex items-center justify-between text-xs text-purple-400 font-semibold">
+              <div className="pt-4 border-t border-gray-800 mt-4 flex items-center justify-between text-xs text-cyan-400 font-semibold">
                 <span>Start Setup</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </div>
@@ -370,7 +321,7 @@ export default function HomePage() {
             {/* Screen 2 */}
             <Link
               href="/settings"
-              className="rounded-2xl border border-gray-800 bg-[#091326] p-6 hover:border-indigo-500/50 transition group flex flex-col justify-between"
+              className="rounded-2xl border border-gray-800 bg-[#091326] p-6 hover:border-cyan-500/50 transition group flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -381,14 +332,14 @@ export default function HomePage() {
                     Screen 2
                   </span>
                 </div>
-                <h3 className="text-base font-bold text-white group-hover:text-indigo-300 transition">
+                <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition">
                   Vault Keys &amp; Prompt Studio
                 </h3>
                 <p className="text-xs text-gray-400 mt-2">
                   The 5 encrypted connection keys, Laptop Ollama runner switch, Claude prompt caching savings (-50%), and pg-boss queue runner.
                 </p>
               </div>
-              <div className="pt-4 border-t border-gray-800 mt-4 flex items-center justify-between text-xs text-indigo-400 font-semibold">
+              <div className="pt-4 border-t border-gray-800 mt-4 flex items-center justify-between text-xs text-cyan-400 font-semibold">
                 <span>Manage Keys &amp; Roles</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </div>
@@ -424,7 +375,7 @@ export default function HomePage() {
             {/* Screen 4 */}
             <Link
               href="/chat"
-              className="rounded-2xl border border-gray-800 bg-[#091326] p-6 hover:border-emerald-500/50 transition group flex flex-col justify-between"
+              className="rounded-2xl border border-gray-800 bg-[#091326] p-6 hover:border-cyan-500/50 transition group flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -435,14 +386,14 @@ export default function HomePage() {
                     Screen 4
                   </span>
                 </div>
-                <h3 className="text-base font-bold text-white group-hover:text-emerald-300 transition">
+                <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition">
                   Ask &amp; Teach Consultant Chat
                 </h3>
                 <p className="text-xs text-gray-400 mt-2">
                   Dynamic citations [1][2], prompt injection safety shield, human escalation valves (legal, refund, anger), and inline teaching lessons.
                 </p>
               </div>
-              <div className="pt-4 border-t border-gray-800 mt-4 flex items-center justify-between text-xs text-emerald-400 font-semibold">
+              <div className="pt-4 border-t border-gray-800 mt-4 flex items-center justify-between text-xs text-cyan-400 font-semibold">
                 <span>Start Consultation</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </div>
@@ -451,7 +402,7 @@ export default function HomePage() {
             {/* Screen 5 */}
             <Link
               href="/evals"
-              className="rounded-2xl border border-gray-800 bg-[#091326] p-6 hover:border-amber-500/50 transition group flex flex-col justify-between"
+              className="rounded-2xl border border-gray-800 bg-[#091326] p-6 hover:border-cyan-500/50 transition group flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -462,14 +413,14 @@ export default function HomePage() {
                     Screen 5
                   </span>
                 </div>
-                <h3 className="text-base font-bold text-white group-hover:text-amber-300 transition">
+                <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition">
                   The Eval Lab &amp; Model Matrix
                 </h3>
                 <p className="text-xs text-gray-400 mt-2">
                   180-case benchmark harness, LLM-as-a-Judge grading rubrics, side-by-side model comparator, release gate, and smart cost router.
                 </p>
               </div>
-              <div className="pt-4 border-t border-gray-800 mt-4 flex items-center justify-between text-xs text-amber-400 font-semibold">
+              <div className="pt-4 border-t border-gray-800 mt-4 flex items-center justify-between text-xs text-cyan-400 font-semibold">
                 <span>Launch Benchmarks</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </div>
@@ -478,7 +429,7 @@ export default function HomePage() {
             {/* Screen 6 */}
             <Link
               href="/self-improve"
-              className="rounded-2xl border border-gray-800 bg-[#091326] p-6 hover:border-pink-500/50 transition group flex flex-col justify-between"
+              className="rounded-2xl border border-gray-800 bg-[#091326] p-6 hover:border-cyan-500/50 transition group flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -489,14 +440,14 @@ export default function HomePage() {
                     Screen 6
                   </span>
                 </div>
-                <h3 className="text-base font-bold text-white group-hover:text-pink-300 transition">
+                <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition">
                   Self-Improvement Loop
                 </h3>
                 <p className="text-xs text-gray-400 mt-2">
                   Autonomous Opus 5.5 failure diagnosis, isolated git branch fixes, hidden holdout test set verification, and 1-click PR merge.
                 </p>
               </div>
-              <div className="pt-4 border-t border-gray-800 mt-4 flex items-center justify-between text-xs text-pink-400 font-semibold">
+              <div className="pt-4 border-t border-gray-800 mt-4 flex items-center justify-between text-xs text-cyan-400 font-semibold">
                 <span>Inspect Auto-Fixes</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </div>
@@ -505,7 +456,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 8. Headquarters & Corporate Profile Section */}
+      {/* 6. Headquarters & Corporate Profile Section */}
       <section id="about" className="py-16 md:py-20 bg-[#040A17] border-b border-gray-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
@@ -543,7 +494,7 @@ export default function HomePage() {
               </p>
               <div className="pt-2">
                 <button
-                  onClick={() => openConnect("client")}
+                  onClick={() => setConnectModalOpen(true)}
                   className="w-full py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition shadow-md shadow-cyan-500/20"
                 >
                   Initiate Strategic Consultation
@@ -554,7 +505,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 9. Website Footer */}
+      {/* 7. Website Footer */}
       <footer className="py-10 bg-[#020610] text-gray-500 text-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
@@ -566,21 +517,20 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center gap-6">
-            <Link href="/" className="hover:text-gray-300 transition">Home</Link>
-            <Link href="/about" className="hover:text-gray-300 transition">About</Link>
-            <Link href="/services" className="hover:text-gray-300 transition">Services</Link>
-            <Link href="/careers" className="hover:text-gray-300 transition">Careers</Link>
-            <Link href="/contact" className="hover:text-gray-300 transition">Contact us</Link>
+            <Link href="/" className="hover:text-cyan-300 transition">Home</Link>
+            <Link href="/about" className="hover:text-cyan-300 transition">About</Link>
+            <Link href="/services" className="hover:text-cyan-300 transition">Services</Link>
+            <Link href="/contact" className="hover:text-cyan-300 transition">Contact us</Link>
             <Link href="/chat" className="text-cyan-400 hover:text-cyan-300 font-semibold transition">Consultant</Link>
           </div>
         </div>
       </footer>
 
-      {/* 10. Interactive Connect / Application Modal */}
+      {/* 8. Interactive Connect Modal */}
       <ConnectModal
         isOpen={connectModalOpen}
         onClose={() => setConnectModalOpen(false)}
-        initialCategory={connectCategory}
+        initialCategory="client"
       />
     </div>
   );

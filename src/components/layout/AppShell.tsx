@@ -61,10 +61,20 @@ export default function AppShell({
     fetch("/api/auth/context")
       .then((res) => res.json())
       .then((data) => {
-        if (data.currentTenant) setCurrentTenant(data.currentTenant);
-        if (data.workspaces) setAllTenants(data.workspaces);
+        if (data.currentTenant && data.currentTenant.userEmail) {
+          setCurrentTenant(data.currentTenant);
+          if (data.workspaces) setAllTenants(data.workspaces);
+        } else {
+          // Gated access: Only after registration / signin can user enter inside workspace pages
+          const publicRoutes = ["/", "/about", "/services", "/contact", "/signin", "/signup"];
+          if (!publicRoutes.includes(pathname)) {
+            window.location.href = `/signup?redirect=${encodeURIComponent(pathname)}`;
+          }
+        }
       })
-      .catch(console.error);
+      .catch((err) => {
+        console.error(err);
+      });
 
     // Fetch local mode state
     fetch("/api/settings/local-mode")
@@ -85,7 +95,7 @@ export default function AppShell({
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [pathname]);
 
   const switchTenant = async (slug: string) => {
     setSwitching(true);
@@ -147,12 +157,12 @@ export default function AppShell({
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#0B0F19] text-gray-100">
+    <div className="flex min-h-screen bg-[#050B18] text-gray-100 selection:bg-cyan-500 selection:text-black font-sans">
       {/* Sidebar */}
-      <aside className="w-64 border-r border-gray-800 bg-[#0E1322] flex flex-col justify-between p-4 flex-shrink-0">
+      <aside className="w-64 border-r border-cyan-950/40 bg-[#040b1a] flex flex-col justify-between p-4 flex-shrink-0">
         <div>
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 px-2 py-3 mb-6 border-b border-gray-800 group">
+          <Link href="/" className="flex items-center gap-3 px-2 py-3 mb-6 border-b border-gray-800/80 group">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-black border border-gray-700 text-white font-serif text-xl font-bold shadow-md shadow-cyan-500/20 group-hover:border-cyan-400 transition">
               α
             </div>
@@ -168,11 +178,11 @@ export default function AppShell({
           <div className="relative mb-6" ref={tenantMenuRef}>
             <button
               onClick={() => setTenantDropdownOpen(!tenantDropdownOpen)}
-              className="w-full text-left rounded-lg border border-gray-800 bg-gray-900/60 p-2.5 hover:border-gray-700 transition flex items-center justify-between"
+              className="w-full text-left rounded-xl border border-cyan-500/30 bg-[#071329] p-2.5 hover:border-cyan-400/60 transition flex items-center justify-between shadow-sm"
             >
               <div>
                 <span className="text-[10px] uppercase font-semibold text-gray-400 tracking-wider flex items-center gap-1.5">
-                  <Building2 className="h-3 w-3 text-indigo-400" />
+                  <Building2 className="h-3 w-3 text-cyan-400" />
                   Active Workspace
                 </span>
                 <div className="flex items-center gap-2 mt-1">
@@ -189,8 +199,8 @@ export default function AppShell({
 
             {/* Dropdown Menu */}
             {tenantDropdownOpen && (
-              <div className="absolute left-0 right-0 top-full mt-2 rounded-xl border border-gray-700 bg-[#141A2D] p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
-                <div className="text-[10px] font-semibold text-gray-400 px-2 py-1 uppercase tracking-wider">
+              <div className="absolute left-0 right-0 top-full mt-2 rounded-xl border border-cyan-500/30 bg-[#071329] p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
+                <div className="text-[10px] font-semibold text-cyan-400 px-2 py-1 uppercase tracking-wider">
                   Switch Tenant Workspace
                 </div>
                 {allTenants.map((t) => {
@@ -202,7 +212,7 @@ export default function AppShell({
                       disabled={switching}
                       className={`w-full flex items-center justify-between px-2.5 py-2 text-xs rounded-lg transition ${
                         isActive
-                          ? "bg-indigo-600/20 text-indigo-300 font-medium border border-indigo-500/30"
+                          ? "bg-cyan-500/20 text-cyan-300 font-medium border border-cyan-500/30"
                           : "text-gray-300 hover:bg-gray-800/80"
                       }`}
                     >
@@ -210,7 +220,7 @@ export default function AppShell({
                         <div className="font-semibold text-white truncate">{t.businessName}</div>
                         <div className="text-[10px] text-gray-400 font-mono truncate">{t.businessSlug}</div>
                       </div>
-                      {isActive && <Check className="h-4 w-4 text-indigo-400 shrink-0" />}
+                      {isActive && <Check className="h-4 w-4 text-cyan-400 shrink-0" />}
                     </button>
                   );
                 })}
@@ -218,7 +228,7 @@ export default function AppShell({
                   <Link
                     href="/signin"
                     onClick={() => setTenantDropdownOpen(false)}
-                    className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-indigo-300 hover:text-white rounded-lg hover:bg-indigo-950/30 transition"
+                    className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-cyan-300 hover:text-white rounded-lg hover:bg-cyan-950/30 transition"
                   >
                     <Building2 className="h-3.5 w-3.5" />
                     <span>Workspace Picker / Sign In</span>
@@ -251,8 +261,8 @@ export default function AppShell({
                   href={item.href}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
                     isActive
-                      ? "bg-indigo-600/10 text-indigo-400 border border-indigo-500/20"
-                      : "text-gray-400 hover:bg-gray-800/60 hover:text-gray-200"
+                      ? "bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 shadow-[0_0_12px_rgba(0,240,255,0.15)] font-semibold"
+                      : "text-gray-400 hover:bg-cyan-950/20 hover:text-cyan-200"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -264,10 +274,10 @@ export default function AppShell({
         </div>
 
         {/* Local-Only Mode Pill */}
-        <div className="rounded-lg border border-gray-800 bg-gray-900/60 p-3">
+        <div className="rounded-xl border border-cyan-950/60 bg-[#071329]/80 p-3">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-gray-400 flex items-center gap-1.5">
-              <Server className="h-3.5 w-3.5 text-gray-400" />
+            <span className="text-xs text-gray-300 flex items-center gap-1.5">
+              <Server className="h-3.5 w-3.5 text-cyan-400" />
               Local-Only Mode
             </span>
             <button
@@ -292,7 +302,7 @@ export default function AppShell({
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         {/* Top Header */}
-        <header className="h-16 border-b border-gray-800 px-8 flex items-center justify-between bg-[#0E1322]/80 backdrop-blur sticky top-0 z-40">
+        <header className="h-16 border-b border-cyan-950/40 px-8 flex items-center justify-between bg-[#050B18]/90 backdrop-blur-xl sticky top-0 z-40">
           <div className="flex items-center gap-2 text-xs">
             <span className="text-gray-400 font-medium">{currentTenant.businessName}</span>
             <span className="text-gray-600">/</span>
@@ -300,7 +310,7 @@ export default function AppShell({
               <React.Fragment key={bc.label}>
                 {idx > 0 && <span className="text-gray-600">/</span>}
                 {bc.href ? (
-                  <Link href={bc.href} className="text-gray-400 hover:text-white transition">
+                  <Link href={bc.href} className="text-gray-400 hover:text-cyan-300 transition">
                     {bc.label}
                   </Link>
                 ) : (
@@ -314,8 +324,8 @@ export default function AppShell({
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="hidden md:inline-flex items-center gap-1.5 rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-400 border border-indigo-500/20">
-              <ShieldCheck className="h-3.5 w-3.5 text-indigo-400" />
+            <span className="hidden md:inline-flex items-center gap-1.5 rounded-full bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-400 border border-cyan-500/20">
+              <ShieldCheck className="h-3.5 w-3.5 text-cyan-400" />
               Prompt Injection Shield Active
             </span>
 
@@ -324,9 +334,9 @@ export default function AppShell({
               <button
                 type="button"
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2.5 p-1.5 px-2.5 rounded-xl border border-gray-800 bg-gray-900/80 hover:border-indigo-500/50 hover:bg-gray-800 transition focus:outline-none"
+                className="flex items-center gap-2.5 p-1.5 px-2.5 rounded-xl border border-cyan-950/60 bg-[#071329] hover:border-cyan-500/40 hover:bg-[#091834] transition focus:outline-none"
               >
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center font-bold text-xs text-white shadow-md">
+                <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center font-bold text-xs text-black shadow-md shadow-cyan-500/20">
                   {getInitials(currentTenant.userEmail)}
                 </div>
                 <div className="hidden sm:block text-left">
@@ -334,7 +344,7 @@ export default function AppShell({
                     {currentTenant.userEmail}
                   </div>
                   <div className="text-[10px] text-gray-400 capitalize flex items-center gap-1.5 mt-0.5">
-                    <span className="text-indigo-400 font-medium truncate max-w-[100px]">{currentTenant.businessName}</span>
+                    <span className="text-cyan-400 font-medium truncate max-w-[100px]">{currentTenant.businessName}</span>
                     <span>&bull;</span>
                     <span className="text-emerald-400 font-semibold">{currentTenant.userRole}</span>
                   </div>
@@ -344,11 +354,11 @@ export default function AppShell({
 
               {/* User Account Dropdown Menu */}
               {userMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl border border-gray-700 bg-[#141A2D] p-3 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
+                <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl border border-cyan-500/30 bg-[#071329] p-3 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
                   {/* Account Header */}
                   <div className="pb-3 mb-2 border-b border-gray-700/80">
                     <div className="flex items-center gap-2.5">
-                      <div className="h-9 w-9 rounded-xl bg-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow">
+                      <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-600 text-black font-extrabold flex items-center justify-center text-sm shadow">
                         {getInitials(currentTenant.userEmail)}
                       </div>
                       <div className="overflow-hidden">
@@ -357,7 +367,7 @@ export default function AppShell({
                       </div>
                     </div>
                     <div className="mt-2.5 flex items-center gap-2">
-                      <span className="inline-flex items-center rounded-md bg-indigo-500/20 px-2 py-0.5 text-[10px] font-semibold text-indigo-300 border border-indigo-500/30">
+                      <span className="inline-flex items-center rounded-md bg-cyan-500/20 px-2 py-0.5 text-[10px] font-semibold text-cyan-300 border border-cyan-500/30">
                         {currentTenant.businessSlug}
                       </span>
                       <span className="inline-flex items-center rounded-md bg-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-300 border border-emerald-500/30 uppercase">
@@ -373,7 +383,7 @@ export default function AppShell({
                       onClick={() => setUserMenuOpen(false)}
                       className="flex items-center gap-2.5 px-2.5 py-2 text-xs text-gray-300 hover:text-white rounded-lg hover:bg-gray-800 transition"
                     >
-                      <LayoutDashboard className="h-4 w-4 text-indigo-400" />
+                      <LayoutDashboard className="h-4 w-4 text-cyan-400" />
                       <span>Dashboard Hub</span>
                     </Link>
 
@@ -383,7 +393,7 @@ export default function AppShell({
                       className="flex items-center gap-2.5 px-2.5 py-2 text-xs text-gray-300 hover:text-white rounded-lg hover:bg-gray-800 transition"
                     >
                       <Settings className="h-4 w-4 text-gray-400" />
-                      <span>Workspace Settings & Keys</span>
+                      <span>Workspace Settings &amp; Keys</span>
                     </Link>
 
                     <Link
@@ -401,9 +411,9 @@ export default function AppShell({
                     <Link
                       href="/signin"
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-2.5 py-2 text-xs text-indigo-300 hover:text-white rounded-lg hover:bg-indigo-950/40 transition"
+                      className="flex items-center gap-2.5 px-2.5 py-2 text-xs text-cyan-300 hover:text-white rounded-lg hover:bg-cyan-950/40 transition"
                     >
-                      <Building2 className="h-4 w-4 text-indigo-400" />
+                      <Building2 className="h-4 w-4 text-cyan-400" />
                       <span>Switch Workspace / Sign In</span>
                     </Link>
 

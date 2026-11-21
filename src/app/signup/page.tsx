@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   ShieldCheck,
   Building2,
@@ -14,7 +15,10 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
-export default function SignUpPage() {
+function SignUpContent() {
+  const searchParams = useSearchParams();
+  const redirectParam = searchParams.get("redirect") || "";
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -77,10 +81,11 @@ export default function SignUpPage() {
       if (!res.ok || data.error) {
         setErrorMsg(data.error || "Registration failed. Please try again.");
       } else {
-        setSuccessMsg("Account and workspace created! Launching Go Live setup wizard...");
+        const destination = redirectParam || data.redirectUrl || "/onboarding";
+        setSuccessMsg("Account and workspace created! Launching setup...");
         setTimeout(() => {
-          window.location.href = data.redirectUrl || "/onboarding";
-        }, 1200);
+          window.location.href = destination;
+        }, 1000);
       }
     } catch (err) {
       console.error(err);
@@ -91,32 +96,39 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-gray-100">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-4">
-          <Sparkles className="w-4 h-4" />
-          <span>Production Multi-Tenant SaaS</span>
-        </div>
-        <h2 className="text-3xl font-extrabold text-white tracking-tight">
-          Create Your Consultant Workspace
-        </h2>
-        <p className="mt-2 text-sm text-gray-400">
-          Sign up to initialize your isolated business tenant and launch the 15-minute setup wizard.
+    <div className="min-h-screen bg-[#050B18] text-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans selection:bg-cyan-500 selection:text-black relative overflow-hidden">
+      {/* Background Cyber Ambient Glow */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-cyan-500/10 blur-[140px] rounded-full" />
+        <div className="absolute bottom-1/4 right-1/4 w-[450px] h-[300px] bg-indigo-600/10 blur-[130px] rounded-full" />
+      </div>
+
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center relative z-10 space-y-3">
+        <Link href="/" className="inline-flex items-center gap-2 group">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-black border border-gray-700 text-white font-serif text-2xl font-bold shadow-md shadow-cyan-500/20 group-hover:border-cyan-400 transition">
+            α
+          </div>
+          <span className="text-xl font-extrabold tracking-tight text-white group-hover:text-cyan-300 transition">
+            AI Technologies &amp; Consulting
+          </span>
+        </Link>
+        <p className="text-xs text-gray-400 max-w-sm mx-auto">
+          Sign up to initialize your isolated business tenant and launch the autonomous AI consultant.
         </p>
       </div>
 
-      <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md px-4 space-y-4">
+      <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md px-4 space-y-4 relative z-10">
         {/* Tab Toggle: Sign In vs Register (Sign Up) */}
-        <div className="flex rounded-xl bg-gray-900/80 p-1 border border-gray-800">
+        <div className="flex rounded-xl bg-[#071329] p-1 border border-cyan-950/60 shadow-inner">
           <Link
-            href="/signin"
-            className="flex-1 py-2 text-center text-xs font-semibold rounded-lg text-gray-400 hover:text-white transition"
+            href={redirectParam ? `/signin?redirect=${encodeURIComponent(redirectParam)}` : "/signin"}
+            className="flex-1 py-2 text-center text-xs font-semibold rounded-lg text-gray-400 hover:text-cyan-300 transition"
           >
             Sign In
           </Link>
           <Link
-            href="/signup"
-            className="flex-1 py-2 text-center text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow transition"
+            href={redirectParam ? `/signup?redirect=${encodeURIComponent(redirectParam)}` : "/signup"}
+            className="flex-1 py-2 text-center text-xs font-bold rounded-lg bg-cyan-500 text-black shadow-md shadow-cyan-500/25 transition"
           >
             Create Workspace (Sign Up)
           </Link>
@@ -124,26 +136,26 @@ export default function SignUpPage() {
 
         {/* Already Logged In / User Present Notification */}
         {activeSession && (
-          <div className="p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/30 flex items-center justify-between">
+          <div className="p-3.5 rounded-xl bg-cyan-950/30 border border-cyan-500/30 flex items-center justify-between">
             <div>
               <div className="text-xs text-gray-300">
                 Signed in as: <strong className="text-white">{activeSession.userEmail}</strong>
               </div>
-              <div className="text-[11px] text-indigo-400 font-medium mt-0.5">
+              <div className="text-[11px] text-cyan-400 font-medium mt-0.5">
                 {activeSession.businessName} &bull; <span className="capitalize">{activeSession.userRole}</span>
               </div>
             </div>
             <Link
-              href="/"
-              className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow-sm shrink-0"
+              href={redirectParam || "/"}
+              className="px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold rounded-lg text-xs transition flex items-center gap-1 shadow-md shadow-cyan-500/20 shrink-0"
             >
-              <span>Dashboard</span>
+              <span>{redirectParam ? "Proceed" : "Dashboard"}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         )}
 
-        <div className="bg-[#0E1322] py-8 px-6 shadow-2xl rounded-2xl border border-gray-800 sm:px-10">
+        <div className="bg-[#040f26]/90 backdrop-blur-xl py-8 px-6 shadow-2xl shadow-cyan-500/10 rounded-2xl border border-cyan-500/30 sm:px-10">
           {errorMsg && (
             <div className="mb-5 p-3.5 rounded-xl bg-red-950/40 border border-red-500/30 text-red-300 text-xs flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
@@ -173,7 +185,7 @@ export default function SignUpPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Alex Turner"
-                  className="block w-full pl-10 pr-3 py-2 text-sm bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="block w-full pl-10 pr-3 py-2 text-sm bg-[#071329] border border-cyan-950/60 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400"
                 />
               </div>
             </div>
@@ -192,7 +204,7 @@ export default function SignUpPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="alex@acmecorp.com"
-                  className="block w-full pl-10 pr-3 py-2 text-sm bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="block w-full pl-10 pr-3 py-2 text-sm bg-[#071329] border border-cyan-950/60 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400"
                 />
               </div>
             </div>
@@ -211,7 +223,7 @@ export default function SignUpPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="block w-full pl-10 pr-3 py-2 text-sm bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="block w-full pl-10 pr-3 py-2 text-sm bg-[#071329] border border-cyan-950/60 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400"
                 />
               </div>
             </div>
@@ -230,7 +242,7 @@ export default function SignUpPage() {
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
                   placeholder="Acme Corporation"
-                  className="block w-full pl-10 pr-3 py-2 text-sm bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="block w-full pl-10 pr-3 py-2 text-sm bg-[#071329] border border-cyan-950/60 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400"
                 />
               </div>
             </div>
@@ -239,7 +251,7 @@ export default function SignUpPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition"
+                className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl shadow-lg shadow-cyan-500/25 text-sm font-bold text-black bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 focus:outline-none transition disabled:opacity-50"
               >
                 <span>{loading ? "Creating Tenant Workspace..." : "Create Account & Workspace"}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -250,7 +262,10 @@ export default function SignUpPage() {
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-400">
               Already have an account?{" "}
-              <Link href="/signin" className="font-semibold text-indigo-400 hover:text-indigo-300 transition">
+              <Link
+                href={redirectParam ? `/signin?redirect=${encodeURIComponent(redirectParam)}` : "/signin"}
+                className="font-semibold text-cyan-400 hover:text-cyan-300 transition"
+              >
                 Sign in to your workspace &rarr;
               </Link>
             </p>
@@ -258,11 +273,19 @@ export default function SignUpPage() {
         </div>
 
         {/* Security & Isolation Guarantee Note */}
-        <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-500 text-center">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>Atomic registration in 1 transaction with owner role & Postgres session scoping.</span>
+        <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400 text-center">
+          <ShieldCheck className="w-4 h-4 text-cyan-400" />
+          <span>Atomic registration in 1 transaction with owner role &amp; Postgres session scoping.</span>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#050B18] flex items-center justify-center text-cyan-400">Loading...</div>}>
+      <SignUpContent />
+    </Suspense>
   );
 }

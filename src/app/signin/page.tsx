@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Sparkles,
   Building2,
@@ -11,7 +12,7 @@ import {
   Lock,
   Mail,
   AlertTriangle,
-  UserCheck,
+  ChevronRight,
 } from "lucide-react";
 
 interface BusinessChoice {
@@ -21,7 +22,10 @@ interface BusinessChoice {
   role: string;
 }
 
-export default function SignInPage() {
+function SignInContent() {
+  const searchParams = useSearchParams();
+  const redirectParam = searchParams.get("redirect") || "";
+
   const [email, setEmail] = useState("alex@acme.com");
   const [password, setPassword] = useState("AcmePass123!");
   const [loading, setLoading] = useState(false);
@@ -87,13 +91,14 @@ export default function SignInPage() {
       if (!res.ok || data.error) {
         setErrorMsg(data.error || "Authentication failed. Please verify credentials.");
       } else if (data.requiresBusinessChoice) {
-        // Multi-Tenant User: Display Business Picker (Task Rule)
+        // Multi-Tenant User: Display Business Picker
         setBusinessChoices(data.businesses || []);
         setPendingUserId(data.user?.id || null);
         setBusinessPickerOpen(true);
       } else {
-        // Single business: Direct entry to dashboard
-        window.location.href = data.redirectUrl || "/";
+        // Direct entry: redirect to intended destination or dashboard
+        const destination = redirectParam || data.redirectUrl || "/";
+        window.location.href = destination;
       }
     } catch (err) {
       console.error(err);
@@ -114,7 +119,8 @@ export default function SignInPage() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        window.location.href = data.redirectUrl || "/";
+        const destination = redirectParam || data.redirectUrl || "/";
+        window.location.href = destination;
       } else {
         setErrorMsg(data.error || "Failed to switch into selected workspace.");
       }
@@ -127,35 +133,40 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-gray-100 flex flex-col justify-center items-center px-4 py-8">
-      {/* Background Glow */}
+    <div className="min-h-screen bg-[#050B18] text-gray-100 flex flex-col justify-center items-center px-4 py-8 font-sans selection:bg-cyan-500 selection:text-black relative overflow-hidden">
+      {/* Background Cyber Ambient Glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-indigo-600/10 blur-[120px] rounded-full"></div>
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-cyan-500/10 blur-[140px] rounded-full" />
+        <div className="absolute bottom-1/4 right-1/4 w-[450px] h-[300px] bg-indigo-600/10 blur-[130px] rounded-full" />
       </div>
 
-      <div className="relative max-w-md w-full space-y-5">
+      <div className="relative max-w-md w-full space-y-6 z-10">
         {/* Brand Header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-white font-bold shadow-xl shadow-indigo-500/20 mb-2">
-            <Sparkles className="h-6 w-6" />
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">AI Tech Consultant</h1>
-          <p className="text-sm text-gray-400">
-            Sign in to access your tenant-isolated Knowledge Brain and Agent Studios.
+        <div className="text-center space-y-3">
+          <Link href="/" className="inline-flex items-center gap-2 group">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-black border border-gray-700 text-white font-serif text-2xl font-bold shadow-md shadow-cyan-500/20 group-hover:border-cyan-400 transition">
+              α
+            </div>
+            <span className="text-xl font-extrabold tracking-tight text-white group-hover:text-cyan-300 transition">
+              AI Technologies &amp; Consulting
+            </span>
+          </Link>
+          <p className="text-xs text-gray-400 max-w-sm mx-auto">
+            Sign in to access your tenant-isolated Knowledge Brain, Agent Studios, and live chat.
           </p>
         </div>
 
         {/* Tab Toggle: Sign In vs Register (Sign Up) */}
-        <div className="flex rounded-xl bg-gray-900/80 p-1 border border-gray-800">
+        <div className="flex rounded-xl bg-[#071329] p-1 border border-cyan-950/60 shadow-inner">
           <Link
-            href="/signin"
-            className="flex-1 py-2 text-center text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow transition"
+            href={redirectParam ? `/signin?redirect=${encodeURIComponent(redirectParam)}` : "/signin"}
+            className="flex-1 py-2 text-center text-xs font-bold rounded-lg bg-cyan-500 text-black shadow-md shadow-cyan-500/25 transition"
           >
             Sign In
           </Link>
           <Link
-            href="/signup"
-            className="flex-1 py-2 text-center text-xs font-semibold rounded-lg text-gray-400 hover:text-white transition"
+            href={redirectParam ? `/signup?redirect=${encodeURIComponent(redirectParam)}` : "/signup"}
+            className="flex-1 py-2 text-center text-xs font-semibold rounded-lg text-gray-400 hover:text-cyan-300 transition"
           >
             Create Workspace (Sign Up)
           </Link>
@@ -163,20 +174,20 @@ export default function SignInPage() {
 
         {/* Already Logged In / User Present Notification */}
         {activeSession && (
-          <div className="p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/30 flex items-center justify-between">
+          <div className="p-3.5 rounded-xl bg-cyan-950/30 border border-cyan-500/30 flex items-center justify-between">
             <div>
               <div className="text-xs text-gray-300">
                 Active session: <strong className="text-white">{activeSession.userEmail}</strong>
               </div>
-              <div className="text-[11px] text-indigo-400 font-medium mt-0.5">
+              <div className="text-[11px] text-cyan-400 font-medium mt-0.5">
                 {activeSession.businessName} &bull; <span className="capitalize">{activeSession.userRole}</span>
               </div>
             </div>
             <Link
-              href="/"
-              className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow-sm shrink-0"
+              href={redirectParam || "/"}
+              className="px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold rounded-lg text-xs transition flex items-center gap-1 shadow-md shadow-cyan-500/20 shrink-0"
             >
-              <span>Go to Dashboard</span>
+              <span>{redirectParam ? "Proceed" : "Go to Dashboard"}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -194,15 +205,15 @@ export default function SignInPage() {
               onClick={() => selectDemoAccount("acme")}
               className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between ${
                 selectedDemo === "acme"
-                  ? "border-indigo-500 bg-indigo-950/40 shadow-sm"
-                  : "border-gray-800 bg-[#0E1322] hover:border-gray-700"
+                  ? "border-cyan-400 bg-cyan-950/40 shadow-[0_0_12px_rgba(0,240,255,0.15)]"
+                  : "border-gray-800 bg-[#071329] hover:border-cyan-900"
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded">
+                <span className="text-[10px] font-bold text-cyan-400 bg-cyan-500/10 px-1.5 py-0.5 rounded">
                   Acme
                 </span>
-                {selectedDemo === "acme" && <Check className="w-3 h-3 text-indigo-400" />}
+                {selectedDemo === "acme" && <Check className="w-3 h-3 text-cyan-400" />}
               </div>
               <div className="text-xs font-semibold text-white mt-1 truncate">Alex Turner</div>
               <div className="text-[10px] text-gray-400">Owner (1 Biz)</div>
@@ -213,15 +224,15 @@ export default function SignInPage() {
               onClick={() => selectDemoAccount("beta")}
               className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between ${
                 selectedDemo === "beta"
-                  ? "border-indigo-500 bg-indigo-950/40 shadow-sm"
-                  : "border-gray-800 bg-[#0E1322] hover:border-gray-700"
+                  ? "border-cyan-400 bg-cyan-950/40 shadow-[0_0_12px_rgba(0,240,255,0.15)]"
+                  : "border-gray-800 bg-[#071329] hover:border-cyan-900"
               }`}
             >
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded">
                   Beta
                 </span>
-                {selectedDemo === "beta" && <Check className="w-3 h-3 text-indigo-400" />}
+                {selectedDemo === "beta" && <Check className="w-3 h-3 text-cyan-400" />}
               </div>
               <div className="text-xs font-semibold text-white mt-1 truncate">Sarah Chen</div>
               <div className="text-[10px] text-gray-400">Owner (1 Biz)</div>
@@ -232,15 +243,15 @@ export default function SignInPage() {
               onClick={() => selectDemoAccount("multi")}
               className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between ${
                 selectedDemo === "multi"
-                  ? "border-indigo-500 bg-indigo-950/40 shadow-sm"
-                  : "border-gray-800 bg-[#0E1322] hover:border-gray-700"
+                  ? "border-cyan-400 bg-cyan-950/40 shadow-[0_0_12px_rgba(0,240,255,0.15)]"
+                  : "border-gray-800 bg-[#071329] hover:border-cyan-900"
               }`}
             >
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
                   Multi
                 </span>
-                {selectedDemo === "multi" && <Check className="w-3 h-3 text-indigo-400" />}
+                {selectedDemo === "multi" && <Check className="w-3 h-3 text-cyan-400" />}
               </div>
               <div className="text-xs font-semibold text-white mt-1 truncate">Morgan Lee</div>
               <div className="text-[10px] text-gray-400">Multi-Biz Picker</div>
@@ -249,7 +260,7 @@ export default function SignInPage() {
         </div>
 
         {/* Credentials Form */}
-        <div className="rounded-2xl border border-gray-800 bg-[#0E1322] p-6 shadow-xl space-y-4">
+        <div className="rounded-2xl border border-cyan-500/30 bg-[#040f26]/90 backdrop-blur-xl p-6 shadow-2xl shadow-cyan-500/10 space-y-4">
           {errorMsg && (
             <div className="p-3 rounded-xl bg-red-950/40 border border-red-500/30 text-red-300 text-xs flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
@@ -269,7 +280,7 @@ export default function SignInPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 text-sm bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="block w-full pl-10 pr-3 py-2 text-sm bg-[#071329] border border-cyan-950/60 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400"
                 />
               </div>
             </div>
@@ -285,7 +296,7 @@ export default function SignInPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 text-sm bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="block w-full pl-10 pr-3 py-2 text-sm bg-[#071329] border border-cyan-950/60 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400"
                 />
               </div>
             </div>
@@ -293,7 +304,7 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-white transition shadow-lg shadow-indigo-600/20 disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 px-4 py-3 text-sm font-bold text-black transition shadow-lg shadow-cyan-500/25 disabled:opacity-50"
             >
               <span>{loading ? "Verifying Credentials..." : "Sign In to Workspace"}</span>
               <ArrowRight className="h-4 w-4" />
@@ -303,7 +314,10 @@ export default function SignInPage() {
           <div className="mt-4 pt-4 border-t border-gray-800 text-center">
             <p className="text-xs text-gray-400">
               Need to register a new company?{" "}
-              <Link href="/signup" className="font-semibold text-indigo-400 hover:text-indigo-300 transition">
+              <Link
+                href={redirectParam ? `/signup?redirect=${encodeURIComponent(redirectParam)}` : "/signup"}
+                className="font-semibold text-cyan-400 hover:text-cyan-300 transition"
+              >
                 Create new business workspace &rarr;
               </Link>
             </p>
@@ -311,20 +325,20 @@ export default function SignInPage() {
         </div>
 
         {/* Security Isolation Callout */}
-        <div className="rounded-lg border border-gray-800 bg-gray-900/40 p-3.5 flex items-start gap-3">
-          <ShieldCheck className="h-5 w-5 text-indigo-400 flex-shrink-0 mt-0.5" />
+        <div className="rounded-xl border border-gray-800 bg-[#071329]/60 p-3.5 flex items-start gap-3">
+          <ShieldCheck className="h-5 w-5 text-cyan-400 flex-shrink-0 mt-0.5" />
           <p className="text-xs text-gray-400 leading-relaxed">
-            <strong className="text-gray-200">Strict Multi-Tenant Guarantee:</strong> Passwords checked against Argon2id hashes. Every session is stored in PostgreSQL with <code className="text-indigo-300 font-mono">business_id</code> scoping. Rate-limited to prevent brute force attacks.
+            <strong className="text-gray-200">Strict Multi-Tenant Guarantee:</strong> Passwords checked against Argon2id hashes. Every session is stored in PostgreSQL with <code className="text-cyan-300 font-mono">business_id</code> scoping. Rate-limited to prevent brute force attacks.
           </p>
         </div>
       </div>
 
       {/* Multi-Business Picker Modal */}
       {businessPickerOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-          <div className="bg-[#0E1322] border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div className="bg-[#071329] border border-cyan-500/30 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-indigo-600/20 text-indigo-400 rounded-xl border border-indigo-500/30">
+              <div className="p-2.5 bg-cyan-500/10 text-cyan-400 rounded-xl border border-cyan-500/30">
                 <Building2 className="w-6 h-6" />
               </div>
               <div>
@@ -341,14 +355,14 @@ export default function SignInPage() {
                   key={b.businessId}
                   onClick={() => handleSelectBusinessWorkspace(b.businessId)}
                   disabled={loading}
-                  className="w-full p-3.5 rounded-xl border border-gray-800 hover:border-indigo-500 bg-gray-950/60 hover:bg-indigo-950/20 text-left transition flex items-center justify-between group"
+                  className="w-full p-3.5 rounded-xl border border-gray-800 hover:border-cyan-500 bg-[#040f26] hover:bg-cyan-950/20 text-left transition flex items-center justify-between group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-indigo-500/10 text-indigo-400 font-bold text-xs flex items-center justify-center border border-indigo-500/20">
+                    <div className="w-9 h-9 rounded-lg bg-cyan-500/10 text-cyan-400 font-bold text-xs flex items-center justify-center border border-cyan-500/20">
                       {b.businessName.substring(0, 2).toUpperCase()}
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-white group-hover:text-indigo-300 transition">
+                      <div className="text-sm font-semibold text-white group-hover:text-cyan-300 transition">
                         {b.businessName}
                       </div>
                       <div className="text-[11px] text-gray-500 font-mono">
@@ -356,7 +370,7 @@ export default function SignInPage() {
                       </div>
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-gray-600 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition" />
+                  <ArrowRight className="w-4 h-4 text-gray-600 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition" />
                 </button>
               ))}
             </div>
@@ -374,5 +388,13 @@ export default function SignInPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#050B18] flex items-center justify-center text-cyan-400">Loading...</div>}>
+      <SignInContent />
+    </Suspense>
   );
 }

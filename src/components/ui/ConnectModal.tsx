@@ -10,9 +10,9 @@ export default function ConnectModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  initialCategory?: "client" | "applicant";
+  initialCategory?: "client" | "advisory";
 }) {
-  const [category, setCategory] = useState<"client" | "applicant">(initialCategory);
+  const [category, setCategory] = useState<"client" | "advisory">(initialCategory);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [roleOrTopic, setRoleOrTopic] = useState("");
@@ -61,16 +61,14 @@ export default function ConnectModal({
             </div>
             <h3 className="text-xl font-bold text-white tracking-tight">Transmission Acknowledged!</h3>
             <p className="text-sm text-gray-300 max-w-sm mx-auto">
-              {category === "applicant"
-                ? `Thank you, ${name || "Applicant"}. Your technical profile has been logged in our talent intelligence engine. Our recruitment leads will review your credentials.`
-                : `Thank you, ${name || "Client"}. Our senior AI engineering consultants have received your inquiry and will reach out within 4 business hours.`}
+              Thank you, {name || "Client"}. Our senior AI engineering consultants have received your inquiry and will reach out within 4 business hours.
             </p>
             <div className="pt-4">
               <button
                 onClick={handleReset}
                 className="px-6 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-xs transition shadow-lg shadow-cyan-500/30"
               >
-                Close & Return
+                Close &amp; Return
               </button>
             </div>
           </div>
@@ -80,10 +78,10 @@ export default function ConnectModal({
               <div className="flex h-7 w-7 items-center justify-center rounded-md bg-black border border-gray-700 text-cyan-400 font-bold font-serif text-sm">
                 α
               </div>
-              <h2 className="text-lg font-bold text-white tracking-tight">Connect with AI Technologies & Consulting</h2>
+              <h2 className="text-lg font-bold text-white tracking-tight">Connect with AI Technologies &amp; Consulting</h2>
             </div>
             <p className="text-xs text-gray-400 mb-5">
-              Enterprise digital transformation, autonomous tech support engineering, and customized talent staffing.
+              Enterprise digital transformation, autonomous tech support engineering, and customized AI architectures.
             </p>
 
             {/* Category Selector Tabs */}
@@ -97,18 +95,18 @@ export default function ConnectModal({
                     : "text-gray-400 hover:text-white"
                 }`}
               >
-                Enterprise Client Inquiry
+                Enterprise AI Consultation
               </button>
               <button
                 type="button"
-                onClick={() => setCategory("applicant")}
+                onClick={() => setCategory("advisory")}
                 className={`py-2 text-xs font-semibold rounded-lg transition ${
-                  category === "applicant"
+                  category === "advisory"
                     ? "bg-cyan-500 text-black shadow-md shadow-cyan-500/30"
                     : "text-gray-400 hover:text-white"
                 }`}
               >
-                Applicant / Career Portal
+                Architecture &amp; Strategy
               </button>
             </div>
 
@@ -122,14 +120,14 @@ export default function ConnectModal({
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder={category === "applicant" ? "Sarah Jenkins (Senior AI Architect)" : "David Miller (CTO)"}
+                    placeholder="David Miller (CTO / VP Engineering)"
                     className="w-full pl-9 pr-3 py-2 rounded-lg bg-gray-900/90 border border-gray-700 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1">Professional Email</label>
+                <label className="block text-xs font-medium text-gray-300 mb-1">Corporate Email</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
                   <input
@@ -144,50 +142,38 @@ export default function ConnectModal({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1">
-                  {category === "applicant" ? "Role Applying For / Primary Skill" : "Project Objective / Stack"}
-                </label>
+                <label className="block text-xs font-medium text-gray-300 mb-1">Target Initiative / Architecture Scope</label>
                 <div className="relative">
                   <Briefcase className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
                   <input
                     type="text"
-                    required
                     value={roleOrTopic}
                     onChange={(e) => setRoleOrTopic(e.target.value)}
-                    placeholder={category === "applicant" ? "Cloud Systems Architect / PostgreSQL 18" : "Digital Transformation & Support Automation"}
+                    placeholder="e.g., Autonomous Support Agent, Hybrid Vector Ingestion, Cloud LLM Routing"
                     className="w-full pl-9 pr-3 py-2 rounded-lg bg-gray-900/90 border border-gray-700 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1">Message / Requirements</label>
-                <div className="relative">
-                  <textarea
-                    rows={3}
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder={category === "applicant" ? "Summarize your architectural expertise, portfolio link, or availability..." : "Tell us about your technical support scaling goals or modernization timeline..."}
-                    className="w-full p-2.5 rounded-lg bg-gray-900/90 border border-gray-700 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400"
-                  />
-                </div>
+                <label className="block text-xs font-medium text-gray-300 mb-1">Detailed Technical Requirements</label>
+                <textarea
+                  rows={3}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Outline your timeline, current tech stack, and goals..."
+                  className="w-full p-2.5 rounded-lg bg-gray-900/90 border border-gray-700 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 resize-none"
+                />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2 rounded-lg border border-gray-700 text-gray-300 hover:bg-gray-800 text-xs transition"
-                >
-                  Cancel
-                </button>
+              <div className="pt-2">
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition shadow-lg shadow-cyan-500/25 disabled:opacity-50"
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/25 transition disabled:opacity-50"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>{submitting ? "Transmitting..." : "Send Transmission"}</span>
+                  <span>{submitting ? "Encrypting & Transmitting..." : "Submit Strategic Consultation"}</span>
                 </button>
               </div>
             </form>

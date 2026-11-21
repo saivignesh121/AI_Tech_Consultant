@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -9,9 +9,8 @@ import {
   Menu,
   X,
   Building2,
-  ChevronDown,
   User,
-  ShieldCheck,
+  LogOut,
   LayoutDashboard,
 } from "lucide-react";
 
@@ -22,21 +21,50 @@ export default function WebsiteHeader({
 }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userSession, setUserSession] = useState<{
+    userEmail: string;
+    businessName: string;
+    businessSlug: string;
+  } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/context")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.currentTenant && d.currentTenant.userEmail) {
+          setUserSession({
+            userEmail: d.currentTenant.userEmail,
+            businessName: d.currentTenant.businessName,
+            businessSlug: d.currentTenant.businessSlug,
+          });
+        }
+      })
+      .catch(console.error);
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      window.location.href = "/signin";
+    }
+  };
 
   const navLinks = [
     { label: "Home", href: "/" },
     { label: "About", href: "/about" },
     { label: "Services", href: "/services" },
-    { label: "Careers", href: "/careers" },
     { label: "Contact us", href: "/contact" },
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-gray-800/80 bg-[#050B18]/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 w-full border-b border-cyan-950/40 bg-[#050B18]/90 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand Logo matching user screenshot */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-black border border-gray-700 text-white font-serif text-xl font-bold shadow-md shadow-cyan-500/10 group-hover:border-cyan-400 transition">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-black border border-gray-700 text-white font-serif text-xl font-bold shadow-md shadow-cyan-500/20 group-hover:border-cyan-400 transition">
             α
           </div>
           <div>
@@ -46,7 +74,7 @@ export default function WebsiteHeader({
           </div>
         </Link>
 
-        {/* Desktop Navigation Links matching user screenshot */}
+        {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center gap-7">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
@@ -68,19 +96,63 @@ export default function WebsiteHeader({
 
         {/* Right Action Buttons */}
         <div className="hidden sm:flex items-center gap-3">
-          <Link
-            href="/chat"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-xs font-semibold transition"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            <span>AI Consultant</span>
-          </Link>
+          {userSession ? (
+            <>
+              <Link
+                href="/chat"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-xs font-semibold transition"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                <span>AI Consultant</span>
+              </Link>
+
+              <Link
+                href="/settings"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-900 border border-gray-800 text-xs text-gray-200 hover:text-white transition"
+              >
+                <Building2 className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="max-w-[120px] truncate">{userSession.businessName}</span>
+              </Link>
+
+              <button
+                onClick={handleLogout}
+                title="Sign Out"
+                className="p-1.5 text-gray-400 hover:text-red-400 transition"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/signin"
+                className="px-3.5 py-1.5 text-xs font-medium text-gray-300 hover:text-white transition"
+              >
+                Sign In
+              </Link>
+
+              <Link
+                href="/signup?redirect=/chat"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-xs font-semibold transition"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Launch AI Consultant</span>
+              </Link>
+
+              <Link
+                href="/signup"
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition shadow-md shadow-cyan-500/25"
+              >
+                <span>Register Workspace</span>
+              </Link>
+            </>
+          )}
 
           <button
             onClick={onConnectClick}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition shadow-md shadow-cyan-500/25"
+            className="px-3 py-1.5 rounded-lg border border-gray-700 bg-gray-800/80 hover:bg-gray-700 text-gray-200 text-xs font-medium transition"
           >
-            <span>Connect with us</span>
+            Connect
           </button>
         </div>
 
@@ -110,24 +182,45 @@ export default function WebsiteHeader({
           </div>
 
           <div className="pt-3 border-t border-gray-800 flex flex-col gap-2">
-            <Link
-              href="/chat"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-center gap-2 py-2 rounded-lg border border-cyan-500/40 bg-cyan-500/10 text-cyan-300 text-xs font-semibold"
-            >
-              <Sparkles className="w-4 h-4 text-cyan-400" />
-              <span>Launch AI Consultant Chat</span>
-            </Link>
-
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onConnectClick?.();
-              }}
-              className="w-full py-2.5 rounded-lg bg-cyan-500 text-black text-xs font-bold text-center"
-            >
-              Connect with us
-            </button>
+            {userSession ? (
+              <>
+                <Link
+                  href="/chat"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-cyan-500 text-black text-xs font-bold"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Launch AI Consultant</span>
+                </Link>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="py-2 text-xs text-red-400 hover:text-red-300"
+                >
+                  Sign Out ({userSession.userEmail})
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/signup?redirect=/chat"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 py-2 rounded-lg border border-cyan-500/40 bg-cyan-500/10 text-cyan-300 text-xs font-semibold"
+                >
+                  <Sparkles className="w-4 h-4 text-cyan-400" />
+                  <span>Launch with AI Consultant (Register)</span>
+                </Link>
+                <Link
+                  href="/signin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full py-2.5 rounded-lg bg-cyan-500 text-black text-xs font-bold text-center"
+                >
+                  Sign In
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}
