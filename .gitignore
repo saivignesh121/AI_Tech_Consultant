@@ -32,3 +32,6 @@ yarn-error.log*
 .vscode/
 *.swp
 *.swo
+
+# TypeScript build info
+*.tsbuildinfo
