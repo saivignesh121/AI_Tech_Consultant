@@ -129,7 +129,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Resolve target prompt record
-    let targetPrompt = promptId
+    const isPromptUuid = typeof promptId === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(promptId);
+    let targetPrompt = (promptId && isPromptUuid)
       ? await db
           .select()
           .from(prompts)

@@ -47,6 +47,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "pageId is required" }, { status: 400 });
     }
 
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(pageId);
+    if (!isUuid) {
+      return NextResponse.json({
+        success: true,
+        message: `Simulated status ${simulatedStatus} recorded for test page.`,
+        simulated: true,
+      });
+    }
+
     const page = await db
       .select()
       .from(knowledgePages)

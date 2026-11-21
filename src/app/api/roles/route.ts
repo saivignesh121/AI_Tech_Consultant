@@ -60,7 +60,9 @@ export async function POST(req: NextRequest) {
 
     const roleSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
-    if (id) {
+    const isUuid = typeof id === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+    if (id && isUuid) {
       // Update existing role
       const existing = await db
         .select()

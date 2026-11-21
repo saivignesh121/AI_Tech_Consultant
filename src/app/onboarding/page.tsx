@@ -219,7 +219,7 @@ export default function OnboardingPage() {
                     type="password"
                     value={claudeKey}
                     onChange={(e) => setClaudeKey(e.target.value)}
-                    className="w-full text-sm font-mono border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    className="w-full text-sm font-mono border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
                   />
                 </div>
 
@@ -231,7 +231,7 @@ export default function OnboardingPage() {
                     type="password"
                     value={geminiKey}
                     onChange={(e) => setGeminiKey(e.target.value)}
-                    className="w-full text-sm font-mono border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    className="w-full text-sm font-mono border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
                   />
                 </div>
 
@@ -305,7 +305,7 @@ export default function OnboardingPage() {
                       type="url"
                       value={sitemapUrl}
                       onChange={(e) => setSitemapUrl(e.target.value)}
-                      className="flex-1 text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                      className="flex-1 text-sm border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
                     />
                     <button
                       type="button"

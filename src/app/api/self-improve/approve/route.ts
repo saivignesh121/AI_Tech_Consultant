@@ -14,21 +14,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing runId parameter" }, { status: 400 });
     }
 
-    // Attempt to update matching run in DB
-    const existing = await db
-      .select()
-      .from(selfImproveRuns)
-      .where(and(eq(selfImproveRuns.id, runId), eq(selfImproveRuns.businessId, tenant.businessId)))
-      .limit(1);
+    // Attempt to update matching run in DB if valid UUID
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(runId);
+    if (isUuid) {
+      const existing = await db
+        .select()
+        .from(selfImproveRuns)
+        .where(and(eq(selfImproveRuns.id, runId), eq(selfImproveRuns.businessId, tenant.businessId)))
+        .limit(1);
 
-    if (existing.length > 0) {
-      await db
-        .update(selfImproveRuns)
-        .set({
-          status: "merged",
-          prUrl: existing[0].prUrl || "https://github.com/acme-corp/ai-consultant/pull/44",
-        })
-        .where(eq(selfImproveRuns.id, runId));
+      if (existing.length > 0) {
+        await db
+          .update(selfImproveRuns)
+          .set({
+            status: "merged",
+            prUrl: existing[0].prUrl || "https://github.com/acme-corp/ai-consultant/pull/44",
+          })
+          .where(eq(selfImproveRuns.id, runId));
+      }
     }
 
     return NextResponse.json({

@@ -63,11 +63,12 @@ export async function POST(req: NextRequest) {
     const costUsd = calculateModelCost(modelId, inputTokens, outputTokens, cachedTokens);
 
     // 3. Log to model_call_logs table
+    const isRoleUuid = typeof roleId === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(roleId);
     await db.insert(modelCallLogs).values({
       businessId: tenant.businessId,
       taskType: "write_reply",
       modelId,
-      roleId: roleId || null,
+      roleId: isRoleUuid ? roleId : null,
       inputTokens,
       outputTokens,
       cachedReadTokens: cachedTokens,
