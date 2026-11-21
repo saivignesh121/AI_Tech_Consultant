@@ -65,12 +65,48 @@ def main():
         ("/evals", "Screen 5: The Eval Lab & Model Matrix"),
         ("/self-improve", "Screen 6: Autonomous Self-Improvement"),
         ("/signin", "Tenant Auth Switcher"),
+        ("/signup", "Tenant Registration Flow"),
     ]
     for path, name in screens:
         st, res = make_req(path)
         check(f"Screen HTML: {name} ({path})", st == 200, f"Status: {st}")
 
-    # 2. Auth Context & Switcher
+    # 2. Auth Flow: Registration, Argon2 Login, Business Picker, Sessions
+    import random
+    rnd = random.randint(1000, 9999)
+    reg_email = f"founder{rnd}@apexcorp.com"
+    st, res = make_req("/api/auth/register", method="POST", data={
+        "name": f"Founder {rnd}",
+        "email": reg_email,
+        "password": "ApexSecure2026!",
+        "businessName": f"Apex Innovations {rnd}"
+    })
+    check("POST /api/auth/register (Atomic Business+User+Owner+Session)", st == 200 and isinstance(res, dict) and res.get("success"), f"Redirect: {res.get('redirectUrl') if isinstance(res, dict) else res}")
+
+    # Login with single-business user (Alex Turner)
+    st, res = make_req("/api/auth/login", method="POST", data={
+        "email": "alex@acme.com",
+        "password": "AcmePass123!"
+    })
+    check("POST /api/auth/login (Argon2 Single-Biz -> Dashboard)", st == 200 and isinstance(res, dict) and res.get("redirectUrl") == "/", f"Biz: {res.get('business', {}).get('businessName') if isinstance(res, dict) else res}")
+
+    # Login with multi-business user (Morgan Lee -> Triggers Business Picker)
+    st, res = make_req("/api/auth/login", method="POST", data={
+        "email": "multi@consultant.com",
+        "password": "MultiPass123!"
+    })
+    check("POST /api/auth/login (Argon2 Multi-Biz -> Business Picker)", st == 200 and isinstance(res, dict) and res.get("requiresBusinessChoice") == True, f"Choices: {len(res.get('businesses', [])) if isinstance(res, dict) else res}")
+
+    # Select business from picker
+    if isinstance(res, dict) and res.get("businesses"):
+        target_biz = res["businesses"][0]
+        st, res = make_req("/api/auth/select-business", method="POST", data={
+            "userId": "cccccccc-3333-4333-8333-333333333333",
+            "businessId": target_biz["businessId"]
+        })
+        check("POST /api/auth/select-business (Set Business Session)", st == 200 and isinstance(res, dict) and res.get("success"), f"Entered: {res.get('business', {}).get('businessName') if isinstance(res, dict) else res}")
+
+    # Auth Context & Switcher
     st, res = make_req("/api/auth/context")
     check("GET /api/auth/context", st == 200 and "currentTenant" in res, f"Tenant: {res.get('currentTenant', {}).get('businessSlug')}")
 

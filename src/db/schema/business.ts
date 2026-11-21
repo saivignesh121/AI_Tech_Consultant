@@ -17,6 +17,7 @@ export const users = pgTable(
       .references(() => businesses.id, { onDelete: "cascade" })
       .notNull(),
     email: varchar("email", { length: 255 }).notNull(),
+    name: varchar("name", { length: 255 }),
     passwordHash: varchar("password_hash", { length: 255 }),
     role: varchar("role", { length: 50 }).default("member").notNull(), // 'owner' | 'admin' | 'member'
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -24,6 +25,54 @@ export const users = pgTable(
   (table) => [
     uniqueIndex("uq_users_business_email").on(table.businessId, table.email),
   ]
+);
+
+export const memberships = pgTable(
+  "memberships",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    businessId: uuid("business_id")
+      .references(() => businesses.id, { onDelete: "cascade" })
+      .notNull(),
+    role: varchar("role", { length: 50 }).default("member").notNull(), // 'owner' | 'admin' | 'member'
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("uq_memberships_user_biz").on(table.userId, table.businessId),
+  ]
+);
+
+export const sessions = pgTable(
+  "sessions",
+  {
+    id: varchar("id", { length: 255 }).primaryKey(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    businessId: uuid("business_id")
+      .references(() => businesses.id, { onDelete: "cascade" })
+      .notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  }
+);
+
+export const invites = pgTable(
+  "invites",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    token: varchar("token", { length: 255 }).unique().notNull(),
+    businessId: uuid("business_id")
+      .references(() => businesses.id, { onDelete: "cascade" })
+      .notNull(),
+    email: varchar("email", { length: 255 }).notNull(),
+    role: varchar("role", { length: 50 }).default("member").notNull(), // 'admin' | 'member'
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  }
 );
 
 export const apiConnections = pgTable(

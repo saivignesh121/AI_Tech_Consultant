@@ -47,8 +47,11 @@
   - `https://www.googleapis.com/auth/gmail.readonly`: Strictly minimal read-only access to messages and threads. We never request write or send permissions (`gmail.send` or `gmail.modify` are explicitly omitted).
 
 ### S6. Authentication & Secure Google Token Vault
-- **My Pick:** Dedicated lightweight JWT session authentication with HTTP-only, SameSite=Strict cookies and AES-256-GCM encryption for third-party credentials.
-- **Google Token Security:** Refresh tokens and third-party API keys are encrypted at rest using AES-256-GCM with a secret key (`ENCRYPTION_KEY`) derived from server environment variables. Keys are never logged, never exposed in client bundles, and decrypted only inside transient server worker memory.
+- **Tool Choice & Architectural Comparison:**
+  - **Python Path:** If you build in Python, write your own auth with FastAPI, argon2 and Postgres sessions.
+  - **TypeScript Path:** Better Auth and Clerk fit the TypeScript path better. In our strict TypeScript stack, we implement native Argon2id password hashing with PostgreSQL-persisted sessions (`sessions` table) and HttpOnly, Secure cookies scoped to `business_id`, guaranteeing atomic registration (creating business, user, and owner membership in one transaction), robust rate-limiting, and zero cross-tenant leakage.
+- **Multi-Tenant Session Scoping:** Every authenticated session stores `business_id` inside PostgreSQL. If a user belongs to one business, login goes straight to the Dashboard; if they belong to several, a business picker is presented first before setting the session cookie.
+- **Google Token Security & Scope:** Gmail is not your login. "Connect Gmail" lives in Settings → Connections, uses Google OAuth with the smallest scope (`https://www.googleapis.com/auth/gmail.readonly`), and stores the tokens encrypted via AES-256-GCM. Passwords and keys are never logged. Rate-limiting protects login attempts.
 
 ### S7. Hosting Architecture & Monthly Cost Breakdown
 1. **VPS with Docker Compose (Hetzner / DigitalOcean Droplet - 8 vCPU, 16 GB RAM, NVMe):**

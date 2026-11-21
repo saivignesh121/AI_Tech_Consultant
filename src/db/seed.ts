@@ -1,12 +1,12 @@
 import { db } from "./index";
-import { businesses, users, apiConnections } from "./schema/business";
+import { businesses, users, memberships, apiConnections } from "./schema/business";
 import { prompts, promptVersions, agentRoles } from "./schema/prompts";
 import { modelCallLogs } from "./schema/telemetry";
 import { DEFAULT_PROMPTS } from "../services/chat/prompts";
 import { BUILTIN_ROLES } from "../services/chat/roles";
 import { encryptCredential } from "../lib/crypto";
-import { DEMO_BUSINESSES } from "../lib/auth";
-import { eq } from "drizzle-orm";
+import { DEMO_BUSINESSES, hashPassword } from "../lib/auth";
+import { eq, and } from "drizzle-orm";
 
 export async function seedDatabase() {
   console.log("🌱 Starting database seeding...");
@@ -29,7 +29,11 @@ export async function seedDatabase() {
       console.log(`✓ Inserted business: ${tenant.businessName}`);
     }
 
-    // 2. Seed Users
+    // 2. Seed Users & Memberships
+    const defaultPassword = slug === "acme-corp" ? "AcmePass123!" : "BetaPass123!";
+    const passwordHash = await hashPassword(defaultPassword);
+    const userName = slug === "acme-corp" ? "Alex Turner" : "Sarah Chen";
+
     const existingUser = await db
       .select()
       .from(users)
@@ -41,9 +45,37 @@ export async function seedDatabase() {
         id: tenant.userId,
         businessId: tenant.businessId,
         email: tenant.userEmail,
+        name: userName,
+        passwordHash,
         role: tenant.userRole,
       });
       console.log(`✓ Inserted user: ${tenant.userEmail}`);
+    } else {
+      await db
+        .update(users)
+        .set({ passwordHash, name: userName })
+        .where(eq(users.id, tenant.userId));
+    }
+
+    // Seed Owner Membership
+    const existingMembership = await db
+      .select()
+      .from(memberships)
+      .where(
+        and(
+          eq(memberships.userId, tenant.userId),
+          eq(memberships.businessId, tenant.businessId)
+        )
+      )
+      .limit(1);
+
+    if (existingMembership.length === 0) {
+      await db.insert(memberships).values({
+        userId: tenant.userId,
+        businessId: tenant.businessId,
+        role: "owner",
+      });
+      console.log(`✓ Inserted membership: ${tenant.userEmail} -> ${tenant.businessName} (owner)`);
     }
 
     // 3. Seed The 5 Connections
@@ -135,6 +167,48 @@ export async function seedDatabase() {
           isBuiltin: r.isBuiltin,
         });
       }
+    }
+  }
+
+  // 5b. Seed Multi-Tenant User for testing Business Picker Flow
+  const multiUserId = "cccccccc-3333-4333-8333-333333333333";
+  const multiHash = await hashPassword("MultiPass123!");
+  const existingMulti = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, multiUserId))
+    .limit(1);
+
+  if (existingMulti.length === 0) {
+    await db.insert(users).values({
+      id: multiUserId,
+      businessId: DEMO_BUSINESSES["acme-corp"].businessId,
+      email: "multi@consultant.com",
+      name: "Morgan Lee",
+      passwordHash: multiHash,
+      role: "admin",
+    });
+    console.log("✓ Inserted multi-tenant user: multi@consultant.com");
+  } else {
+    await db.update(users).set({ passwordHash: multiHash, name: "Morgan Lee" }).where(eq(users.id, multiUserId));
+  }
+
+  // Memberships for multi-tenant user in Acme and Beta
+  for (const [slug, role] of [["acme-corp", "admin"], ["beta-dynamics", "member"]] as const) {
+    const bizId = DEMO_BUSINESSES[slug].businessId;
+    const exists = await db
+      .select()
+      .from(memberships)
+      .where(and(eq(memberships.userId, multiUserId), eq(memberships.businessId, bizId)))
+      .limit(1);
+
+    if (exists.length === 0) {
+      await db.insert(memberships).values({
+        userId: multiUserId,
+        businessId: bizId,
+        role,
+      });
+      console.log(`✓ Inserted multi-tenant membership: multi@consultant.com -> ${slug} (${role})`);
     }
   }
 

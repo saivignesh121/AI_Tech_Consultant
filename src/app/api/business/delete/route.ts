@@ -13,11 +13,22 @@ export async function POST(req: NextRequest) {
   try {
     const tenant = await getTenantContext();
     const body = await req.json();
-    const { confirmSlug } = body;
+    const { confirmSlug, confirmName } = body;
 
-    if (confirmSlug !== tenant.businessSlug) {
+    // Enforce owner-only deletion (Task 1.1 / Brief Rule)
+    if (tenant.userRole !== "owner") {
       return NextResponse.json(
-        { error: `Confirmation mismatch. Please type '${tenant.businessSlug}' to confirm deletion.` },
+        { error: "Forbidden. Only the business owner can delete this workspace." },
+        { status: 403 }
+      );
+    }
+
+    const expectedConfirm = [tenant.businessSlug, tenant.businessName].filter(Boolean);
+    const providedConfirm = (confirmSlug || confirmName || "").trim();
+
+    if (!expectedConfirm.includes(providedConfirm)) {
+      return NextResponse.json(
+        { error: `Confirmation mismatch. Please type '${tenant.businessName}' or '${tenant.businessSlug}' to confirm deletion.` },
         { status: 400 }
       );
     }
@@ -35,8 +46,9 @@ export async function POST(req: NextRequest) {
       message: `Workspace ${tenant.businessName} and all associated data permanently purged.`,
     });
 
-    // Clear active tenant cookie
+    // Clear session cookies
     response.cookies.delete("active_tenant_slug");
+    response.cookies.delete("session_token");
 
     return response;
   } catch (error) {
