@@ -84,3 +84,25 @@ export function evaluateUrlHealth(
 export function isEligibleForSearch(healthStatus: HealthStatus): boolean {
   return healthStatus === "active" || healthStatus === "watch";
 }
+
+
+/**
+ * Convenient alias for URL health status transitions.
+ */
+export function updateUrlHealthStatus(
+  currentStatus: HealthStatus,
+  httpStatus: number,
+  currentFailures: number = 0,
+  redirectUrl?: string
+): {
+  newStatus: HealthStatus;
+  newFailures: number;
+  redirectUrl?: string;
+} {
+  const res = evaluateUrlHealth(currentStatus, currentFailures, httpStatus);
+  return {
+    newStatus: res.newStatus,
+    newFailures: res.consecutiveFailures,
+    redirectUrl,
+  };
+}

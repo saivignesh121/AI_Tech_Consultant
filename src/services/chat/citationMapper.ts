@@ -49,3 +49,21 @@ export function buildCitations(
     formattedContext: formattedSections.join("\n\n"),
   };
 }
+
+
+/**
+ * Convenient alias to map dynamic citations from chunks to an answer.
+ */
+export function mapDynamicCitations(
+  answer: string,
+  chunks: Array<{ title: string; url?: string; content?: string }>
+): {
+  citations: Array<{ citationNumber: number; sourceTitle: string; url: string }>;
+} {
+  const citations = chunks.map((c, i) => ({
+    citationNumber: i + 1,
+    sourceTitle: c.title,
+    url: c.url || "https://support.acme.com",
+  }));
+  return { citations };
+}

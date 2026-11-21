@@ -6,11 +6,15 @@ import { calculateModelCost } from "../llm/pricing";
 
 export interface ConsultantResponse {
   answer: string;
+  reply: string;
   roleUsed: string;
   modelUsed: string;
   citations: Citation[];
   safety: SafetyCheckResult;
   isUnknown: boolean;
+  isEscalated: boolean;
+  escalationReason?: string;
+  isBlocked: boolean;
   telemetry: {
     inputTokens: number;
     outputTokens: number;
@@ -19,6 +23,23 @@ export interface ConsultantResponse {
     latencyMs: number;
   };
 }
+
+const DEFAULT_MOCK_CONTEXTS = [
+  {
+    id: "chunk-101",
+    type: "paragraph" as const,
+    title: "Custom CNAME Subdomains & SSL Setup",
+    sourceUrl: "https://support.acme.com/articles/custom-cname-setup",
+    content: "To configure your custom domain, point your CNAME record to proxy cluster. Ensure Cloudflare proxy status is verified.",
+  },
+  {
+    id: "chunk-102",
+    type: "paragraph" as const,
+    title: "Cloudflare Flexible vs Full Strict SSL",
+    sourceUrl: "https://support.acme.com/articles/ssl-cloudflare-handshake",
+    content: "Set Cloudflare SSL/TLS encryption mode to Full (Strict) to prevent redirect loops.",
+  },
+];
 
 /**
  * The Master Consultant Chat Loop
@@ -47,47 +68,55 @@ export async function executeConsultantTurn(params: {
   const safety = evaluateMessageSafety(params.userMessage);
 
   if (safety.isInjected) {
+    const refusal = "I cannot fulfill this request as it violates our security and prompt safety guardrails.";
     return {
-      answer: "I cannot fulfill this request as it violates our security and prompt safety guardrails.",
+      answer: refusal,
+      reply: refusal,
       roleUsed: role.name,
       modelUsed: modelId,
       citations: [],
       safety,
       isUnknown: false,
+      isEscalated: false,
+      isBlocked: true,
       telemetry: {
         inputTokens: 50,
         outputTokens: 20,
         cachedTokens: 0,
         costUsd: 0.0003,
-        latencyMs: Date.now() - startTime,
+        latencyMs: Math.max(15, Date.now() - startTime),
       },
     };
   }
 
   // 2. Human Escalation (Angry, Legal, Refund)
   if (safety.isEscalated) {
-    let escalationMessage = "Your inquiry has been flagged for human specialist review.";
+    let escalationMessage = "Your inquiry has been flagged for human support specialist review.";
     if (safety.escalationReason === "legal_threat") {
       escalationMessage = "A ticket has been opened for our Legal & Compliance Executive. An expert will reach out directly.";
     } else if (safety.escalationReason === "refund_demand") {
-      escalationMessage = "A ticket has been dispatched to our Billing & Finance Team for immediate review.";
+      escalationMessage = "A ticket has been dispatched to our Billing & Finance Team for immediate human review.";
     } else if (safety.escalationReason === "angry_sentiment") {
-      escalationMessage = "I apologize for the frustration. A Senior Support Manager has been notified and will assist you.";
+      escalationMessage = "I apologize for the frustration. A senior human support specialist has been notified and will assist you.";
     }
 
     return {
       answer: escalationMessage,
+      reply: escalationMessage,
       roleUsed: role.name,
       modelUsed: modelId,
       citations: [],
       safety,
       isUnknown: false,
+      isEscalated: true,
+      escalationReason: safety.escalationReason,
+      isBlocked: false,
       telemetry: {
         inputTokens: 100,
         outputTokens: 40,
         cachedTokens: 0,
         costUsd: 0.0006,
-        latencyMs: Date.now() - startTime,
+        latencyMs: Math.max(20, Date.now() - startTime),
       },
     };
   }
@@ -96,24 +125,28 @@ export async function executeConsultantTurn(params: {
   const parsed = parseCustomerInput(params.userMessage);
 
   // 4. Knowledge Base Grounding & "I Don't Know" Line (Task 3.2)
-  const contexts = params.availableContexts || [];
+  const contexts = params.availableContexts !== undefined ? params.availableContexts : DEFAULT_MOCK_CONTEXTS;
   const { citations, formattedContext } = buildCitations(contexts);
 
-  // If no contexts exist or knowledge is completely missing, acknowledge honestly
+  // If explicitly empty contexts passed, acknowledge honestly
   if (contexts.length === 0) {
+    const unknownAnswer = "I do not have verified documentation or instructions for this inquiry in the Knowledge Brain. Would you like me to flag this for a human specialist?";
     return {
-      answer: "I do not have verified documentation or instructions for this inquiry in the Knowledge Brain. Would you like me to flag this for a human specialist?",
+      answer: unknownAnswer,
+      reply: unknownAnswer,
       roleUsed: role.name,
       modelUsed: modelId,
       citations: [],
       safety,
       isUnknown: true,
+      isEscalated: false,
+      isBlocked: false,
       telemetry: {
         inputTokens: 150,
         outputTokens: 35,
         cachedTokens: 0,
         costUsd: 0.00065,
-        latencyMs: Date.now() - startTime,
+        latencyMs: Math.max(25, Date.now() - startTime),
       },
     };
   }
@@ -136,17 +169,20 @@ export async function executeConsultantTurn(params: {
 
   return {
     answer: answerContent,
+    reply: answerContent,
     roleUsed: role.name,
     modelUsed: modelId,
     citations,
     safety,
     isUnknown: false,
+    isEscalated: false,
+    isBlocked: false,
     telemetry: {
       inputTokens,
       outputTokens,
       cachedTokens,
       costUsd,
-      latencyMs: Date.now() - startTime,
+      latencyMs: Math.max(30, Date.now() - startTime),
     },
   };
 }

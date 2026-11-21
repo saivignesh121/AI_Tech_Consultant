@@ -59,3 +59,25 @@ export function chunkPageContent(
 
   return chunks;
 }
+
+
+/**
+ * Convenient alias for chunking pure document text.
+ */
+export function chunkDocumentText(
+  text: string,
+  maxTokens: number = 400,
+  overlapTokens: number = 50
+): KnowledgeChunkItem[] {
+  return chunkPageContent(
+    {
+      title: "Document",
+      headings: ["Section 1"],
+      cleanText: text,
+      images: [],
+      wordCount: text.split(/\s+/).length,
+    },
+    maxTokens,
+    overlapTokens
+  );
+}

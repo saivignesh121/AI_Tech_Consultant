@@ -137,50 +137,116 @@ export default function DashboardPage() {
         {/* Feature Quick Launch Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <Link
+            href="/onboarding"
+            className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 hover:border-purple-500/50 transition group"
+          >
+            <div className="flex items-center justify-between">
+              <div className="h-9 w-9 rounded-lg bg-purple-600/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <ArrowRight className="h-4 w-4 text-gray-500 group-hover:text-purple-400 transition" />
+            </div>
+            <div className="flex items-center gap-2 mt-4">
+              <h3 className="text-sm font-semibold text-white">15-Minute Onboarding</h3>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-900/60 text-purple-300">Screen 1</span>
+            </div>
+            <p className="text-xs text-gray-400 mt-1">
+              Live stopwatch timer, vault key setup, synthetic test generator, and 85% readiness pass-bar check.
+            </p>
+          </Link>
+
+          <Link
+            href="/knowledge"
+            className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 hover:border-indigo-500/50 transition group"
+          >
+            <div className="flex items-center justify-between">
+              <div className="h-9 w-9 rounded-lg bg-indigo-600/10 text-indigo-400 flex items-center justify-center border border-indigo-500/20">
+                <Brain className="h-5 w-5" />
+              </div>
+              <ArrowRight className="h-4 w-4 text-gray-500 group-hover:text-indigo-400 transition" />
+            </div>
+            <div className="flex items-center gap-2 mt-4">
+              <h3 className="text-sm font-semibold text-white">The Knowledge Brain</h3>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-900/60 text-indigo-300">Screen 3</span>
+            </div>
+            <p className="text-xs text-gray-400 mt-1">
+              Polite batch crawler, pgvector hybrid search, URL health lifecycle (404 watch / 301 quarantine), and drafted skills.
+            </p>
+          </Link>
+
+          <Link
+            href="/chat"
+            className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 hover:border-emerald-500/50 transition group"
+          >
+            <div className="flex items-center justify-between">
+              <div className="h-9 w-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+                <MessageSquare className="h-5 w-5" />
+              </div>
+              <ArrowRight className="h-4 w-4 text-gray-500 group-hover:text-emerald-400 transition" />
+            </div>
+            <div className="flex items-center gap-2 mt-4">
+              <h3 className="text-sm font-semibold text-white">Ask & Teach Consultant Chat</h3>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-900/60 text-emerald-300">Screen 4</span>
+            </div>
+            <p className="text-xs text-gray-400 mt-1">
+              Agent loop with inline citations [1], multimodal screenshot uploads, prompt injection shield, and human escalation.
+            </p>
+          </Link>
+
+          <Link
+            href="/evals"
+            className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 hover:border-amber-500/50 transition group"
+          >
+            <div className="flex items-center justify-between">
+              <div className="h-9 w-9 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
+                <FlaskConical className="h-5 w-5" />
+              </div>
+              <ArrowRight className="h-4 w-4 text-gray-500 group-hover:text-amber-400 transition" />
+            </div>
+            <div className="flex items-center gap-2 mt-4">
+              <h3 className="text-sm font-semibold text-white">The Eval Lab & Router</h3>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-900/60 text-amber-300">Screen 5</span>
+            </div>
+            <p className="text-xs text-gray-400 mt-1">
+              180 benchmark suite, 14-model matrix, AI Judge calibration, 38.4% cost router, and production release gate.
+            </p>
+          </Link>
+
+          <Link
+            href="/self-improve"
+            className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 hover:border-purple-500/50 transition group"
+          >
+            <div className="flex items-center justify-between">
+              <div className="h-9 w-9 rounded-lg bg-purple-600/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <ArrowRight className="h-4 w-4 text-gray-500 group-hover:text-purple-400 transition" />
+            </div>
+            <div className="flex items-center gap-2 mt-4">
+              <h3 className="text-sm font-semibold text-white">Self-Improvement Loop</h3>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-900/60 text-purple-300">Screen 6</span>
+            </div>
+            <p className="text-xs text-gray-400 mt-1">
+              Claude Opus 5.5 failure packing, isolated git branches, hidden check set validation, $5 ceiling, and 1-click merge/revert.
+            </p>
+          </Link>
+
+          <Link
             href="/settings/roles-prompts"
             className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 hover:border-indigo-500/50 transition group"
           >
             <div className="flex items-center justify-between">
               <div className="h-9 w-9 rounded-lg bg-indigo-600/10 text-indigo-400 flex items-center justify-center border border-indigo-500/20">
-                <Sparkles className="h-5 w-5" />
+                <Zap className="h-5 w-5" />
               </div>
               <ArrowRight className="h-4 w-4 text-gray-500 group-hover:text-indigo-400 transition" />
             </div>
-            <h3 className="text-sm font-semibold text-white mt-4">Role & Prompt Studio</h3>
-            <p className="text-xs text-gray-400 mt-1">
-              Configure Support Engineer, Executive, and Consultant personas with live split-screen test chat and prompt caching simulation.
-            </p>
-          </Link>
-
-          <Link
-            href="/settings"
-            className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 hover:border-indigo-500/50 transition group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="h-9 w-9 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
-                <Zap className="h-5 w-5" />
-              </div>
-              <ArrowRight className="h-4 w-4 text-gray-500 group-hover:text-amber-400 transition" />
+            <div className="flex items-center gap-2 mt-4">
+              <h3 className="text-sm font-semibold text-white">Role & Prompt Studio</h3>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-900/60 text-indigo-300">Screen 2</span>
             </div>
-            <h3 className="text-sm font-semibold text-white mt-4">The 5 Connections & Keys</h3>
             <p className="text-xs text-gray-400 mt-1">
-              Manage AES-256 encrypted keys for Claude, Gemini, OpenRouter, and Ollama localhost:11434 with live latency testing.
-            </p>
-          </Link>
-
-          <Link
-            href="/settings?tab=telemetry"
-            className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 hover:border-indigo-500/50 transition group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="h-9 w-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
-                <TrendingUp className="h-5 w-5" />
-              </div>
-              <ArrowRight className="h-4 w-4 text-gray-500 group-hover:text-emerald-400 transition" />
-            </div>
-            <h3 className="text-sm font-semibold text-white mt-4">Model Cost Telemetry</h3>
-            <p className="text-xs text-gray-400 mt-1">
-              Inspect granular USD costs down to 6 decimals, token counters, and p95 latency across all 14 supported models.
+              Persona prompt editor, live split-screen test chat, prompt caching simulator, and instant rollback versioning.
             </p>
           </Link>
         </div>

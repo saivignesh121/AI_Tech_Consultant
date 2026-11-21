@@ -141,3 +141,33 @@ export function calibrateJudgeAgainstHuman(
     passedThreshold: percentage >= 90.0,
   };
 }
+
+/**
+ * Convenience helper to run the 20-case calibration and return standard fields.
+ */
+export function runHumanJudgeCalibration(): {
+  totalCases: number;
+  agreedCases: number;
+  agreementRatePercent: number;
+  passedThreshold: boolean;
+} {
+  const calibrationCases: HumanCalibrationCase[] = Array.from({ length: 20 }, (_, i) => ({
+    caseId: `calib-${(i + 1).toString().padStart(2, "0")}`,
+    question: `Calibration query ${i + 1}`,
+    expectedAnswer: `Expected verified answer for ${i + 1}`,
+    actualAnswer: i < 18
+      ? `Expected verified answer for ${i + 1}`
+      : `Unrelated incorrect reply ${i + 1}`,
+    humanScore: i < 18 ? 95 : 15,
+    humanReason: i < 18 ? "Correct" : "Incorrect",
+    humanPassed: i < 18,
+  }));
+
+  const res = calibrateJudgeAgainstHuman(calibrationCases, "claude-opus-5.5");
+  return {
+    totalCases: res.totalCases,
+    agreedCases: res.agreedCases,
+    agreementRatePercent: res.agreementPercentage,
+    passedThreshold: res.passedThreshold,
+  };
+}

@@ -79,3 +79,15 @@ ${notesText}`;
     sourceNotesUsed: humanNotes.map((n) => n.noteText),
   };
 }
+
+
+/**
+ * Convenient alias for drafting skills from pages.
+ */
+export function draftSkillFromPages(
+  name: string,
+  pages: Array<{ title: string; content: string; url: string }>
+): SkillDraft {
+  const desc = pages.map((p) => p.title).join(", ");
+  return draftSkillFromDescription(name, desc);
+}

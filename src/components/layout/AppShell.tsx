@@ -102,11 +102,12 @@ export default function AppShell({
 
   const navItems = [
     { label: "Dashboard", href: "/", icon: LayoutDashboard },
-    { label: "Knowledge Brain", href: "/#knowledge", icon: Brain },
-    { label: "Ask & Teach Chat", href: "/#chat", icon: MessageSquare },
+    { label: "15-Min Onboarding", href: "/onboarding", icon: Sparkles },
+    { label: "Knowledge Brain", href: "/knowledge", icon: Brain },
+    { label: "Ask & Teach Chat", href: "/chat", icon: MessageSquare },
     { label: "Role & Prompt Studio", href: "/settings/roles-prompts", icon: Sparkles },
-    { label: "The Eval Lab", href: "/#evals", icon: FlaskConical },
-    { label: "Self-Improve Loop", href: "/#self-improve", icon: RefreshCw },
+    { label: "The Eval Lab", href: "/evals", icon: FlaskConical },
+    { label: "Self-Improve Loop", href: "/self-improve", icon: RefreshCw },
     { label: "Settings & Keys", href: "/settings", icon: Settings },
   ];
 

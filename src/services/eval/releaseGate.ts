@@ -13,39 +13,49 @@ export interface ReleaseGateCheckParams {
 
 export interface ReleaseGateResult {
   canRelease: boolean;
+  allowed: boolean;
+  status: "PASSED" | "BLOCKED";
   scoreDelta: number;
   reason: string;
   timestamp: string;
 }
 
-export function evaluateReleaseGate(params: ReleaseGateCheckParams): ReleaseGateResult {
-  const minThreshold = params.minimumPassThreshold ?? 80.0;
-  const delta = Number((params.newVersionScore - params.previousVersionScore).toFixed(2));
-
-  // Condition 1: Absolute minimum bar check
-  if (params.newVersionScore < minThreshold) {
-    return {
-      canRelease: false,
-      scoreDelta: delta,
-      reason: `Blocked by Release Gate: New version score (${params.newVersionScore}%) is below the minimum threshold (${minThreshold}%).`,
-      timestamp: new Date().toISOString(),
+export function evaluateReleaseGate(
+  paramsOrEntityType: ReleaseGateCheckParams | "prompt" | "role" | "skill" | "model",
+  entityName?: string,
+  newVersionScore?: number,
+  previousVersionScore?: number
+): ReleaseGateResult {
+  let params: ReleaseGateCheckParams;
+  if (typeof paramsOrEntityType === "string") {
+    params = {
+      entityType: paramsOrEntityType,
+      entityName: entityName || "",
+      newVersionScore: newVersionScore || 0,
+      previousVersionScore: previousVersionScore || 0,
     };
+  } else {
+    params = paramsOrEntityType;
   }
 
-  // Condition 2: Regression check against previous active version
-  if (params.newVersionScore < params.previousVersionScore) {
-    return {
-      canRelease: false,
-      scoreDelta: delta,
-      reason: `Blocked by Release Gate: Regression detected. Score dropped by ${Math.abs(delta)}% (from ${params.previousVersionScore}% to ${params.newVersionScore}%).`,
-      timestamp: new Date().toISOString(),
-    };
+  const minThreshold = params.minimumPassThreshold ?? 80.0;
+  const delta = Number((params.newVersionScore - params.previousVersionScore).toFixed(2));
+  const canRelease = params.newVersionScore >= minThreshold && params.newVersionScore >= params.previousVersionScore;
+  const status: "PASSED" | "BLOCKED" = canRelease ? "PASSED" : "BLOCKED";
+
+  let reason = `Release Gate Passed: Score improved or matched previous version (+${delta}%). Ready for production.`;
+  if (params.newVersionScore < minThreshold) {
+    reason = `Blocked by Release Gate: New version score (${params.newVersionScore}%) is below the minimum threshold (${minThreshold}%).`;
+  } else if (params.newVersionScore < params.previousVersionScore) {
+    reason = `Blocked by Release Gate: Regression detected (Score drop). Score dropped by ${Math.abs(delta)}% (from ${params.previousVersionScore}% to ${params.newVersionScore}%).`;
   }
 
   return {
-    canRelease: true,
+    canRelease,
+    allowed: canRelease,
+    status,
     scoreDelta: delta,
-    reason: `Release Gate Passed: Score improved or matched previous version (+${delta}%). Ready for production.`,
+    reason,
     timestamp: new Date().toISOString(),
   };
 }
