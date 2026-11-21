@@ -414,189 +414,202 @@ export default function SelfImprovePage() {
         )}
 
         {/* Tab 2: Run Inspector & Diff Viewer */}
-        {activeTab === "inspector" && selectedRun && (
-          <div className="space-y-6">
-            {/* Inspector Top Bar */}
-            <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-3">
-                  <h2 className="text-lg font-bold text-gray-900">
-                    Inspection: {selectedRun.id}
-                  </h2>
-                  <span className="font-mono text-xs px-2.5 py-1 bg-purple-50 text-purple-700 border border-purple-200 rounded-lg">
-                    {selectedRun.branchName}
-                  </span>
+        {activeTab === "inspector" && (
+          (() => {
+            const currentRun = selectedRun || runs[0];
+            if (!currentRun) {
+              return (
+                <div className="bg-white p-12 rounded-xl border border-gray-200 text-center text-sm text-gray-500">
+                  No active runs available. Trigger a new Opus fix above to begin.
                 </div>
-                <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
-                  <span>Model: <strong>Claude Opus 5.5</strong></span>
-                  <span>Rounds: <strong>{selectedRun.roundsExecuted} of 5</strong></span>
-                  <span>Cost: <strong>${parseFloat(selectedRun.costAccumulatedUsd).toFixed(2)} USD</strong></span>
-                  <span>Hidden Validation Set: <strong className="text-green-600">PASSED (0 Regressions)</strong></span>
+              );
+            }
+
+            return (
+              <div className="space-y-6">
+                {/* Inspector Top Bar */}
+                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-lg font-bold text-gray-900">
+                        Inspection: {currentRun.id}
+                      </h2>
+                      <span className="font-mono text-xs px-2.5 py-1 bg-purple-50 text-purple-700 border border-purple-200 rounded-lg">
+                        {currentRun.branchName}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
+                      <span>Model: <strong>Claude Opus 5.5</strong></span>
+                      <span>Rounds: <strong>{currentRun.roundsExecuted} of 5</strong></span>
+                      <span>Cost: <strong>${parseFloat(currentRun.costAccumulatedUsd || "0").toFixed(2)} USD</strong></span>
+                      <span>Hidden Validation Set: <strong className="text-green-600">PASSED (0 Regressions)</strong></span>
+                    </div>
+                  </div>
+
+                  {/* 1-Click Action Buttons */}
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => handleApprove(currentRun.id)}
+                      disabled={currentRun.status === "merged" || currentRun.status === "failed_limit"}
+                      className={`inline-flex items-center gap-2 px-4 py-2 font-medium text-sm rounded-lg shadow-sm transition ${
+                        currentRun.status === "merged"
+                          ? "bg-green-100 text-green-700 cursor-not-allowed"
+                          : currentRun.status === "failed_limit"
+                          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                          : "bg-green-600 hover:bg-green-700 text-white"
+                      }`}
+                    >
+                      <GitPullRequest className="w-4 h-4" />
+                      {currentRun.status === "merged" ? "Merged to Main" : "1-Click Approve & Merge"}
+                    </button>
+
+                    <button
+                      onClick={() => handleRevert(currentRun.id)}
+                      disabled={currentRun.status === "reverted"}
+                      className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-sm rounded-lg border border-gray-300 transition"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      1-Click Revert
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              {/* 1-Click Action Buttons */}
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => handleApprove(selectedRun.id)}
-                  disabled={selectedRun.status === "merged" || selectedRun.status === "failed_limit"}
-                  className={`inline-flex items-center gap-2 px-4 py-2 font-medium text-sm rounded-lg shadow-sm transition ${
-                    selectedRun.status === "merged"
-                      ? "bg-green-100 text-green-700 cursor-not-allowed"
-                      : selectedRun.status === "failed_limit"
-                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                      : "bg-green-600 hover:bg-green-700 text-white"
-                  }`}
-                >
-                  <GitPullRequest className="w-4 h-4" />
-                  {selectedRun.status === "merged" ? "Merged to Main" : "1-Click Approve & Merge"}
-                </button>
+                {/* Split Screen Inspector: Left Failure Details | Right Visual Diff */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Left Column: Failure & Reasoning */}
+                  <div className="space-y-4">
+                    <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-4">
+                      <h3 className="font-semibold text-gray-900 text-sm flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 text-amber-500" />
+                        Failure Diagnosis (Round 0)
+                      </h3>
 
-                <button
-                  onClick={() => handleRevert(selectedRun.id)}
-                  disabled={selectedRun.status === "reverted"}
-                  className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-sm rounded-lg border border-gray-300 transition"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  1-Click Revert
-                </button>
-              </div>
-            </div>
+                      <div className="space-y-2 text-xs">
+                        <div>
+                          <span className="font-semibold text-gray-600">Question:</span>
+                          <p className="p-2.5 bg-gray-50 rounded border border-gray-200 text-gray-800 font-mono mt-1">
+                            {currentRun.failingCasesSummary?.question || "What IP should my A record point to?"}
+                          </p>
+                        </div>
 
-            {/* Split Screen Inspector: Left Failure Details | Right Visual Diff */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Column: Failure & Reasoning */}
-              <div className="space-y-4">
-                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-4">
-                  <h3 className="font-semibold text-gray-900 text-sm flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 text-amber-500" />
-                    Failure Diagnosis (Round 0)
-                  </h3>
+                        <div>
+                          <span className="font-semibold text-red-600">Failing Answer (Pre-Fix):</span>
+                          <p className="p-2.5 bg-red-50 rounded border border-red-200 text-red-800 font-mono mt-1">
+                            {currentRun.failingCasesSummary?.failingAnswer || "Point your A record to 127.0.0.1"}
+                          </p>
+                        </div>
 
-                  <div className="space-y-2 text-xs">
-                    <div>
-                      <span className="font-semibold text-gray-600">Question:</span>
-                      <p className="p-2.5 bg-gray-50 rounded border border-gray-200 text-gray-800 font-mono mt-1">
-                        {selectedRun.failingCasesSummary?.question || "What IP should my A record point to?"}
+                        <div>
+                          <span className="font-semibold text-green-700">Expected Resolution:</span>
+                          <p className="p-2.5 bg-green-50 rounded border border-green-200 text-green-900 font-mono mt-1">
+                            {currentRun.failingCasesSummary?.expectedAnswer || "Point your A record to 54.214.12.8 per Solution Center."}
+                          </p>
+                        </div>
+
+                        <div>
+                          <span className="font-semibold text-gray-600">AI Judge Critique:</span>
+                          <p className="p-2.5 bg-gray-50 rounded border border-gray-200 text-gray-700 italic mt-1">
+                            &quot;{currentRun.failingCasesSummary?.judgeCritique || "Failed to cite correct IP documented in Solution Center."}&quot;
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Hidden Check Set Verification Card */}
+                    <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-gray-900 text-sm flex items-center gap-2">
+                          <ShieldCheck className="w-4 h-4 text-green-600" />
+                          Hidden Validation Set Verification
+                        </h3>
+                        <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-800 rounded-full">
+                          5 / 5 Passed
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        To prevent overfitting to the single failing test, Claude Opus 5.5 must pass all 5 secret regression tests without losing a single point.
+                      </p>
+                      <div className="space-y-1.5 text-xs font-mono">
+                        <div className="p-2 bg-gray-50 rounded flex items-center justify-between text-gray-700">
+                          <span>1. Cloudflare CNAME flattening lookup</span>
+                          <span className="text-green-600 font-bold">100% OK</span>
+                        </div>
+                        <div className="p-2 bg-gray-50 rounded flex items-center justify-between text-gray-700">
+                          <span>2. Subdomain wildcard proxy protocol</span>
+                          <span className="text-green-600 font-bold">100% OK</span>
+                        </div>
+                        <div className="p-2 bg-gray-50 rounded flex items-center justify-between text-gray-700">
+                          <span>3. Apex root domain ALIAS record</span>
+                          <span className="text-green-600 font-bold">100% OK</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Visual Unified Diff Viewer */}
+                  <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+                    <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <FileCode className="w-4 h-4 text-purple-600" />
+                        <span className="font-mono text-xs font-bold text-gray-800">
+                          diff --git a/prompts/qa_answer.txt b/prompts/qa_answer.txt
+                        </span>
+                      </div>
+                      <span className="text-xs text-gray-500 font-mono">+12 / -4 lines</span>
+                    </div>
+
+                    <div className="p-4 bg-slate-900 text-gray-100 font-mono text-xs overflow-x-auto flex-1 leading-relaxed">
+                      <div className="text-gray-400">@@ -14,8 +14,12 @@ Instruction Set:</div>
+                      <div className="text-red-400 bg-red-950/40 px-2 py-0.5 rounded">
+                        - When customer asks about DNS proxying, suggest localhost or standard IPs.
+                      </div>
+                      <div className="text-green-400 bg-green-950/40 px-2 py-0.5 rounded">
+                        + When customer asks about DNS proxying with an external registrar:
+                      </div>
+                      <div className="text-green-400 bg-green-950/40 px-2 py-0.5 rounded">
+                        + 1. Point the A record strictly to 54.214.12.8 (Solution Center).
+                      </div>
+                      <div className="text-green-400 bg-green-950/40 px-2 py-0.5 rounded">
+                        + 2. Never recommend localhost 127.0.0.1 for live production domains.
+                      </div>
+                      <div className="text-green-400 bg-green-950/40 px-2 py-0.5 rounded">
+                        + 3. Provide exact CNAME verification steps from Cloudflare docs.
+                      </div>
+                      <div className="text-gray-400">@@ -32,4 +36,8 @@ Safety Protocol:</div>
+                      <div className="text-gray-300"> Always verify SPF and DKIM records when modifying MX lines.</div>
+                      <div className="text-green-400 bg-green-950/40 px-2 py-0.5 rounded">
+                        + Caching hash verified. Zero regression on 5 hidden test cases.
+                      </div>
+                    </div>
+
+                    {/* Budget Meter Bar */}
+                    <div className="p-4 border-t border-gray-200 bg-gray-50">
+                      <div className="flex items-center justify-between text-xs font-medium text-gray-700 mb-1.5">
+                        <span>Claude Opus Reasoning Budget</span>
+                        <span className="font-mono">
+                          ${parseFloat(currentRun.costAccumulatedUsd || "0").toFixed(2)} / $5.00 Cap
+                        </span>
+                      </div>
+                      <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-purple-600 rounded-full transition-all"
+                          style={{
+                            width: `${Math.min(
+                              100,
+                              (parseFloat(currentRun.costAccumulatedUsd || "0") / 5.0) * 100
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                      <p className="text-[11px] text-gray-500 mt-1.5">
+                        Hard circuit breaker triggers and safely quarantines changes if round cost exceeds $5.00 ceiling.
                       </p>
                     </div>
-
-                    <div>
-                      <span className="font-semibold text-red-600">Failing Answer (Pre-Fix):</span>
-                      <p className="p-2.5 bg-red-50 rounded border border-red-200 text-red-800 font-mono mt-1">
-                        {selectedRun.failingCasesSummary?.failingAnswer || "Point your A record to 127.0.0.1"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <span className="font-semibold text-green-700">Expected Resolution:</span>
-                      <p className="p-2.5 bg-green-50 rounded border border-green-200 text-green-900 font-mono mt-1">
-                        {selectedRun.failingCasesSummary?.expectedAnswer || "Point your A record to 54.214.12.8 per Solution Center."}
-                      </p>
-                    </div>
-
-                    <div>
-                      <span className="font-semibold text-gray-600">AI Judge Critique:</span>
-                      <p className="p-2.5 bg-gray-50 rounded border border-gray-200 text-gray-700 italic mt-1">
-                        "{selectedRun.failingCasesSummary?.judgeCritique || "Failed to cite correct IP documented in Solution Center."}"
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Hidden Check Set Verification Card */}
-                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900 text-sm flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-green-600" />
-                      Hidden Validation Set Verification
-                    </h3>
-                    <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-800 rounded-full">
-                      5 / 5 Passed
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500">
-                    To prevent overfitting to the single failing test, Claude Opus 5.5 must pass all 5 secret regression tests without losing a single point.
-                  </p>
-                  <div className="space-y-1.5 text-xs font-mono">
-                    <div className="p-2 bg-gray-50 rounded flex items-center justify-between text-gray-700">
-                      <span>1. Cloudflare CNAME flattening lookup</span>
-                      <span className="text-green-600 font-bold">100% OK</span>
-                    </div>
-                    <div className="p-2 bg-gray-50 rounded flex items-center justify-between text-gray-700">
-                      <span>2. Subdomain wildcard proxy protocol</span>
-                      <span className="text-green-600 font-bold">100% OK</span>
-                    </div>
-                    <div className="p-2 bg-gray-50 rounded flex items-center justify-between text-gray-700">
-                      <span>3. Apex root domain ALIAS record</span>
-                      <span className="text-green-600 font-bold">100% OK</span>
-                    </div>
                   </div>
                 </div>
               </div>
-
-              {/* Right Column: Visual Unified Diff Viewer */}
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-                <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <FileCode className="w-4 h-4 text-purple-600" />
-                    <span className="font-mono text-xs font-bold text-gray-800">
-                      diff --git a/prompts/qa_answer.txt b/prompts/qa_answer.txt
-                    </span>
-                  </div>
-                  <span className="text-xs text-gray-500 font-mono">+12 / -4 lines</span>
-                </div>
-
-                <div className="p-4 bg-slate-900 text-gray-100 font-mono text-xs overflow-x-auto flex-1 leading-relaxed">
-                  <div className="text-gray-400">@@ -14,8 +14,12 @@ Instruction Set:</div>
-                  <div className="text-red-400 bg-red-950/40 px-2 py-0.5 rounded">
-                    - When customer asks about DNS proxying, suggest localhost or standard IPs.
-                  </div>
-                  <div className="text-green-400 bg-green-950/40 px-2 py-0.5 rounded">
-                    + When customer asks about DNS proxying with an external registrar:
-                  </div>
-                  <div className="text-green-400 bg-green-950/40 px-2 py-0.5 rounded">
-                    + 1. Point the A record strictly to 54.214.12.8 (Solution Center).
-                  </div>
-                  <div className="text-green-400 bg-green-950/40 px-2 py-0.5 rounded">
-                    + 2. Never recommend localhost 127.0.0.1 for live production domains.
-                  </div>
-                  <div className="text-green-400 bg-green-950/40 px-2 py-0.5 rounded">
-                    + 3. Provide exact CNAME verification steps from Cloudflare docs.
-                  </div>
-                  <div className="text-gray-400">@@ -32,4 +36,8 @@ Safety Protocol:</div>
-                  <div className="text-gray-300"> Always verify SPF and DKIM records when modifying MX lines.</div>
-                  <div className="text-green-400 bg-green-950/40 px-2 py-0.5 rounded">
-                    + Caching hash verified. Zero regression on 5 hidden test cases.
-                  </div>
-                </div>
-
-                {/* Budget Meter Bar */}
-                <div className="p-4 border-t border-gray-200 bg-gray-50">
-                  <div className="flex items-center justify-between text-xs font-medium text-gray-700 mb-1.5">
-                    <span>Claude Opus Reasoning Budget</span>
-                    <span className="font-mono">
-                      ${parseFloat(selectedRun.costAccumulatedUsd).toFixed(2)} / $5.00 Cap
-                    </span>
-                  </div>
-                  <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-purple-600 rounded-full transition-all"
-                      style={{
-                        width: `${Math.min(
-                          100,
-                          (parseFloat(selectedRun.costAccumulatedUsd) / 5.0) * 100
-                        )}%`,
-                      }}
-                    />
-                  </div>
-                  <p className="text-[11px] text-gray-500 mt-1.5">
-                    Hard circuit breaker triggers and safely quarantines changes if round cost exceeds $5.00 ceiling.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+            );
+          })()
         )}
 
         {/* Tab 3: Weekly Owner Digest */}

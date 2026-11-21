@@ -80,7 +80,7 @@ export default function AppShell({
         const data = await res.json();
         setCurrentTenant(data.activeTenant);
         setTenantDropdownOpen(false);
-        router.refresh();
+        window.location.reload();
       }
     } catch (e) {
       console.error(e);

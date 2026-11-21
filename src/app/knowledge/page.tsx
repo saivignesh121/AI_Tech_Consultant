@@ -74,7 +74,7 @@ export default function KnowledgeBrainPage() {
 
   // --- Sitemaps Tab State ---
   const [sources, setSources] = useState<SitemapSource[]>([]);
-  const [newSitemapUrl, setNewSitemapUrl] = useState("");
+  const [newSitemapUrl, setNewSitemapUrl] = useState("https://docs.acme.com/sitemap.xml");
   const [loadingSources, setLoadingSources] = useState(false);
   const [previewSummary, setPreviewSummary] = useState<{
     sitemapUrl: string;

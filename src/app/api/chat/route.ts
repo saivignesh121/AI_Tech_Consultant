@@ -48,9 +48,22 @@ export async function POST(req: NextRequest) {
 
     // 1. If request is Teach Mode or has feedback correction, compile lesson
     if (mode === "teach" || feedbackCorrection) {
+      // First persist the user correction message so foreign key constraint is satisfied
+      const [savedFeedbackMsg] = await db
+        .insert(chatMessages)
+        .values({
+          sessionId: targetSessionId,
+          businessId: tenant.businessId,
+          sender: "user",
+          content: message,
+          citations: [],
+          isEscalated: false,
+        })
+        .returning();
+
       const compiled = compileLessonFromCorrection({
         businessId: tenant.businessId,
-        chatMessageId: targetSessionId,
+        chatMessageId: savedFeedbackMsg.id,
         category: feedbackCorrection?.category || "Customer Support Teaching",
         originalQuestion: message,
         wrongAnswer: feedbackCorrection?.wrongAnswer || "Previous answer",
@@ -63,7 +76,7 @@ export async function POST(req: NextRequest) {
         .insert(lessons)
         .values({
           businessId: tenant.businessId,
-          chatMessageId: targetSessionId,
+          chatMessageId: savedFeedbackMsg.id,
           title: compiled.title,
           category: compiled.category,
           lessonMarkdown: compiled.lessonMarkdown,

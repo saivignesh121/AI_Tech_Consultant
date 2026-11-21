@@ -20,7 +20,7 @@ export default function SignInPage() {
         body: JSON.stringify({ tenantSlug: slug }),
       });
       if (res.ok) {
-        router.push("/");
+        window.location.href = "/";
       }
     } catch (err) {
       console.error(err);
