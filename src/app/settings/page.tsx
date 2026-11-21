@@ -1,0 +1,827 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import AppShell from "@/components/layout/AppShell";
+import {
+  Key,
+  Activity,
+  AlertOctagon,
+  Users,
+  CheckCircle2,
+  AlertTriangle,
+  RotateCw,
+  Trash2,
+  Eye,
+  EyeOff,
+  Server,
+  Zap,
+  Clock,
+  DollarSign,
+  ShieldAlert,
+} from "lucide-react";
+
+interface ConnectionItem {
+  provider: string;
+  endpointUrl: string | null;
+  status: "active" | "error" | "untested";
+  maskedApiKey: string | null;
+  hasKey: boolean;
+  lastTestedAt: string | null;
+}
+
+interface TelemetryLog {
+  id: string;
+  taskType: string;
+  modelId: string;
+  inputTokens: number;
+  outputTokens: number;
+  cachedReadTokens: number;
+  durationMs: number;
+  costUsd: string;
+  status: string;
+  createdAt: string;
+}
+
+interface TelemetrySummary {
+  totalSpendUsd: number;
+  totalCalls: number;
+  avgLatencyMs: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalCachedTokens: number;
+  cacheHitPercentage: number;
+}
+
+interface FailedJobItem {
+  id: string;
+  queueName: string;
+  payload: Record<string, unknown>;
+  errorStack: string | null;
+  retryCount: number;
+  lastAttemptAt: string;
+}
+
+export default function SettingsPage() {
+  const [activeTab, setActiveTab] = useState<"connections" | "telemetry" | "failed_jobs" | "workspace">("connections");
+
+  // --- Connections Tab State ---
+  const [connections, setConnections] = useState<ConnectionItem[]>([]);
+  const [loadingConn, setLoadingConn] = useState(true);
+  const [editingProvider, setEditingProvider] = useState<string | null>(null);
+  const [keyInput, setKeyInput] = useState("");
+  const [endpointInput, setEndpointInput] = useState("");
+  const [testingProvider, setTestingProvider] = useState<string | null>(null);
+  const [testResult, setTestResult] = useState<{ provider: string; message: string; latencyMs: number } | null>(null);
+  const [localOnlyMode, setLocalOnlyMode] = useState(false);
+
+  // --- Telemetry Tab State ---
+  const [telemetryLogs, setTelemetryLogs] = useState<TelemetryLog[]>([]);
+  const [telemetrySummary, setTelemetrySummary] = useState<TelemetrySummary | null>(null);
+  const [telemetryFilter, setTelemetryFilter] = useState("all");
+  const [loadingTelemetry, setLoadingTelemetry] = useState(false);
+
+  // --- Failed Jobs Tab State ---
+  const [failedJobs, setFailedJobs] = useState<FailedJobItem[]>([]);
+  const [loadingJobs, setLoadingJobs] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<FailedJobItem | null>(null);
+  const [retryingJobId, setRetryingJobId] = useState<string | null>(null);
+
+  // --- Workspace Danger Zone State ---
+  const [currentTenantSlug, setCurrentTenantSlug] = useState("acme-corp");
+  const [confirmSlugInput, setConfirmSlugInput] = useState("");
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  // Load initial data
+  useEffect(() => {
+    fetchConnections();
+    fetchLocalMode();
+    fetchTelemetry();
+    fetchFailedJobs();
+    fetch("/api/auth/context")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.currentTenant?.businessSlug) setCurrentTenantSlug(d.currentTenant.businessSlug);
+      })
+      .catch(console.error);
+  }, []);
+
+  const fetchConnections = async () => {
+    setLoadingConn(true);
+    try {
+      const res = await fetch("/api/settings/connections");
+      const data = await res.json();
+      if (data.connections) setConnections(data.connections);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingConn(false);
+    }
+  };
+
+  const fetchLocalMode = async () => {
+    try {
+      const res = await fetch("/api/settings/local-mode");
+      const data = await res.json();
+      if (typeof data.localOnlyMode === "boolean") setLocalOnlyMode(data.localOnlyMode);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const toggleLocalMode = async () => {
+    const nextVal = !localOnlyMode;
+    setLocalOnlyMode(nextVal);
+    await fetch("/api/settings/local-mode", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled: nextVal }),
+    });
+  };
+
+  const saveConnection = async (provider: string) => {
+    try {
+      const res = await fetch("/api/settings/connections", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider,
+          apiKey: keyInput || undefined,
+          endpointUrl: endpointInput || undefined,
+        }),
+      });
+      if (res.ok) {
+        setEditingProvider(null);
+        setKeyInput("");
+        setEndpointInput("");
+        fetchConnections();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const testConnection = async (provider: string, endpointUrl?: string | null) => {
+    setTestingProvider(provider);
+    setTestResult(null);
+    try {
+      const res = await fetch("/api/settings/connections/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider, endpointUrl }),
+      });
+      const data = await res.json();
+      setTestResult({
+        provider,
+        message: data.message || (data.success ? "Connection Verified" : "Connection Failed"),
+        latencyMs: data.latencyMs || 0,
+      });
+      fetchConnections();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setTestingProvider(null);
+    }
+  };
+
+  const fetchTelemetry = async (filter = "all") => {
+    setLoadingTelemetry(true);
+    try {
+      const url = filter === "all" ? "/api/telemetry" : `/api/telemetry?taskType=${filter}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.summary) setTelemetrySummary(data.summary);
+      if (data.logs) setTelemetryLogs(data.logs);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingTelemetry(false);
+    }
+  };
+
+  const fetchFailedJobs = async () => {
+    setLoadingJobs(true);
+    try {
+      const res = await fetch("/api/jobs/failed");
+      const data = await res.json();
+      if (data.jobs) setFailedJobs(data.jobs);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingJobs(false);
+    }
+  };
+
+  const handleJobAction = async (jobId: string, action: "retry" | "dismiss") => {
+    setRetryingJobId(jobId);
+    try {
+      await fetch("/api/jobs/failed", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId, action }),
+      });
+      fetchFailedJobs();
+      if (selectedJob?.id === jobId) setSelectedJob(null);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setRetryingJobId(null);
+    }
+  };
+
+  const handleDeleteTenant = async () => {
+    if (confirmSlugInput !== currentTenantSlug) return;
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/business/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirmSlug: confirmSlugInput }),
+      });
+      if (res.ok) {
+        window.location.href = "/signin";
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const providerLabels: Record<string, { title: string; desc: string; placeholder: string }> = {
+    claude: {
+      title: "Anthropic Claude API",
+      desc: "Powers Claude Opus 5.5, Sonnet 5.5, and Haiku 5.5 with dynamic prompt caching.",
+      placeholder: "sk-ant-api03-••••••••••••••••••••••••",
+    },
+    gemini: {
+      title: "Google Gemini API",
+      desc: "Powers Gemini 3.8 Flash, 3 Flash, and 2.5 Flash-Lite multimodal reasoning.",
+      placeholder: "AIzaSy••••••••••••••••••••••••••••••",
+    },
+    openrouter: {
+      title: "OpenRouter Gateway",
+      desc: "Routes to free Nemotron 3 Ultra, Nemotron 3.5, Gemma 4 31B, and Qwen 3.8 Max.",
+      placeholder: "sk-or-v1-••••••••••••••••••••••••••",
+    },
+    ollama: {
+      title: "Laptop Ollama Runner",
+      desc: "Runs local-only gemma4:e4b and qwen3.5:4b at localhost:11434 with zero external API calls.",
+      placeholder: "http://localhost:11434",
+    },
+    google: {
+      title: "Google OAuth & Gmail Integration",
+      desc: "Inbound customer tech support email polling and webhook notification dispatcher.",
+      placeholder: "oauth2:ya29.••••••••••••••••••••••••",
+    },
+  };
+
+  return (
+    <AppShell breadcrumbs={[{ label: "Settings & Keys" }]}>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-white">Workspace Settings & Telemetry</h1>
+            <p className="text-sm text-gray-400 mt-1">
+              Manage encrypted model connection keys, inspect per-business telemetry spend, and supervise queue jobs.
+            </p>
+          </div>
+
+          {/* Local-Only Mode Master Switch (Task 1.2 & 4.3) */}
+          <div className="flex items-center gap-3 rounded-xl border border-gray-800 bg-[#0E1322] p-2.5 px-4 shadow-sm">
+            <Server className="h-4 w-4 text-indigo-400" />
+            <div>
+              <div className="text-xs font-semibold text-white">Local-Only Mode</div>
+              <div className="text-[10px] text-gray-400">Bypass all paid APIs &rarr; Laptop Ollama</div>
+            </div>
+            <button
+              onClick={toggleLocalMode}
+              className={`ml-2 text-xs font-mono font-medium rounded-lg px-2.5 py-1 transition ${
+                localOnlyMode
+                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                  : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+              }`}
+            >
+              {localOnlyMode ? "ACTIVE (LOCAL)" : "INACTIVE"}
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex border-b border-gray-800 space-x-1">
+          <button
+            onClick={() => setActiveTab("connections")}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+              activeTab === "connections"
+                ? "border-indigo-500 text-indigo-400"
+                : "border-transparent text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            <Key className="h-4 w-4" />
+            <span>The 5 Vault Connections</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab("telemetry");
+              fetchTelemetry(telemetryFilter);
+            }}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+              activeTab === "telemetry"
+                ? "border-indigo-500 text-indigo-400"
+                : "border-transparent text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            <Activity className="h-4 w-4" />
+            <span>Model Telemetry & Cost Logs</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab("failed_jobs");
+              fetchFailedJobs();
+            }}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+              activeTab === "failed_jobs"
+                ? "border-indigo-500 text-indigo-400"
+                : "border-transparent text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            <AlertOctagon className="h-4 w-4" />
+            <span>Failed Jobs Drawer ({failedJobs.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("workspace")}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+              activeTab === "workspace"
+                ? "border-indigo-500 text-indigo-400"
+                : "border-transparent text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            <Users className="h-4 w-4" />
+            <span>Workspace & Danger Zone</span>
+          </button>
+        </div>
+
+        {/* ================= TAB 1: THE 5 CONNECTIONS (Task 1.2) ================= */}
+        {activeTab === "connections" && (
+          <div className="space-y-6">
+            <div className="rounded-xl border border-indigo-500/20 bg-indigo-950/20 p-4 text-xs text-indigo-300 flex items-start gap-3">
+              <Key className="h-4 w-4 text-indigo-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <strong>AES-256 Encrypted Credential Vault:</strong> All secrets are encrypted at rest using AES-256-GCM. Unencrypted keys are never transmitted to the browser or stored in logs. Tested with zero plaintext leakage.
+              </div>
+            </div>
+
+            {testResult && (
+              <div className="rounded-xl border border-gray-700 bg-gray-900/90 p-4 text-xs flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                  <span className="text-white font-medium">{testResult.message}</span>
+                </div>
+                <span className="font-mono text-gray-400 bg-gray-800 px-2 py-0.5 rounded text-[11px]">
+                  Latency: {testResult.latencyMs}ms
+                </span>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 gap-4">
+              {connections.map((c) => {
+                const info = providerLabels[c.provider] || {
+                  title: c.provider,
+                  desc: "API connection provider.",
+                  placeholder: "Key...",
+                };
+                const isEditing = editingProvider === c.provider;
+                const isTesting = testingProvider === c.provider;
+
+                return (
+                  <div
+                    key={c.provider}
+                    className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-4"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-lg bg-gray-800 flex items-center justify-center font-bold text-sm text-indigo-400">
+                          {c.provider === "claude" && "C"}
+                          {c.provider === "gemini" && "G"}
+                          {c.provider === "openrouter" && "OR"}
+                          {c.provider === "ollama" && "O"}
+                          {c.provider === "google" && "M"}
+                        </div>
+                        <div>
+                          <div className="text-sm font-semibold text-white flex items-center gap-2">
+                            {info.title}
+                            {c.status === "active" && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-400 border border-emerald-500/20">
+                                <CheckCircle2 className="h-3 w-3" /> Active
+                              </span>
+                            )}
+                            {c.status === "error" && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-medium text-red-400 border border-red-500/20">
+                                <AlertTriangle className="h-3 w-3" /> Error
+                              </span>
+                            )}
+                            {c.status === "untested" && (
+                              <span className="inline-flex items-center rounded-full bg-gray-800 px-2 py-0.5 text-[10px] font-medium text-gray-400">
+                                Untested
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-400">{info.desc}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => testConnection(c.provider, c.endpointUrl)}
+                          disabled={isTesting}
+                          className="flex items-center gap-1.5 rounded-lg border border-gray-700 bg-gray-800/60 hover:bg-gray-700 px-3 py-1.5 text-xs font-medium text-gray-200 transition disabled:opacity-50"
+                        >
+                          <RotateCw className={`h-3.5 w-3.5 ${isTesting ? "animate-spin text-indigo-400" : ""}`} />
+                          <span>{isTesting ? "Testing..." : "Test Connection"}</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            if (isEditing) {
+                              setEditingProvider(null);
+                            } else {
+                              setEditingProvider(c.provider);
+                              setKeyInput("");
+                              setEndpointInput(c.endpointUrl || "");
+                            }
+                          }}
+                          className="rounded-lg border border-gray-700 bg-gray-800/60 hover:bg-gray-700 px-3 py-1.5 text-xs font-medium text-gray-200 transition"
+                        >
+                          {isEditing ? "Cancel" : "Edit Key"}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Masked Key Display or Edit Form */}
+                    {!isEditing ? (
+                      <div className="rounded-lg border border-gray-800/80 bg-gray-950 p-3 flex items-center justify-between font-mono text-xs text-gray-400">
+                        <div className="flex items-center gap-2 truncate">
+                          <Key className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />
+                          <span>{c.maskedApiKey || c.endpointUrl || "No key configured"}</span>
+                        </div>
+                        {c.lastTestedAt && (
+                          <span className="text-[10px] text-gray-500 font-sans">
+                            Tested {new Date(c.lastTestedAt).toLocaleTimeString()}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-3 pt-2 border-t border-gray-800">
+                        {c.provider === "ollama" ? (
+                          <div>
+                            <label className="block text-xs font-medium text-gray-300 mb-1">Ollama Server URL</label>
+                            <input
+                              type="text"
+                              value={endpointInput}
+                              onChange={(e) => setEndpointInput(e.target.value)}
+                              placeholder="http://localhost:11434"
+                              className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs font-mono text-white focus:border-indigo-500 focus:outline-none"
+                            />
+                          </div>
+                        ) : (
+                          <div>
+                            <label className="block text-xs font-medium text-gray-300 mb-1">Enter API Key</label>
+                            <input
+                              type="password"
+                              value={keyInput}
+                              onChange={(e) => setKeyInput(e.target.value)}
+                              placeholder={info.placeholder}
+                              className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs font-mono text-white focus:border-indigo-500 focus:outline-none"
+                            />
+                          </div>
+                        )}
+
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => saveConnection(c.provider)}
+                            className="rounded-lg bg-indigo-600 hover:bg-indigo-500 px-4 py-1.5 text-xs font-medium text-white transition shadow-sm"
+                          >
+                            Save Encrypted Credential
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ================= TAB 2: MODEL TELEMETRY & COST LOGS (Task 1.5 & Task 4.3) ================= */}
+        {activeTab === "telemetry" && (
+          <div className="space-y-6">
+            {/* Telemetry Summary Cards */}
+            {telemetrySummary && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4">
+                  <div className="flex items-center justify-between text-xs text-gray-400">
+                    <span>Total Model Spend</span>
+                    <DollarSign className="h-4 w-4 text-emerald-400" />
+                  </div>
+                  <div className="text-2xl font-bold text-white mt-2 font-mono">
+                    ${telemetrySummary.totalSpendUsd.toFixed(6)}
+                  </div>
+                  <span className="text-[11px] text-emerald-400 mt-1 inline-block">Exact per 1M rates</span>
+                </div>
+
+                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4">
+                  <div className="flex items-center justify-between text-xs text-gray-400">
+                    <span>Total Invocations</span>
+                    <Zap className="h-4 w-4 text-indigo-400" />
+                  </div>
+                  <div className="text-2xl font-bold text-white mt-2 font-mono">
+                    {telemetrySummary.totalCalls} calls
+                  </div>
+                  <span className="text-[11px] text-gray-400 mt-1 inline-block">Logged with tokens & latency</span>
+                </div>
+
+                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4">
+                  <div className="flex items-center justify-between text-xs text-gray-400">
+                    <span>Average Latency</span>
+                    <Clock className="h-4 w-4 text-amber-400" />
+                  </div>
+                  <div className="text-2xl font-bold text-white mt-2 font-mono">
+                    {telemetrySummary.avgLatencyMs} ms
+                  </div>
+                  <span className="text-[11px] text-gray-400 mt-1 inline-block">End-to-end roundtrip</span>
+                </div>
+
+                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4">
+                  <div className="flex items-center justify-between text-xs text-gray-400">
+                    <span>Prompt Cache Hit Rate</span>
+                    <Activity className="h-4 w-4 text-purple-400" />
+                  </div>
+                  <div className="text-2xl font-bold text-purple-300 mt-2 font-mono">
+                    {telemetrySummary.cacheHitPercentage}%
+                  </div>
+                  <span className="text-[11px] text-purple-400 mt-1 inline-block">Claude Prompt Caching</span>
+                </div>
+              </div>
+            )}
+
+            {/* Filter Bar */}
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-gray-400 font-medium">Filter by Task:</span>
+                {["all", "write_reply", "find_facts", "judge_eval", "tag_job"].map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => {
+                      setTelemetryFilter(t);
+                      fetchTelemetry(t);
+                    }}
+                    className={`rounded-lg px-3 py-1 font-mono transition ${
+                      telemetryFilter === t
+                        ? "bg-indigo-600/20 text-indigo-300 border border-indigo-500/30"
+                        : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                    }`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => fetchTelemetry(telemetryFilter)}
+                className="flex items-center gap-1.5 rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:text-white"
+              >
+                <RotateCw className="h-3 w-3" />
+                <span>Refresh Logs</span>
+              </button>
+            </div>
+
+            {/* Telemetry Logs Table */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-gray-900/60 border-b border-gray-800 text-gray-400 uppercase font-semibold text-[10px] tracking-wider">
+                    <tr>
+                      <th className="px-4 py-3">Timestamp</th>
+                      <th className="px-4 py-3">Task Type</th>
+                      <th className="px-4 py-3">Model</th>
+                      <th className="px-4 py-3 text-right">Tokens (In / Out / Cache)</th>
+                      <th className="px-4 py-3 text-right">Latency</th>
+                      <th className="px-4 py-3 text-right">Cost (USD)</th>
+                      <th className="px-4 py-3 text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-800/60">
+                    {telemetryLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-gray-900/40 transition">
+                        <td className="px-4 py-3 text-gray-400 font-mono text-[11px]">
+                          {new Date(log.createdAt).toLocaleTimeString()}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="rounded bg-indigo-500/10 text-indigo-400 px-2 py-0.5 font-mono text-[11px] border border-indigo-500/20">
+                            {log.taskType}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-white font-mono">{log.modelId}</td>
+                        <td className="px-4 py-3 text-right font-mono text-gray-300">
+                          {log.inputTokens} / {log.outputTokens} /{" "}
+                          <span className="text-purple-400">{log.cachedReadTokens}</span>
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono text-gray-400">{log.durationMs}ms</td>
+                        <td className="px-4 py-3 text-right font-mono font-medium text-emerald-400">
+                          ${parseFloat(log.costUsd).toFixed(6)}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span
+                            className={`rounded px-1.5 py-0.5 text-[10px] font-medium uppercase font-mono ${
+                              log.status === "success"
+                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                : "bg-red-500/10 text-red-400 border border-red-500/20"
+                            }`}
+                          >
+                            {log.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                    {telemetryLogs.length === 0 && (
+                      <tr>
+                        <td colSpan={7} className="text-center py-8 text-gray-500">
+                          No model calls logged for this filter yet.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ================= TAB 3: FAILED JOBS DRAWER (Task 1.5) ================= */}
+        {activeTab === "failed_jobs" && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-white">PostgreSQL pg-boss Queue Failure Drawer</h3>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Any background worker encountering unhandled exceptions logs payloads here for safe inspection and manual re-enqueuing.
+                </p>
+              </div>
+
+              <button
+                onClick={fetchFailedJobs}
+                className="flex items-center gap-1.5 rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:text-white"
+              >
+                <RotateCw className="h-3 w-3" />
+                <span>Refresh</span>
+              </button>
+            </div>
+
+            {failedJobs.length === 0 ? (
+              <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-12 text-center space-y-3">
+                <CheckCircle2 className="h-8 w-8 text-emerald-400 mx-auto" />
+                <h4 className="text-sm font-semibold text-white">All Queue Tasks Healthy</h4>
+                <p className="text-xs text-gray-400 max-w-sm mx-auto">
+                  Zero active failures in the pg-boss queue. Background crawl workers and evaluation runners are healthy.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {failedJobs.map((job) => (
+                  <div
+                    key={job.id}
+                    className="rounded-xl border border-red-500/30 bg-[#0E1322] p-5 shadow-sm space-y-3"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-red-400" />
+                        <span className="text-sm font-semibold text-white">{job.queueName}</span>
+                        <span className="rounded bg-red-500/10 text-red-400 text-[10px] px-2 py-0.5 font-mono border border-red-500/20">
+                          Attempt #{job.retryCount + 1}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleJobAction(job.id, "retry")}
+                          disabled={retryingJobId === job.id}
+                          className="flex items-center gap-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 text-xs font-medium text-white transition disabled:opacity-50"
+                        >
+                          <RotateCw className={`h-3 w-3 ${retryingJobId === job.id ? "animate-spin" : ""}`} />
+                          <span>Retry Job</span>
+                        </button>
+                        <button
+                          onClick={() => handleJobAction(job.id, "dismiss")}
+                          className="rounded-lg border border-gray-700 bg-gray-800 hover:bg-gray-700 px-3 py-1.5 text-xs font-medium text-gray-300 transition"
+                        >
+                          Dismiss
+                        </button>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-red-300 font-mono bg-red-950/30 p-2.5 rounded border border-red-500/20 truncate">
+                      {job.errorStack || "Task threw an unhandled runtime error."}
+                    </p>
+
+                    <div className="text-[11px] text-gray-400 font-mono">
+                      Last attempted: {new Date(job.lastAttemptAt).toLocaleString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ================= TAB 4: WORKSPACE & DANGER ZONE (Task 1.1) ================= */}
+        {activeTab === "workspace" && (
+          <div className="space-y-6">
+            {/* Workspace Profile Card */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 space-y-4">
+              <h3 className="text-sm font-semibold text-white">Active Tenant Profile</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <span className="text-gray-400">Workspace Identifier (Slug):</span>
+                  <div className="text-white font-mono font-medium mt-1">{currentTenantSlug}</div>
+                </div>
+                <div>
+                  <span className="text-gray-400">Tenant Isolation Status:</span>
+                  <div className="text-emerald-400 font-medium mt-1 flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Enforced by non-nullable business_id
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Danger Zone: Account Deletion (Task 1.1 / D14) */}
+            <div className="rounded-xl border border-red-500/30 bg-red-950/10 p-6 space-y-4">
+              <div className="flex items-center gap-2 text-red-400">
+                <AlertTriangle className="h-5 w-5" />
+                <h3 className="text-base font-bold">Danger Zone: Permanent Workspace Deletion</h3>
+              </div>
+              <p className="text-xs text-gray-300 leading-relaxed">
+                Task 1.1 & D14 Protocol: Deleting this business permanently wipes all records, embeddings, chunks, vector rows, chat sessions, prompt versions, and model call logs via cascading foreign keys. This action cannot be undone.
+              </p>
+
+              <button
+                onClick={() => setDeleteModalOpen(true)}
+                className="flex items-center gap-2 rounded-lg bg-red-600 hover:bg-red-500 px-4 py-2 text-xs font-semibold text-white transition shadow-lg shadow-red-600/20"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span>Delete Workspace and All Data</span>
+              </button>
+            </div>
+
+            {/* Modal Confirmation */}
+            {deleteModalOpen && (
+              <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                <div className="max-w-md w-full rounded-2xl border border-red-500/40 bg-[#0E1322] p-6 shadow-2xl space-y-4">
+                  <div className="flex items-center gap-3 text-red-400">
+                    <ShieldAlert className="h-6 w-6" />
+                    <h3 className="text-lg font-bold">Confirm Account Deletion</h3>
+                  </div>
+
+                  <p className="text-xs text-gray-300 leading-relaxed">
+                    This will immediately purge all data belonging to <strong className="text-white">{currentTenantSlug}</strong>. To confirm, please type <code className="text-red-300 font-mono bg-red-950/60 px-1 py-0.5 rounded">{currentTenantSlug}</code> below:
+                  </p>
+
+                  <input
+                    type="text"
+                    value={confirmSlugInput}
+                    onChange={(e) => setConfirmSlugInput(e.target.value)}
+                    placeholder={currentTenantSlug}
+                    className="w-full rounded-lg border border-red-500/40 bg-gray-950 px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-red-500"
+                  />
+
+                  <div className="flex justify-end gap-2 pt-2">
+                    <button
+                      onClick={() => {
+                        setDeleteModalOpen(false);
+                        setConfirmSlugInput("");
+                      }}
+                      className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-xs text-gray-300 hover:text-white"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleDeleteTenant}
+                      disabled={confirmSlugInput !== currentTenantSlug || deleting}
+                      className="rounded-lg bg-red-600 hover:bg-red-500 px-4 py-2 text-xs font-semibold text-white transition disabled:opacity-40"
+                    >
+                      {deleting ? "Purging Workspace..." : "Permanently Wipe Tenant"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </AppShell>
+  );
+}

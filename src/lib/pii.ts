@@ -63,16 +63,16 @@ export function maskPII(text: string): { sanitized: string; maskedCount: number 
     return "[REDACTED_SSN]";
   });
 
-  // 3. Mask Physical Street Addresses
-  result = result.replace(PATTERNS.streetAddress, () => {
-    count++;
-    return "[REDACTED_ADDRESS]";
-  });
-
-  // 4. Mask Phone Numbers
+  // 3. Mask Phone Numbers (BEFORE street addresses so house numbers don't swallow phone digits)
   result = result.replace(PATTERNS.phone, () => {
     count++;
     return "[REDACTED_PHONE]";
+  });
+
+  // 4. Mask Physical Street Addresses
+  result = result.replace(PATTERNS.streetAddress, () => {
+    count++;
+    return "[REDACTED_ADDRESS]";
   });
 
   return { sanitized: result, maskedCount: count };

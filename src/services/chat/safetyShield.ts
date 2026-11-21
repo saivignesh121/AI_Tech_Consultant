@@ -96,3 +96,14 @@ export function evaluateMessageSafety(message: string): SafetyCheckResult {
     sanitizedMessage: message,
   };
 }
+
+/**
+ * Quick helper for checking prompt injection in role testing and chat endpoints.
+ */
+export function checkPromptInjection(message: string): { isBlocked: boolean; threatType?: string } {
+  const result = evaluateMessageSafety(message);
+  return {
+    isBlocked: result.isInjected,
+    threatType: result.isInjected ? "system_override" : undefined,
+  };
+}
