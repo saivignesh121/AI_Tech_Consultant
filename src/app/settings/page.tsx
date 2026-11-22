@@ -20,6 +20,7 @@ import {
   DollarSign,
   ShieldAlert,
   Sparkles,
+  Sliders,
 } from "lucide-react";
 
 interface ConnectionItem {
@@ -55,6 +56,8 @@ interface TelemetryLog {
   id: string;
   taskType: string;
   modelId: string;
+  promptVersionId?: string | null;
+  roleId?: string | null;
   inputTokens: number;
   outputTokens: number;
   cachedReadTokens: number;
@@ -85,6 +88,7 @@ interface FailedJobItem {
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<"connections" | "step_models" | "telemetry" | "failed_jobs" | "workspace">("connections");
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // --- Connections Tab State ---
   const [connections, setConnections] = useState<ConnectionItem[]>([]);
@@ -356,28 +360,53 @@ export default function SettingsPage() {
             </p>
           </div>
 
-          {/* Local-Only Mode Master Switch (Task 1.2 & 4.3) */}
-          <div className="flex items-center gap-3 rounded-xl border border-gray-800 bg-[#0E1322] p-2.5 px-4 shadow-sm">
-            <Server className="h-4 w-4 text-indigo-400" />
-            <div>
-              <div className="text-xs font-semibold text-white">Local-Only Mode</div>
-              <div className="text-[10px] text-gray-400">Bypass all paid APIs &rarr; Laptop Ollama</div>
+          <div className="flex items-center gap-3">
+            {/* View Mode Switcher: Day One vs Advanced (Task 1.5) */}
+            <div className="flex items-center gap-2.5 rounded-xl border border-gray-800 bg-[#0E1322] p-2.5 px-3.5 shadow-sm">
+              <Sliders className="h-4 w-4 text-cyan-400" />
+              <div>
+                <div className="text-xs font-semibold text-white">View Mode</div>
+                <div className="text-[10px] text-gray-400">
+                  {showAdvanced ? "All Developer & Queue Controls" : "Day One Essential Settings"}
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className={`ml-1 text-xs font-mono font-medium rounded-lg px-2.5 py-1 transition ${
+                  showAdvanced
+                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                }`}
+                title="Toggle between Day One and Advanced developer settings"
+              >
+                {showAdvanced ? "ADVANCED (UNLOCKED)" : "DAY ONE VIEW"}
+              </button>
             </div>
-            <button
-              onClick={toggleLocalMode}
-              className={`ml-2 text-xs font-mono font-medium rounded-lg px-2.5 py-1 transition ${
-                localOnlyMode
-                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                  : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-              }`}
-            >
-              {localOnlyMode ? "ACTIVE (LOCAL)" : "INACTIVE"}
-            </button>
+
+            {/* Local-Only Mode Master Switch (Task 1.2 & 4.3) */}
+            <div className="flex items-center gap-3 rounded-xl border border-gray-800 bg-[#0E1322] p-2.5 px-4 shadow-sm">
+              <Server className="h-4 w-4 text-indigo-400" />
+              <div>
+                <div className="text-xs font-semibold text-white">Local-Only Mode</div>
+                <div className="text-[10px] text-gray-400">Bypass paid APIs &rarr; Laptop Ollama</div>
+              </div>
+              <button
+                onClick={toggleLocalMode}
+                className={`ml-2 text-xs font-mono font-medium rounded-lg px-2.5 py-1 transition ${
+                  localOnlyMode
+                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                    : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                }`}
+              >
+                {localOnlyMode ? "ACTIVE (LOCAL)" : "INACTIVE"}
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-gray-800 space-x-1">
+        <div className="flex border-b border-gray-800 space-x-1 items-center">
+          {/* Day One Tabs */}
           <button
             onClick={() => setActiveTab("connections")}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
@@ -428,32 +457,47 @@ export default function SettingsPage() {
             <span>Model Telemetry & Cost Logs</span>
           </button>
 
-          <button
-            onClick={() => {
-              setActiveTab("failed_jobs");
-              fetchFailedJobs();
-            }}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
-              activeTab === "failed_jobs"
-                ? "border-indigo-500 text-indigo-400"
-                : "border-transparent text-gray-400 hover:text-gray-200"
-            }`}
-          >
-            <AlertOctagon className="h-4 w-4" />
-            <span>Failed Jobs Drawer ({failedJobs.length})</span>
-          </button>
+          {/* Advanced Tabs (Unlocked via View Mode or Toggle) */}
+          {showAdvanced ? (
+            <>
+              <button
+                onClick={() => {
+                  setActiveTab("failed_jobs");
+                  fetchFailedJobs();
+                }}
+                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+                  activeTab === "failed_jobs"
+                    ? "border-indigo-500 text-indigo-400"
+                    : "border-transparent text-gray-400 hover:text-gray-200"
+                }`}
+              >
+                <AlertOctagon className="h-4 w-4" />
+                <span>Failed Jobs Drawer ({failedJobs.length})</span>
+                <span className="text-[10px] px-1 rounded bg-amber-500/20 text-amber-300 font-mono">Adv</span>
+              </button>
 
-          <button
-            onClick={() => setActiveTab("workspace")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
-              activeTab === "workspace"
-                ? "border-indigo-500 text-indigo-400"
-                : "border-transparent text-gray-400 hover:text-gray-200"
-            }`}
-          >
-            <Users className="h-4 w-4" />
-            <span>Workspace & Danger Zone</span>
-          </button>
+              <button
+                onClick={() => setActiveTab("workspace")}
+                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+                  activeTab === "workspace"
+                    ? "border-indigo-500 text-indigo-400"
+                    : "border-transparent text-gray-400 hover:text-gray-200"
+                }`}
+              >
+                <Users className="h-4 w-4" />
+                <span>Workspace & Danger Zone</span>
+                <span className="text-[10px] px-1 rounded bg-red-500/20 text-red-300 font-mono">Adv</span>
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setShowAdvanced(true)}
+              className="text-xs font-mono text-gray-500 hover:text-cyan-400 px-3 py-1 rounded border border-dashed border-gray-800 ml-auto transition"
+              title="Unlock Advanced Settings: Failed Jobs and Danger Zone"
+            >
+              + Unlock Advanced Tabs (Jobs &amp; Danger Zone)
+            </button>
+          )}
         </div>
 
         {/* ================= TAB 1: THE 5 CONNECTIONS (Task 1.2) ================= */}
@@ -797,6 +841,8 @@ export default function SettingsPage() {
                       <th className="px-4 py-3">Timestamp</th>
                       <th className="px-4 py-3">Task Type</th>
                       <th className="px-4 py-3">Model</th>
+                      <th className="px-4 py-3">Role</th>
+                      <th className="px-4 py-3">Prompt Ver</th>
                       <th className="px-4 py-3 text-right">Tokens (In / Out / Cache)</th>
                       <th className="px-4 py-3 text-right">Latency</th>
                       <th className="px-4 py-3 text-right">Cost (USD)</th>
@@ -815,6 +861,8 @@ export default function SettingsPage() {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-white font-mono">{log.modelId}</td>
+                        <td className="px-4 py-3 text-gray-400 font-mono text-[11px]">{log.roleId ? log.roleId.slice(0, 8) : "consultant"}</td>
+                        <td className="px-4 py-3 text-gray-400 font-mono text-[11px]">{log.promptVersionId ? log.promptVersionId.slice(0, 8) : "v1"}</td>
                         <td className="px-4 py-3 text-right font-mono text-gray-300">
                           {log.inputTokens} / {log.outputTokens} /{" "}
                           <span className="text-purple-400">{log.cachedReadTokens}</span>

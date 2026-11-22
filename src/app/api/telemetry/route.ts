@@ -54,6 +54,8 @@ export async function GET(req: NextRequest) {
         id: l.id,
         taskType: l.taskType,
         modelId: l.modelId,
+        promptVersionId: l.promptVersionId,
+        roleId: l.roleId,
         inputTokens: l.inputTokens,
         outputTokens: l.outputTokens,
         cachedReadTokens: l.cachedReadTokens,
