@@ -126,27 +126,30 @@ export function runModelMatrixEvaluation(localOnly: boolean = false): ModelEvalM
   return metrics;
 }
 
+import { runHumanJudgeCalibration } from "./judge";
+
 /**
  * Returns 20-case human expert vs AI judge calibration results.
  * Specification: Show that your AI judge agrees with human scores >= 90% of the time.
  */
 export function getHumanJudgeCalibrationResults() {
-  const cases = Array.from({ length: 20 }, (_, i) => ({
-    caseId: `calib-${(i + 1).toString().padStart(2, "0")}`,
-    question: `Customer configuration inquiry ${i + 1}: CNAME DNS, SSL, and webhook verification`,
-    humanGrade: i < 19 ? 95 : 20,
-    aiJudgeGrade: i < 19 ? 92 : 25,
-    agreed: true,
-  }));
-
-  const agreedCases = cases.filter((c) => Math.abs(c.humanGrade - c.aiJudgeGrade) <= 15).length;
-  const agreementRatePercent = Number(((agreedCases / cases.length) * 100).toFixed(1));
-
+  const cal = runHumanJudgeCalibration();
   return {
-    totalCases: cases.length,
-    agreedCases,
-    agreementRatePercent,
-    cases,
+    totalCases: cal.totalCases,
+    agreedCases: cal.agreedCases,
+    agreementRatePercent: cal.agreementRatePercent,
+    summaryText: cal.summaryText,
+    passedThreshold: cal.passedThreshold,
+    cases: cal.cases.map((c) => ({
+      caseId: c.caseId,
+      question: c.question,
+      humanGrade: c.humanScore,
+      aiJudgeGrade: c.judgeScore,
+      agreed: c.agreed,
+      humanReason: c.humanReason,
+      judgeReason: c.judgeReason,
+    })),
   };
 }
+
 

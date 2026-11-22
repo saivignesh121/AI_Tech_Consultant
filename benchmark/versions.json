@@ -1,0 +1,55 @@
+{
+  "activeVersion": "2.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "name": "Step 4 Seed Test Set",
+      "description": "The initial seed test set from Step 4 of 'How to start', saved as versioned files in the repository. Contains 20 realistic technical support and consulting inquiries.",
+      "totalCases": 20,
+      "filePath": "benchmark/v1.0.0/test_set.json",
+      "releaseDate": "2026-11-20T10:00:00.000Z",
+      "categories": [
+        "DNS & Domains",
+        "Security & SSL",
+        "Billing & Escalation",
+        "Database Configuration",
+        "Security & Injection",
+        "Legal & Compliance",
+        "Webhooks & APIs",
+        "Unanswerable / Hallucination Check",
+        "Email Deliverability",
+        "API Rate Limits",
+        "Authentication & OAuth",
+        "API Security",
+        "Screenshots & Vision",
+        "Sitemaps & Freshness",
+        "Role Tone & Conciseness",
+        "Billing Tiers",
+        "Angry Customer Escalation",
+        "Synonyms & Typos",
+        "Data Privacy & GDPR",
+        "Offline Local Execution"
+      ]
+    },
+    {
+      "version": "2.0.0",
+      "name": "Production 180 Benchmark Suite",
+      "description": "Comprehensive 180-test benchmark suite covering Knowledge Brain (100), Ask & Teach Chat (60), and Escalations/Safety (20).",
+      "totalCases": 180,
+      "filePath": "benchmark/v2.0.0/benchmark_180.json",
+      "releaseDate": "2026-11-21T16:21:31.513Z",
+      "categories": [
+        "Knowledge Brain (Help Pages)",
+        "Knowledge Brain (Screenshots)",
+        "Knowledge Brain (Unanswerable)",
+        "Knowledge Brain (Instructions & Skills)",
+        "Knowledge Brain (Synonyms & Typos)",
+        "Knowledge Brain (URL Health Levels)",
+        "Ask & Teach (Trick Injections)",
+        "Ask & Teach (Escalations & Safety)",
+        "Ask & Teach (Teach Pairs)",
+        "Ask & Teach (Consultant & General)"
+      ]
+    }
+  ]
+}

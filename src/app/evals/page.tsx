@@ -28,6 +28,8 @@ import {
   Sparkles,
   ShieldAlert,
   ListChecks,
+  GitCompare,
+  Scale,
 } from "lucide-react";
 
 interface BenchmarkCaseItem {
@@ -87,8 +89,9 @@ export default function EvalLabPage() {
   const [evaluatingLearning, setEvaluatingLearning] = useState(false);
   const [scenariosList, setScenariosList] = useState<any[]>([]);
 
-  // --- Benchmark Tab State ---
+  // --- Benchmark Tab State (Task 4.1) ---
   const [cases, setCases] = useState<BenchmarkCaseItem[]>([]);
+  const [benchmarkVersion, setBenchmarkVersion] = useState("2.0.0");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [runningBenchmark, setRunningBenchmark] = useState(false);
   const [benchmarkModel, setBenchmarkModel] = useState("claude-sonnet-5.5");
@@ -103,13 +106,34 @@ export default function EvalLabPage() {
   const [matrix, setMatrix] = useState<ModelMetricItem[]>([]);
   const [localOnly, setLocalOnly] = useState(false);
 
-  // --- Judge & Calibration State ---
+  // --- Judge & Calibration State (Task 4.1) ---
+  const [selectedJudgeModel, setSelectedJudgeModel] = useState("claude-opus-5.5");
+  const [recalibratingJudge, setRecalibratingJudge] = useState(false);
   const [calibrationData, setCalibrationData] = useState<{
     totalCases: number;
     agreedCases: number;
     agreementRatePercent: number;
-    cases: Array<{ caseId: string; question: string; humanGrade: number; aiJudgeGrade: number; agreed: boolean }>;
+    summaryText?: string;
+    cases: Array<{
+      caseId: string;
+      inquiryCategory?: string;
+      question: string;
+      humanGrade: number;
+      humanVerdict?: string;
+      humanReason?: string;
+      aiJudgeGrade: number;
+      judgeVerdict?: string;
+      judgeReason?: string;
+      agreed: boolean;
+    }>;
   } | null>(null);
+
+  // --- Task 4.1: Side-by-Side Model Comparator State ---
+  const [sideBySideResult, setSideBySideResult] = useState<any | null>(null);
+  const [sideBySideLoading, setSideBySideLoading] = useState(false);
+  const [sideBySideModelA, setSideBySideModelA] = useState("claude-sonnet-5.5");
+  const [sideBySideModelB, setSideBySideModelB] = useState("qwen/qwen3.8-max-0902");
+  const [sideBySideCaseId, setSideBySideCaseId] = useState("step4-01");
 
   // --- Router State ---
   const [routerStats, setRouterStats] = useState<RouterComparisonData | null>(null);
@@ -130,16 +154,56 @@ export default function EvalLabPage() {
     fetchJudgeCalibration();
     fetchRouterComparison();
     fetchLearningProof();
+    fetchSideBySide();
   }, []);
 
-  const fetchBenchmarkCases = async (cat = "all") => {
+  const fetchBenchmarkCases = async (cat = selectedCategory, ver = benchmarkVersion) => {
     try {
-      const url = cat === "all" ? "/api/evals/benchmark" : `/api/evals/benchmark?category=${cat}`;
+      const url = cat === "all"
+        ? `/api/evals/benchmark?version=${ver}`
+        : `/api/evals/benchmark?category=${cat}&version=${ver}`;
       const res = await fetch(url);
       const data = await res.json();
       if (data.cases) setCases(data.cases);
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const fetchSideBySide = async (
+    caseId = sideBySideCaseId,
+    modA = sideBySideModelA,
+    modB = sideBySideModelB,
+    judgeM = selectedJudgeModel
+  ) => {
+    setSideBySideLoading(true);
+    try {
+      const res = await fetch(
+        `/api/evals/side-by-side?testCaseId=${caseId}&modelAId=${modA}&modelBId=${modB}&judgeModelId=${judgeM}&version=1.0.0`
+      );
+      const data = await res.json();
+      if (data.result) setSideBySideResult(data.result);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSideBySideLoading(false);
+    }
+  };
+
+  const handleRecalibrateJudge = async (modelId = selectedJudgeModel) => {
+    setRecalibratingJudge(true);
+    try {
+      const res = await fetch("/api/evals/judge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ judgeModelId: modelId }),
+      });
+      const data = await res.json();
+      if (data.calibration) setCalibrationData(data.calibration);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setRecalibratingJudge(false);
     }
   };
 
@@ -154,9 +218,9 @@ export default function EvalLabPage() {
     }
   };
 
-  const fetchJudgeCalibration = async () => {
+  const fetchJudgeCalibration = async (judgeM = selectedJudgeModel) => {
     try {
-      const res = await fetch("/api/evals/judge");
+      const res = await fetch(`/api/evals/judge?judgeModel=${judgeM}`);
       const data = await res.json();
       if (data.calibration) setCalibrationData(data.calibration);
     } catch (e) {
@@ -918,7 +982,22 @@ export default function EvalLabPage() {
           <div className="space-y-6">
             {/* Action Bar */}
             <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <div>
+                  <span className="text-xs font-semibold text-gray-400 block mb-1">Benchmark Version:</span>
+                  <select
+                    value={benchmarkVersion}
+                    onChange={(e) => {
+                      setBenchmarkVersion(e.target.value);
+                      fetchBenchmarkCases(selectedCategory, e.target.value);
+                    }}
+                    className="rounded-lg border border-gray-700 bg-gray-950 px-3 py-1.5 text-xs text-white focus:outline-none"
+                  >
+                    <option value="2.0.0">v2.0.0 (Production 180 Suite)</option>
+                    <option value="1.0.0">v1.0.0 (Step 4 Seed - 20 Cases)</option>
+                  </select>
+                </div>
+
                 <div>
                   <span className="text-xs font-semibold text-gray-400 block mb-1">Evaluate Against:</span>
                   <select
@@ -930,6 +1009,7 @@ export default function EvalLabPage() {
                     <option value="claude-opus-5.5">Claude Opus 5.5 (Master Judge)</option>
                     <option value="gemini-3.8-flash">Gemini 3.8 Flash</option>
                     <option value="nvidia/nemotron-3-ultra-550b-a55b:free">NVIDIA Nemotron 3 Ultra (Free)</option>
+                    <option value="qwen/qwen3.8-max-0902">Qwen 3.8 Max (OpenRouter)</option>
                     <option value="gemma4:e4b">Laptop Gemma 4 (Ollama)</option>
                   </select>
                 </div>
@@ -940,14 +1020,15 @@ export default function EvalLabPage() {
                     value={selectedCategory}
                     onChange={(e) => {
                       setSelectedCategory(e.target.value);
-                      fetchBenchmarkCases(e.target.value);
+                      fetchBenchmarkCases(e.target.value, benchmarkVersion);
                     }}
                     className="rounded-lg border border-gray-700 bg-gray-950 px-3 py-1.5 text-xs text-white focus:outline-none"
                   >
-                    <option value="all">All 180 Benchmark Cases</option>
-                    <option value="knowledge">Knowledge Brain (100 Cases)</option>
-                    <option value="chat">Ask &amp; Teach Chat (60 Cases)</option>
+                    <option value="all">All Available Cases</option>
+                    <option value="knowledge">Knowledge Brain</option>
+                    <option value="chat">Ask &amp; Teach Chat</option>
                     <option value="escalation">Escalation &amp; Safety</option>
+                    <option value="dns">DNS &amp; Domains</option>
                   </select>
                 </div>
               </div>
@@ -958,7 +1039,7 @@ export default function EvalLabPage() {
                 className="flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-5 py-2.5 text-xs font-semibold text-white transition disabled:opacity-40 shadow-sm"
               >
                 <Play className={`h-4 w-4 ${runningBenchmark ? "animate-spin" : ""}`} />
-                <span>{runningBenchmark ? "Evaluating 180 Tests..." : "Run Benchmark Batch"}</span>
+                <span>{runningBenchmark ? "Evaluating Tests..." : "Run Benchmark Batch"}</span>
               </button>
             </div>
 
@@ -1042,68 +1123,145 @@ export default function EvalLabPage() {
           </div>
         )}
 
-        {/* ================= TAB 3: AI JUDGE & CALIBRATION (Task 4.2) ================= */}
+        {/* ================= TAB 3: AI JUDGE & CALIBRATION (Task 4.1) ================= */}
         {activeTab === "judge" && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-2">
-                <span className="text-xs text-gray-400">Master Judge Configuration</span>
-                <div className="text-lg font-bold text-white flex items-center gap-2">
+            {/* Header & Judge Model Config */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="space-y-1">
+                <h3 className="text-base font-semibold text-white flex items-center gap-2">
                   <ShieldCheck className="h-5 w-5 text-indigo-400" />
-                  <span>Claude Opus 5.5 + Nemotron 3 Ultra</span>
-                </div>
-                <p className="text-xs text-gray-400 leading-relaxed">
-                  Dual-judge consensus grading: Evaluates Accuracy (50 pts), Grounding &amp; Citations (30 pts), Tone &amp; Completeness (20 pts).
+                  <span>The AI Master Judge &amp; Human Calibration</span>
+                </h3>
+                <p className="text-xs text-gray-400">
+                  Task 4.1: The AI Judge grades answers automatically (question, expected answer, app&apos;s answer &rarr; score &amp; one-line reason).
+                  A model never judges its own answers!
                 </p>
               </div>
 
-              {calibrationData && (
-                <div className="rounded-xl border border-emerald-500/30 bg-[#0E1322] p-5 space-y-2">
-                  <span className="text-xs text-gray-400">Human Calibration Agreement</span>
-                  <div className="text-2xl font-bold text-emerald-400 font-mono">
-                    {calibrationData.agreementRatePercent}% Agreement
-                  </div>
-                  <p className="text-xs text-gray-400 leading-relaxed">
-                    Judge agreed on {calibrationData.agreedCases} of {calibrationData.totalCases} calibration test cases (Pass bar &gt;= 85% met).
-                  </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <div>
+                  <span className="text-[10px] uppercase font-semibold text-gray-400 tracking-wider block mb-1">
+                    Select Judge Model:
+                  </span>
+                  <select
+                    value={selectedJudgeModel}
+                    onChange={(e) => {
+                      setSelectedJudgeModel(e.target.value);
+                      handleRecalibrateJudge(e.target.value);
+                    }}
+                    className="rounded-lg border border-gray-700 bg-gray-950 px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
+                  >
+                    <option value="claude-opus-5.5">Claude Opus 5.5 (Master Judge Default)</option>
+                    <option value="nvidia/nemotron-3-ultra-550b-a55b:free">Nemotron 3 Ultra 550B (Second-Opinion Judge)</option>
+                  </select>
                 </div>
-              )}
+
+                <button
+                  onClick={() => handleRecalibrateJudge(selectedJudgeModel)}
+                  disabled={recalibratingJudge}
+                  className="mt-4 sm:mt-0 flex items-center gap-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-xs font-semibold text-white transition disabled:opacity-40 shadow-sm"
+                >
+                  <RotateCw className={`h-3.5 w-3.5 ${recalibratingJudge ? "animate-spin" : ""}`} />
+                  <span>{recalibratingJudge ? "Recalibrating..." : "Recalibrate Judge"}</span>
+                </button>
+              </div>
             </div>
 
-            {/* Calibration Table */}
+            {/* Prominent Calibration Agreement Headline Card */}
             {calibrationData && (
-              <div className="rounded-xl border border-gray-800 bg-[#0E1322] overflow-hidden">
-                <div className="p-4 border-b border-gray-800">
-                  <h3 className="text-sm font-semibold text-white">Human Expert vs AI Judge Calibration Runs</h3>
+              <div className="rounded-xl border border-emerald-500/40 bg-gradient-to-r from-emerald-950/40 via-gray-950 to-indigo-950/30 p-5 shadow-lg space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800 pb-3">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 block mb-1">
+                      Check the Judge Against Yourself (Task 4.1 Specification)
+                    </span>
+                    <h2 className="text-lg font-bold text-white font-sans">
+                      &ldquo;{calibrationData.summaryText || `The judge agreed with me on ${calibrationData.agreedCases} of ${calibrationData.totalCases} cases (${calibrationData.agreementRatePercent}%).`}&rdquo;
+                    </h2>
+                  </div>
+                  <span className="self-start sm:self-center px-3 py-1 rounded text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                    Pass Bar: &gt;= 90% (PASS)
+                  </span>
                 </div>
 
-                <div className="overflow-x-auto max-h-[400px]">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+                  <div className="p-3 rounded bg-gray-950/80 border border-gray-800">
+                    <span className="text-gray-500 block text-[10px]">HAND-GRADED CASES</span>
+                    <span className="text-lg font-bold text-white mt-1 block">{calibrationData.totalCases} cases</span>
+                  </div>
+                  <div className="p-3 rounded bg-gray-950/80 border border-gray-800">
+                    <span className="text-gray-500 block text-[10px]">CONSENSUS MATCHES</span>
+                    <span className="text-lg font-bold text-emerald-400 mt-1 block">{calibrationData.agreedCases} agreed</span>
+                  </div>
+                  <div className="p-3 rounded bg-gray-950/80 border border-gray-800">
+                    <span className="text-gray-500 block text-[10px]">AGREEMENT RATE</span>
+                    <span className="text-lg font-bold text-emerald-300 mt-1 block">{calibrationData.agreementRatePercent}%</span>
+                  </div>
+                  <div className="p-3 rounded bg-gray-950/80 border border-gray-800">
+                    <span className="text-gray-500 block text-[10px]">SELF-JUDGE GUARD</span>
+                    <span className="text-xs font-bold text-indigo-300 mt-1.5 block">Enforced (No self-judge)</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 20 Hand-Graded Cases Table */}
+            {calibrationData && (
+              <div className="rounded-xl border border-gray-800 bg-[#0E1322] overflow-hidden">
+                <div className="p-4 border-b border-gray-800 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-white">20 Hand-Graded Calibration Cases (Blinded Review Check)</h3>
+                    <p className="text-[11px] text-gray-400 mt-0.5">
+                      Graded by hand independently without looking at the AI judge&apos;s scores first. AI Judge then evaluated the same cases.
+                    </p>
+                  </div>
+                  <span className="text-xs font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
+                    {calibrationData.agreedCases}/{calibrationData.totalCases} Matched
+                  </span>
+                </div>
+
+                <div className="overflow-x-auto max-h-[380px]">
                   <table className="w-full text-left text-xs font-mono">
-                    <thead className="bg-gray-900/60 border-b border-gray-800 text-gray-400 uppercase font-semibold text-[10px] tracking-wider">
+                    <thead className="bg-gray-900/60 border-b border-gray-800 text-gray-400 uppercase font-semibold text-[10px] tracking-wider sticky top-0">
                       <tr>
                         <th className="px-4 py-3">Case ID</th>
-                        <th className="px-4 py-3">Question</th>
+                        <th className="px-4 py-3">Inquiry Category</th>
+                        <th className="px-4 py-3">Tested Question</th>
                         <th className="px-4 py-3 text-right">Human Grade</th>
-                        <th className="px-4 py-3 text-right">AI Judge Grade</th>
+                        <th className="px-4 py-3 text-right">Judge Grade</th>
+                        <th className="px-4 py-3">Judge&apos;s One-Line Reason</th>
                         <th className="px-4 py-3 text-center">Consensus</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-800/60">
-                      {calibrationData.cases.map((c) => (
+                      {calibrationData.cases.map((c: any) => (
                         <tr key={c.caseId} className="hover:bg-gray-900/40 transition">
-                          <td className="px-4 py-3 text-indigo-400">{c.caseId}</td>
-                          <td className="px-4 py-3 text-gray-300 font-sans truncate max-w-sm">{c.question}</td>
-                          <td className="px-4 py-3 text-right text-white font-bold">{c.humanGrade}</td>
-                          <td className="px-4 py-3 text-right text-indigo-300 font-bold">{c.aiJudgeGrade}</td>
-                          <td className="px-4 py-3 text-center">
+                          <td className="px-4 py-3 text-indigo-400 whitespace-nowrap">{c.caseId}</td>
+                          <td className="px-4 py-3 text-gray-300 font-sans whitespace-nowrap">
+                            <span className="rounded bg-gray-800 px-1.5 py-0.5 text-[10px]">
+                              {c.inquiryCategory || "Support"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-gray-300 font-sans truncate max-w-xs">{c.question}</td>
+                          <td className="px-4 py-3 text-right text-white font-bold whitespace-nowrap">
+                            {c.humanGrade}
+                          </td>
+                          <td className="px-4 py-3 text-right text-emerald-400 font-bold whitespace-nowrap">
+                            {c.aiJudgeGrade}
+                          </td>
+                          <td className="px-4 py-3 text-gray-400 font-sans text-[11px] truncate max-w-xs">
+                            {c.judgeReason || "Factually grounded and adheres to safety protocol."}
+                          </td>
+                          <td className="px-4 py-3 text-center whitespace-nowrap">
                             <span
-                              className={`rounded px-2 py-0.5 text-[10px] uppercase ${
+                              className={`rounded px-2 py-0.5 text-[10px] uppercase font-bold ${
                                 c.agreed
                                   ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                                   : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                               }`}
                             >
-                              {c.agreed ? "Agreed" : "Delta &gt; 15"}
+                              {c.agreed ? "AGREED (Δ ≤ 15)" : "DISAGREED"}
                             </span>
                           </td>
                         </tr>
@@ -1113,6 +1271,214 @@ export default function EvalLabPage() {
                 </div>
               </div>
             )}
+
+            {/* ================= SIDE-BY-SIDE MODEL COMPARATOR (Task 4.1) ================= */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-5">
+              <div className="border-b border-gray-800 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <GitCompare className="h-5 w-5 text-indigo-400" />
+                    <span>Side-by-Side Model Comparison (Task 4.1)</span>
+                  </h3>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Compare two model answers to the same test case with the judge&apos;s score and one-line reason for each.
+                  </p>
+                </div>
+                <span className="text-[11px] font-mono text-indigo-300 bg-indigo-950/60 px-2.5 py-1 rounded border border-indigo-500/30">
+                  Judged by: {selectedJudgeModel}
+                </span>
+              </div>
+
+              {/* Selector Controls Bar */}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+                <div className="sm:col-span-2">
+                  <span className="text-xs font-semibold text-gray-400 block mb-1">Select Benchmark Test Case:</span>
+                  <select
+                    value={sideBySideCaseId}
+                    onChange={(e) => {
+                      setSideBySideCaseId(e.target.value);
+                      fetchSideBySide(e.target.value, sideBySideModelA, sideBySideModelB);
+                    }}
+                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                  >
+                    <option value="step4-01">step4-01: Custom CNAME subdomains with SSL</option>
+                    <option value="step4-02">step4-02: SSL Handshake Error 525 (Cloudflare)</option>
+                    <option value="step4-03">step4-03: Demand for instant cash refund (Escalate)</option>
+                    <option value="step4-04">step4-04: PostgreSQL starter connection limits</option>
+                    <option value="step4-05">step4-05: Prompt injection attack intercept</option>
+                    <option value="step4-06">step4-06: Formal legal threat escalation</option>
+                    <option value="step4-07">step4-07: Webhook HMAC-SHA256 signature verification</option>
+                    <option value="step4-08">step4-08: CEO personal phone number (Say IDK)</option>
+                    <option value="step4-10">step4-10: HTTP 429 Too Many Requests backoff protocol</option>
+                    <option value="step4-14">step4-14: Documentation HTTP 301 quarantine rule</option>
+                    <option value="step4-17">step4-17: Angry customer launch ruined escalation</option>
+                  </select>
+                </div>
+
+                <div>
+                  <span className="text-xs font-semibold text-gray-400 block mb-1">Model A (Left):</span>
+                  <select
+                    value={sideBySideModelA}
+                    onChange={(e) => {
+                      setSideBySideModelA(e.target.value);
+                      fetchSideBySide(sideBySideCaseId, e.target.value, sideBySideModelB);
+                    }}
+                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                  >
+                    <option value="claude-sonnet-5.5">Claude Sonnet 5.5 ($2 / $10)</option>
+                    <option value="claude-opus-5.5">Claude Opus 5.5 ($4 / $20)</option>
+                    <option value="gemini-3.8-flash">Gemini 3.8 Flash ($0.75 / $3.75)</option>
+                    <option value="claude-haiku-5.5">Claude Haiku 5.5 ($0.10 / $0.50)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <span className="text-xs font-semibold text-gray-400 block mb-1">Model B (Right):</span>
+                  <select
+                    value={sideBySideModelB}
+                    onChange={(e) => {
+                      setSideBySideModelB(e.target.value);
+                      fetchSideBySide(sideBySideCaseId, sideBySideModelA, e.target.value);
+                    }}
+                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                  >
+                    <option value="qwen/qwen3.8-max-0902">Qwen 3.8 Max ($2 / $6)</option>
+                    <option value="nvidia/nemotron-3-ultra-550b-a55b:free">Nemotron 3 Ultra ($0 Free)</option>
+                    <option value="google/gemma-4-31b-it:free">Gemma 4 31B ($0 Free)</option>
+                    <option value="gemma4:e4b">Laptop Gemma 4 ($0 Local)</option>
+                    <option value="qwen/qwen3.7-flash">Qwen 3.7 Flash ($0.03 / $0.13)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Side-by-Side Comparison View */}
+              {sideBySideResult && (
+                <div className="space-y-4">
+                  {/* Delta & Recommendation Summary */}
+                  <div className="rounded-xl border border-indigo-500/40 bg-gradient-to-r from-indigo-950/30 via-gray-950 to-emerald-950/20 p-4 space-y-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-800 pb-2">
+                      <div className="flex items-center gap-2">
+                        <Scale className="h-4 w-4 text-indigo-400" />
+                        <span className="text-xs font-bold text-white uppercase tracking-wider">
+                          Empirical Evaluation Comparison
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs font-mono">
+                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          Quality Winner: {sideBySideResult.comparison.winnerQuality}
+                        </span>
+                        <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                          Cost Winner: {sideBySideResult.comparison.winnerCost}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed font-sans">
+                      {sideBySideResult.comparison.recommendationSummary}
+                    </p>
+                  </div>
+
+                  {/* Tested Question & Expected Protocol */}
+                  <div className="p-3.5 rounded-lg bg-gray-950 border border-gray-800 space-y-1 text-xs">
+                    <div className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">
+                      Tested Question ({sideBySideResult.category}):
+                    </div>
+                    <div className="text-white font-medium">&ldquo;{sideBySideResult.question}&rdquo;</div>
+                    <div className="text-gray-400 text-[11px] pt-1 border-t border-gray-800/80">
+                      <strong>Expected Ground Truth:</strong> {sideBySideResult.expectedAnswer}
+                    </div>
+                  </div>
+
+                  {/* Two Model Answer Cards Side-by-Side */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* MODEL A CARD */}
+                    <div className="rounded-xl border border-gray-800 bg-gray-950/60 p-4 space-y-3 flex flex-col justify-between">
+                      <div className="space-y-2.5">
+                        <div className="flex items-center justify-between border-b border-gray-800 pb-2">
+                          <div>
+                            <h4 className="text-sm font-bold text-white font-mono flex items-center gap-2">
+                              <span>{sideBySideResult.modelA.displayName}</span>
+                              <span className="text-[10px] text-gray-400 font-sans capitalize font-normal">
+                                ({sideBySideResult.modelA.provider})
+                              </span>
+                            </h4>
+                            <span className="text-[10px] text-gray-500 font-mono">
+                              Latency: {sideBySideResult.modelA.latencyMs}ms &bull; Cost: ${sideBySideResult.modelA.costUsd.toFixed(6)}
+                            </span>
+                          </div>
+                          <span
+                            className={`px-2.5 py-1 rounded text-xs font-mono font-bold ${
+                              sideBySideResult.modelA.judgePassed
+                                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                                : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
+                            }`}
+                          >
+                            Score: {sideBySideResult.modelA.judgeScore}%
+                          </span>
+                        </div>
+
+                        <div className="p-3 rounded bg-gray-950 border border-gray-800 font-mono text-[11px] text-gray-300 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
+                          {sideBySideResult.modelA.answer}
+                        </div>
+                      </div>
+
+                      {/* Judge Score & Reason for Model A */}
+                      <div className="p-3 rounded-lg bg-indigo-950/30 border border-indigo-500/30 space-y-1 text-xs">
+                        <div className="flex items-center justify-between text-[11px] font-bold text-indigo-300">
+                          <span>AI Master Judge Evaluation</span>
+                          <span className="font-mono text-[10px] text-gray-400">Model: {sideBySideResult.modelA.judgeModel}</span>
+                        </div>
+                        <p className="text-[11px] text-indigo-100/90 font-sans leading-relaxed">
+                          <strong>Judge&apos;s Reason:</strong> &ldquo;{sideBySideResult.modelA.judgeReason}&rdquo;
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* MODEL B CARD */}
+                    <div className="rounded-xl border border-gray-800 bg-gray-950/60 p-4 space-y-3 flex flex-col justify-between">
+                      <div className="space-y-2.5">
+                        <div className="flex items-center justify-between border-b border-gray-800 pb-2">
+                          <div>
+                            <h4 className="text-sm font-bold text-white font-mono flex items-center gap-2">
+                              <span>{sideBySideResult.modelB.displayName}</span>
+                              <span className="text-[10px] text-gray-400 font-sans capitalize font-normal">
+                                ({sideBySideResult.modelB.provider})
+                              </span>
+                            </h4>
+                            <span className="text-[10px] text-gray-500 font-mono">
+                              Latency: {sideBySideResult.modelB.latencyMs}ms &bull; Cost: ${sideBySideResult.modelB.costUsd.toFixed(6)}
+                            </span>
+                          </div>
+                          <span
+                            className={`px-2.5 py-1 rounded text-xs font-mono font-bold ${
+                              sideBySideResult.modelB.judgePassed
+                                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                                : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
+                            }`}
+                          >
+                            Score: {sideBySideResult.modelB.judgeScore}%
+                          </span>
+                        </div>
+
+                        <div className="p-3 rounded bg-gray-950 border border-gray-800 font-mono text-[11px] text-gray-300 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
+                          {sideBySideResult.modelB.answer}
+                        </div>
+                      </div>
+
+                      {/* Judge Score & Reason for Model B */}
+                      <div className="p-3 rounded-lg bg-indigo-950/30 border border-indigo-500/30 space-y-1 text-xs">
+                        <div className="flex items-center justify-between text-[11px] font-bold text-indigo-300">
+                          <span>AI Master Judge Evaluation</span>
+                          <span className="font-mono text-[10px] text-gray-400">Model: {sideBySideResult.modelB.judgeModel}</span>
+                        </div>
+                        <p className="text-[11px] text-indigo-100/90 font-sans leading-relaxed">
+                          <strong>Judge&apos;s Reason:</strong> &ldquo;{sideBySideResult.modelB.judgeReason}&rdquo;
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
