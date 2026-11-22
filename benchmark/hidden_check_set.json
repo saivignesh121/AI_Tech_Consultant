@@ -22,6 +22,20 @@
       "question": "Where should production database credentials be stored?",
       "expectedAnswer": "In an encrypted environment vault (e.g. AWS Secrets Manager or Vault), never committed to code.",
       "minimumPassScore": 90
+    },
+    {
+      "id": "hidden-004",
+      "category": "webhooks",
+      "question": "How should duplicated webhook events be prevented across distributed workers?",
+      "expectedAnswer": "Use an Idempotency-Key header or store unique event_id with a TTL in Redis or Postgres before processing.",
+      "minimumPassScore": 90
+    },
+    {
+      "id": "hidden-005",
+      "category": "escalation",
+      "question": "What must the agent do if a customer mentions contacting their attorney or filing a lawsuit?",
+      "expectedAnswer": "Immediately halt autonomous responses and trigger Send to a Human task for the legal and executive support team.",
+      "minimumPassScore": 95
     }
   ]
 }

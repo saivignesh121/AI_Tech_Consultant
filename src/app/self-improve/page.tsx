@@ -60,6 +60,11 @@ export default function SelfImprovePage() {
   const [triggerExpected, setTriggerExpected] = useState(
     "Point your A record to 54.214.12.8 per Solution Center."
   );
+  const [triggerComment, setTriggerComment] = useState(
+    "Failed to cite correct proxy ingress IP 54.214.12.8. Hallucinated localhost."
+  );
+  const [triggerMaxRounds, setTriggerMaxRounds] = useState(5);
+  const [triggerMaxBudget, setTriggerMaxBudget] = useState(5.0);
   const [forceCeiling, setForceCeiling] = useState(false);
   const [triggering, setTriggering] = useState(false);
 
@@ -125,6 +130,10 @@ export default function SelfImprovePage() {
           caseId: triggerCaseId,
           question: triggerQuestion,
           expectedAnswer: triggerExpected,
+          judgeCritique: triggerComment,
+          comment: triggerComment,
+          maxRounds: triggerMaxRounds,
+          maxBudgetUsd: triggerMaxBudget,
           forceFailureScenario: forceCeiling,
         }),
       });
@@ -540,16 +549,51 @@ export default function SelfImprovePage() {
                       </p>
                       <div className="space-y-1.5 text-xs font-mono">
                         <div className="p-2 bg-gray-50 rounded flex items-center justify-between text-gray-700">
-                          <span>1. Cloudflare CNAME flattening lookup</span>
+                          <span>1. [DNS] Migration TTL recommendation</span>
                           <span className="text-green-600 font-bold">100% OK</span>
                         </div>
                         <div className="p-2 bg-gray-50 rounded flex items-center justify-between text-gray-700">
-                          <span>2. Subdomain wildcard proxy protocol</span>
+                          <span>2. [Billing] Enterprise discount approval gate</span>
                           <span className="text-green-600 font-bold">100% OK</span>
                         </div>
                         <div className="p-2 bg-gray-50 rounded flex items-center justify-between text-gray-700">
-                          <span>3. Apex root domain ALIAS record</span>
+                          <span>3. [Security] Production DB credentials vault</span>
                           <span className="text-green-600 font-bold">100% OK</span>
+                        </div>
+                        <div className="p-2 bg-gray-50 rounded flex items-center justify-between text-gray-700">
+                          <span>4. [Webhooks] Distributed idempotency deduplication</span>
+                          <span className="text-green-600 font-bold">100% OK</span>
+                        </div>
+                        <div className="p-2 bg-gray-50 rounded flex items-center justify-between text-gray-700">
+                          <span>5. [Escalation] Legal threat human handoff valve</span>
+                          <span className="text-green-600 font-bold">100% OK</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Task 5.1 Safety Fencing & Sandbox Boundaries */}
+                    <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-gray-900 text-sm flex items-center gap-2">
+                          <ShieldCheck className="w-4 h-4 text-purple-600" />
+                          Task 5.1 Safety Fences & Branch Isolation
+                        </h3>
+                        <span className="text-xs font-semibold px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full">
+                          Enforced
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 gap-2 text-xs">
+                        <div className="p-2 bg-purple-50/60 rounded border border-purple-100">
+                          <span className="font-semibold text-purple-900">Branch Quarantine:</span>
+                          <p className="text-purple-700 font-mono mt-0.5">
+                            Opus works on \`{currentRun.branchName}\`. Main branch checkout is hard blocked.
+                          </p>
+                        </div>
+                        <div className="p-2 bg-gray-50 rounded border border-gray-200">
+                          <span className="font-semibold text-gray-700">Protected Test Set & Judge Prompt:</span>
+                          <p className="text-gray-500 font-mono mt-0.5">
+                            Edits to \`benchmark/**\`, \`tests/**\`, and \`src/services/eval/judge.ts\` trigger immediate security termination.
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -720,6 +764,49 @@ export default function SelfImprovePage() {
                     className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none"
                     required
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Human / AI Judge Critique (Comment)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={triggerComment}
+                    onChange={(e) => setTriggerComment(e.target.value)}
+                    className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Max Rounds
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={triggerMaxRounds}
+                      onChange={(e) => setTriggerMaxRounds(parseInt(e.target.value) || 5)}
+                      className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 font-mono focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Max Budget Cap ($ USD)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      min={1}
+                      max={20}
+                      value={triggerMaxBudget}
+                      onChange={(e) => setTriggerMaxBudget(parseFloat(e.target.value) || 5.0)}
+                      className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 font-mono focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
                 </div>
 
                 <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between">

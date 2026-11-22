@@ -109,7 +109,13 @@ export async function POST(req: NextRequest) {
       failingAnswer = "Point your A record to 127.0.0.1",
       expectedAnswer = "Point your A record to 54.214.12.8 per Solution Center.",
       judgeCritique = "Failed to cite correct IP.",
+      comment,
+      systemPrompt,
+      relatedCode,
+      targetBranch,
       activePromptVersion = "v1.2.0",
+      maxRounds = 5,
+      maxBudgetUsd = 5.0,
       forceFailureScenario = false,
     } = body;
 
@@ -119,13 +125,19 @@ export async function POST(req: NextRequest) {
       failingAnswer,
       expectedAnswer,
       judgeCritique,
+      comment,
+      systemPrompt,
+      relatedCode,
+      targetBranch,
       activePromptVersion,
     });
 
     const result = await executeOpusSelfImproveLoop(failurePkg, {
-      maxRounds: 5,
-      maxBudgetUsd: 5.0,
+      maxRounds,
+      maxBudgetUsd,
       forceFailureScenario,
+      businessSlug: tenant.businessSlug,
+      businessId: tenant.businessId,
     });
 
     // Persist to database
@@ -135,9 +147,9 @@ export async function POST(req: NextRequest) {
         businessId: tenant.businessId,
         branchName: result.branchName,
         roundsExecuted: result.roundsExecuted,
-        maxRounds: 5,
+        maxRounds,
         costAccumulatedUsd: result.totalCostUsd.toFixed(6),
-        maxBudgetUsd: "5.000000",
+        maxBudgetUsd: maxBudgetUsd.toFixed(6),
         status: result.status,
         prUrl: result.pullRequestUrl || null,
         failingCasesSummary: {
@@ -146,9 +158,13 @@ export async function POST(req: NextRequest) {
           failingAnswer,
           expectedAnswer,
           judgeCritique,
+          comment: failurePkg.comment,
+          systemPrompt: failurePkg.systemPrompt,
           scoreBefore: result.failingCaseScoreBefore,
           scoreAfter: result.failingCaseScoreAfter,
           hiddenCheckSetPassed: result.hiddenCheckSetPassed,
+          visibleCasesPassed: result.visibleCasesPassed ?? true,
+          roundsLog: result.rounds || [],
         },
       })
       .returning();
@@ -156,6 +172,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       run: inserted,
+      failurePackage: failurePkg,
+      rounds: result.rounds,
       reportMarkdown: result.reportMarkdown,
     });
   } catch (error) {
