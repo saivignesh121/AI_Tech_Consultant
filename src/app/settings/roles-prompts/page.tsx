@@ -696,59 +696,73 @@ ${skillForm.examples
 
   return (
     <AppShell breadcrumbs={[{ label: "Role & Prompt Studio" }]}>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#0B1B3A]">Role & Prompt Studio</h1>
-            <p className="text-sm text-gray-400 mt-1">
-              Refine governance prompts with variable validation, simulate prompt caching savings, and test agent personas live.
-            </p>
+      <div className="space-y-8">
+        {/* Header Banner: Proteus Royal Blue to Violet/Purple */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#1D4ED8] via-[#4338CA] to-[#7E22CE] text-white p-8 md:p-10 shadow-md">
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-cyan-200 text-xs font-mono font-medium">
+                <Sparkles className="h-3.5 w-3.5 text-cyan-300" />
+                <span>Autonomous Prompt &amp; Role Engineering</span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                Role &amp; Prompt Studio
+              </h1>
+              <p className="text-sm text-purple-100 max-w-2xl leading-relaxed">
+                Refine governance prompts with variable validation, simulate prompt caching savings, and test agent personas live.
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Tab Selection */}
-        <div className="flex border-b border-[#DCE6F5] space-x-1">
+        {/* Tab Selection in Rounded-Full Pills */}
+        <div className="flex flex-wrap gap-2.5 items-center pb-2 border-b border-[#DCE6F5]">
           <button
             onClick={() => setActiveTab("prompts")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
-              activeTab === "prompts" ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF] font-semibold" : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
+              activeTab === "prompts"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <FileCode className="h-4 w-4" />
-            <span>Prompt Studio & Caching Simulator</span>
+            <FileCode className="h-3.5 w-3.5" />
+            <span>Prompt Studio &amp; Caching Simulator</span>
           </button>
 
           <button
             onClick={() => setActiveTab("roles")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
-              activeTab === "roles" ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF] font-semibold" : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
+              activeTab === "roles"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <Users className="h-4 w-4" />
-            <span>Agent Roles & Live Split-Screen Test</span>
+            <Users className="h-3.5 w-3.5" />
+            <span>Role Studio &amp; Persona Sandbox</span>
           </button>
 
           <button
             onClick={() => setActiveTab("skills")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
-              activeTab === "skills" ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF] font-semibold" : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
+              activeTab === "skills"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <BookOpen className="h-4 w-4" />
-            <span>Skills &amp; SOP Workflows</span>
+            <BookOpen className="h-3.5 w-3.5" />
+            <span>Structured Skills &amp; SOPs</span>
           </button>
 
           <button
             onClick={() => setActiveTab("security_matrix")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
               activeTab === "security_matrix"
-                ? "border-cyan-400 text-cyan-300 font-semibold"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <ShieldCheck className="h-4 w-4 text-cyan-400" />
-            <span>Role Governance &amp; Security Matrix</span>
+            <ShieldCheck className="h-3.5 w-3.5" />
+            <span>Role Security Matrix &amp; Fencing</span>
           </button>
         </div>
 

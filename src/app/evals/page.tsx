@@ -623,134 +623,139 @@ export default function EvalLabPage() {
 
   return (
     <AppShell breadcrumbs={[{ label: "The Eval Lab" }]}>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#0B1B3A] flex items-center gap-2">
-              <FlaskConical className="h-6 w-6 text-[#2563EB]" />
-              <span>The Eval Lab</span>
-            </h1>
-            <p className="text-sm text-gray-400 mt-1">
-              Continuous 180-test benchmark verification, 14-model quality matrix, and 3-tier cost router.
-            </p>
-          </div>
+      <div className="space-y-8">
+        {/* Header Banner: Proteus Royal Blue to Violet/Purple Gradient */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#1D4ED8] via-[#4338CA] to-[#7E22CE] text-white p-8 md:p-10 shadow-md">
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-cyan-200 text-xs font-mono font-medium">
+                <FlaskConical className="h-3.5 w-3.5 text-cyan-300" />
+                <span>Automated Benchmarking &amp; Model Matrix</span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                The Eval Lab
+              </h1>
+              <p className="text-sm text-purple-100 max-w-2xl leading-relaxed">
+                Continuous 180-test benchmark verification, 14-model quality matrix, and 3-tier cost router.
+              </p>
+            </div>
 
-          <div className="flex items-center gap-2">
-            <span className="rounded-lg border border-emerald-500/20 bg-emerald-50 px-3 py-1.5 text-xs font-mono text-emerald-300 flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-              <span>Pass Bar: 98.8% Active</span>
-            </span>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-mono text-emerald-300 font-semibold shadow-xs flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                <span>Pass Bar: 98.8% Active</span>
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Tab Selection */}
-        <div className="flex border-b border-[#DCE6F5] space-x-1 overflow-x-auto">
+        {/* Tab Selection in Rounded-Full Pills */}
+        <div className="flex flex-wrap gap-2.5 items-center pb-2 border-b border-[#DCE6F5]">
           <button
             onClick={() => setActiveTab("jobs")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
               activeTab === "jobs"
-                ? "border-indigo-500 text-[#2563EB] font-semibold"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <ListChecks className="h-4 w-4" />
+            <ListChecks className="h-3.5 w-3.5" />
             <span>The 6 Eval Jobs</span>
           </button>
 
           <button
             onClick={() => setActiveTab("models")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
               activeTab === "models"
-                ? "border-indigo-500 text-[#2563EB] font-semibold"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <Cpu className="h-4 w-4" />
-            <span>14-Model Comparison Matrix</span>
+            <Cpu className="h-3.5 w-3.5" />
+            <span>14-Model Quality Matrix</span>
           </button>
 
           <button
             onClick={() => setActiveTab("local")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
               activeTab === "local"
-                ? "border-indigo-500 text-[#2563EB] font-semibold"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <HardDrive className="h-4 w-4" />
+            <HardDrive className="h-3.5 w-3.5" />
             <span>Laptop Local Models (Ollama)</span>
           </button>
 
           <button
             onClick={() => setActiveTab("judge")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
               activeTab === "judge"
-                ? "border-indigo-500 text-[#2563EB] font-semibold"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <ShieldCheck className="h-4 w-4" />
+            <ShieldCheck className="h-3.5 w-3.5" />
             <span>AI Judge &amp; Calibration</span>
           </button>
 
           <button
             onClick={() => setActiveTab("benchmark")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
               activeTab === "benchmark"
-                ? "border-indigo-500 text-[#2563EB] font-semibold"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <FlaskConical className="h-4 w-4" />
+            <FlaskConical className="h-3.5 w-3.5" />
             <span>Benchmark Suite (180 Tests)</span>
           </button>
 
           <button
             onClick={() => setActiveTab("router")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
               activeTab === "router"
-                ? "border-indigo-500 text-[#2563EB] font-semibold"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <Zap className="h-4 w-4" />
+            <Zap className="h-3.5 w-3.5" />
             <span>Cost-Optimized Model Router</span>
           </button>
 
           <button
             onClick={() => setActiveTab("release-gate")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
               activeTab === "release-gate"
-                ? "border-indigo-500 text-[#2563EB] font-semibold"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <Lock className="h-4 w-4" />
+            <Lock className="h-3.5 w-3.5" />
             <span>Production Release Gates</span>
           </button>
 
           <button
             onClick={() => setActiveTab("feedback-tests")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
               activeTab === "feedback-tests"
-                ? "border-indigo-500 text-[#2563EB] font-semibold"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <MessageSquarePlus className="h-4 w-4" />
+            <MessageSquarePlus className="h-3.5 w-3.5" />
             <span>User Feedback Test Generation</span>
           </button>
 
           <button
             onClick={() => setActiveTab("prove-learned")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
               activeTab === "prove-learned"
-                ? "border-emerald-500 text-emerald-400 font-semibold"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <GraduationCap className="h-4 w-4" />
+            <GraduationCap className="h-3.5 w-3.5" />
             <span>Learning Verification Benchmarks</span>
           </button>
         </div>

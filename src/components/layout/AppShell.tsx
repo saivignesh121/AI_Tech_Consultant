@@ -356,9 +356,9 @@ export default function AppShell({
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition ${
                     isActive
-                      ? "bg-[#EEF4FF] text-[#2563EB] border-l-[3px] border-[#2563EB] shadow-sm font-semibold"
+                      ? "bg-[#EEF5FD] text-[#1D4ED8] border-l-4 border-[#1D4ED8] shadow-xs font-bold"
                       : "text-[#4A5B78] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
                   }`}
                 >
@@ -599,8 +599,8 @@ export default function AppShell({
         {/* Content Body with RBAC Guard */}
         <div className="p-8 max-w-7xl w-full">
           {accessDeniedReason ? (
-            <div className="max-w-2xl mx-auto my-12 p-8 rounded-3xl border border-[#FCA5A5] bg-white shadow-xl shadow-red-500/5 text-center space-y-5 animate-in fade-in">
-              <div className="w-16 h-16 rounded-2xl bg-[#FEF2F2] border border-[#FCA5A5] text-[#DC2626] flex items-center justify-center mx-auto shadow-sm">
+            <div className="max-w-2xl mx-auto my-12 p-8 sm:p-10 rounded-3xl border-2 border-[#D0E2FB] bg-white shadow-xl shadow-blue-500/5 text-center space-y-6 animate-in fade-in">
+              <div className="w-16 h-16 rounded-2xl bg-[#FEF2F2] border border-[#FCA5A5] text-[#DC2626] flex items-center justify-center mx-auto shadow-xs">
                 <Lock className="h-8 w-8" />
               </div>
 
@@ -608,7 +608,7 @@ export default function AppShell({
                 <h2 className="text-2xl font-extrabold text-[#0B1B3A]">
                   Access Restricted by Role
                 </h2>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FEF2F2] border border-[#FCA5A5] text-[#DC2626] text-xs font-mono font-semibold">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FEF2F2] border border-[#FCA5A5] text-[#DC2626] text-xs font-mono font-semibold">
                   <span>Current Role:</span>
                   <strong className="uppercase">{currentTenant.userRole}</strong>
                 </div>
@@ -619,22 +619,22 @@ export default function AppShell({
               </p>
 
               {requiredRole && (
-                <div className="p-3.5 rounded-xl border border-[#DCE6F5] bg-[#EEF4FF] text-xs font-mono text-[#4A5B78]">
-                  Required Role: <span className="text-[#2563EB] font-bold">{requiredRole}</span>
+                <div className="p-4 rounded-2xl border border-[#DCE6F5] bg-[#EEF4FF] text-xs font-mono text-[#4A5B78]">
+                  Required Role: <span className="text-[#1D4ED8] font-bold">{requiredRole}</span>
                 </div>
               )}
 
-              <div className="pt-2 flex items-center justify-center gap-3">
+              <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
                 <Link
                   href="/"
-                  className="px-5 py-2.5 rounded-xl bg-white border border-[#DCE6F5] hover:bg-[#EEF4FF] text-[#0B1B3A] font-semibold text-xs transition shadow-sm"
+                  className="px-6 py-2.5 rounded-full bg-white border border-[#DCE6F5] hover:bg-[#EEF4FF] text-[#0B1B3A] font-semibold text-xs transition shadow-xs"
                 >
                   Return to Dashboard
                 </Link>
 
                 <button
                   onClick={() => switchRole("owner")}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 text-white font-bold text-xs transition shadow-md shadow-blue-500/20"
+                  className="px-6 py-2.5 rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white font-semibold text-xs transition shadow-sm"
                 >
                   Switch to Owner (Test Mode)
                 </button>

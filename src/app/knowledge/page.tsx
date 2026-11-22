@@ -990,40 +990,45 @@ export default function KnowledgeBrainPage() {
 
   return (
     <AppShell breadcrumbs={[{ label: "Knowledge Brain" }]}>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#0B1B3A] flex items-center gap-2">
-              <Brain className="h-6 w-6 text-indigo-400" />
-              <span>The Knowledge Brain</span>
-            </h1>
-            <p className="text-sm text-gray-400 mt-1">
-              Learns from 5 distinct knowledge types with dynamic citation badges: Sitemaps, Page URLs, Instructions, Skills, and Past Emails.
-            </p>
-          </div>
+      <div className="space-y-8">
+        {/* Flagship Header Banner: Proteus Royal Blue to Violet/Purple */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#1D4ED8] via-[#4338CA] to-[#7E22CE] text-white p-8 md:p-10 shadow-md">
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-cyan-200 text-xs font-mono font-medium">
+                <Brain className="h-3.5 w-3.5 text-cyan-300" />
+                <span>Multi-Source Ingestion &amp; Hybrid Vector Indexing</span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                The Knowledge Brain
+              </h1>
+              <p className="text-sm text-purple-100 max-w-2xl leading-relaxed">
+                Learns from 5 distinct knowledge types with dynamic citation badges: Sitemaps, Page URLs, Instructions, Skills, and Past Emails.
+              </p>
+            </div>
 
-          <div className="flex items-center gap-2">
-            <span className="rounded-lg border border-[#DCE6F5] bg-indigo-50 px-3 py-1.5 text-xs font-mono text-indigo-300">
-              5 Knowledge Types Active
-            </span>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-mono text-cyan-200 font-semibold shadow-xs">
+                5 Knowledge Types Active
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* 5 Primary Knowledge Types Tabs + Hybrid Search Sandbox */}
-        <div className="flex border-b border-[#DCE6F5] space-x-1 overflow-x-auto">
+        {/* 5 Primary Knowledge Types Tabs + Hybrid Search Sandbox in Rounded-Full Pills */}
+        <div className="flex flex-wrap gap-2.5 items-center pb-2 border-b border-[#DCE6F5]">
           {/* Tab 1: Sitemaps */}
           <button
             onClick={() => setActiveTab("sitemaps")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
               activeTab === "sitemaps"
-                ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF]"
-                : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
+                ? "bg-[#1D4ED8] text-white shadow-sm"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <Globe className="h-4 w-4" />
+            <Globe className="h-3.5 w-3.5" />
             <span>1. Sitemaps</span>
-            <span className="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200 font-mono font-medium">
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${activeTab === "sitemaps" ? "bg-white/20 text-white" : "bg-blue-50 text-blue-700 border border-blue-200"}`}>
               [sitemap]
             </span>
           </button>
@@ -1031,15 +1036,15 @@ export default function KnowledgeBrainPage() {
           {/* Tab 2: Page URLs */}
           <button
             onClick={() => setActiveTab("pages")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
               activeTab === "pages"
-                ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF]"
-                : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
+                ? "bg-[#1D4ED8] text-white shadow-sm"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <FileText className="h-4 w-4" />
+            <FileText className="h-3.5 w-3.5" />
             <span>2. Page URLs</span>
-            <span className="text-[10px] bg-sky-50 text-sky-700 px-1.5 py-0.5 rounded border border-sky-200 font-mono font-medium">
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${activeTab === "pages" ? "bg-white/20 text-white" : "bg-sky-50 text-sky-700 border border-sky-200"}`}>
               [page_url]
             </span>
           </button>
@@ -1047,15 +1052,15 @@ export default function KnowledgeBrainPage() {
           {/* Tab 3: Instructions */}
           <button
             onClick={() => setActiveTab("instructions")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
               activeTab === "instructions"
-                ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF]"
-                : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
+                ? "bg-[#1D4ED8] text-white shadow-sm"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <BookOpen className="h-4 w-4" />
+            <BookOpen className="h-3.5 w-3.5" />
             <span>3. Instructions</span>
-            <span className="text-[10px] bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-200 font-mono font-medium">
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${activeTab === "instructions" ? "bg-white/20 text-white" : "bg-emerald-50 text-emerald-700 border border-emerald-200"}`}>
               [instruction]
             </span>
           </button>
@@ -1063,15 +1068,15 @@ export default function KnowledgeBrainPage() {
           {/* Tab 4: Skills */}
           <button
             onClick={() => setActiveTab("skills")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
               activeTab === "skills"
-                ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF]"
-                : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
+                ? "bg-[#1D4ED8] text-white shadow-sm"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <Sparkles className="h-4 w-4" />
+            <Sparkles className="h-3.5 w-3.5" />
             <span>4. Skills</span>
-            <span className="text-[10px] bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded border border-purple-200 font-mono font-medium">
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${activeTab === "skills" ? "bg-white/20 text-white" : "bg-purple-50 text-purple-700 border border-purple-200"}`}>
               [skill]
             </span>
           </button>
@@ -1079,15 +1084,15 @@ export default function KnowledgeBrainPage() {
           {/* Tab 5: Past Emails */}
           <button
             onClick={() => setActiveTab("emails")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
               activeTab === "emails"
-                ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF]"
-                : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
+                ? "bg-[#1D4ED8] text-white shadow-sm"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <Mail className="h-4 w-4" />
+            <Mail className="h-3.5 w-3.5" />
             <span>5. Past Emails</span>
-            <span className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded border border-amber-200 font-mono font-medium">
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${activeTab === "emails" ? "bg-white/20 text-white" : "bg-amber-50 text-amber-700 border border-amber-200"}`}>
               [past_email]
             </span>
           </button>
@@ -1095,28 +1100,28 @@ export default function KnowledgeBrainPage() {
           {/* Tab 6: Search & Health */}
           <button
             onClick={() => setActiveTab("search")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
               activeTab === "search"
-                ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF]"
-                : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
+                ? "bg-[#1D4ED8] text-white shadow-sm"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <Search className="h-4 w-4" />
+            <Search className="h-3.5 w-3.5" />
             <span>Search &amp; Sandbox</span>
           </button>
 
-          {/* Tab 7: Stay Fresh & URL Health (Task 2.4) */}
+          {/* Tab 7: Stay Fresh & URL Health */}
           <button
             onClick={() => setActiveTab("freshness")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
               activeTab === "freshness"
-                ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF]"
-                : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
+                ? "bg-[#1D4ED8] text-white shadow-sm"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <RotateCw className="h-4 w-4" />
+            <RotateCw className="h-3.5 w-3.5" />
             <span>Stay Fresh &amp; Health</span>
-            <span className="text-[10px] bg-emerald-50 text-emerald-300 px-1.5 py-0.2 rounded border border-emerald-500/20 font-mono">
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${activeTab === "freshness" ? "bg-white/20 text-white" : "bg-emerald-50 text-emerald-700 border border-emerald-200"}`}>
               Auto-Sync
             </span>
           </button>
@@ -1235,10 +1240,10 @@ export default function KnowledgeBrainPage() {
                       ingesting ||
                       urlValidationChecks.filter((u) => u.valid).length === 0
                     }
-                    className="flex items-center gap-2 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-700 shadow-xs transition disabled:opacity-40"
+                    className="flex items-center gap-2 rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] px-6 py-2.5 text-xs font-semibold text-white transition disabled:opacity-40 shadow-sm"
                   >
-                    <Search className="h-4 w-4 text-cyan-400" />
-                    <span>{ingesting ? "Analyzing Sitemaps..." : "Analyze Sitemaps (Pre-Flight Plan)"}</span>
+                    <Search className="h-4 w-4 text-cyan-200" />
+                    <span>{ingesting ? "Analyzing Sitemaps..." : "Plan Sitemap Read (Pre-Flight Summary)"}</span>
                   </button>
                   <button
                     onClick={async () => {
@@ -1266,7 +1271,7 @@ export default function KnowledgeBrainPage() {
                       ingesting ||
                       urlValidationChecks.filter((u) => u.valid).length === 0
                     }
-                    className="flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-5 py-2.5 text-xs font-semibold text-white transition disabled:opacity-40 shadow-md shadow-emerald-600/30"
+                    className="flex items-center gap-2 rounded-full bg-emerald-600 hover:bg-emerald-500 px-6 py-2.5 text-xs font-semibold text-white transition disabled:opacity-40 shadow-sm"
                   >
                     <CheckCircle2 className="h-4 w-4" />
                     <span>{ingesting ? "Starting Ingestion..." : "Start Ingestion Now"}</span>
@@ -1276,28 +1281,30 @@ export default function KnowledgeBrainPage() {
 
               {/* Pre-Crawl Summary Modal / Preview Card */}
               {previewSummary && (
-                <div className="rounded-xl border border-[#BFDBFE] bg-indigo-50 p-6 space-y-6 mt-4">
-                  <div className="flex items-center justify-between border-b border-[#BFDBFE] pb-3">
-                    <div className="flex items-center gap-2 text-indigo-300">
-                      <Sparkles className="h-5 w-5 text-indigo-400" />
+                <div className="rounded-3xl border-2 border-[#D0E2FB] bg-white p-6 sm:p-8 space-y-6 mt-4 shadow-md">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#DCE6F5] pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-2xl bg-[#EEF5FD] border border-[#D0E2FB] flex items-center justify-center text-[#1D4ED8]">
+                        <Sparkles className="h-5 w-5" />
+                      </div>
                       <div>
-                        <h4 className="text-base font-bold text-[#0B1B3A]">Pre-Flight Read Plan</h4>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          Review discovered nested sitemaps, duplicate URLs, and throughput estimates. Click confirm to start crawling.
+                        <h4 className="text-base font-bold text-[#0B1B3A]">Pre-Flight Read Plan (Confirmation Required)</h4>
+                        <p className="text-xs text-[#4A5B78] mt-0.5">
+                          Review discovered nested sitemaps, duplicate URLs, and throughput estimates. Processing will only start after your confirmation.
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 shrink-0">
                       <button
                         onClick={() => setPreviewSummary(null)}
-                        className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 shadow-xs"
+                        className="rounded-full border border-[#DCE6F5] bg-white px-4 py-2 text-xs font-medium text-[#4A5B78] hover:bg-[#EEF4FF] shadow-xs"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={handleConfirmIngest}
                         disabled={ingesting}
-                        className="flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-4 py-1.5 text-xs font-semibold text-white transition shadow-md shadow-emerald-600/30"
+                        className="flex items-center gap-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 px-5 py-2 text-xs font-semibold text-white transition shadow-sm"
                       >
                         <CheckCircle2 className="h-4 w-4" />
                         <span>{ingesting ? "Starting..." : "Confirm & Start Ingestion"}</span>
@@ -1305,46 +1312,46 @@ export default function KnowledgeBrainPage() {
                     </div>
                   </div>
 
-                  {/* Grand Totals KPI Grid */}
+                  {/* Grand Totals KPI Grid in 4 Pastel Tints */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-                    <div className="bg-[#F6F9FF] p-3.5 rounded-lg border border-[#DCE6F5]">
-                      <span className="text-gray-400">Total Sitemaps:</span>
-                      <div className="text-2xl font-bold text-[#0B1B3A] mt-1 font-mono">
+                    <div className="bg-[#E6F8F9] p-5 rounded-3xl border-2 border-[#BCECEF] shadow-xs">
+                      <span className="text-cyan-800 font-semibold uppercase text-[11px] tracking-wider block">Total Sitemaps:</span>
+                      <div className="text-3xl font-extrabold text-[#0B1B3A] mt-1 font-mono">
                         {previewSummary.totalSitemapsFound}
                       </div>
-                      <span className="text-[10px] text-gray-500 mt-0.5 block">
+                      <span className="text-[11px] text-[#334155] mt-1 block">
                         {previewSummary.rootUrls.length} root + {previewSummary.nestedSitemaps.length} nested
                       </span>
                     </div>
 
-                    <div className="bg-[#F6F9FF] p-3.5 rounded-lg border border-[#DCE6F5]">
-                      <span className="text-gray-400">Total URLs Discovered:</span>
-                      <div className="text-2xl font-bold text-[#2563EB] mt-1 font-mono">
+                    <div className="bg-[#EEF5FD] p-5 rounded-3xl border-2 border-[#D0E2FB] shadow-xs">
+                      <span className="text-blue-800 font-semibold uppercase text-[11px] tracking-wider block">Total URLs Discovered:</span>
+                      <div className="text-3xl font-extrabold text-[#1D4ED8] mt-1 font-mono">
                         {previewSummary.totalUrls}
                       </div>
-                      <span className="text-[10px] text-gray-500 mt-0.5 block">
+                      <span className="text-[11px] text-[#334155] mt-1 block">
                         {previewSummary.uniqueUrls} unique URLs
                       </span>
                     </div>
 
-                    <div className="bg-[#F6F9FF] p-3.5 rounded-lg border border-[#DCE6F5]">
-                      <span className="text-gray-400">Duplicate URLs:</span>
-                      <div className={`text-2xl font-bold mt-1 font-mono ${
+                    <div className="bg-[#FFF4E8] p-5 rounded-3xl border-2 border-[#FFE2C2] shadow-xs">
+                      <span className="text-amber-800 font-semibold uppercase text-[11px] tracking-wider block">Duplicate URLs:</span>
+                      <div className={`text-3xl font-extrabold mt-1 font-mono ${
                         previewSummary.duplicateUrlsCount > 0 ? "text-[#B45309]" : "text-[#15803D]"
                       }`}>
                         {previewSummary.duplicateUrlsCount}
                       </div>
-                      <span className="text-[10px] text-gray-500 mt-0.5 block">
+                      <span className="text-[11px] text-[#334155] mt-1 block">
                         {previewSummary.duplicateUrlsCount > 0 ? "Flagged for deduplication" : "Zero cross-duplicates"}
                       </span>
                     </div>
 
-                    <div className="bg-[#F6F9FF] p-3.5 rounded-lg border border-[#DCE6F5]">
-                      <span className="text-gray-400">Expected Finish Time:</span>
-                      <div className="text-2xl font-bold text-[#15803D] mt-1 font-mono">
+                    <div className="bg-[#F5F3FF] p-5 rounded-3xl border-2 border-[#DDD6FE] shadow-xs">
+                      <span className="text-purple-800 font-semibold uppercase text-[11px] tracking-wider block">Expected Finish Time:</span>
+                      <div className="text-3xl font-extrabold text-[#15803D] mt-1 font-mono">
                         {previewSummary.formattedEta}
                       </div>
-                      <span className="text-[10px] text-gray-500 mt-0.5 block">
+                      <span className="text-[11px] text-[#334155] mt-1 block">
                         ~{previewSummary.estimatedMinutes} mins ({previewSummary.estimatedHours} hrs)
                       </span>
                     </div>

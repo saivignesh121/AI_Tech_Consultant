@@ -350,72 +350,72 @@ export default function SettingsPage() {
 
   return (
     <AppShell breadcrumbs={[{ label: "Settings & Keys" }]}>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#0B1B3A]">Workspace Settings & Telemetry</h1>
-            <p className="text-sm text-gray-400 mt-1">
-              Manage encrypted model connection keys, inspect per-business telemetry spend, and supervise queue jobs.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* View Mode Switcher: Day One vs Advanced (Task 1.5) */}
-            <div className="flex items-center gap-2.5 rounded-xl border border-[#DCE6F5] bg-white p-2.5 px-3.5 shadow-sm">
-              <Sliders className="h-4 w-4 text-cyan-400" />
-              <div>
-                <div className="text-xs font-semibold text-slate-900">View Mode</div>
-                <div className="text-[10px] text-gray-400">
-                  {showAdvanced ? "All Developer & Queue Controls" : "Day One Essential Settings"}
-                </div>
+      <div className="space-y-8">
+        {/* Header Banner: Proteus Royal Blue to Violet/Purple Gradient */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#1D4ED8] via-[#4338CA] to-[#7E22CE] text-white p-8 md:p-10 shadow-md">
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-cyan-200 text-xs font-mono font-medium">
+                <Key className="h-3.5 w-3.5 text-cyan-300" />
+                <span>Security &amp; Telemetry Hub</span>
               </div>
-              <button
-                onClick={() => setShowAdvanced(!showAdvanced)}
-                className={`ml-1 text-xs font-mono font-medium rounded-lg px-2.5 py-1 transition ${
-                  showAdvanced
-                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
-                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                }`}
-                title="Toggle between Day One and Advanced developer settings"
-              >
-                {showAdvanced ? "ADVANCED (UNLOCKED)" : "DAY ONE VIEW"}
-              </button>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                Workspace Settings &amp; Telemetry
+              </h1>
+              <p className="text-sm text-purple-100 max-w-xl leading-relaxed">
+                Manage encrypted model connection keys, inspect per-business telemetry spend, and supervise queue jobs.
+              </p>
             </div>
 
-            {/* Local-Only Mode Master Switch (Task 1.2 & 4.3) */}
-            <div className="flex items-center gap-3 rounded-xl border border-[#DCE6F5] bg-white p-2.5 px-4 shadow-sm">
-              <Server className="h-4 w-4 text-indigo-400" />
-              <div>
-                <div className="text-xs font-semibold text-slate-900">Local-Only Mode</div>
-                <div className="text-[10px] text-gray-400">Bypass paid APIs &rarr; Laptop Ollama</div>
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
+              {/* View Mode Switcher */}
+              <div className="flex items-center gap-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 shadow-sm text-xs">
+                <Sliders className="h-3.5 w-3.5 text-cyan-300" />
+                <span className="font-semibold text-white">View Mode:</span>
+                <button
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className={`text-[11px] font-mono font-bold rounded-full px-3 py-1 transition ${
+                    showAdvanced
+                      ? "bg-amber-400 text-amber-950 shadow-xs"
+                      : "bg-white text-[#1D4ED8] shadow-xs"
+                  }`}
+                  title="Toggle between Day One and Advanced developer settings"
+                >
+                  {showAdvanced ? "ADVANCED" : "DAY ONE VIEW"}
+                </button>
               </div>
-              <button
-                onClick={toggleLocalMode}
-                className={`ml-2 text-xs font-mono font-medium rounded-lg px-2.5 py-1 transition ${
-                  localOnlyMode
-                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                    : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-                }`}
-              >
-                {localOnlyMode ? "ACTIVE (LOCAL)" : "INACTIVE"}
-              </button>
+
+              {/* Local-Only Mode Master Switch */}
+              <div className="flex items-center gap-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 shadow-sm text-xs">
+                <Server className="h-3.5 w-3.5 text-cyan-300" />
+                <span className="font-semibold text-white">Local-Only Mode:</span>
+                <button
+                  onClick={toggleLocalMode}
+                  className={`text-[11px] font-mono font-bold rounded-full px-3 py-1 transition ${
+                    localOnlyMode
+                      ? "bg-emerald-400 text-emerald-950 shadow-xs"
+                      : "bg-white/20 text-white hover:bg-white/30"
+                  }`}
+                >
+                  {localOnlyMode ? "ACTIVE (LOCAL)" : "OFF"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-[#DCE6F5] space-x-1 items-center">
+        <div className="flex flex-wrap border-b border-[#DCE6F5] gap-2 items-center pb-2">
           {/* Day One Tabs */}
           <button
             onClick={() => setActiveTab("connections")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition ${
               activeTab === "connections"
-                ? "border-cyan-400 text-cyan-400 font-semibold"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "bg-[#1D4ED8] text-white shadow-sm"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <Key className="h-4 w-4" />
+            <Key className="h-3.5 w-3.5" />
             <span>The 5 Vault Connections</span>
           </button>
 
@@ -424,22 +424,22 @@ export default function SettingsPage() {
               setActiveTab("step_models");
               fetchStepModels();
             }}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition ${
               activeTab === "step_models"
-                ? "border-cyan-400 text-cyan-400 font-semibold"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "bg-[#1D4ED8] text-white shadow-sm"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <Zap className="h-4 w-4" />
+            <Zap className="h-3.5 w-3.5" />
             <span>Model per Step Routing</span>
           </button>
 
           <Link
             href="/settings/roles-prompts"
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-gray-400 hover:text-cyan-400 transition"
+            className="flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A] transition"
           >
-            <Sparkles className="h-4 w-4" />
-            <span>Prompts & Roles Studio</span>
+            <Sparkles className="h-3.5 w-3.5 text-[#1D4ED8]" />
+            <span>Prompts &amp; Roles Studio</span>
           </Link>
 
           <button
@@ -447,17 +447,17 @@ export default function SettingsPage() {
               setActiveTab("telemetry");
               fetchTelemetry(telemetryFilter);
             }}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition ${
               activeTab === "telemetry"
-                ? "border-indigo-500 text-indigo-400"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "bg-[#1D4ED8] text-white shadow-sm"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <Activity className="h-4 w-4" />
-            <span>Model Telemetry & Cost Logs</span>
+            <Activity className="h-3.5 w-3.5" />
+            <span>Model Telemetry &amp; Cost Logs</span>
           </button>
 
-          {/* Advanced Tabs (Unlocked via View Mode or Toggle) */}
+          {/* Advanced Tabs */}
           {showAdvanced ? (
             <>
               <button
@@ -465,34 +465,34 @@ export default function SettingsPage() {
                   setActiveTab("failed_jobs");
                   fetchFailedJobs();
                 }}
-                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+                className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition ${
                   activeTab === "failed_jobs"
-                    ? "border-indigo-500 text-indigo-400"
-                    : "border-transparent text-gray-400 hover:text-gray-200"
+                    ? "bg-[#1D4ED8] text-white shadow-sm"
+                    : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
                 }`}
               >
-                <AlertOctagon className="h-4 w-4" />
+                <AlertOctagon className="h-3.5 w-3.5 text-amber-500" />
                 <span>Failed Jobs Drawer ({failedJobs.length})</span>
-                <span className="text-[10px] px-1 rounded bg-amber-500/20 text-amber-300 font-mono">Adv</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-mono font-bold">Adv</span>
               </button>
 
               <button
                 onClick={() => setActiveTab("workspace")}
-                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+                className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition ${
                   activeTab === "workspace"
-                    ? "border-indigo-500 text-indigo-400"
-                    : "border-transparent text-gray-400 hover:text-gray-200"
+                    ? "bg-[#1D4ED8] text-white shadow-sm"
+                    : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
                 }`}
               >
-                <Users className="h-4 w-4" />
-                <span>Workspace & Danger Zone</span>
-                <span className="text-[10px] px-1 rounded bg-red-500/20 text-red-300 font-mono">Adv</span>
+                <Users className="h-3.5 w-3.5 text-red-500" />
+                <span>Workspace &amp; Danger Zone</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-100 text-red-800 font-mono font-bold">Adv</span>
               </button>
             </>
           ) : (
             <button
               onClick={() => setShowAdvanced(true)}
-              className="text-xs font-mono text-gray-500 hover:text-cyan-400 px-3 py-1 rounded border border-dashed border-[#DCE6F5] ml-auto transition"
+              className="text-xs font-mono text-[#7B8AA6] hover:text-[#1D4ED8] px-4 py-2 rounded-full border border-dashed border-[#DCE6F5] ml-auto transition hover:bg-[#EEF4FF]"
               title="Unlock Advanced Settings: Failed Jobs and Danger Zone"
             >
               + Unlock Advanced Tabs (Jobs &amp; Danger Zone)
@@ -503,26 +503,26 @@ export default function SettingsPage() {
         {/* ================= TAB 1: THE 5 CONNECTIONS (Task 1.2) ================= */}
         {activeTab === "connections" && (
           <div className="space-y-6">
-            <div className="rounded-xl border border-[#DCE6F5] bg-indigo-50 p-4 text-xs text-indigo-300 flex items-start gap-3">
-              <Key className="h-4 w-4 text-indigo-400 mt-0.5 flex-shrink-0" />
-              <div>
-                <strong>AES-256 Encrypted Credential Vault:</strong> All secrets are encrypted at rest using AES-256-GCM. Unencrypted keys are never transmitted to the browser or stored in logs. Tested with zero plaintext leakage.
+            <div className="rounded-3xl border-2 border-[#D0E2FB] bg-[#EEF5FD] p-6 text-xs text-[#334155] flex items-start gap-3 shadow-sm">
+              <Key className="h-5 w-5 text-[#1D4ED8] mt-0.5 flex-shrink-0" />
+              <div className="leading-relaxed">
+                <strong className="text-[#0B1B3A]">AES-256 Encrypted Credential Vault:</strong> All secrets are encrypted at rest using AES-256-GCM. Unencrypted keys are never transmitted to the browser or stored in logs. Tested with zero plaintext leakage.
               </div>
             </div>
 
             {testResult && (
-              <div className="rounded-xl border border-[#C3D3EA] bg-white/90 p-4 text-xs flex items-center justify-between">
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-xs flex items-center justify-between shadow-xs">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                  <span className="text-slate-900 font-medium">{testResult.message}</span>
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                  <span className="text-[#0B1B3A] font-semibold">{testResult.message}</span>
                 </div>
-                <span className="font-mono text-gray-400 bg-gray-800 px-2 py-0.5 rounded text-[11px]">
+                <span className="font-mono text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full text-[11px] font-bold">
                   Latency: {testResult.latencyMs}ms
                 </span>
               </div>
             )}
 
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-5">
               {connections.map((c) => {
                 const info = providerLabels[c.provider] || {
                   title: c.provider,
@@ -535,11 +535,11 @@ export default function SettingsPage() {
                 return (
                   <div
                     key={c.provider}
-                    className="rounded-xl border border-[#DCE6F5] bg-white p-5 shadow-sm space-y-4"
+                    className="rounded-3xl border border-[#DCE6F5] bg-white p-6 shadow-sm hover:border-blue-300 transition space-y-4"
                   >
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-lg bg-gray-800 flex items-center justify-center font-bold text-sm text-indigo-400">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      <div className="flex items-center gap-3.5">
+                        <div className="h-11 w-11 rounded-2xl bg-[#EEF5FD] border border-[#D0E2FB] flex items-center justify-center font-bold text-base text-[#1D4ED8] shadow-xs">
                           {c.provider === "claude" && "C"}
                           {c.provider === "gemini" && "G"}
                           {c.provider === "openrouter" && "OR"}
@@ -547,35 +547,35 @@ export default function SettingsPage() {
                           {c.provider === "google" && "M"}
                         </div>
                         <div>
-                          <div className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                          <div className="text-base font-bold text-[#0B1B3A] flex items-center gap-2">
                             {info.title}
                             {c.status === "active" && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-400 border border-emerald-500/20">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200 font-mono">
                                 <CheckCircle2 className="h-3 w-3" /> Active
                               </span>
                             )}
                             {c.status === "error" && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-medium text-red-400 border border-red-500/20">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-600 border border-red-200 font-mono">
                                 <AlertTriangle className="h-3 w-3" /> Error
                               </span>
                             )}
                             {c.status === "untested" && (
-                              <span className="inline-flex items-center rounded-full bg-gray-800 px-2 py-0.5 text-[10px] font-medium text-gray-400">
+                              <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-semibold text-[#7B8AA6] font-mono">
                                 Untested
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-gray-400">{info.desc}</p>
+                          <p className="text-xs text-[#4A5B78] mt-0.5">{info.desc}</p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 shrink-0">
                         <button
                           onClick={() => testConnection(c.provider, c.endpointUrl)}
                           disabled={isTesting}
-                          className="flex items-center gap-1.5 rounded-lg border border-[#C3D3EA] bg-gray-800/60 hover:bg-gray-700 px-3 py-1.5 text-xs font-medium text-gray-200 transition disabled:opacity-50"
+                          className="flex items-center gap-1.5 rounded-full border border-blue-200 bg-[#EEF4FF] hover:bg-blue-100 px-4 py-2 text-xs font-semibold text-[#1D4ED8] transition disabled:opacity-50 shadow-xs"
                         >
-                          <RotateCw className={`h-3.5 w-3.5 ${isTesting ? "animate-spin text-indigo-400" : ""}`} />
+                          <RotateCw className={`h-3.5 w-3.5 ${isTesting ? "animate-spin text-[#1D4ED8]" : ""}`} />
                           <span>{isTesting ? "Testing..." : "Test Connection"}</span>
                         </button>
 
@@ -589,7 +589,7 @@ export default function SettingsPage() {
                               setEndpointInput(c.endpointUrl || "");
                             }
                           }}
-                          className="rounded-lg border border-[#C3D3EA] bg-gray-800/60 hover:bg-gray-700 px-3 py-1.5 text-xs font-medium text-gray-200 transition"
+                          className="rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] px-5 py-2 text-xs font-semibold text-white transition shadow-sm"
                         >
                           {isEditing ? "Cancel" : "Edit Key"}
                         </button>
@@ -598,39 +598,39 @@ export default function SettingsPage() {
 
                     {/* Masked Key Display or Edit Form */}
                     {!isEditing ? (
-                      <div className="rounded-lg border border-[#DCE6F5] bg-[#F1F6FF] p-3 flex items-center justify-between font-mono text-xs text-gray-400">
+                      <div className="rounded-2xl border border-[#DCE6F5] bg-[#F8FAFC] p-3.5 flex items-center justify-between font-mono text-xs text-[#0B1B3A]">
                         <div className="flex items-center gap-2 truncate">
-                          <Key className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />
-                          <span>{c.maskedApiKey || c.endpointUrl || "No key configured"}</span>
+                          <Key className="h-3.5 w-3.5 text-[#1D4ED8] flex-shrink-0" />
+                          <span className="truncate">{c.maskedApiKey || c.endpointUrl || "No key configured"}</span>
                         </div>
                         {c.lastTestedAt && (
-                          <span className="text-[10px] text-gray-500 font-sans">
+                          <span className="text-[10px] text-[#7B8AA6] font-sans shrink-0 ml-2">
                             Tested {new Date(c.lastTestedAt).toLocaleTimeString()}
                           </span>
                         )}
                       </div>
                     ) : (
-                      <div className="space-y-3 pt-2 border-t border-[#DCE6F5]">
+                      <div className="space-y-3 pt-3 border-t border-[#DCE6F5]">
                         {c.provider === "ollama" ? (
                           <div>
-                            <label className="block text-xs font-medium text-gray-300 mb-1">Ollama Server URL</label>
+                            <label className="block text-xs font-semibold text-[#0B1B3A] mb-1">Ollama Server URL</label>
                             <input
                               type="text"
                               value={endpointInput}
                               onChange={(e) => setEndpointInput(e.target.value)}
                               placeholder="http://localhost:11434"
-                              className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs font-mono text-slate-900 focus:border-indigo-500 focus:outline-none"
+                              className="w-full rounded-xl border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs font-mono text-[#0B1B3A] focus:border-[#1D4ED8] focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                             />
                           </div>
                         ) : (
                           <div>
-                            <label className="block text-xs font-medium text-gray-300 mb-1">Enter API Key</label>
+                            <label className="block text-xs font-semibold text-[#0B1B3A] mb-1">Enter API Key</label>
                             <input
                               type="password"
                               value={keyInput}
                               onChange={(e) => setKeyInput(e.target.value)}
                               placeholder={info.placeholder}
-                              className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs font-mono text-slate-900 focus:border-indigo-500 focus:outline-none"
+                              className="w-full rounded-xl border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs font-mono text-[#0B1B3A] focus:border-[#1D4ED8] focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                             />
                           </div>
                         )}
@@ -638,7 +638,7 @@ export default function SettingsPage() {
                         <div className="flex justify-end gap-2">
                           <button
                             onClick={() => saveConnection(c.provider)}
-                            className="rounded-lg bg-indigo-600 hover:bg-indigo-500 px-4 py-1.5 text-xs font-medium text-white transition shadow-sm"
+                            className="rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] px-6 py-2 text-xs font-semibold text-white transition shadow-sm"
                           >
                             Save Encrypted Credential
                           </button>

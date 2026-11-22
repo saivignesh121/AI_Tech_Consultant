@@ -678,66 +678,71 @@ export default function ChatPage() {
 
   return (
     <AppShell breadcrumbs={[{ label: "Ask & Teach Chat" }]}>
-      <div className="space-y-4">
-        {/* Top Mode Toggle & Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-3">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-              <MessageSquare className="h-6 w-6 text-blue-600" />
-              <span>Ask &amp; Teach Consultant Hub</span>
-            </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Customer technical consultation with inline citations, multimodal screenshot upload, and human teaching flow.
-            </p>
-          </div>
+      <div className="space-y-6">
+        {/* Top Header Banner: Proteus Royal Blue to Violet/Purple */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#1D4ED8] via-[#4338CA] to-[#7E22CE] text-white p-7 md:p-8 shadow-md">
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-cyan-200 text-xs font-mono font-medium">
+                <MessageSquare className="h-3.5 w-3.5 text-cyan-300" />
+                <span>Autonomous Multi-Model Chat &amp; Inline Teaching</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                Ask &amp; Teach Consultant Hub
+              </h1>
+              <p className="text-xs sm:text-sm text-purple-100 max-w-xl leading-relaxed">
+                Customer technical consultation with inline citations, multimodal screenshot upload, and human teaching flow.
+              </p>
+            </div>
 
-          {/* Mode Switcher: Ask vs Teach */}
-          <div className="flex items-center gap-1.5 bg-slate-100 border border-slate-200 rounded-xl p-1 shadow-xs">
-            <button
-              onClick={() => setMode("ask")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                mode === "ask"
-                  ? "bg-[#2563EB] text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-white"
-              }`}
-            >
-              <Bot className="h-3.5 w-3.5" />
-              <span>Ask Consultant</span>
-            </button>
-            <button
-              onClick={() => setMode("teach")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                mode === "teach"
-                  ? "bg-[#2563EB] text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-white"
-              }`}
-            >
-              <GraduationCap className="h-3.5 w-3.5" />
-              <span>Teach &amp; Correct AI</span>
-            </button>
-            <button
-              onClick={handleOpenThresholdModal}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-white border border-transparent transition"
-              title="Calibrated Confidence Threshold and Trade-Off Curve"
-            >
-              <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
-              <span>Line: 0.38</span>
-            </button>
+            {/* Mode Switcher in Clean White/Cyan Pill Container */}
+            <div className="flex flex-wrap items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full p-1.5 shadow-sm text-xs shrink-0">
+              <button
+                onClick={() => setMode("ask")}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-full font-bold transition ${
+                  mode === "ask"
+                    ? "bg-white text-[#1D4ED8] shadow-xs"
+                    : "text-white/80 hover:text-white"
+                }`}
+              >
+                <Bot className="h-3.5 w-3.5" />
+                <span>Ask Consultant</span>
+              </button>
+              <button
+                onClick={() => setMode("teach")}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-full font-bold transition ${
+                  mode === "teach"
+                    ? "bg-white text-[#1D4ED8] shadow-xs"
+                    : "text-white/80 hover:text-white"
+                }`}
+              >
+                <GraduationCap className="h-3.5 w-3.5" />
+                <span>Teach &amp; Correct AI</span>
+              </button>
+              <button
+                onClick={handleOpenThresholdModal}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-mono font-bold text-cyan-200 hover:text-white transition border border-white/20"
+                title="Calibrated Confidence Threshold and Trade-Off Curve"
+              >
+                <ShieldCheck className="h-3.5 w-3.5 text-cyan-300" />
+                <span>Line: 0.38</span>
+              </button>
+            </div>
           </div>
         </div>
 
         {/* 3-Column Layout: Left (Sessions), Center (Chat Stream), Right (Inspector) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 h-[680px]">
           {/* ================= LEFT COLUMN: SESSIONS LIST (3 Cols) ================= */}
-          <div className="lg:col-span-3 rounded-xl border border-slate-200 bg-white p-4 flex flex-col justify-between overflow-hidden shadow-xs">
+          <div className="lg:col-span-3 rounded-3xl border border-[#DCE6F5] bg-white p-5 flex flex-col justify-between overflow-hidden shadow-sm">
             <div className="space-y-3 flex-1 flex flex-col min-h-0">
-              <div className="flex items-center justify-between pb-1 border-b border-slate-100">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <div className="flex items-center justify-between pb-2 border-b border-[#DCE6F5]">
+                <span className="text-xs font-bold text-[#7B8AA6] uppercase tracking-wider font-mono">
                   Consultations
                 </span>
                 <button
                   onClick={() => setShowNewChatModal(true)}
-                  className="flex items-center gap-1 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] px-2.5 py-1 text-[11px] font-medium text-white transition shadow-xs"
+                  className="flex items-center gap-1 rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] px-3 py-1 text-xs font-semibold text-white transition shadow-xs"
                 >
                   <Plus className="h-3 w-3" />
                   <span>New Chat</span>
@@ -750,16 +755,16 @@ export default function ChatPage() {
                   <div
                     key={s.id}
                     onClick={() => handleSelectSession(s)}
-                    className={`cursor-pointer rounded-xl p-3 transition border text-left ${
+                    className={`cursor-pointer rounded-2xl p-3.5 transition border text-left ${
                       activeSessionId === s.id
-                        ? "border-[#2563EB] bg-blue-50/60 shadow-xs"
-                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                        ? "border-[#1D4ED8] bg-[#EEF5FD] shadow-xs"
+                        : "border-[#DCE6F5] bg-white hover:border-[#BFDBFE] hover:bg-[#F6F9FF]"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-1.5">
-                      <div className="text-xs font-semibold text-slate-900 truncate">{s.title}</div>
+                      <div className="text-xs font-bold text-[#0B1B3A] truncate">{s.title}</div>
                       <span
-                        className={`text-[9px] font-mono px-1.5 py-0.5 rounded uppercase font-bold shrink-0 ${
+                        className={`text-[9px] font-mono px-2 py-0.5 rounded-full uppercase font-bold shrink-0 ${
                           s.mode === "teach"
                             ? "bg-slate-100 text-slate-700 border border-slate-200"
                             : "bg-blue-50 text-blue-700 border border-blue-200"
@@ -768,7 +773,7 @@ export default function ChatPage() {
                         {s.mode === "teach" ? "Teach" : "Ask"}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono mt-1.5">
+                    <div className="flex items-center justify-between text-[10px] text-[#7B8AA6] font-mono mt-1.5">
                       <span>{s.messageCount || 0} messages</span>
                       <span>{new Date(s.createdAt).toLocaleDateString()}</span>
                     </div>
@@ -779,9 +784,9 @@ export default function ChatPage() {
           </div>
 
           {/* ================= CENTER COLUMN: CHAT STREAM & INPUT (6 Cols) ================= */}
-          <div className="lg:col-span-6 rounded-xl border border-slate-200 bg-white flex flex-col justify-between overflow-hidden shadow-xs">
+          <div className="lg:col-span-6 rounded-3xl border border-[#DCE6F5] bg-white flex flex-col justify-between overflow-hidden shadow-sm">
             {/* Chat Header with Mid-Chat Role Switcher */}
-            <div className="p-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+            <div className="p-4 border-b border-[#DCE6F5] bg-[#F8FAFC] flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-blue-600 animate-pulse"></div>
                 <label className="text-xs text-slate-600 font-medium hidden sm:inline">Active Persona:</label>
@@ -1471,7 +1476,7 @@ export default function ChatPage() {
               <button
                 onClick={() => handleSendMessage()}
                 disabled={!inputMessage.trim() || sending}
-                className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] p-2.5 text-white transition disabled:opacity-40 shadow-xs"
+                className="rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] p-3 text-white transition disabled:opacity-40 shadow-sm"
               >
                 <Send className="h-4 w-4" />
               </button>
@@ -1479,7 +1484,7 @@ export default function ChatPage() {
           </div>
 
           {/* ================= RIGHT COLUMN: LIVE INSPECTOR DRAWER (3 Cols) ================= */}
-          <div className="lg:col-span-3 rounded-xl border border-slate-200 bg-white p-4 flex flex-col justify-between overflow-y-auto space-y-4 shadow-xs">
+          <div className="lg:col-span-3 rounded-3xl border border-[#DCE6F5] bg-white p-5 flex flex-col justify-between overflow-y-auto space-y-4 shadow-sm">
             <div className="space-y-4">
               <div className="border-b border-slate-100 pb-2 flex items-center justify-between">
                 <span className="text-xs font-semibold text-slate-900 flex items-center gap-1.5">

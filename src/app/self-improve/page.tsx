@@ -198,132 +198,137 @@ export default function SelfImprovePage() {
 
   return (
     <AppShell breadcrumbs={[{ label: "Self-Improvement Loop" }]}>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-6 h-6 text-purple-600" />
-              <h1 className="text-2xl font-bold text-gray-900">
-                Autonomous Self-Improvement Loop
+      <div className="space-y-8">
+        {/* Header Banner: Proteus Royal Blue to Violet/Purple */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#1D4ED8] via-[#4338CA] to-[#7E22CE] text-white p-8 md:p-10 shadow-md">
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-cyan-200 text-xs font-mono font-medium">
+                <Sparkles className="h-3.5 w-3.5 text-cyan-300" />
+                <span>Autonomous Git-Branch Diagnosis &amp; Healing</span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                Self-Improvement Loop
               </h1>
+              <p className="text-sm text-purple-100 max-w-2xl leading-relaxed">
+                Claude Opus 5.5 automatically packs failing test cases, branches git, synthesizes fixes, validates against hidden check sets, and enforces a strict $5.00 ceiling.
+              </p>
             </div>
-            <p className="text-sm text-gray-500 mt-1">
-              Claude Opus 5.5 automatically packs failing test cases, branches git, synthesizes fixes, validates against hidden check sets, and enforces a strict $5.00 ceiling.
-            </p>
-          </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium text-sm rounded-lg shadow-sm transition"
-            >
-              <Play className="w-4 h-4 fill-white" />
-              Trigger New Opus Fix
-            </button>
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-white hover:bg-blue-50 text-[#1D4ED8] font-bold text-xs rounded-full shadow-sm transition"
+              >
+                <Play className="w-3.5 h-3.5 fill-[#1D4ED8]" />
+                Trigger New Opus Fix
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Global Notification */}
         {actionMessage && (
-          <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between text-sm text-green-800">
+          <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between text-xs text-emerald-800 shadow-xs">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-green-600" />
-              <span>{actionMessage}</span>
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <span className="font-semibold">{actionMessage}</span>
             </div>
             <button
               onClick={() => setActionMessage(null)}
-              className="text-green-600 hover:text-green-800 font-semibold text-xs"
+              className="text-emerald-700 hover:text-emerald-900 font-bold text-xs"
             >
               Dismiss
             </button>
           </div>
         )}
 
-        {/* KPI Top Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+        {/* KPI Top Cards in 4 Pastel Tinted Styles */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+          {/* Card 1: Mint / Soft Cyan */}
+          <div className="p-6 rounded-3xl border-2 border-[#BCECEF] bg-[#E6F8F9] shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+              <span className="text-xs font-semibold uppercase tracking-wider text-cyan-800">
                 Total Runs
               </span>
-              <Layers className="w-5 h-5 text-gray-400" />
+              <Layers className="w-5 h-5 text-cyan-600" />
             </div>
-            <div className="mt-2 text-2xl font-bold text-gray-900">{runs.length || 3}</div>
-            <div className="mt-1 text-xs text-gray-500">Autonomous Claude Opus fixes</div>
+            <div className="mt-2 text-3xl font-extrabold text-[#0B1B3A] font-mono">{runs.length || 3}</div>
+            <div className="mt-1 text-xs text-[#334155]">Autonomous Claude Opus fixes</div>
           </div>
 
-          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+          {/* Card 2: Ice Blue */}
+          <div className="p-6 rounded-3xl border-2 border-[#D0E2FB] bg-[#EEF5FD] shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+              <span className="text-xs font-semibold uppercase tracking-wider text-blue-800">
                 Success Pass Rate
               </span>
-              <CheckCircle2 className="w-5 h-5 text-green-500" />
+              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
             </div>
-            <div className="mt-2 text-2xl font-bold text-green-600">66.7%</div>
-            <div className="mt-1 text-xs text-gray-500">2 passed / 1 quarantined limit</div>
+            <div className="mt-2 text-3xl font-extrabold text-emerald-700 font-mono">66.7%</div>
+            <div className="mt-1 text-xs text-[#334155]">2 passed / 1 quarantined limit</div>
           </div>
 
-          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+          {/* Card 3: Warm Peach / Soft Cream */}
+          <div className="p-6 rounded-3xl border-2 border-[#FFE2C2] bg-[#FFF4E8] shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+              <span className="text-xs font-semibold uppercase tracking-wider text-amber-800">
                 Total Invested
               </span>
-              <DollarSign className="w-5 h-5 text-purple-500" />
+              <DollarSign className="w-5 h-5 text-amber-600" />
             </div>
-            <div className="mt-2 text-2xl font-bold text-purple-600">$6.80 USD</div>
-            <div className="mt-1 text-xs text-gray-500">Opus reasoning tokens ($5 hard cap)</div>
+            <div className="mt-2 text-3xl font-extrabold text-[#15803D] font-mono">$6.80 USD</div>
+            <div className="mt-1 text-xs text-[#334155]">Opus reasoning tokens ($5 hard cap)</div>
           </div>
 
-          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+          {/* Card 4: Soft Lavender */}
+          <div className="p-6 rounded-3xl border-2 border-[#DDD6FE] bg-[#F5F3FF] shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+              <span className="text-xs font-semibold uppercase tracking-wider text-purple-800">
                 Hidden Check Set
               </span>
-              <ShieldCheck className="w-5 h-5 text-indigo-500" />
+              <ShieldCheck className="w-5 h-5 text-purple-600" />
             </div>
-            <div className="mt-2 text-2xl font-bold text-indigo-600">100%</div>
-            <div className="mt-1 text-xs text-gray-500">0 regressions verified</div>
+            <div className="mt-2 text-3xl font-extrabold text-purple-700 font-mono">100%</div>
+            <div className="mt-1 text-xs text-[#334155]">0 regressions verified</div>
           </div>
         </div>
 
-        {/* Tabs Bar */}
-        <div className="border-b border-gray-200">
-          <nav className="flex space-x-8">
-            <button
-              onClick={() => setActiveTab("runs")}
-              className={`py-3 px-1 font-medium text-sm border-b-2 flex items-center gap-2 transition ${
-                activeTab === "runs"
-                  ? "border-purple-600 text-purple-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <GitBranch className="w-4 h-4" />
-              Active Runs & History ({runs.length})
-            </button>
-            <button
-              onClick={() => setActiveTab("inspector")}
-              className={`py-3 px-1 font-medium text-sm border-b-2 flex items-center gap-2 transition ${
-                activeTab === "inspector"
-                  ? "border-purple-600 text-purple-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <FileCode className="w-4 h-4" />
-              Run Inspector & Diff Viewer
-            </button>
-            <button
-              onClick={() => setActiveTab("digest")}
-              className={`py-3 px-1 font-medium text-sm border-b-2 flex items-center gap-2 transition ${
-                activeTab === "digest"
-                  ? "border-purple-600 text-purple-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <Mail className="w-4 h-4" />
-              Weekly Owner Digest Preview
-            </button>
-          </nav>
+        {/* Tabs Bar in Rounded-Full Pills */}
+        <div className="flex flex-wrap gap-2.5 items-center pb-2 border-b border-[#DCE6F5]">
+          <button
+            onClick={() => setActiveTab("runs")}
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
+              activeTab === "runs"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
+            }`}
+          >
+            <GitBranch className="w-3.5 h-3.5" />
+            <span>Active Runs &amp; History ({runs.length})</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("inspector")}
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
+              activeTab === "inspector"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
+            }`}
+          >
+            <FileCode className="w-3.5 h-3.5" />
+            <span>Run Inspector &amp; Diff Viewer</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("digest")}
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
+              activeTab === "digest"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
+            }`}
+          >
+            <Mail className="w-3.5 h-3.5" />
+            <span>Weekly Owner Digest Preview</span>
+          </button>
         </div>
 
         {/* Tab 1: Runs Table */}

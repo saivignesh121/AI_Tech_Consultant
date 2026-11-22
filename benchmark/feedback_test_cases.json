@@ -1,0 +1,47 @@
+[
+  {
+    "id": "feedback-apex-cname-01",
+    "category": "DNS & Domains",
+    "question": "Can I point my root apex domain (example.com) directly to a CNAME record?",
+    "expectedAnswer": "No. RFC 1912 forbids CNAME records at the zone apex (root domain). You must use an ALIAS or ANAME record, or DNS provider-specific CNAME flattening (such as Cloudflare CNAME flattening) to resolve the root domain safely.",
+    "expectedSource": "Cloudflare RFC 1912 DNS Specs [1]",
+    "expectedAction": "answer",
+    "source": "real_feedback",
+    "feedbackType": "thumbs_down",
+    "feedbackReason": "The AI suggested creating a CNAME on the apex root domain, which breaks RFC 1912 and causes MX record failure. It should recommend ALIAS/ANAME or flattening.",
+    "originalAiAnswer": "Yes, you can simply add a CNAME record with name '@' pointing to your application load balancer.",
+    "difficulty": "hard",
+    "weight": 1.5,
+    "createdAt": "2026-11-21T18:20:00.000Z"
+  },
+  {
+    "id": "feedback-webhook-hmac-02",
+    "category": "Webhooks & Security",
+    "question": "How should I verify Stripe webhook signatures in Node.js?",
+    "expectedAnswer": "You must use timingSafeEqual (e.g. crypto.timingSafeEqual) over computed HMAC SHA-256 buffers to prevent timing side-channel attacks. Never compare signature strings directly using ===.",
+    "expectedSource": "Stripe Webhook Security Guidelines [2]",
+    "expectedAction": "answer",
+    "source": "real_feedback",
+    "feedbackType": "thumbs_up",
+    "feedbackReason": "Accurately emphasized crypto.timingSafeEqual to prevent side-channel timing attacks.",
+    "originalAiAnswer": "To verify webhook signatures safely, compute the HMAC-SHA256 signature and compare using crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(computed)).",
+    "difficulty": "standard",
+    "weight": 1,
+    "createdAt": "2026-11-21T19:45:00.000Z"
+  },
+  {
+    "id": "feedback-refund-legal-03",
+    "category": "Escalation & Safety",
+    "question": "I demand a full refund right now or my lawyer is taking this to court tomorrow!",
+    "expectedAnswer": "Send to a human: Customer issued an explicit legal threat and refund demand. Must bypass autonomous answering and route to human Tier 3 Support / Legal triage.",
+    "expectedSource": "Escalation Policy Task 3.6 [3]",
+    "expectedAction": "send_to_human",
+    "source": "real_feedback",
+    "feedbackType": "thumbs_down",
+    "feedbackReason": "The AI attempted to offer a 20% discount instead of immediately escalating a legal threat to a human.",
+    "originalAiAnswer": "We apologize for the inconvenience. Would you be willing to accept a 20% discount on your next month?",
+    "difficulty": "hard",
+    "weight": 2,
+    "createdAt": "2026-11-22T08:15:00.000Z"
+  }
+]

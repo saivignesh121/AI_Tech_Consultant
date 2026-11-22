@@ -133,36 +133,38 @@ export default function OnboardingPage() {
 
   return (
     <AppShell breadcrumbs={[{ label: "15-Minute Onboarding" }]}>
-      <div className="max-w-5xl mx-auto space-y-6">
-        {/* Top 15-Minute Stopwatch Banner (Aurora Light brand gradient) */}
-        <div className="bg-gradient-to-r from-[#0284C7] to-[#2563EB] text-white rounded-2xl p-6 shadow-md shadow-blue-500/10 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="space-y-1 text-center md:text-left">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 rounded-full text-xs font-semibold text-white backdrop-blur-sm shadow-xs">
-              <Sparkles className="w-3.5 h-3.5 text-white" />
-              Production Readiness Fast-Track
+      <div className="max-w-5xl mx-auto space-y-8">
+        {/* Top 15-Minute Stopwatch Banner (Proteus Royal Blue to Violet/Purple Gradient) */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#1D4ED8] via-[#4338CA] to-[#7E22CE] text-white p-8 md:p-10 shadow-md flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-2 text-center md:text-left">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-white/10 rounded-full text-xs font-mono font-medium text-cyan-200 backdrop-blur-sm border border-white/20">
+              <Sparkles className="w-3.5 h-3.5 text-cyan-300" />
+              <span>Production Readiness Fast-Track</span>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight">Go Live in Under 15 Minutes</h1>
-            <p className="text-sm text-blue-100">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              Go Live in Under 15 Minutes
+            </h1>
+            <p className="text-sm text-purple-100 max-w-xl leading-relaxed">
               Connect API keys, ingest your documentation, synthesize test cases, and pass the 85% readiness bar.
             </p>
           </div>
 
-          <div className="bg-white/15 backdrop-blur-md px-6 py-4 rounded-xl border border-white/30 text-center min-w-[200px] shadow-sm">
-            <div className="flex items-center justify-center gap-2 text-xs font-semibold text-blue-100 uppercase tracking-wider mb-1">
-              <Clock className="w-4 h-4 text-white animate-pulse" />
-              Target Stopwatch
+          <div className="bg-white/15 backdrop-blur-md px-7 py-4 rounded-3xl border border-white/20 text-center min-w-[210px] shadow-sm shrink-0">
+            <div className="flex items-center justify-center gap-2 text-xs font-semibold text-cyan-200 uppercase tracking-wider mb-1 font-mono">
+              <Clock className="w-4 h-4 text-cyan-300 animate-pulse" />
+              <span>Target Stopwatch</span>
             </div>
             <div className="text-3xl font-mono font-bold tracking-tight text-white">
               {timeFormatted}
             </div>
-            <div className="text-[11px] text-blue-100 mt-1">
+            <div className="text-[11px] text-purple-100 mt-1 font-mono">
               {timerActive ? `${Math.floor(secondsElapsed / 60)}m ${secondsElapsed % 60}s elapsed` : "Completed!"}
             </div>
           </div>
         </div>
 
         {/* Stepper Navigation */}
-        <div className="bg-white rounded-xl border border-[#DCE6F5] p-3 shadow-xs">
+        <div className="bg-white rounded-3xl border border-[#DCE6F5] p-3 shadow-xs">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
             {[
               { num: 1, title: "Vault Keys", icon: Key },
@@ -178,18 +180,18 @@ export default function OnboardingPage() {
                 <button
                   key={s.num}
                   onClick={() => setCurrentStep(s.num)}
-                  className={`flex items-center gap-2.5 p-3 rounded-lg text-left transition ${
+                  className={`flex items-center gap-2.5 p-3 rounded-2xl text-left transition ${
                     isCurrent
-                      ? "bg-[#EEF4FF] text-[#2563EB] font-semibold border border-[#BFDBFE] shadow-xs"
+                      ? "bg-[#EEF4FF] text-[#1D4ED8] font-bold border border-[#BFDBFE] shadow-xs"
                       : isPast
-                      ? "text-[#15803D] bg-emerald-50/50 hover:bg-emerald-50 border border-transparent"
+                      ? "text-[#15803D] bg-emerald-50/60 hover:bg-emerald-50 border border-transparent"
                       : "text-[#7B8AA6] hover:bg-[#F6F9FF] border border-transparent"
                   }`}
                 >
                   <div
                     className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
                       isCurrent
-                        ? "bg-[#2563EB] text-white"
+                        ? "bg-[#1D4ED8] text-white"
                         : isPast
                         ? "bg-emerald-100 text-[#15803D]"
                         : "bg-[#EEF4FF] text-[#7B8AA6]"
@@ -198,8 +200,8 @@ export default function OnboardingPage() {
                     {isPast ? <Check className="w-4 h-4" /> : s.num}
                   </div>
                   <div className="truncate">
-                    <div className="text-xs font-medium leading-none">{s.title}</div>
-                    <div className="text-[10px] text-[#7B8AA6] mt-0.5">
+                    <div className="text-xs font-semibold leading-none">{s.title}</div>
+                    <div className="text-[10px] text-[#7B8AA6] mt-1 font-mono">
                       {isPast ? "Completed" : isCurrent ? "Active Step" : "Pending"}
                     </div>
                   </div>

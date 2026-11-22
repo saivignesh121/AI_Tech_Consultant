@@ -312,65 +312,67 @@ export default function ApprovalsPage() {
 
   return (
     <AppShell breadcrumbs={[{ label: "Approvals Inbox", href: "/approvals" }]}>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#DCE6F5] pb-6">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-[#BFDBFE] text-cyan-400 text-xs font-mono font-medium mb-2">
-              <ShieldAlert className="h-3.5 w-3.5" />
-              <span>Human Expert Governance</span>
+      <div className="space-y-8">
+        {/* Header Banner: Proteus Royal Blue to Violet/Purple */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#1D4ED8] via-[#4338CA] to-[#7E22CE] text-white p-8 md:p-10 shadow-md">
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-cyan-200 text-xs font-mono font-medium">
+                <ShieldAlert className="h-3.5 w-3.5 text-cyan-300" />
+                <span>Human Expert Governance</span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                Approvals &amp; Escalations Inbox
+              </h1>
+              <p className="text-sm text-purple-100 max-w-2xl leading-relaxed">
+                Review escalated customer tasks, approve learned lessons, and authorize self-improvement patches.
+              </p>
             </div>
-            <h1 className="text-3xl font-extrabold text-[#0B1B3A] tracking-tight">
-              Approvals &amp; Escalations Inbox
-            </h1>
-            <p className="text-sm text-gray-400 mt-1">
-              Review escalated customer tasks, approve learned lessons, and authorize self-improvement patches.
-            </p>
-          </div>
 
-          <button
-            onClick={fetchApprovals}
-            disabled={loading}
-            className="p-2.5 rounded-xl border border-[#C3D3EA] bg-white text-slate-600 hover:text-slate-900 hover:border-cyan-400 transition flex items-center gap-2 self-start md:self-auto"
-          >
-            <RotateCw className={`h-4 w-4 ${loading ? "animate-spin text-cyan-400" : ""}`} />
-            <span className="text-xs font-medium">Refresh</span>
-          </button>
+            <button
+              onClick={fetchApprovals}
+              disabled={loading}
+              className="p-3 rounded-full border border-white/20 bg-white/10 hover:bg-white/20 text-white transition flex items-center gap-2 self-start md:self-auto shadow-sm"
+            >
+              <RotateCw className={`h-4 w-4 ${loading ? "animate-spin text-cyan-300" : ""}`} />
+              <span className="text-xs font-semibold">Refresh Inbox</span>
+            </button>
+          </div>
         </div>
 
         {/* Toast */}
         {toastMsg && (
-          <div className="p-4 rounded-xl bg-blue-50 border border-[#BFDBFE] text-cyan-300 text-xs flex items-center gap-2 shadow-lg">
-            <CheckCircle2 className="h-4 w-4 shrink-0 text-cyan-400" />
-            <span>{toastMsg}</span>
+          <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 shadow-xs">
+            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+            <span className="font-semibold">{toastMsg}</span>
           </div>
         )}
 
         {/* Error */}
         {errorMsg && (
-          <div className="p-6 rounded-2xl bg-amber-950/30 border border-amber-500/40 text-amber-200">
-            <div className="flex items-center gap-2 font-bold text-sm mb-1">
-              <AlertTriangle className="h-4 w-4 text-amber-400" />
+          <div className="p-6 rounded-3xl bg-amber-50 border-2 border-amber-200 text-amber-900 shadow-sm">
+            <div className="flex items-center gap-2 font-bold text-sm mb-1 text-amber-800">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
               <span>Role Authorization Notice</span>
             </div>
-            <p className="text-xs text-amber-300/80">{errorMsg}</p>
+            <p className="text-xs text-amber-800/90">{errorMsg}</p>
           </div>
         )}
 
-        {/* Tab Selection */}
-        <div className="flex flex-wrap gap-2 border-b border-[#DCE6F5] pb-2">
+        {/* Tab Selection in Rounded-Full Pills */}
+        <div className="flex flex-wrap gap-2.5 border-b border-[#DCE6F5] pb-2">
           <button
             onClick={() => setActiveTab("escalations")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold transition whitespace-nowrap shadow-xs ${
               activeTab === "escalations"
-                ? "bg-blue-100 text-cyan-300 border border-[#BFDBFE] shadow-sm"
-                : "text-gray-400 hover:text-gray-200 hover:bg-[#EEF4FF]/50"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <HelpCircle className="h-4 w-4 text-amber-400" />
+            <HelpCircle className="h-3.5 w-3.5" />
             <span>Escalated Tasks</span>
             {pendingEscalationsCount > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${activeTab === "escalations" ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800 border border-amber-200"}`}>
                 {pendingEscalationsCount}
               </span>
             )}
@@ -378,16 +380,16 @@ export default function ApprovalsPage() {
 
           <button
             onClick={() => setActiveTab("lessons")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold transition whitespace-nowrap shadow-xs ${
               activeTab === "lessons"
-                ? "bg-blue-100 text-cyan-300 border border-[#BFDBFE] shadow-sm"
-                : "text-gray-400 hover:text-gray-200 hover:bg-[#EEF4FF]/50"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <Sparkles className="h-4 w-4 text-cyan-400" />
-            <span>Learned Lessons &amp; Skills</span>
+            <BookOpen className="h-3.5 w-3.5" />
+            <span>Learned Lessons</span>
             {pendingLessonsCount > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-blue-100 text-cyan-300 border border-[#BFDBFE]">
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${activeTab === "lessons" ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-800 border border-emerald-200"}`}>
                 {pendingLessonsCount}
               </span>
             )}
@@ -395,16 +397,16 @@ export default function ApprovalsPage() {
 
           <button
             onClick={() => setActiveTab("prs")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold transition whitespace-nowrap shadow-xs ${
               activeTab === "prs"
-                ? "bg-blue-100 text-cyan-300 border border-[#BFDBFE] shadow-sm"
-                : "text-gray-400 hover:text-gray-200 hover:bg-[#EEF4FF]/50"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <GitPullRequest className="h-4 w-4 text-purple-400" />
-            <span>Self-Improvement PRs</span>
+            <GitPullRequest className="h-3.5 w-3.5" />
+            <span>Self-Improve PRs</span>
             {pendingPrsCount > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${activeTab === "prs" ? "bg-white/20 text-white" : "bg-purple-100 text-purple-800 border border-purple-200"}`}>
                 {pendingPrsCount}
               </span>
             )}
@@ -412,16 +414,16 @@ export default function ApprovalsPage() {
 
           <button
             onClick={() => setActiveTab("skills")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold transition whitespace-nowrap shadow-xs ${
               activeTab === "skills"
-                ? "bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm"
-                : "text-gray-400 hover:text-gray-200 hover:bg-[#EEF4FF]/50"
+                ? "bg-[#1D4ED8] text-white shadow-sm font-bold"
+                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
             }`}
           >
-            <BookOpen className="h-4 w-4 text-purple-400" />
-            <span>Skill Improvements (Email Notes)</span>
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>Email Skill Proposals</span>
             {pendingSkillsCount > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${activeTab === "skills" ? "bg-white/20 text-white" : "bg-cyan-100 text-cyan-800 border border-cyan-200"}`}>
                 {pendingSkillsCount}
               </span>
             )}
