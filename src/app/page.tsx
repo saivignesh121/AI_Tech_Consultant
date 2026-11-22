@@ -112,93 +112,186 @@ export default function HomePage() {
       {/* 1. Global Navigation Header */}
       <WebsiteHeader onConnectClick={() => setConnectModalOpen(true)} />
 
-      {/* 2. Hero Banner: Aurora Light Theme */}
-      <section className="relative overflow-hidden bg-[#F6F9FF] border-b border-[#DCE6F5]">
-        {/* Interactive Matrix Canvas */}
-        <CyberMatrixCanvas particleCount={55} />
+      {/* 2. Flagship Hero Banner: Royal Blue to Violet/Purple Gradient (ProteusVision Theme) */}
+      <section className="relative overflow-hidden bg-gradient-to-r from-[#1D4ED8] via-[#4338CA] to-[#7E22CE] text-white">
+        {/* Subtle Cyber Waves & Matrix Particles Overlay */}
+        <div className="absolute inset-0 opacity-20 pointer-events-none">
+          <CyberMatrixCanvas particleCount={40} />
+        </div>
 
-        {/* Ambient Top Glow Orbs (faint radial gradients: blue top-left, cyan bottom-right, opacity .10-.14) */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/12 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-[140px] pointer-events-none" />
+        {/* Ambient Glow Orbs */}
+        <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-purple-500/25 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute bottom-0 left-10 w-[400px] h-[400px] bg-blue-400/25 rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 relative z-10">
-          <div className="rounded-3xl border border-[#DCE6F5] bg-gradient-to-br from-white to-[#EAF2FF] p-6 sm:p-10 md:p-14 shadow-md shadow-blue-500/10 overflow-hidden relative">
-            {/* Top Accent Scan Line */}
-            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#06B6D4]/35 to-transparent animate-scanline-horiz opacity-70" />
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              {/* Left Column: Holographic AI Head Visual */}
-              <div className="lg:col-span-5 flex justify-center">
-                <HolographicAiHead className="w-72 h-72 sm:w-88 sm:h-88" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-28 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-14 items-center">
+            {/* Left Column: Circular Emblem Badge & Brand Tagline (from Screenshot 1) */}
+            <div className="lg:col-span-5 flex flex-col items-center justify-center text-center">
+              <div className="w-48 h-48 sm:w-56 sm:h-56 rounded-full bg-white shadow-2xl flex items-center justify-center p-6 border-4 border-white/20 transform hover:scale-105 transition-all duration-300">
+                <div className="relative flex items-center justify-center">
+                  {/* Tech Green Checkmark */}
+                  <svg
+                    viewBox="0 0 100 100"
+                    fill="none"
+                    className="w-24 h-24 sm:w-28 sm:h-28 stroke-emerald-500 stroke-[10] stroke-linecap-round stroke-linejoin-round drop-shadow-sm"
+                  >
+                    <path d="M26 52 L44 70 L76 30" />
+                  </svg>
+                  {/* Tech Sparkle Nodes */}
+                  <div className="absolute top-1 left-2 h-3.5 w-3.5 rounded-full bg-pink-500 shadow-sm animate-ping" />
+                  <div className="absolute top-1 left-2 h-3.5 w-3.5 rounded-full bg-pink-500" />
+                </div>
               </div>
 
-              {/* Right Column: Hero Content */}
-              <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EAF2FF] border border-[#BFDBFE] text-[#2563EB] text-xs font-mono font-medium shadow-xs">
-                  <span className="w-2 h-2 rounded-full bg-[#2563EB] animate-ping" />
-                  <span>AI Technologies &amp; Consulting &bull; Live Intelligence</span>
-                </div>
-
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-[#0B1B3A] leading-tight">
-                  AI Technologies and{" "}
-                  <span className="bg-gradient-to-r from-[#0284C7] to-[#2563EB] bg-clip-text text-transparent">
-                    Consulting
-                  </span>
-                </h1>
-
-                <p className="text-base sm:text-lg text-[#4A5B78] font-normal max-w-xl mx-auto lg:mx-0">
-                  Transform your business with strong tech support and digitalization.
+              <div className="mt-6">
+                <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                  ProteusVision.com
+                </h3>
+                <p className="text-xs sm:text-sm font-medium text-purple-200 tracking-wider mt-1">
+                  Simple . Smart . Intelligent
                 </p>
-
-                {/* Buttons: Secondary (White + Blue border) + Primary (Brand gradient) */}
-                <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                  <button
-                    onClick={() => setConnectModalOpen(true)}
-                    className="px-7 py-3 rounded-xl border border-[#2563EB] bg-white hover:bg-[#EEF4FF] text-[#2563EB] font-bold text-sm tracking-wide transition shadow-sm flex items-center gap-2"
-                  >
-                    <span>Connect with us</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-
-                  <Link
-                    href={isAuthenticated ? "/chat" : "/signup?redirect=/chat"}
-                    className="px-7 py-3 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 text-white font-bold text-sm transition shadow-md shadow-blue-500/20 flex items-center gap-2"
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    <span>Launch AI Consultant</span>
-                  </Link>
-                </div>
-
-                {/* Registration / Login helper text */}
-                {!isAuthenticated && (
-                  <p className="text-xs text-[#7B8AA6] pt-1">
-                    New enterprise?{" "}
-                    <Link href="/signup?redirect=/chat" className="text-[#2563EB] hover:underline font-semibold">
-                      Register Workspace
-                    </Link>{" "}
-                    &bull; Already registered?{" "}
-                    <Link href="/signin?redirect=/chat" className="text-[#2563EB] hover:underline font-semibold">
-                      Sign In &rarr;
-                    </Link>
-                  </p>
-                )}
-
-                {/* Stats Strip with Small Pills and Blue/Green Dots */}
-                <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-3 text-xs font-mono text-[#4A5B78] border-t border-[#DCE6F5]">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#DCE6F5] shadow-xs text-[#0B1B3A]">
-                    <span className="w-2 h-2 rounded-full bg-[#06B6D4]" />
-                    Latency: &lt;18ms
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#DCE6F5] shadow-xs text-[#0B1B3A]">
-                    <span className="w-2 h-2 rounded-full bg-[#2563EB]" />
-                    Hybrid pgvector RRF
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 shadow-xs text-[#15803D] font-semibold">
-                    <span className="w-2 h-2 rounded-full bg-[#15803D]" />
-                    98.8% Accuracy Pass Bar
-                  </span>
-                </div>
               </div>
+            </div>
+
+            {/* Right Column: Hero Headline & Action Buttons (from Screenshot 1) */}
+            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+              <div>
+                <span className="text-lg sm:text-xl md:text-2xl font-bold text-blue-100 tracking-tight block">
+                  Why Spend Hours?
+                </span>
+                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight mt-2">
+                  leverage AI in your Enterprise
+                </h1>
+              </div>
+
+              <p className="text-base sm:text-lg text-purple-100 font-normal max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                Transform your business with strong tech support, continuous learning, and multi-tenant autonomous intelligence.
+              </p>
+
+              {/* Action Buttons: Outlined Pill Button + Solid White Pill Button */}
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                <button
+                  onClick={() => setConnectModalOpen(true)}
+                  className="w-full sm:w-auto px-8 py-3.5 rounded-full border-2 border-white text-white font-semibold text-sm sm:text-base hover:bg-white hover:text-[#1D4ED8] transition-all duration-200 shadow-lg inline-flex items-center justify-center gap-2"
+                >
+                  <span>Learn how AI can transform your business</span>
+                </button>
+
+                <Link
+                  href={isAuthenticated ? "/chat" : "/signup?redirect=/chat"}
+                  className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-white hover:bg-blue-50 text-[#1D4ED8] font-bold text-sm sm:text-base transition-all duration-200 shadow-lg inline-flex items-center justify-center gap-2"
+                >
+                  <Sparkles className="w-4 h-4 text-[#1D4ED8]" />
+                  <span>Launch AI Consultant</span>
+                </Link>
+              </div>
+
+              {/* Registration / Login helper text */}
+              {!isAuthenticated && (
+                <p className="text-xs text-purple-200 pt-1">
+                  New enterprise?{" "}
+                  <Link href="/signup?redirect=/chat" className="text-white underline font-semibold hover:text-purple-100">
+                    Register Workspace
+                  </Link>{" "}
+                  &bull; Already registered?{" "}
+                  <Link href="/signin?redirect=/chat" className="text-white underline font-semibold hover:text-purple-100">
+                    Sign In &rarr;
+                  </Link>
+                </p>
+              )}
+
+              {/* Stats Strip with Small Pills and Blue/Green Dots */}
+              <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-3 text-xs font-mono border-t border-white/20">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-xs text-white">
+                  <span className="w-2 h-2 rounded-full bg-cyan-300" />
+                  Latency: &lt;18ms
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-xs text-white">
+                  <span className="w-2 h-2 rounded-full bg-blue-300" />
+                  Hybrid pgvector RRF
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-400/20 backdrop-blur-md border border-emerald-300/40 shadow-xs text-emerald-200 font-semibold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  98.8% Accuracy Pass Bar
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2B. The 3 Pastel Tinted Product Cards (Exact Format from Example Screenshot 1) */}
+      <section className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+          {/* Card 1: Mint / Soft Cyan Tint */}
+          <div className="bg-[#E6F8F9] border-2 border-[#BCECEF] rounded-3xl p-8 flex flex-col justify-between shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
+            <div>
+              <div className="flex items-center gap-2 text-cyan-600 font-bold text-xs uppercase tracking-wider">
+                <Sparkles className="w-4 h-4 text-cyan-600" />
+                <span>twasta.ai by PROTEUS</span>
+              </div>
+              <h3 className="text-3xl font-extrabold text-[#0F172A] tracking-tight mt-4 mb-3">
+                twasta.ai
+              </h3>
+              <p className="text-sm text-[#334155] leading-relaxed">
+                Empower your organization with AI that understands your data, automates complex workflows, and builds intelligent software faster. Our enterprise AI models help you drive efficiency, innovation, and measurable growth.
+              </p>
+            </div>
+            <div className="pt-6">
+              <Link
+                href="/knowledge"
+                className="inline-flex items-center justify-center px-7 py-2.5 rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-semibold shadow-sm transition"
+              >
+                Know More
+              </Link>
+            </div>
+          </div>
+
+          {/* Card 2: Soft Ice Blue Tint */}
+          <div className="bg-[#EEF5FD] border-2 border-[#D0E2FB] rounded-3xl p-8 flex flex-col justify-between shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
+            <div>
+              <div className="flex items-center gap-2 text-blue-600 font-bold text-xs uppercase tracking-wider">
+                <Brain className="w-4 h-4 text-blue-600" />
+                <span>VISION by PROTEUS</span>
+              </div>
+              <h3 className="text-3xl font-extrabold text-[#0F172A] tracking-tight mt-4 mb-3">
+                ERP
+              </h3>
+              <p className="text-sm text-[#334155] leading-relaxed">
+                Cloud ERP scales with your business, adapting to growth with automation, real-time insights, and flexible workflows ensuring efficiency and seamless expansion.
+              </p>
+            </div>
+            <div className="pt-6">
+              <Link
+                href="/settings/roles-prompts"
+                className="inline-flex items-center justify-center px-7 py-2.5 rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-semibold shadow-sm transition"
+              >
+                Know More
+              </Link>
+            </div>
+          </div>
+
+          {/* Card 3: Warm Peach / Soft Cream Tint */}
+          <div className="bg-[#FFF4E8] border-2 border-[#FFE2C2] rounded-3xl p-8 flex flex-col justify-between shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
+            <div>
+              <div className="flex items-center gap-2 text-amber-600 font-bold text-xs uppercase tracking-wider">
+                <Building2 className="w-4 h-4 text-amber-600" />
+                <span>VISION by PROTEUS</span>
+              </div>
+              <h3 className="text-3xl font-extrabold text-[#0F172A] tracking-tight mt-4 mb-3">
+                SFA &amp; CRM
+              </h3>
+              <p className="text-sm text-[#334155] leading-relaxed">
+                AI-based reporting, E-Detailing, Expense management, surveys and feedback, Learning tools, Sample management, and very comprehensive analytics.
+              </p>
+            </div>
+            <div className="pt-6">
+              <Link
+                href="/settings"
+                className="inline-flex items-center justify-center px-7 py-2.5 rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-semibold shadow-sm transition"
+              >
+                Know More
+              </Link>
             </div>
           </div>
         </div>
@@ -494,15 +587,15 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-[#DCE6F5] bg-white p-6 shadow-sm space-y-4">
-              <h4 className="text-sm font-bold text-[#0B1B3A]">Direct Connect Hotline</h4>
-              <p className="text-xs text-[#4A5B78]">
+            <div className="rounded-3xl border border-[#DCE6F5] bg-white p-8 shadow-sm space-y-4">
+              <h4 className="text-base font-bold text-[#0B1B3A]">Direct Connect Hotline</h4>
+              <p className="text-xs text-[#4A5B78] leading-relaxed">
                 Need customized staffing or urgent technical architecture consultation? Connect directly with our enterprise team.
               </p>
               <div className="pt-2">
                 <button
                   onClick={() => setConnectModalOpen(true)}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 text-white font-bold text-xs transition shadow-md shadow-blue-500/20"
+                  className="w-full py-3 rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white font-semibold text-xs transition shadow-sm"
                 >
                   Initiate Strategic Consultation
                 </button>

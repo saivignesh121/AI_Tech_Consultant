@@ -118,17 +118,17 @@ export default function WebsiteHeader({
             <>
               <Link
                 href="/chat"
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-blue-200 bg-[#EEF4FF] hover:bg-[#E0EDFF] text-[#2563EB] text-xs font-semibold transition shadow-sm"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-blue-200 bg-[#EEF4FF] hover:bg-[#E0EDFF] text-[#1D4ED8] text-xs font-semibold transition shadow-xs"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#2563EB]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#1D4ED8]" />
                 <span>AI Consultant</span>
               </Link>
 
               <Link
                 href="/settings"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#DCE6F5] text-xs text-[#0B1B3A] hover:border-[#BFDBFE] hover:bg-[#F6F9FF] transition shadow-sm"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-[#DCE6F5] text-xs text-[#0B1B3A] hover:border-[#BFDBFE] hover:bg-[#F6F9FF] transition shadow-xs"
               >
-                <Building2 className="w-3.5 h-3.5 text-[#2563EB]" />
+                <Building2 className="w-3.5 h-3.5 text-[#1D4ED8]" />
                 <span className="max-w-[120px] truncate">{userSession.businessName}</span>
               </Link>
 
@@ -144,34 +144,27 @@ export default function WebsiteHeader({
             <>
               <Link
                 href="/signin"
-                className="px-3.5 py-1.5 text-xs font-medium text-[#4A5B78] hover:text-[#2563EB] transition"
+                className="px-3 py-1.5 text-xs font-medium text-[#4A5B78] hover:text-[#1D4ED8] transition"
               >
                 Sign In
               </Link>
 
               <Link
                 href="/signup?redirect=/chat"
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-blue-200 bg-[#EEF4FF] hover:bg-[#E0EDFF] text-[#2563EB] text-xs font-semibold transition shadow-sm"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-blue-200 bg-[#EEF4FF] hover:bg-[#E0EDFF] text-[#1D4ED8] text-xs font-semibold transition shadow-xs"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#2563EB]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#1D4ED8]" />
                 <span>Launch AI Consultant</span>
-              </Link>
-
-              <Link
-                href="/signup"
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 text-white text-xs font-bold transition shadow-sm shadow-blue-500/20"
-              >
-                <span>Register Workspace</span>
               </Link>
             </>
           )}
 
-          <button
-            onClick={onConnectClick}
-            className="px-3 py-1.5 rounded-lg border border-[#DCE6F5] bg-white hover:bg-[#EEF4FF] text-[#0B1B3A] text-xs font-semibold transition shadow-sm"
+          <Link
+            href="/contact"
+            className="px-6 py-2 rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-sm font-semibold transition shadow-sm"
           >
-            Connect
-          </button>
+            Contact us
+          </Link>
         </div>
 
         {/* Mobile Menu Hamburger */}
@@ -205,7 +198,7 @@ export default function WebsiteHeader({
                 <Link
                   href="/chat"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-gradient-to-r from-[#0284C7] to-[#2563EB] text-white text-xs font-bold shadow-md shadow-blue-500/20"
+                  className="flex items-center justify-center gap-2 py-2.5 rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-semibold shadow-sm transition"
                 >
                   <Sparkles className="w-4 h-4" />
                   <span>Launch AI Consultant</span>
@@ -225,15 +218,15 @@ export default function WebsiteHeader({
                 <Link
                   href="/signup?redirect=/chat"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center gap-2 py-2 rounded-lg border border-blue-200 bg-[#EEF4FF] text-[#2563EB] text-xs font-semibold"
+                  className="flex items-center justify-center gap-2 py-2 rounded-full border border-blue-200 bg-[#EEF4FF] text-[#1D4ED8] text-xs font-semibold"
                 >
-                  <Sparkles className="w-4 h-4 text-[#2563EB]" />
+                  <Sparkles className="w-4 h-4 text-[#1D4ED8]" />
                   <span>Launch with AI Consultant (Register)</span>
                 </Link>
                 <Link
                   href="/signin"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full py-2.5 rounded-lg bg-gradient-to-r from-[#0284C7] to-[#2563EB] text-white text-xs font-bold text-center shadow-md shadow-blue-500/20"
+                  className="w-full py-2.5 rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-semibold text-center shadow-sm transition"
                 >
                   Sign In
                 </Link>

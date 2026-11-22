@@ -398,6 +398,9 @@ export default function AppShell({
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        {/* Top Brand Accent Bar (Proteus Royal Blue to Violet/Purple Gradient) */}
+        <div className="h-1.5 w-full bg-gradient-to-r from-[#1D4ED8] via-[#4338CA] to-[#7E22CE] flex-shrink-0" />
+
         {/* Top Header */}
         <header className="h-16 border-b border-[#DCE6F5] px-8 flex items-center justify-between bg-white/95 backdrop-blur-xl sticky top-0 z-40 shadow-sm">
           <div className="flex items-center gap-2 text-xs">
