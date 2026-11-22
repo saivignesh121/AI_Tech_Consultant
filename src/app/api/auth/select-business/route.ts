@@ -36,16 +36,67 @@ export async function POST(req: NextRequest) {
     // Create session in Postgres
     const { token, expiresAt } = await createSession(userId, membership.businessId);
 
+    // Check readiness score (<85% goes to /onboarding, >=85% goes to role-appropriate dashboard)
+    let readinessScore = 0;
+    try {
+      const [biz] = await db
+        .select({ readinessScore: businesses.readinessScore })
+        .from(businesses)
+        .where(eq(businesses.id, membership.businessId))
+        .limit(1);
+      readinessScore = biz?.readinessScore ?? 0;
+    } catch (_e) {
+      readinessScore = 100;
+    }
+
+    let redirectUrl = "/";
+    if (readinessScore < 85) {
+      redirectUrl = "/onboarding";
+    } else {
+      if (membership.role === "expert") {
+        redirectUrl = "/approvals";
+      } else if (membership.role === "team" || membership.role === "member") {
+        redirectUrl = "/chat";
+      } else {
+        redirectUrl = "/evals";
+      }
+    }
+
     const response = NextResponse.json({
       success: true,
-      redirectUrl: "/",
+      redirectUrl,
       business: membership,
+      readinessScore,
       message: `Workspace switched to ${membership.businessName}`,
     });
 
     const isSecure = process.env.COOKIE_SECURE === "true";
 
     response.cookies.set("session_token", token, {
+      path: "/",
+      httpOnly: true,
+      secure: isSecure,
+      sameSite: "lax",
+      expires: expiresAt,
+    });
+
+    response.cookies.set("business_id", membership.businessId, {
+      path: "/",
+      httpOnly: true,
+      secure: isSecure,
+      sameSite: "lax",
+      expires: expiresAt,
+    });
+
+    response.cookies.set("user_id", userId, {
+      path: "/",
+      httpOnly: true,
+      secure: isSecure,
+      sameSite: "lax",
+      expires: expiresAt,
+    });
+
+    response.cookies.set("user_role", membership.role, {
       path: "/",
       httpOnly: true,
       secure: isSecure,

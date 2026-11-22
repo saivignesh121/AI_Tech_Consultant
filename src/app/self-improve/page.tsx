@@ -576,7 +576,7 @@ export default function SelfImprovePage() {
                       <div className="flex items-center justify-between">
                         <h3 className="font-semibold text-gray-900 text-sm flex items-center gap-2">
                           <ShieldCheck className="w-4 h-4 text-purple-600" />
-                          Task 5.1 Safety Fences & Branch Isolation
+                          Security Boundaries &amp; Git Branch Isolation
                         </h3>
                         <span className="text-xs font-semibold px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full">
                           Enforced

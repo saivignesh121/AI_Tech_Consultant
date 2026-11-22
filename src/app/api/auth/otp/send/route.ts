@@ -61,13 +61,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: emailResult.isRealSmtp
-        ? `Real OTP email successfully dispatched to ${cleanEmail}. Please check your inbox and spam folder.`
-        : `Verification code generated for ${cleanEmail}. Code: ${otpCode}`,
+        ? `Real verification email dispatched to ${cleanEmail}. Please check your inbox or spam folder.`
+        : `Verification code generated for ${cleanEmail}. Check terminal or enter demo code 123456.`,
       emailResult,
       previewUrl: emailResult.previewUrl || null,
       isRealSmtp: Boolean(emailResult.isRealSmtp),
-      // For instant local testing / dev environment preview
-      devPreviewOtp: otpCode,
+      // Never expose the OTP code in response when real SMTP is configured
+      devPreviewOtp: emailResult.isRealSmtp ? undefined : otpCode,
     });
   } catch (err) {
     console.error("Failed to generate and dispatch OTP:", err);

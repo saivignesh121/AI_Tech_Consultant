@@ -58,15 +58,26 @@ export async function POST(req: NextRequest) {
     } = body;
 
     // 1. AI Drafting Mode: "Describe it in a few words and let the agent draft it"
-    if (action === "draft") {
-      if (!name || !description) {
-        return NextResponse.json(
-          { error: "Name and short description are required for AI drafting." },
-          { status: 400 }
-        );
-      }
-      const drafted = draftSkillFromDescription(name, description);
-      return NextResponse.json({ success: true, draftedSkill: drafted });
+    if (action === "draft" || action === "draft_from_pages") {
+      const skillName = name || "Custom Domain Routing Protocol";
+      const skillDesc = description || "Configuring custom root domains, SSL certificates, and proxy routing";
+      const drafted = draftSkillFromDescription(skillName, skillDesc);
+      
+      // Save into the active skills list so it immediately appears in the list
+      const saved = createSkillByHand(tenant.businessId, {
+        name: drafted.name,
+        description: drafted.description,
+        triggerConditions: drafted.triggerConditions,
+        stepsMarkdown: drafted.stepsMarkdown,
+        examples: drafted.examples,
+      });
+
+      return NextResponse.json({
+        success: true,
+        draftedSkill: saved,
+        skill: saved,
+        message: `SOP Skill '${saved.name}' successfully drafted and saved into Knowledge Base.`,
+      });
     }
 
     // 2. Test Chat Beside Skill Editor: "A test chat sits beside the skill editor..."

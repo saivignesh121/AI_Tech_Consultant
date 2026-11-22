@@ -529,13 +529,16 @@ export default function KnowledgeBrainPage() {
         }),
       });
       const data = await res.json();
-      if (data.success) {
-        setSinglePageSuccessMsg(`Indexed '${singlePageUrl}' into Knowledge Brain.`);
+      if (data.success && data.page) {
+        setPages((prev) => [data.page, ...prev.filter((p) => p.url !== data.page.url)]);
+        setSelectedPage(data.page);
+        setSinglePageSuccessMsg(`✓ Successfully indexed '${data.page.title}' into Knowledge Base.`);
         setSinglePageUrl("");
         setSinglePageTitle("");
         setSinglePageContent("");
+        setTimeout(() => setSinglePageSuccessMsg(""), 5000);
+      } else {
         fetchPages();
-        setTimeout(() => setSinglePageSuccessMsg(""), 4000);
       }
     } catch (err) {
       console.error(err);
@@ -575,18 +578,23 @@ export default function KnowledgeBrainPage() {
         }),
       });
       const data = await res.json();
-      if (data.success) {
+      if (data.success && data.instruction) {
+        setInstructionsList((prev) => [
+          data.instruction,
+          ...prev.filter((i) => i.id !== data.instruction.id),
+        ]);
         setInstructionSuccessMsg(
           editingInstructionId
-            ? "Instruction rule updated successfully!"
-            : "Rule successfully registered into Knowledge Brain!"
+            ? "✓ Rule updated successfully!"
+            : "✓ Business Rule created and active across all AI agents!"
         );
         setNewInstTitle("");
         setNewInstRuleText("");
         setNewInstRole("all");
         setEditingInstructionId(null);
+        setTimeout(() => setInstructionSuccessMsg(""), 5000);
+      } else {
         fetchInstructions();
-        setTimeout(() => setInstructionSuccessMsg(""), 4000);
       }
     } catch (err) {
       console.error(err);
@@ -596,6 +604,10 @@ export default function KnowledgeBrainPage() {
   };
 
   const handleToggleInstruction = async (inst: InstructionItem) => {
+    // Instant UI update
+    setInstructionsList((prev) =>
+      prev.map((i) => (i.id === inst.id ? { ...i, isActive: !i.isActive } : i))
+    );
     try {
       await fetch("/api/brain/instructions", {
         method: "POST",
@@ -608,20 +620,22 @@ export default function KnowledgeBrainPage() {
           isActive: !inst.isActive,
         }),
       });
-      fetchInstructions();
     } catch (err) {
       console.error(err);
+      fetchInstructions();
     }
   };
 
   const handleDeleteInstruction = async (id: string) => {
+    // Instant UI removal
+    setInstructionsList((prev) => prev.filter((i) => i.id !== id));
     try {
       await fetch(`/api/brain/instructions?id=${id}`, {
         method: "DELETE",
       });
-      fetchInstructions();
     } catch (err) {
       console.error(err);
+      fetchInstructions();
     }
   };
 
@@ -648,10 +662,14 @@ export default function KnowledgeBrainPage() {
         body: JSON.stringify({ action: "draft_from_pages", name: "Custom Domain Routing Protocol" }),
       });
       const data = await res.json();
-      if (data.draftedSkill) {
-        setSkillSuccessMsg("Skill drafted automatically from ingested help docs!");
+      const newSkill = data.draftedSkill || data.skill;
+      if (newSkill) {
+        setSkillsList((prev) => [newSkill, ...prev.filter((s) => s.id !== newSkill.id)]);
+        setSelectedSkill(newSkill);
+        setSkillSuccessMsg(`✓ SOP Skill '${newSkill.name}' drafted from help documentation and active!`);
+        setTimeout(() => setSkillSuccessMsg(""), 5000);
+      } else {
         fetchSkills();
-        setTimeout(() => setSkillSuccessMsg(""), 4000);
       }
     } catch (e) {
       console.error(e);
@@ -1099,24 +1117,24 @@ export default function KnowledgeBrainPage() {
             <RotateCw className="h-4 w-4" />
             <span>Stay Fresh &amp; Health</span>
             <span className="text-[10px] bg-emerald-950/60 text-emerald-300 px-1.5 py-0.2 rounded border border-emerald-500/20 font-mono">
-              Task 2.4
+              Auto-Sync
             </span>
           </button>
         </div>
 
-        {/* ================= TAB 1: SITEMAPS (Task 2.1 & 2.2) ================= */}
+        {/* ================= TAB 1: SITEMAPS ================= */}
         {activeTab === "sitemaps" && (
           <div className="space-y-6">
             <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Ingest Help Center Sitemaps (Task 2.2)</h3>
+                  <h3 className="text-sm font-semibold text-white">Documentation Sitemaps &amp; Knowledge Crawling</h3>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    Add one or more sitemap URLs. Automatically checks each URL on entry, resolves nested sitemaps recursively, tracks duplicate URLs, and generates pre-flight read plans.
+                    Add one or more XML sitemap URLs. Automatically inspects links on entry, resolves nested sitemaps recursively, eliminates duplicates, and generates pre-flight read plans.
                   </p>
                 </div>
                 <span className="rounded bg-indigo-500/10 text-indigo-400 px-2.5 py-0.5 text-xs font-mono border border-indigo-500/20">
-                  Polite 450 pages/hr (10,800/day) &bull; 8s batch pause
+                  Rate: 450 pages/hr &bull; 8s polite batch pause
                 </span>
               </div>
 
@@ -1210,37 +1228,81 @@ export default function KnowledgeBrainPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-end pt-2">
+                <div className="flex items-center justify-end gap-3 pt-2">
                   <button
                     onClick={handlePreviewSitemap}
                     disabled={
                       ingesting ||
                       urlValidationChecks.filter((u) => u.valid).length === 0
                     }
-                    className="flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-5 py-2.5 text-xs font-semibold text-white transition disabled:opacity-40 shadow-sm"
+                    className="flex items-center gap-2 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 px-4 py-2.5 text-xs font-semibold text-white transition disabled:opacity-40"
                   >
-                    <Search className="h-4 w-4" />
-                    <span>{ingesting ? "Discovering Nested Sitemaps..." : "Plan Sitemap Read (Pre-Flight Summary)"}</span>
+                    <Search className="h-4 w-4 text-cyan-400" />
+                    <span>{ingesting ? "Analyzing Sitemaps..." : "Analyze Sitemaps (Pre-Flight Plan)"}</span>
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const validUrls = urlValidationChecks.filter((u) => u.valid).map((u) => u.url);
+                      if (validUrls.length === 0) return;
+                      setIngesting(true);
+                      try {
+                        const res = await fetch("/api/brain/sitemaps", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ sitemapUrls: validUrls, confirmed: true }),
+                        });
+                        const data = await res.json();
+                        setIngestSuccessMsg("✓ Sitemap ingestion started! Live crawler active.");
+                        fetchSitemaps();
+                        await handleTriggerCrawl();
+                        setTimeout(() => setIngestSuccessMsg(""), 6000);
+                      } catch (e) {
+                        console.error(e);
+                      } finally {
+                        setIngesting(false);
+                      }
+                    }}
+                    disabled={
+                      ingesting ||
+                      urlValidationChecks.filter((u) => u.valid).length === 0
+                    }
+                    className="flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-5 py-2.5 text-xs font-semibold text-white transition disabled:opacity-40 shadow-md shadow-emerald-600/30"
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>{ingesting ? "Starting Ingestion..." : "Start Ingestion Now"}</span>
                   </button>
                 </div>
               </div>
 
-              {/* Pre-Crawl Summary Modal / Preview Card (Task 2.2) */}
+              {/* Pre-Crawl Summary Modal / Preview Card */}
               {previewSummary && (
                 <div className="rounded-xl border border-indigo-500/40 bg-indigo-950/20 p-6 space-y-6 mt-4">
                   <div className="flex items-center justify-between border-b border-indigo-500/30 pb-3">
                     <div className="flex items-center gap-2 text-indigo-300">
                       <Sparkles className="h-5 w-5 text-indigo-400" />
                       <div>
-                        <h4 className="text-base font-bold text-white">Pre-Flight Read Plan (Confirmation Required)</h4>
+                        <h4 className="text-base font-bold text-white">Pre-Flight Read Plan</h4>
                         <p className="text-xs text-gray-400 mt-0.5">
-                          Review discovered nested sitemaps, duplicate URLs, and throughput estimates. Processing will only start after your confirmation.
+                          Review discovered nested sitemaps, duplicate URLs, and throughput estimates. Click confirm to start crawling.
                         </p>
                       </div>
                     </div>
-                    <span className="rounded bg-emerald-500/10 text-emerald-400 text-xs px-2.5 py-1 font-mono border border-emerald-500/20">
-                      Robots.txt Verified
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setPreviewSummary(null)}
+                        className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:text-white"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleConfirmIngest}
+                        disabled={ingesting}
+                        className="flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-4 py-1.5 text-xs font-semibold text-white transition shadow-md shadow-emerald-600/30"
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                        <span>{ingesting ? "Starting..." : "Confirm & Start Ingestion"}</span>
+                      </button>
+                    </div>
                   </div>
 
                   {/* Grand Totals KPI Grid */}
@@ -1432,7 +1494,7 @@ export default function KnowledgeBrainPage() {
                 <div className="flex items-center gap-2">
                   <Activity className="h-5 w-5 text-indigo-400" />
                   <div>
-                    <h3 className="text-sm font-semibold text-white">Live Polite Ingestion Monitor (Task 2.3)</h3>
+                    <h3 className="text-sm font-semibold text-white">Live Knowledge Ingestion &amp; Crawler Monitor</h3>
                     <p className="text-xs text-gray-400 mt-0.5">
                       Batching: 5 pages/batch &bull; Polite rate: 450 pages/hr with 8s pause &bull; Resumes halfway if interrupted.
                     </p>
@@ -2101,7 +2163,7 @@ export default function KnowledgeBrainPage() {
               <div>
                 <h3 className="text-sm font-semibold text-white flex items-center gap-2">
                   <Mail className="h-4 w-4 text-amber-400" />
-                  <span>Gmail Threads &amp; Human Teaching Notes (Task 2.6)</span>
+                  <span>Customer Email History &amp; Agent Learning</span>
                 </h3>
                 <p className="text-xs text-gray-400 mt-0.5">
                   Annotate notes on whole threads and individual messages. Claude Opus 5.5 continuously optimizes skills from these notes.
@@ -2440,7 +2502,7 @@ export default function KnowledgeBrainPage() {
                     <CheckCircle2 className="h-5 w-5 text-indigo-400" />
                     <div>
                       <h4 className="text-sm font-bold text-white">
-                        Done-When Criteria: Note &rarr; Skill Change &rarr; Better Answer
+                        Training Impact: Note &rarr; Skill Update &rarr; Improved Resolution
                       </h4>
                       <p className="text-xs text-gray-400">
                         Demonstrating how a human teaching note updates a skill and delivers a measurably better customer answer.
@@ -2529,7 +2591,7 @@ export default function KnowledgeBrainPage() {
                 <div className="flex items-center gap-2">
                   <Database className="h-4 w-4 text-indigo-400" />
                   <span className="text-xs font-semibold text-white uppercase tracking-wider">
-                    Knowledge Brain Retrieval Engine (Task 2.7 &amp; 2.8)
+                    Hybrid Semantic &amp; Keyword Search Engine
                   </span>
                 </div>
 
@@ -2623,7 +2685,7 @@ export default function KnowledgeBrainPage() {
               {/* Morphology & Typo Invariance Quick Test Chips */}
               <div className="space-y-2 pt-1 border-t border-gray-800/80">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-400 font-medium">Task 2.7 Invariance &amp; Precision Test Suite:</span>
+                  <span className="text-gray-400 font-medium">Retrieval Precision &amp; Quality Benchmarks:</span>
                   {searchDurationMs > 0 && (
                     <span className="font-mono text-[11px] text-gray-400 bg-gray-900 px-2 py-0.5 rounded border border-gray-800">
                       Retrieved in {searchDurationMs}ms &bull; Mode: {searchMode}
@@ -2705,14 +2767,14 @@ export default function KnowledgeBrainPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="rounded bg-emerald-500/10 text-emerald-400 font-mono text-xs px-2 py-0.5 font-bold border border-emerald-500/30">
-                        TASK 2.7 EVALUATION LAB
+                        SEARCH RELEVANCE BENCHMARK
                       </span>
                       <h3 className="text-sm font-semibold text-white">
                         Hybrid Search vs. Meaning-Only Search Benchmark
                       </h3>
                     </div>
                     <p className="text-xs text-gray-400 mt-0.5">
-                      Capstone Requirement: &quot;Done when: your evals show it beats meaning-only search.&quot;
+                      Continuous Evaluation: Proving Reciprocal Rank Fusion outperforms vector cosine alone.
                     </p>
                   </div>
 
@@ -2877,7 +2939,7 @@ export default function KnowledgeBrainPage() {
                     <div className="flex items-center gap-2">
                       <Terminal className="h-5 w-5 text-indigo-400" />
                       <div>
-                        <h2 className="text-base font-bold text-white">Knowledge Brain Retrieval API (Task 2.8)</h2>
+                        <h2 className="text-base font-bold text-white">Knowledge Brain REST API Documentation</h2>
                         <p className="text-xs text-gray-400">
                           Production-grade multi-tenant API called by Ask &amp; Teach Chat and Eval Lab.
                         </p>
@@ -3055,7 +3117,7 @@ export default function KnowledgeBrainPage() {
                 <div>
                   <h3 className="text-sm font-semibold text-white flex items-center gap-2">
                     <RotateCw className="h-4 w-4 text-emerald-400" />
-                    <span>Stay Fresh &amp; Health Lifecycle (Task 2.4)</span>
+                    <span>Content Freshness &amp; Health Lifecycle</span>
                   </h3>
                   <p className="text-xs text-gray-400 mt-1">
                     Recheck sitemaps regularly to detect new and changed pages. Unchanged pages skip re-embedding via SHA-256 content hashes. Quarantined &amp; archived pages never appear in search answers.

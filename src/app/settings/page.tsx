@@ -753,7 +753,7 @@ export default function SettingsPage() {
                 <div className="flex items-center gap-2">
                   <Sliders className="h-5 w-5 text-indigo-400" />
                   <div>
-                    <h3 className="text-sm font-bold text-white">Autonomous 3-Tier Routing Table (Task 4.3)</h3>
+                    <h3 className="text-sm font-bold text-white">Autonomous 3-Tier Intelligent Model Router</h3>
                     <p className="text-xs text-gray-400">
                       Settings routing table: for each job and complexity, the cheapest model that passed the bar in the Eval Lab.
                     </p>
@@ -1107,7 +1107,7 @@ export default function SettingsPage() {
                 <h3 className="text-base font-bold">Danger Zone: Permanent Workspace Deletion</h3>
               </div>
               <p className="text-xs text-gray-300 leading-relaxed">
-                Task 1.1 & D14 Protocol: Deleting this business permanently wipes all records, embeddings, chunks, vector rows, chat sessions, prompt versions, and model call logs via cascading foreign keys. This action cannot be undone.
+                Deleting this workspace permanently removes all organization data, documents, vector embeddings, chat history, prompt templates, and audit logs. This action is irreversible.
               </p>
 
               <button

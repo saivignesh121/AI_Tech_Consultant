@@ -715,7 +715,7 @@ export default function EvalLabPage() {
             }`}
           >
             <Zap className="h-4 w-4" />
-            <span>3-Tier Router (Task 4.3)</span>
+            <span>Cost-Optimized Model Router</span>
           </button>
 
           <button
@@ -727,7 +727,7 @@ export default function EvalLabPage() {
             }`}
           >
             <Lock className="h-4 w-4" />
-            <span>Release Gate (Task 4.5)</span>
+            <span>Production Release Gates</span>
           </button>
 
           <button
@@ -739,7 +739,7 @@ export default function EvalLabPage() {
             }`}
           >
             <MessageSquarePlus className="h-4 w-4" />
-            <span>Real Feedback Tests (Task 4.4)</span>
+            <span>User Feedback Test Generation</span>
           </button>
 
           <button
@@ -751,7 +751,7 @@ export default function EvalLabPage() {
             }`}
           >
             <GraduationCap className="h-4 w-4" />
-            <span>Prove That It Learned (Task 3.5)</span>
+            <span>Learning Verification Benchmarks</span>
           </button>
         </div>
 
@@ -977,7 +977,7 @@ export default function EvalLabPage() {
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
                   <Layers className="h-5 w-5 text-indigo-400" />
-                  <span>Task 4.2: Compare the 14 Models</span>
+                  <span>Multi-Model Performance Matrix (14 Models)</span>
                 </h3>
                 <p className="text-[11px] text-gray-400 mt-0.5">
                   Evaluates Quality (from AI Judge), Cost in $ per 100 runs, and Speed (average and slowest 5% P95) across all 6 steps.
@@ -1255,7 +1255,7 @@ export default function EvalLabPage() {
                     <div>
                       <h3 className="text-sm font-semibold text-white">Step-by-Step Model Performance Matrix</h3>
                       <p className="text-[11px] text-gray-400 mt-0.5">
-                        Task 4.2: For each model and each step: Quality Score (from Judge), Cost of running step 100 times ($), and Speed (Avg &amp; P95 slowest 5%).
+                        Granular Telemetry Matrix: Quality Score (from Master Judge), Cost per 100 invocations ($), and Latency (Avg &amp; P95 slowest 5%).
                       </p>
                     </div>
                   </div>
@@ -1626,7 +1626,7 @@ export default function EvalLabPage() {
                     <div>
                       <h3 className="text-sm font-bold text-white flex items-center gap-2">
                         <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-                        <span>Task 4.2 Benchmark Results: All 14 Models Evaluated</span>
+                        <span>Fleet Benchmark Results: All 14 Models Evaluated</span>
                       </h3>
                       <p className="text-xs text-indigo-200/90 mt-0.5">
                         {multiModelBenchmarkData.casesEvaluatedCount} test cases evaluated per model across all 14 models &bull; Quality graded by AI Master Judge
@@ -1691,7 +1691,7 @@ export default function EvalLabPage() {
                         Evaluated Cases &amp; Human Reviewer Notes
                       </h4>
                       <p className="text-[11px] text-gray-400">
-                        Task 4.2: For each case and each model, the human reviewer can add a note (what was good, what was wrong).
+                        Evaluator Notes: Add qualitative notes for any model response (highlighting strengths, edge-case failures, or formatting issues).
                       </p>
                     </div>
                     <span className="text-xs text-indigo-400 font-mono bg-indigo-950/60 px-2.5 py-1 rounded border border-indigo-500/30">
@@ -1990,8 +1990,7 @@ export default function EvalLabPage() {
                   <span>The AI Master Judge &amp; Human Calibration</span>
                 </h3>
                 <p className="text-xs text-gray-400">
-                  Task 4.1: The AI Judge grades answers automatically (question, expected answer, app&apos;s answer &rarr; score &amp; one-line reason).
-                  A model never judges its own answers!
+                  Automated Evaluation: The Master Judge grades responses with score and qualitative rationale against ground truth. Independent evaluation: models never judge their own answers.
                 </p>
               </div>
 
@@ -2030,7 +2029,7 @@ export default function EvalLabPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800 pb-3">
                   <div>
                     <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 block mb-1">
-                      Check the Judge Against Yourself (Task 4.1 Specification)
+                      Human Calibration Agreement (Judge Verification)
                     </span>
                     <h2 className="text-lg font-bold text-white font-sans">
                       &ldquo;{calibrationData.summaryText || `The judge agreed with me on ${calibrationData.agreedCases} of ${calibrationData.totalCases} cases (${calibrationData.agreementRatePercent}%).`}&rdquo;
@@ -2134,7 +2133,7 @@ export default function EvalLabPage() {
                 <div>
                   <h3 className="text-base font-bold text-white flex items-center gap-2">
                     <GitCompare className="h-5 w-5 text-indigo-400" />
-                    <span>Side-by-Side Model Comparison (Task 4.1)</span>
+                    <span>Side-by-Side Model Comparator</span>
                   </h3>
                   <p className="text-xs text-gray-400 mt-0.5">
                     Compare two model answers to the same test case with the judge&apos;s score and one-line reason for each.
@@ -2347,7 +2346,7 @@ export default function EvalLabPage() {
                 <div className="flex items-center justify-between border-b border-emerald-500/30 pb-3">
                   <div className="flex items-center gap-2 text-emerald-300">
                     <TrendingUp className="h-5 w-5 text-emerald-400" />
-                    <h3 className="text-base font-bold">3-Tier Router Cost Savings Proof (Task 4.3)</h3>
+                    <h3 className="text-base font-bold">3-Tier Cost Routing Intelligence</h3>
                   </div>
                   <span className="rounded bg-emerald-500/20 text-emerald-300 text-xs px-2.5 py-0.5 font-mono font-bold border border-emerald-500/30">
                     -38.4% Cost Reduction
@@ -2398,7 +2397,7 @@ export default function EvalLabPage() {
                 <div className="flex items-center gap-2">
                   <Lock className="h-5 w-5 text-indigo-400" />
                   <div>
-                    <h3 className="text-sm font-semibold text-white">Release Gate Blocking Enforcer (Task 4.4)</h3>
+                    <h3 className="text-sm font-semibold text-white">Automated Release Gate Enforcer</h3>
                     <p className="text-xs text-gray-400">
                       Hard automated rule: candidate versions are prevented from publishing if benchmark score drops below active baseline.
                     </p>
@@ -2701,7 +2700,7 @@ export default function EvalLabPage() {
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
                   <Lock className="h-5 w-5 text-indigo-400" />
-                  <span>Release Gate Blocking Enforcer (Task 4.5)</span>
+                  <span>Automated Release Gate Enforcer</span>
                 </h3>
                 <p className="text-xs text-gray-400 mt-1 max-w-2xl leading-relaxed">
                   Hard automated rule: A new prompt, role, skill or model cannot go live if any score falls below the last version. This strictly blocks regressions across all settings and code updates.
@@ -2888,7 +2887,7 @@ export default function EvalLabPage() {
               <div className="flex items-center justify-between border-b border-gray-800 pb-2">
                 <h4 className="text-sm font-bold text-white flex items-center gap-2">
                   <Scale className="h-4 w-4 text-cyan-400" />
-                  <span>The Three Architectural Decisions (Task 4.5 Governance)</span>
+                  <span>The Three Architectural Pillars (System Governance)</span>
                 </h4>
                 <span className="text-xs text-gray-400 font-mono">Explicit Production Policies</span>
               </div>
@@ -2943,7 +2942,7 @@ export default function EvalLabPage() {
                     Stops benchmark from becoming too easy over time:
                   </p>
                   <ul className="space-y-1.5 text-gray-400 text-[11px]">
-                    <li><strong className="text-white">Live Feedback Ingestion (Task 4.4):</strong> Every thumbs-down critique automatically converts into a hard regression test.</li>
+                    <li><strong className="text-white">Live Feedback Ingestion:</strong> Every thumbs-down critique automatically converts into a hard regression test.</li>
                     <li><strong className="text-white">Adversarial Hard Traps:</strong> 10 prompt injections, typo traps, and subtle boundary edge-cases.</li>
                     <li><strong className="text-white">Dynamic Difficulty Weighting:</strong> Tests models consistently pass are weighted 1.0x; newly ingested real failure cases carry 1.5x–2.0x weight.</li>
                     <li><strong className="text-white">Immutable Versions:</strong> Frozen Git datasets prevent cherry-picking questions.</li>
@@ -2962,7 +2961,7 @@ export default function EvalLabPage() {
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
                   <MessageSquarePlus className="h-5 w-5 text-indigo-400" />
-                  <span>Real Feedback Becomes New Tests (Task 4.4)</span>
+                  <span>Continuous Feedback Regression Suite</span>
                 </h3>
                 <p className="text-xs text-gray-400 mt-1 max-w-2xl leading-relaxed">
                   Every thumbs up or down with a reason on AI answers in the chat automatically converts into durable benchmark test cases, continuously hardening the Eval Lab against live customer failure modes.
@@ -3158,7 +3157,7 @@ export default function EvalLabPage() {
                   <span>Prove That It Learned: Comparative Eval Lab</span>
                 </h3>
                 <p className="text-xs text-gray-400">
-                  Task 3.5: Run the exact same customer question before and after a human lesson approval to demonstrate empirical score gains.
+                  Empirical Verification: Run the exact same customer question before and after a human lesson approval to demonstrate empirical score gains.
                 </p>
               </div>
 

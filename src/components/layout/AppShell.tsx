@@ -202,10 +202,18 @@ export default function AppShell({
       { label: "Knowledge Brain", href: "/knowledge", icon: Brain },
       { label: "The Eval Lab", href: "/evals", icon: FlaskConical },
     ];
-  } else if (role === "admin") {
+  } else if (role === "admin" || role === "owner") {
     navItems = [
+      { label: "Dashboard", href: "/", icon: LayoutDashboard },
+      { label: "15-Min Onboarding", href: "/onboarding", icon: Sparkles },
+      { label: "Knowledge Brain", href: "/knowledge", icon: Brain },
+      { label: "Ask & Teach Chat", href: "/chat", icon: MessageSquare },
+      { label: "Role & Prompt Studio", href: "/settings/roles-prompts", icon: Sparkles },
+      { label: "The Eval Lab", href: "/evals", icon: FlaskConical },
+      { label: "Self-Improve Loop", href: "/self-improve", icon: RefreshCw },
+      { label: "Approvals Inbox", href: "/approvals", icon: CheckCircle2 },
+      { label: "Settings & Keys", href: "/settings", icon: Settings },
       { label: "Platform Fleet Admin", href: "/admin", icon: ShieldAlert },
-      { label: "Dashboard Hub", href: "/", icon: LayoutDashboard },
     ];
   }
 
@@ -218,21 +226,18 @@ export default function AppShell({
   let accessDeniedReason: string | null = null;
   let requiredRole: string | null = null;
 
-  if (pathname.startsWith("/admin") && !isAdmin) {
-    accessDeniedReason = "Platform Admin Fleet Access: Only the SaaS Operator (Platform Admin) can access the fleet governance dashboard.";
-    requiredRole = "Platform Admin (admin)";
-  } else if (pathname.startsWith("/approvals") && !isExpert && !isOwner) {
-    accessDeniedReason = "Approvals Inbox Access: Only the Expert / Approver or Business Owner can review escalations, approve learned skills, and merge PRs.";
+  if (pathname.startsWith("/admin") && !isAdmin && !isOwner) {
+    accessDeniedReason = "Platform Admin Fleet Access: Only the SaaS Operator or Workspace Admin can access the fleet governance dashboard.";
+    requiredRole = "Platform Admin (admin) or Business Owner (owner)";
+  } else if (pathname.startsWith("/approvals") && !isExpert && !isOwner && !isAdmin) {
+    accessDeniedReason = "Approvals Inbox Access: Only the Expert / Approver or Business Owner/Admin can review escalations, approve learned skills, and merge PRs.";
     requiredRole = "Expert / Approver (expert) or Business Owner (owner)";
   } else if (isTeam && (pathname.startsWith("/settings") || pathname.startsWith("/onboarding") || pathname.startsWith("/evals") || pathname.startsWith("/self-improve"))) {
-    accessDeniedReason = "Owner Privilege Required: As a Team Member (Support Specialist), you have access to Ask & Teach Chat and the Knowledge Base. Settings, API vault keys, prompt editing, and workspace deletion are restricted to the Business Owner.";
-    requiredRole = "Business Owner (owner)";
+    accessDeniedReason = "Admin Privilege Required: As a Team Member (Support Specialist), you have access to Ask & Teach Chat and the Knowledge Base. Settings, API vault keys, prompt editing, and workspace onboarding are restricted to Business Owners and Admins.";
+    requiredRole = "Business Owner (owner) or Admin (admin)";
   } else if (isExpert && pathname.startsWith("/settings")) {
-    accessDeniedReason = "Owner Privilege Required: As an Expert / Approver, you have authority over escalations, lessons, and PRs. Modifying raw API vault keys or deleting the business is reserved for the Business Owner.";
-    requiredRole = "Business Owner (owner)";
-  } else if (isAdmin && (pathname.startsWith("/settings") || pathname.startsWith("/chat") || pathname.startsWith("/knowledge") || pathname.startsWith("/evals") || pathname.startsWith("/self-improve") || pathname.startsWith("/onboarding"))) {
-    accessDeniedReason = "Strict Zero-Leakage Multi-Tenant Isolation: As Platform Admin (SaaS Operator), platform architecture strictly prohibits viewing or accessing individual tenant private data, chats, prompts, or API vault keys. Please visit /admin for fleet telemetry.";
-    requiredRole = "Tenant User (owner, team, or expert)";
+    accessDeniedReason = "Admin Privilege Required: As an Expert / Approver, you have authority over escalations, lessons, and PRs. Modifying raw API vault keys or deleting the business is reserved for the Business Owner or Admin.";
+    requiredRole = "Business Owner (owner) or Admin (admin)";
   }
 
   return (

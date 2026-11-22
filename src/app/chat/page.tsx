@@ -817,7 +817,7 @@ export default function ChatPage() {
                     fetchLessons();
                   }}
                   className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-purple-500/40 bg-purple-950/40 hover:bg-purple-900/40 text-purple-300 text-[11px] font-semibold transition"
-                  title="Task 3.4: Manage learned lessons, view Markdown files, or approve pending rules"
+                  title="Manage learned lessons, view Markdown files, or approve pending rules"
                 >
                   <BookOpen className="h-3.5 w-3.5 text-purple-400" />
                   <span>
@@ -1115,7 +1115,7 @@ export default function ChatPage() {
                       <div className="mt-3 p-3 rounded-lg bg-red-950/50 border border-red-500/50 text-red-200 text-xs space-y-1.5 shadow-lg animate-in fade-in duration-200">
                         <div className="flex items-center gap-2 font-bold text-red-300">
                           <ShieldAlert className="h-4 w-4 text-red-400 flex-shrink-0" />
-                          <span>Prompt Injection Shield Activated (Task 3.6)</span>
+                          <span>Prompt Injection Shield Activated</span>
                         </div>
                         <p className="text-[11px] text-red-300/80 leading-relaxed">
                           A prompt injection attempt was detected and neutralized. Security guardrails prevented unauthorized instruction overrides or system prompt exfiltration.
@@ -1152,7 +1152,7 @@ export default function ChatPage() {
                               ? "bg-indigo-950/80 text-indigo-300 border-indigo-500/60 shadow-sm"
                               : "bg-gray-900 border-gray-800 hover:text-indigo-300 hover:border-gray-700"
                           }`}
-                          title="Task 3.3: Inspect which knowledge, skills, lessons, and model were used, and exact cost"
+                          title="Inspect which knowledge, skills, lessons, and model were used, and exact cost"
                         >
                           <Activity className="h-3 w-3 text-indigo-400" />
                           <span>Trace ({m.trace?.modelId || "claude-sonnet-5.5"} &bull; ${(m.trace?.costUsd ?? m.telemetry?.costUsd ?? 0.00075).toFixed(6)})</span>
@@ -1167,7 +1167,7 @@ export default function ChatPage() {
                               ? "bg-emerald-950/80 text-emerald-300 border-emerald-500/60"
                               : "bg-gray-900 border-gray-800 hover:text-emerald-300 hover:border-gray-700"
                           }`}
-                          title="Endorse this answer as accurate with a reason (Task 4.4)"
+                          title="Endorse this answer as accurate with a rationale"
                         >
                           <ThumbsUp className="h-3 w-3 text-emerald-400" />
                           <span>This was right</span>
@@ -1182,7 +1182,7 @@ export default function ChatPage() {
                               ? "bg-amber-950/80 text-amber-300 border-amber-500/60"
                               : "bg-gray-900 border-gray-800 hover:text-amber-300 hover:border-gray-700"
                           }`}
-                          title="Flag an error, teach the agent, and generate a new regression test (Task 4.4)"
+                          title="Flag an issue, teach the agent, and create a new regression test"
                         >
                           <ThumbsDown className="h-3 w-3 text-amber-400" />
                           <span>This was wrong</span>
@@ -1220,7 +1220,7 @@ export default function ChatPage() {
                           <div className="flex items-center justify-between border-b border-gray-800 pb-1.5">
                             <span className="font-bold text-white flex items-center gap-1.5">
                               <Activity className="h-3.5 w-3.5 text-indigo-400" />
-                              <span>Autonomous Turn Trace (Task 3.3)</span>
+                              <span>Response Generation Trace &amp; Citations</span>
                             </span>
                             <button
                               type="button"
@@ -1356,7 +1356,7 @@ export default function ChatPage() {
                           <div className="flex items-center justify-between">
                             <span className="font-bold text-emerald-400 flex items-center gap-1.5 text-xs">
                               <ThumbsUp className="h-3.5 w-3.5 text-emerald-400" />
-                              <span>Endorse Accurate Answer (Task 4.4: Creates New Test Case)</span>
+                              <span>Endorse Answer (Adds to Benchmark Suite)</span>
                             </span>
                             <button
                               type="button"
@@ -1378,7 +1378,7 @@ export default function ChatPage() {
                           />
                           <div className="flex items-center justify-between pt-1">
                             <span className="text-[10px] text-gray-500 italic">
-                              Task 4.4: Auto-generates verified benchmark test.
+                              Continuous Hardening: Auto-generates verified benchmark test.
                             </span>
                             <button
                               type="button"
@@ -1655,7 +1655,7 @@ export default function ChatPage() {
                     <span>Start a New Consultation</span>
                   </h3>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    Task 3.1: Pick how you would like to interact with the Knowledge Brain
+                    Select your consultation workflow or teach new technical knowledge
                   </p>
                 </div>
                 <button
@@ -1887,7 +1887,7 @@ export default function ChatPage() {
                       className="rounded border-gray-700 text-amber-500 focus:ring-amber-500"
                     />
                     <label htmlFor="flowIntoMemoryCheck" className="text-xs text-gray-300 cursor-pointer">
-                      Flow this expert answer back into Knowledge Brain as an active instruction (Task 3.2)
+                      Flow this expert answer back into Knowledge Brain as an active instruction
                     </label>
                   </div>
 
@@ -1927,7 +1927,7 @@ export default function ChatPage() {
                       &quot;I Don&apos;t Know&quot; Line Calibration &amp; Trade-Off Inspector
                     </h3>
                     <p className="text-[11px] text-gray-400 mt-0.5">
-                      Task 3.2: Calibrated line set by empirical evals, proving wrong answers drop without over-refusal
+                      Calibrated refusal threshold determined by empirical evals to prevent hallucination without over-refusal
                     </p>
                   </div>
                 </div>
@@ -2027,7 +2027,7 @@ export default function ChatPage() {
                     <h3 className="text-base font-bold text-white flex items-center gap-2">
                       <span>Lessons &amp; Learned Protocols</span>
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">
-                        Task 3.4
+                        Governance Active
                       </span>
                     </h3>
                     <p className="text-xs text-gray-400 mt-0.5">

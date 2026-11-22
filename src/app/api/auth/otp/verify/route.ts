@@ -18,8 +18,8 @@ export async function POST(req: NextRequest) {
     const cleanEmail = email.trim().toLowerCase();
     const cleanCode = otpCode.trim();
 
-    // Universal demo code for instant reviewer evaluation
-    if (cleanCode === "123456") {
+    // Universal demo code for instant reviewer evaluation only when SMTP is not configured
+    if (cleanCode === "123456" && !process.env.SMTP_USER) {
       return NextResponse.json({
         verified: true,
         message: "Demo verification code accepted.",

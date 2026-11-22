@@ -93,12 +93,11 @@ function SignUpContent() {
       } else {
         setOtpSent(true);
         setCountdown(60);
-        if (data.devPreviewOtp) {
-          setOtpCode(data.devPreviewOtp);
-        }
+        // Do NOT auto-fill the OTP; user must read and manually enter the code from their email
+        setOtpCode("");
         let notice = data.isRealSmtp
-          ? `✓ Real verification email sent to ${email.trim()} via SMTP! Check your inbox or spam.`
-          : `Verification code: ${data.devPreviewOtp || "123456"} (auto-filled below). To receive real emails to your personal inbox, add SMTP_USER & SMTP_PASS in .env.`;
+          ? `✓ Real verification email sent to ${email.trim()} via SMTP! Please check your inbox or spam for the 6-digit code.`
+          : `Verification email sent! Enter the 6-digit code from your email. (Fallback demo code: 123456).`;
         setOtpNotification(notice);
       }
     } catch (err) {
@@ -349,7 +348,7 @@ function SignUpContent() {
                 />
               </div>
               <p className="text-[11px] text-gray-400 leading-tight">
-                Dispatched to your mail. Universal demo code <code className="text-cyan-300 font-mono">123456</code> is accepted for testing.
+                Check your email inbox or spam folder for the 6-digit verification code and enter it above.
               </p>
             </div>
 

@@ -1,4 +1,6 @@
 import nodemailer from "nodemailer";
+import * as dotenv from "dotenv";
+dotenv.config();
 
 export interface SmtpConfig {
   host?: string;
@@ -31,10 +33,15 @@ export async function sendOtpEmail(params: SendOtpParams): Promise<SendEmailResu
   // 1. Resolve SMTP configuration (custom > env > defaults)
   const smtpHost = customSmtp?.host || process.env.SMTP_HOST || "smtp.gmail.com";
   const smtpPort = customSmtp?.port || parseInt(process.env.SMTP_PORT || "587", 10);
-  const smtpUser = customSmtp?.user || process.env.SMTP_USER;
-  const smtpPass = customSmtp?.pass || process.env.SMTP_PASS;
+  const smtpUser = (customSmtp?.user || process.env.SMTP_USER || "").trim() || undefined;
+  const rawPass = customSmtp?.pass || process.env.SMTP_PASS;
+  const smtpPass = rawPass ? rawPass.replace(/["'\s]/g, "") : undefined;
   const smtpSecure = customSmtp?.secure ?? (process.env.SMTP_SECURE === "true" || smtpPort === 465);
-  const smtpFrom = customSmtp?.from || process.env.SMTP_FROM || '"AI Technologies & Consulting" <no-reply@aitechconsults.com>';
+  
+  let smtpFrom = customSmtp?.from || process.env.SMTP_FROM;
+  if (!smtpFrom || smtpFrom.includes("no-reply@aitechconsults.com") || smtpFrom.includes("aitechconsults.com")) {
+    smtpFrom = smtpUser ? `"AI Technologies & Consulting" <${smtpUser}>` : '"AI Technologies & Consulting" <no-reply@aitechconsults.com>';
+  }
 
   const subject = `Your Verification Code: ${otpCode} — AI Technologies & Consulting`;
 

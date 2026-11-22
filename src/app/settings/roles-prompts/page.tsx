@@ -712,7 +712,7 @@ ${skillForm.examples
             }`}
           >
             <BookOpen className="h-4 w-4" />
-            <span>Skills & SOP Studio (Task 2.5)</span>
+            <span>Skills &amp; SOP Workflows</span>
           </button>
         </div>
 
@@ -919,7 +919,7 @@ ${skillForm.examples
                 <div className="flex items-center gap-2">
                   <Zap className="h-5 w-5 text-amber-400" />
                   <div>
-                    <h3 className="text-sm font-semibold text-white">Prompt Caching Cost Simulator (Task 1.3)</h3>
+                    <h3 className="text-sm font-semibold text-white">Prompt Caching &amp; Cost Simulator</h3>
                     <p className="text-xs text-gray-400">
                       Simulate 100 customer tech consultations to prove exact dollar and percentage savings with prompt caching ON.
                     </p>

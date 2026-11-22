@@ -127,6 +127,30 @@ export async function POST(req: NextRequest) {
       expires: expiresAt,
     });
 
+    response.cookies.set("business_id", result.newBiz.id, {
+      path: "/",
+      httpOnly: true,
+      secure: isSecure,
+      sameSite: "lax",
+      expires: expiresAt,
+    });
+
+    response.cookies.set("user_id", result.newUser.id, {
+      path: "/",
+      httpOnly: true,
+      secure: isSecure,
+      sameSite: "lax",
+      expires: expiresAt,
+    });
+
+    response.cookies.set("user_role", "owner", {
+      path: "/",
+      httpOnly: true,
+      secure: isSecure,
+      sameSite: "lax",
+      expires: expiresAt,
+    });
+
     response.cookies.set("active_tenant_slug", result.newBiz.slug, {
       path: "/",
       httpOnly: false,

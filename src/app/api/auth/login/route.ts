@@ -102,10 +102,38 @@ export async function POST(req: NextRequest) {
       const targetBiz = userMemberships[0];
       const { token, expiresAt } = await createSession(user.id, targetBiz.businessId);
 
+      // Check onboarding readiness score (<85% goes to /onboarding, >=85% goes to role-appropriate dashboard)
+      let readinessScore = 0;
+      try {
+        const [bizRecord] = await db
+          .select({ readinessScore: businesses.readinessScore })
+          .from(businesses)
+          .where(eq(businesses.id, targetBiz.businessId))
+          .limit(1);
+        readinessScore = bizRecord?.readinessScore ?? 0;
+      } catch (_e) {
+        readinessScore = 100;
+      }
+
+      let redirectUrl = "/";
+      if (readinessScore < 85) {
+        redirectUrl = "/onboarding";
+      } else {
+        if (targetBiz.role === "expert") {
+          redirectUrl = "/approvals";
+        } else if (targetBiz.role === "team" || targetBiz.role === "member") {
+          redirectUrl = "/chat";
+        } else {
+          // owner or admin
+          redirectUrl = "/evals";
+        }
+      }
+
       const response = NextResponse.json({
         success: true,
-        redirectUrl: "/",
+        redirectUrl,
         business: targetBiz,
+        readinessScore,
         user: {
           id: user.id,
           email: user.email,
@@ -116,7 +144,32 @@ export async function POST(req: NextRequest) {
 
       const isSecure = process.env.COOKIE_SECURE === "true";
 
+      // Store HTTP-only cookies
       response.cookies.set("session_token", token, {
+        path: "/",
+        httpOnly: true,
+        secure: isSecure,
+        sameSite: "lax",
+        expires: expiresAt,
+      });
+
+      response.cookies.set("business_id", targetBiz.businessId, {
+        path: "/",
+        httpOnly: true,
+        secure: isSecure,
+        sameSite: "lax",
+        expires: expiresAt,
+      });
+
+      response.cookies.set("user_id", user.id, {
+        path: "/",
+        httpOnly: true,
+        secure: isSecure,
+        sameSite: "lax",
+        expires: expiresAt,
+      });
+
+      response.cookies.set("user_role", targetBiz.role, {
         path: "/",
         httpOnly: true,
         secure: isSecure,
