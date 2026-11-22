@@ -106,25 +106,53 @@ interface EmailThreadItem {
   }>;
 }
 
+interface SitemapPlanSummary {
+  rootUrl: string;
+  rootUrls: string[];
+  totalSitemapsFound: number;
+  nestedSitemaps: string[];
+  nestedBreakdown: Array<{
+    sitemapUrl: string;
+    pageCount: number;
+    firstUrl: string | null;
+    lastUrl: string | null;
+  }>;
+  totalUrls: number;
+  uniqueUrls: number;
+  duplicateUrlsCount: number;
+  duplicates: Array<{
+    url: string;
+    foundIn: string[];
+    occurrences: number;
+  }>;
+  firstUrl: string | null;
+  lastUrl: string | null;
+  estimatedPagesPerHour: number;
+  estimatedPagesPerDay: number;
+  estimatedHours: number;
+  estimatedMinutes: number;
+  estimatedCompletionTime: string;
+  formattedEta: string;
+}
+
 export default function KnowledgeBrainPage() {
   const [activeTab, setActiveTab] = useState<
     "sitemaps" | "pages" | "instructions" | "skills" | "emails" | "search" | "health"
   >("sitemaps");
 
-  // --- Sitemaps Tab State (Knowledge Type 1) ---
+  // --- Sitemaps Tab State (Knowledge Type 1 & Task 2.2) ---
   const [sources, setSources] = useState<SitemapSource[]>([]);
-  // Default benchmark: Brilliant Directories Solution Center sitemap
-  const [newSitemapUrl, setNewSitemapUrl] = useState("https://support.brilliantdirectories.com/support/sitemap.xml");
+  // Default benchmark: Brilliant Directories Solution Center sitemap (supports 1 or more URLs)
+  const [sitemapsInput, setSitemapsInput] = useState("https://support.brilliantdirectories.com/support/sitemap.xml");
+  const [urlValidationChecks, setUrlValidationChecks] = useState<
+    Array<{ url: string; valid: boolean; error?: string }>
+  >([
+    { url: "https://support.brilliantdirectories.com/support/sitemap.xml", valid: true },
+  ]);
   const [loadingSources, setLoadingSources] = useState(false);
-  const [previewSummary, setPreviewSummary] = useState<{
-    sitemapUrl: string;
-    discoveredUrlsCount: number;
-    sampleUrls: string[];
-    estimatedMinutes: number;
-    politeRatePerPageSec: number;
-    robotsTxtCompliant: boolean;
-  } | null>(null);
+  const [previewSummary, setPreviewSummary] = useState<SitemapPlanSummary | null>(null);
   const [ingesting, setIngesting] = useState(false);
+  const [ingestSuccessMsg, setIngestSuccessMsg] = useState("");
 
   // --- Standalone Pages Tab State (Knowledge Type 2) ---
   const [pages, setPages] = useState<KnowledgePageItem[]>([]);
@@ -198,14 +226,42 @@ export default function KnowledgeBrainPage() {
     }
   };
 
+  const validateUrlInput = (urlStr: string) => {
+    const trimmed = urlStr.trim();
+    if (!trimmed) return { valid: false, error: "URL cannot be empty." };
+    try {
+      const u = new URL(trimmed);
+      if (u.protocol !== "http:" && u.protocol !== "https:") {
+        return { valid: false, error: "Must start with http:// or https://" };
+      }
+      if (!u.hostname.includes(".")) {
+        return { valid: false, error: "Must contain a valid domain name." };
+      }
+      return { valid: true };
+    } catch {
+      return { valid: false, error: "Invalid URL syntax." };
+    }
+  };
+
+  const handleSitemapsInputChange = (val: string) => {
+    setSitemapsInput(val);
+    const lines = val.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
+    const checks = lines.map((line) => ({
+      url: line,
+      ...validateUrlInput(line),
+    }));
+    setUrlValidationChecks(checks.length > 0 ? checks : [{ url: "", valid: false, error: "Enter at least one URL." }]);
+  };
+
   const handlePreviewSitemap = async () => {
-    if (!newSitemapUrl.trim()) return;
+    const validUrls = urlValidationChecks.filter((u) => u.valid).map((u) => u.url);
+    if (validUrls.length === 0) return;
     setIngesting(true);
     try {
       const res = await fetch("/api/brain/sitemaps", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sitemapUrl: newSitemapUrl, previewOnly: true }),
+        body: JSON.stringify({ sitemapUrls: validUrls, previewOnly: true }),
       });
       const data = await res.json();
       if (data.summary) setPreviewSummary(data.summary);
@@ -219,15 +275,22 @@ export default function KnowledgeBrainPage() {
   const handleConfirmIngest = async () => {
     if (!previewSummary) return;
     setIngesting(true);
+    setIngestSuccessMsg("");
     try {
       const res = await fetch("/api/brain/sitemaps", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sitemapUrl: previewSummary.sitemapUrl }),
+        body: JSON.stringify({
+          sitemapUrls: previewSummary.rootUrls,
+          confirmed: true,
+        }),
       });
-      if (res.ok) {
+      const data = await res.json();
+      if (data.success) {
+        setIngestSuccessMsg(data.message || "Sitemaps confirmed and scheduled for polite crawling!");
         setPreviewSummary(null);
         fetchSitemaps();
+        setTimeout(() => setIngestSuccessMsg(""), 6000);
       }
     } catch (e) {
       console.error(e);
@@ -612,119 +675,317 @@ export default function KnowledgeBrainPage() {
             <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Ingest Help Center Sitemap</h3>
+                  <h3 className="text-sm font-semibold text-white">Ingest Help Center Sitemaps (Task 2.2)</h3>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    Works for any public sitemap (docs, blog, online store). Default benchmark is the Brilliant Directories Solution Center.
+                    Add one or more sitemap URLs. Automatically checks each URL on entry, resolves nested sitemaps recursively, tracks duplicate URLs, and generates pre-flight read plans.
                   </p>
                 </div>
                 <span className="rounded bg-indigo-500/10 text-indigo-400 px-2.5 py-0.5 text-xs font-mono border border-indigo-500/20">
-                  Polite 450 pages/hr &bull; 8s delay
+                  Polite 450 pages/hr (10,800/day) &bull; 8s batch pause
                 </span>
               </div>
+
+              {ingestSuccessMsg && (
+                <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3.5 text-xs text-emerald-300 flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+                  <span>{ingestSuccessMsg}</span>
+                </div>
+              )}
 
               {/* Quick Preset Buttons */}
               <div className="flex items-center gap-2 flex-wrap text-xs">
                 <span className="text-gray-500">Presets:</span>
                 <button
                   type="button"
-                  onClick={() => setNewSitemapUrl("https://support.brilliantdirectories.com/support/sitemap.xml")}
+                  onClick={() =>
+                    handleSitemapsInputChange(
+                      "https://support.brilliantdirectories.com/support/sitemap.xml"
+                    )
+                  }
                   className="rounded bg-indigo-950/40 border border-indigo-500/30 hover:bg-indigo-900/40 px-2.5 py-1 text-indigo-300 font-mono text-[11px]"
                 >
                   Brilliant Directories (Default Benchmark)
                 </button>
                 <button
                   type="button"
-                  onClick={() => setNewSitemapUrl("https://docs.stripe.com/sitemap.xml")}
+                  onClick={() =>
+                    handleSitemapsInputChange(
+                      "https://support.brilliantdirectories.com/support/sitemap.xml\nhttps://docs.stripe.com/sitemap.xml"
+                    )
+                  }
+                  className="rounded bg-purple-950/40 border border-purple-500/30 hover:bg-purple-900/40 px-2.5 py-1 text-purple-300 font-mono text-[11px]"
+                >
+                  Multi-Sitemap Batch (Nested Demo)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSitemapsInputChange("https://docs.stripe.com/sitemap.xml")}
                   className="rounded bg-gray-800/80 hover:bg-gray-700 px-2.5 py-1 text-gray-300 font-mono text-[11px]"
                 >
                   Stripe Docs
                 </button>
                 <button
                   type="button"
-                  onClick={() => setNewSitemapUrl("https://docs.github.com/sitemap.xml")}
+                  onClick={() => handleSitemapsInputChange("https://docs.github.com/sitemap.xml")}
                   className="rounded bg-gray-800/80 hover:bg-gray-700 px-2.5 py-1 text-gray-300 font-mono text-[11px]"
                 >
                   GitHub Docs
                 </button>
               </div>
 
-              <div className="flex gap-2">
-                <input
-                  type="url"
-                  value={newSitemapUrl}
-                  onChange={(e) => setNewSitemapUrl(e.target.value)}
-                  placeholder="https://example.com/sitemap.xml"
-                  className="flex-1 rounded-lg border border-gray-700 bg-gray-950 px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+              {/* Multiline Sitemap URLs Input */}
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-gray-300">
+                  Enter One or More Sitemap URLs (one per line or comma-separated):
+                </label>
+                <textarea
+                  rows={3}
+                  value={sitemapsInput}
+                  onChange={(e) => handleSitemapsInputChange(e.target.value)}
+                  placeholder="https://example.com/sitemap.xml&#10;https://example.com/sitemap_index.xml"
+                  className="w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 font-mono"
                 />
-                <button
-                  onClick={handlePreviewSitemap}
-                  disabled={ingesting || !newSitemapUrl.trim()}
-                  className="flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-5 py-2.5 text-xs font-semibold text-white transition disabled:opacity-40"
-                >
-                  <Search className="h-4 w-4" />
-                  <span>{ingesting ? "Discovering..." : "Discover & Pre-Crawl Summary"}</span>
-                </button>
+
+                {/* Live URL Validation Feedback List (Task 2.2: Check each URL when it is entered) */}
+                <div className="space-y-1.5 pt-1">
+                  <span className="text-[11px] text-gray-400 font-semibold block">URL Entry Checks:</span>
+                  <div className="space-y-1 max-h-32 overflow-y-auto">
+                    {urlValidationChecks.map((check, idx) => (
+                      <div
+                        key={idx}
+                        className={`flex items-center justify-between text-xs px-2.5 py-1.5 rounded border font-mono ${
+                          check.valid
+                            ? "bg-emerald-950/20 border-emerald-500/30 text-emerald-300"
+                            : "bg-red-950/20 border-red-500/30 text-red-300"
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5 truncate max-w-xl">
+                          {check.valid ? (
+                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 flex-shrink-0" />
+                          ) : (
+                            <AlertTriangle className="h-3.5 w-3.5 text-red-400 flex-shrink-0" />
+                          )}
+                          <span className="truncate">{check.url || "(Empty input line)"}</span>
+                        </div>
+                        <span className="text-[10px] uppercase font-bold flex-shrink-0 ml-2">
+                          {check.valid ? "Valid Syntax" : check.error}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    onClick={handlePreviewSitemap}
+                    disabled={
+                      ingesting ||
+                      urlValidationChecks.filter((u) => u.valid).length === 0
+                    }
+                    className="flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-5 py-2.5 text-xs font-semibold text-white transition disabled:opacity-40 shadow-sm"
+                  >
+                    <Search className="h-4 w-4" />
+                    <span>{ingesting ? "Discovering Nested Sitemaps..." : "Plan Sitemap Read (Pre-Flight Summary)"}</span>
+                  </button>
+                </div>
               </div>
 
-              {/* Pre-Crawl Summary Modal / Preview Card */}
+              {/* Pre-Crawl Summary Modal / Preview Card (Task 2.2) */}
               {previewSummary && (
-                <div className="rounded-xl border border-indigo-500/40 bg-indigo-950/20 p-5 space-y-4 mt-4">
+                <div className="rounded-xl border border-indigo-500/40 bg-indigo-950/20 p-6 space-y-6 mt-4">
                   <div className="flex items-center justify-between border-b border-indigo-500/30 pb-3">
                     <div className="flex items-center gap-2 text-indigo-300">
-                      <Sparkles className="h-4 w-4 text-indigo-400" />
-                      <h4 className="text-sm font-bold">Pre-Crawl Discovery Summary</h4>
+                      <Sparkles className="h-5 w-5 text-indigo-400" />
+                      <div>
+                        <h4 className="text-base font-bold text-white">Pre-Flight Read Plan (Confirmation Required)</h4>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          Review discovered nested sitemaps, duplicate URLs, and throughput estimates. Processing will only start after your confirmation.
+                        </p>
+                      </div>
                     </div>
-                    <span className="rounded bg-emerald-500/10 text-emerald-400 text-xs px-2.5 py-0.5 font-mono border border-emerald-500/20">
-                      Robots.txt Allowed
+                    <span className="rounded bg-emerald-500/10 text-emerald-400 text-xs px-2.5 py-1 font-mono border border-emerald-500/20">
+                      Robots.txt Verified
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                    <div>
-                      <span className="text-gray-400">Discovered URLs:</span>
-                      <div className="text-xl font-bold text-white mt-1 font-mono">
-                        {previewSummary.discoveredUrlsCount} pages
+                  {/* Grand Totals KPI Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+                    <div className="bg-gray-950/80 p-3.5 rounded-lg border border-gray-800">
+                      <span className="text-gray-400">Total Sitemaps:</span>
+                      <div className="text-2xl font-bold text-white mt-1 font-mono">
+                        {previewSummary.totalSitemapsFound}
+                      </div>
+                      <span className="text-[10px] text-gray-500 mt-0.5 block">
+                        {previewSummary.rootUrls.length} root + {previewSummary.nestedSitemaps.length} nested
+                      </span>
+                    </div>
+
+                    <div className="bg-gray-950/80 p-3.5 rounded-lg border border-gray-800">
+                      <span className="text-gray-400">Total URLs Discovered:</span>
+                      <div className="text-2xl font-bold text-indigo-300 mt-1 font-mono">
+                        {previewSummary.totalUrls}
+                      </div>
+                      <span className="text-[10px] text-gray-500 mt-0.5 block">
+                        {previewSummary.uniqueUrls} unique URLs
+                      </span>
+                    </div>
+
+                    <div className="bg-gray-950/80 p-3.5 rounded-lg border border-gray-800">
+                      <span className="text-gray-400">Duplicate URLs:</span>
+                      <div className={`text-2xl font-bold mt-1 font-mono ${
+                        previewSummary.duplicateUrlsCount > 0 ? "text-amber-400" : "text-emerald-400"
+                      }`}>
+                        {previewSummary.duplicateUrlsCount}
+                      </div>
+                      <span className="text-[10px] text-gray-500 mt-0.5 block">
+                        {previewSummary.duplicateUrlsCount > 0 ? "Flagged for deduplication" : "Zero cross-duplicates"}
+                      </span>
+                    </div>
+
+                    <div className="bg-gray-950/80 p-3.5 rounded-lg border border-gray-800">
+                      <span className="text-gray-400">Expected Finish Time:</span>
+                      <div className="text-2xl font-bold text-emerald-400 mt-1 font-mono">
+                        {previewSummary.formattedEta}
+                      </div>
+                      <span className="text-[10px] text-gray-500 mt-0.5 block">
+                        ~{previewSummary.estimatedMinutes} mins ({previewSummary.estimatedHours} hrs)
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Throughput Specs */}
+                  <div className="bg-gray-950/60 p-3.5 rounded-lg border border-gray-800 flex items-center justify-between text-xs font-mono">
+                    <span className="text-gray-400 flex items-center gap-1.5">
+                      <Clock className="h-4 w-4 text-indigo-400" />
+                      Polite Crawler Throughput:
+                    </span>
+                    <div className="flex items-center gap-4 text-indigo-300">
+                      <span>{previewSummary.estimatedPagesPerHour} pages / hour</span>
+                      <span>&bull;</span>
+                      <span className="text-purple-300">{previewSummary.estimatedPagesPerDay.toLocaleString()} pages / day</span>
+                      <span>&bull;</span>
+                      <span className="text-gray-400">8s pause per page batch</span>
+                    </div>
+                  </div>
+
+                  {/* First & Last URL Overall */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div className="bg-gray-950/80 p-3 rounded-lg border border-gray-800 space-y-1">
+                      <span className="text-[10px] uppercase font-semibold text-gray-400 tracking-wider">
+                        First Discovered URL (Overall)
+                      </span>
+                      <div className="text-indigo-400 font-mono text-[11px] truncate">
+                        {previewSummary.firstUrl || "N/A"}
                       </div>
                     </div>
-                    <div>
-                      <span className="text-gray-400">Estimated Duration:</span>
-                      <div className="text-xl font-bold text-amber-400 mt-1 font-mono">
-                        ~{previewSummary.estimatedMinutes} minutes
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-gray-400">Polite Crawl Rate:</span>
-                      <div className="text-xl font-bold text-indigo-300 mt-1 font-mono">
-                        450 pages/hr (8s pause)
+                    <div className="bg-gray-950/80 p-3 rounded-lg border border-gray-800 space-y-1">
+                      <span className="text-[10px] uppercase font-semibold text-gray-400 tracking-wider">
+                        Last Discovered URL (Overall)
+                      </span>
+                      <div className="text-indigo-400 font-mono text-[11px] truncate">
+                        {previewSummary.lastUrl || "N/A"}
                       </div>
                     </div>
                   </div>
 
-                  <div className="text-xs text-gray-300">
-                    <span className="text-gray-400 block mb-1">Sample Discovered URLs:</span>
-                    <div className="bg-gray-950/80 p-2.5 rounded font-mono text-[11px] text-gray-400 space-y-1">
-                      {previewSummary.sampleUrls.slice(0, 3).map((u, i) => (
-                        <div key={i} className="truncate">
-                          &bull; {u}
-                        </div>
-                      ))}
+                  {/* Per-Nested Sitemap Breakdown Table (Task 2.2) */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-white uppercase tracking-wider">
+                        Nested Sitemaps Breakdown ({previewSummary.nestedBreakdown.length} sitemaps)
+                      </span>
+                      <span className="text-[11px] text-gray-400 font-mono">
+                        Per-sitemap counts, first and last URLs
+                      </span>
+                    </div>
+
+                    <div className="rounded-lg border border-gray-800 overflow-hidden bg-gray-950">
+                      <table className="w-full text-left text-xs font-mono">
+                        <thead className="bg-gray-900 border-b border-gray-800 text-gray-400 uppercase text-[10px]">
+                          <tr>
+                            <th className="px-3.5 py-2.5">Sitemap Source URL</th>
+                            <th className="px-3.5 py-2.5 text-right">Page Count</th>
+                            <th className="px-3.5 py-2.5">First URL</th>
+                            <th className="px-3.5 py-2.5">Last URL</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-800/60">
+                          {previewSummary.nestedBreakdown.map((item, idx) => (
+                            <tr key={idx} className="hover:bg-gray-900/40">
+                              <td className="px-3.5 py-2 text-white truncate max-w-xs">{item.sitemapUrl}</td>
+                              <td className="px-3.5 py-2 text-right text-indigo-300 font-bold">{item.pageCount}</td>
+                              <td className="px-3.5 py-2 text-gray-400 truncate max-w-xs">{item.firstUrl || "-"}</td>
+                              <td className="px-3.5 py-2 text-gray-400 truncate max-w-xs">{item.lastUrl || "-"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
 
-                  <div className="flex justify-end gap-2 pt-2">
-                    <button
-                      onClick={() => setPreviewSummary(null)}
-                      className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-xs text-gray-300 hover:text-white"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleConfirmIngest}
-                      disabled={ingesting}
-                      className="rounded-lg bg-indigo-600 hover:bg-indigo-500 px-5 py-2 text-xs font-semibold text-white transition"
-                    >
-                      {ingesting ? "Scheduling Crawl..." : "Confirm & Start Ingestion"}
-                    </button>
+                  {/* Duplicate URLs Section (Task 2.2) */}
+                  {previewSummary.duplicateUrlsCount > 0 && (
+                    <div className="space-y-2 bg-amber-950/20 border border-amber-500/30 rounded-lg p-4">
+                      <div className="flex items-center gap-2 text-amber-300">
+                        <AlertTriangle className="h-4 w-4 text-amber-400 flex-shrink-0" />
+                        <h5 className="text-xs font-bold uppercase tracking-wider">
+                          Duplicate URLs Detected ({previewSummary.duplicateUrlsCount} cross-sitemap duplicates)
+                        </h5>
+                      </div>
+                      <p className="text-[11px] text-gray-300">
+                        These URLs exist in more than one sitemap. They are highlighted below and will be deduplicated so each page is only ingested and indexed once:
+                      </p>
+
+                      <div className="space-y-1.5 max-h-48 overflow-y-auto pt-1 font-mono text-xs">
+                        {previewSummary.duplicates.map((dup, idx) => (
+                          <div
+                            key={idx}
+                            className="bg-gray-950/90 border border-gray-800 p-2.5 rounded space-y-1"
+                          >
+                            <div className="flex items-center justify-between text-white text-[11px]">
+                              <span className="truncate max-w-lg text-amber-200 font-semibold">{dup.url}</span>
+                              <span className="text-[10px] bg-amber-950 text-amber-300 px-2 py-0.5 rounded border border-amber-500/30">
+                                Found in {dup.occurrences} sitemaps
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 flex-wrap text-[10px] text-gray-400">
+                              <span>Found in:</span>
+                              {dup.foundIn.map((src, sIdx) => (
+                                <span
+                                  key={sIdx}
+                                  className="bg-gray-900 border border-gray-700 px-1.5 py-0.2 rounded text-indigo-300 truncate max-w-xs"
+                                >
+                                  {src}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Confirmation Actions Bar (Task 2.2: User must confirm before processing starts) */}
+                  <div className="flex items-center justify-between pt-3 border-t border-indigo-500/30">
+                    <span className="text-xs text-gray-400 font-sans">
+                      Click confirm to queue background crawler jobs across all discovered sitemaps.
+                    </span>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setPreviewSummary(null)}
+                        className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-xs text-gray-300 hover:text-white"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleConfirmIngest}
+                        disabled={ingesting}
+                        className="flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-5 py-2 text-xs font-semibold text-white transition shadow-sm"
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                        <span>{ingesting ? "Starting Ingestion..." : "Confirm & Start Processing"}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}

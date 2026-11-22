@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/auth";
 import { db } from "@/db";
-import { knowledgeSources, knowledgePages, sourcePageLinks } from "@/db/schema/knowledge";
-import { parseSitemapXml } from "@/services/brain/sitemapParser";
+import { knowledgeSources, sourcePageLinks } from "@/db/schema/knowledge";
+import {
+  parseAndValidateSitemapUrls,
+  validateSitemapUrl,
+  planSitemapsRead,
+  type SitemapSummary,
+} from "@/services/brain/sitemapParser";
 import { eq, desc } from "drizzle-orm";
 
 export async function GET() {
@@ -15,7 +20,6 @@ export async function GET() {
       .where(eq(knowledgeSources.businessId, tenant.businessId))
       .orderBy(desc(knowledgeSources.lastCrawledAt));
 
-    // If no sources exist yet, return empty list
     if (sources.length === 0) {
       return NextResponse.json({ sources: [] });
     }
@@ -49,64 +53,89 @@ export async function POST(req: NextRequest) {
   try {
     const tenant = await getTenantContext();
     const body = await req.json();
-    const { sitemapUrl, crawlSchedule = "daily", previewOnly = false } = body;
-
-    if (!sitemapUrl) {
-      return NextResponse.json({ error: "sitemapUrl is required" }, { status: 400 });
-    }
-
-    // Task 2.1: Sitemap discovery & pre-crawl summary simulation
-    const mockXml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>${sitemapUrl.replace("/sitemap.xml", "")}/articles/custom-cname-setup</loc></url>
-  <url><loc>${sitemapUrl.replace("/sitemap.xml", "")}/articles/webhook-configuration</loc></url>
-  <url><loc>${sitemapUrl.replace("/sitemap.xml", "")}/articles/dns-records-guide</loc></url>
-  <url><loc>${sitemapUrl.replace("/sitemap.xml", "")}/articles/ssl-troubleshooting</loc></url>
-  <url><loc>${sitemapUrl.replace("/sitemap.xml", "")}/articles/api-authentication</loc></url>
-</urlset>`;
-
-    const parseResult = await parseSitemapXml(mockXml, sitemapUrl);
-
-    // Polite crawl estimation at 450 pages/hr (8 seconds per page batch)
-    const totalDiscovered = 482;
-    const estimatedMinutes = Math.ceil((totalDiscovered / 450) * 60);
-
-    const summary = {
+    const {
       sitemapUrl,
-      discoveredUrlsCount: totalDiscovered,
-      sampleUrls: parseResult.urls.map((u) => u.url),
-      estimatedMinutes,
-      politeRatePerPageSec: 8,
-      robotsTxtCompliant: true,
-      hasNestedSitemaps: parseResult.childSitemaps.length > 0,
-    };
+      sitemapUrls,
+      crawlSchedule = "daily",
+      previewOnly = false,
+      validateOnly = false,
+      confirmed = false,
+    } = body;
 
-    if (previewOnly) {
-      return NextResponse.json({ success: true, summary });
+    // Collect all entered sitemap URLs
+    let rawUrls: string[] = [];
+    if (Array.isArray(sitemapUrls)) {
+      rawUrls = sitemapUrls;
+    } else if (typeof sitemapUrl === "string") {
+      rawUrls = sitemapUrl.split(/[\n,]+/).map((u) => u.trim()).filter(Boolean);
     }
 
-    // Insert new knowledge source record
-    const [inserted] = await db
-      .insert(knowledgeSources)
-      .values({
-        businessId: tenant.businessId,
-        sourceType: "sitemap",
-        rootUrl: sitemapUrl,
-        crawlSchedule,
-        status: "active",
-        lastCrawledAt: new Date(),
-      })
-      .returning();
+    if (rawUrls.length === 0) {
+      return NextResponse.json({ error: "At least one sitemap URL is required." }, { status: 400 });
+    }
+
+    // Task 2.2: Check each URL when it is entered
+    const { validUrls, invalidUrls } = parseAndValidateSitemapUrls(rawUrls.join("\n"));
+
+    if (validateOnly) {
+      return NextResponse.json({
+        valid: invalidUrls.length === 0,
+        validUrls,
+        invalidUrls,
+      });
+    }
+
+    if (validUrls.length === 0) {
+      return NextResponse.json(
+        {
+          error: "No valid sitemap URLs provided.",
+          invalidUrls,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Task 2.2: Compute Pre-Flight Read Plan with nested sitemap discovery & duplicate tracking
+    const planSummary: SitemapSummary = await planSitemapsRead(validUrls, 450);
+
+    // If pre-flight preview mode, return summary and require user confirmation before starting
+    if (previewOnly && !confirmed) {
+      return NextResponse.json({
+        success: true,
+        previewMode: true,
+        confirmationRequired: true,
+        summary: planSummary,
+        invalidUrls,
+      });
+    }
+
+    // User confirmed processing: insert knowledge sources
+    const insertedSources = [];
+    for (const url of validUrls) {
+      const [inserted] = await db
+        .insert(knowledgeSources)
+        .values({
+          businessId: tenant.businessId,
+          sourceType: "sitemap",
+          rootUrl: url,
+          crawlSchedule,
+          status: "active",
+          lastCrawledAt: new Date(),
+        })
+        .returning();
+      insertedSources.push(inserted);
+    }
 
     return NextResponse.json({
       success: true,
-      source: inserted,
-      summary,
-      message: `Sitemap ingested. Polite crawler scheduled (${estimatedMinutes} mins at 450 pages/hr).`,
+      confirmed: true,
+      sources: insertedSources,
+      summary: planSummary,
+      message: `Ingestion confirmed. Discovered ${planSummary.totalSitemapsFound} sitemaps and ${planSummary.uniqueUrls} unique URLs (${planSummary.duplicateUrlsCount} duplicates deduplicated). Processing scheduled at 450 pages/hr (10,800/day). ETA finish: ${planSummary.formattedEta}.`,
     });
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to process sitemap", details: String(error) },
+      { error: "Failed to process sitemap read plan", details: String(error) },
       { status: 500 }
     );
   }
