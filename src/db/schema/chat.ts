@@ -27,6 +27,8 @@ export const chatMessages = pgTable("chat_messages", {
   citations: jsonb("citations").$type<Array<{ id: string; type: string; title: string; url?: string; snippet: string }>>().default([]).notNull(),
   isEscalated: boolean("is_escalated").default(false).notNull(),
   escalationReason: varchar("escalation_reason", { length: 255 }),
+  isResolved: boolean("is_resolved").default(false).notNull(),
+  expertReply: text("expert_reply"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 

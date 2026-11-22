@@ -20,14 +20,20 @@ import {
   User,
   PlusCircle,
   ArrowRight,
+  ShieldAlert,
+  CheckCircle2,
+  Lock,
+  AlertTriangle,
 } from "lucide-react";
+
+export type AppUserRole = "owner" | "admin" | "team" | "expert" | "member";
 
 interface TenantContext {
   businessId: string;
   businessName: string;
   businessSlug: string;
   userEmail: string;
-  userRole: string;
+  userRole: AppUserRole;
   userId?: string;
 }
 
@@ -52,6 +58,7 @@ export default function AppShell({
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [localOnlyMode, setLocalOnlyMode] = useState(false);
   const [switching, setSwitching] = useState(false);
+  const [switchingRole, setSwitchingRole] = useState(false);
 
   const userMenuRef = useRef<HTMLDivElement>(null);
   const tenantMenuRef = useRef<HTMLDivElement>(null);
@@ -118,6 +125,27 @@ export default function AppShell({
     }
   };
 
+  const switchRole = async (role: AppUserRole) => {
+    setSwitchingRole(true);
+    try {
+      const res = await fetch("/api/auth/switch-role", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCurrentTenant(data.activeTenant);
+        setUserMenuOpen(false);
+        window.location.reload();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSwitchingRole(false);
+    }
+  };
+
   const handleSignOut = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
@@ -145,7 +173,10 @@ export default function AppShell({
     return prefix.substring(0, 2).toUpperCase() || "AI";
   };
 
-  const navItems = [
+  // --- Dynamic Role-Tailored Navigation Items ---
+  const role = currentTenant.userRole || "owner";
+
+  let navItems = [
     { label: "Dashboard", href: "/", icon: LayoutDashboard },
     { label: "15-Min Onboarding", href: "/onboarding", icon: Sparkles },
     { label: "Knowledge Brain", href: "/knowledge", icon: Brain },
@@ -153,8 +184,56 @@ export default function AppShell({
     { label: "Role & Prompt Studio", href: "/settings/roles-prompts", icon: Sparkles },
     { label: "The Eval Lab", href: "/evals", icon: FlaskConical },
     { label: "Self-Improve Loop", href: "/self-improve", icon: RefreshCw },
+    { label: "Approvals Inbox", href: "/approvals", icon: CheckCircle2 },
     { label: "Settings & Keys", href: "/settings", icon: Settings },
   ];
+
+  if (role === "team" || role === "member") {
+    navItems = [
+      { label: "Dashboard Hub", href: "/", icon: LayoutDashboard },
+      { label: "Ask & Teach Chat", href: "/chat", icon: MessageSquare },
+      { label: "Knowledge Brain", href: "/knowledge", icon: Brain },
+    ];
+  } else if (role === "expert") {
+    navItems = [
+      { label: "Dashboard Hub", href: "/", icon: LayoutDashboard },
+      { label: "Approvals Inbox", href: "/approvals", icon: CheckCircle2 },
+      { label: "Ask & Teach Chat", href: "/chat", icon: MessageSquare },
+      { label: "Knowledge Brain", href: "/knowledge", icon: Brain },
+      { label: "The Eval Lab", href: "/evals", icon: FlaskConical },
+    ];
+  } else if (role === "admin") {
+    navItems = [
+      { label: "Platform Fleet Admin", href: "/admin", icon: ShieldAlert },
+      { label: "Dashboard Hub", href: "/", icon: LayoutDashboard },
+    ];
+  }
+
+  // --- Granular Route Access Control Enforcement ---
+  const isTeam = role === "team" || role === "member";
+  const isExpert = role === "expert";
+  const isAdmin = role === "admin";
+  const isOwner = role === "owner";
+
+  let accessDeniedReason: string | null = null;
+  let requiredRole: string | null = null;
+
+  if (pathname.startsWith("/admin") && !isAdmin) {
+    accessDeniedReason = "Platform Admin Fleet Access: Only the SaaS Operator (Platform Admin) can access the fleet governance dashboard.";
+    requiredRole = "Platform Admin (admin)";
+  } else if (pathname.startsWith("/approvals") && !isExpert && !isOwner) {
+    accessDeniedReason = "Approvals Inbox Access: Only the Expert / Approver or Business Owner can review escalations, approve learned skills, and merge PRs.";
+    requiredRole = "Expert / Approver (expert) or Business Owner (owner)";
+  } else if (isTeam && (pathname.startsWith("/settings") || pathname.startsWith("/onboarding") || pathname.startsWith("/evals") || pathname.startsWith("/self-improve"))) {
+    accessDeniedReason = "Owner Privilege Required: As a Team Member (Support Specialist), you have access to Ask & Teach Chat and the Knowledge Base. Settings, API vault keys, prompt editing, and workspace deletion are restricted to the Business Owner.";
+    requiredRole = "Business Owner (owner)";
+  } else if (isExpert && pathname.startsWith("/settings")) {
+    accessDeniedReason = "Owner Privilege Required: As an Expert / Approver, you have authority over escalations, lessons, and PRs. Modifying raw API vault keys or deleting the business is reserved for the Business Owner.";
+    requiredRole = "Business Owner (owner)";
+  } else if (isAdmin && (pathname.startsWith("/settings") || pathname.startsWith("/chat") || pathname.startsWith("/knowledge") || pathname.startsWith("/evals") || pathname.startsWith("/self-improve") || pathname.startsWith("/onboarding"))) {
+    accessDeniedReason = "Strict Zero-Leakage Multi-Tenant Isolation: As Platform Admin (SaaS Operator), platform architecture strictly prohibits viewing or accessing individual tenant private data, chats, prompts, or API vault keys. Please visit /admin for fleet telemetry.";
+    requiredRole = "Tenant User (owner, team, or expert)";
+  }
 
   return (
     <div className="flex min-h-screen bg-[#050B18] text-gray-100 selection:bg-cyan-500 selection:text-black font-sans">
@@ -329,7 +408,7 @@ export default function AppShell({
               Prompt Injection Shield Active
             </span>
 
-            {/* Interactive User Account Section & Dropdown Menu */}
+            {/* Interactive User Account Section & Role Switcher */}
             <div className="relative" ref={userMenuRef}>
               <button
                 type="button"
@@ -346,15 +425,15 @@ export default function AppShell({
                   <div className="text-[10px] text-gray-400 capitalize flex items-center gap-1.5 mt-0.5">
                     <span className="text-cyan-400 font-medium truncate max-w-[100px]">{currentTenant.businessName}</span>
                     <span>&bull;</span>
-                    <span className="text-emerald-400 font-semibold">{currentTenant.userRole}</span>
+                    <span className="text-emerald-400 font-semibold uppercase">{currentTenant.userRole}</span>
                   </div>
                 </div>
                 <ChevronDown className={`h-3.5 w-3.5 text-gray-400 transition-transform ${userMenuOpen ? "rotate-180" : ""}`} />
               </button>
 
-              {/* User Account Dropdown Menu */}
+              {/* User Account & Role Switcher Dropdown Menu */}
               {userMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl border border-cyan-500/30 bg-[#071329] p-3 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
+                <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-cyan-500/30 bg-[#071329] p-3.5 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
                   {/* Account Header */}
                   <div className="pb-3 mb-2 border-b border-gray-700/80">
                     <div className="flex items-center gap-2.5">
@@ -371,8 +450,44 @@ export default function AppShell({
                         {currentTenant.businessSlug}
                       </span>
                       <span className="inline-flex items-center rounded-md bg-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-300 border border-emerald-500/30 uppercase">
-                        {currentTenant.userRole}
+                        Role: {currentTenant.userRole}
                       </span>
+                    </div>
+                  </div>
+
+                  {/* Role Switcher Section for Live Localhost RBAC Testing */}
+                  <div className="pb-2.5 mb-2 border-b border-gray-700/80">
+                    <div className="text-[10px] uppercase font-semibold text-cyan-400 tracking-wider mb-2 flex items-center gap-1.5">
+                      <ShieldCheck className="h-3 w-3 text-cyan-400" />
+                      <span>Switch Role (RBAC Testing)</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {[
+                        { id: "owner", label: "Owner", sub: "Full Access" },
+                        { id: "team", label: "Team", sub: "Chat & Knowledge" },
+                        { id: "expert", label: "Expert", sub: "Approvals & Tasks" },
+                        { id: "admin", label: "Admin", sub: "Fleet Operator" },
+                      ].map((r) => {
+                        const isCurrent = currentTenant.userRole === r.id;
+                        return (
+                          <button
+                            key={r.id}
+                            onClick={() => switchRole(r.id as AppUserRole)}
+                            disabled={switchingRole}
+                            className={`p-2 rounded-lg text-left transition border ${
+                              isCurrent
+                                ? "bg-cyan-500/20 border-cyan-500/40 text-cyan-200"
+                                : "border-gray-800 bg-gray-900/60 text-gray-400 hover:border-gray-700 hover:text-white"
+                            }`}
+                          >
+                            <div className="text-xs font-bold flex items-center justify-between">
+                              <span>{r.label}</span>
+                              {isCurrent && <Check className="h-3 w-3 text-cyan-400" />}
+                            </div>
+                            <div className="text-[9px] text-gray-400 truncate mt-0.5">{r.sub}</div>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -381,49 +496,64 @@ export default function AppShell({
                     <Link
                       href="/"
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-2.5 py-2 text-xs text-gray-300 hover:text-white rounded-lg hover:bg-gray-800 transition"
+                      className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs text-gray-300 hover:text-white rounded-lg hover:bg-gray-800 transition"
                     >
-                      <LayoutDashboard className="h-4 w-4 text-cyan-400" />
+                      <LayoutDashboard className="h-3.5 w-3.5 text-cyan-400" />
                       <span>Dashboard Hub</span>
                     </Link>
 
-                    <Link
-                      href="/settings"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-2.5 py-2 text-xs text-gray-300 hover:text-white rounded-lg hover:bg-gray-800 transition"
-                    >
-                      <Settings className="h-4 w-4 text-gray-400" />
-                      <span>Workspace Settings &amp; Keys</span>
-                    </Link>
+                    {isOwner && (
+                      <Link
+                        href="/settings"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs text-gray-300 hover:text-white rounded-lg hover:bg-gray-800 transition"
+                      >
+                        <Settings className="h-3.5 w-3.5 text-gray-400" />
+                        <span>Workspace Settings &amp; Keys</span>
+                      </Link>
+                    )}
 
-                    <Link
-                      href="/onboarding"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-2.5 py-2 text-xs text-gray-300 hover:text-white rounded-lg hover:bg-gray-800 transition"
-                    >
-                      <Sparkles className="h-4 w-4 text-amber-400" />
-                      <span>15-Minute Setup Wizard</span>
-                    </Link>
+                    {(isExpert || isOwner) && (
+                      <Link
+                        href="/approvals"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs text-gray-300 hover:text-white rounded-lg hover:bg-gray-800 transition"
+                      >
+                        <CheckCircle2 className="h-3.5 w-3.5 text-amber-400" />
+                        <span>Approvals Inbox</span>
+                      </Link>
+                    )}
+
+                    {isAdmin && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs text-gray-300 hover:text-white rounded-lg hover:bg-gray-800 transition"
+                      >
+                        <ShieldAlert className="h-3.5 w-3.5 text-cyan-400" />
+                        <span>Platform Fleet Admin</span>
+                      </Link>
+                    )}
                   </div>
 
-                  {/* Registration and Sign In Options */}
+                  {/* Workspace switcher / sign up */}
                   <div className="border-t border-gray-700/80 my-2 pt-2 space-y-1">
                     <Link
                       href="/signin"
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-2.5 py-2 text-xs text-cyan-300 hover:text-white rounded-lg hover:bg-cyan-950/40 transition"
+                      className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs text-cyan-300 hover:text-white rounded-lg hover:bg-cyan-950/40 transition"
                     >
-                      <Building2 className="h-4 w-4 text-cyan-400" />
+                      <Building2 className="h-3.5 w-3.5 text-cyan-400" />
                       <span>Switch Workspace / Sign In</span>
                     </Link>
 
                     <Link
                       href="/signup"
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-2.5 py-2 text-xs text-emerald-300 hover:text-white rounded-lg hover:bg-emerald-950/40 transition"
+                      className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs text-emerald-300 hover:text-white rounded-lg hover:bg-emerald-950/40 transition"
                     >
-                      <PlusCircle className="h-4 w-4 text-emerald-400" />
-                      <span>Register New Workspace (Sign Up)</span>
+                      <PlusCircle className="h-3.5 w-3.5 text-emerald-400" />
+                      <span>Register New Workspace</span>
                     </Link>
                   </div>
 
@@ -432,9 +562,9 @@ export default function AppShell({
                     <button
                       type="button"
                       onClick={handleSignOut}
-                      className="w-full flex items-center gap-2.5 px-2.5 py-2 text-xs text-red-400 hover:text-red-300 rounded-lg hover:bg-red-950/30 transition text-left"
+                      className="w-full flex items-center gap-2.5 px-2.5 py-1.5 text-xs text-red-400 hover:text-red-300 rounded-lg hover:bg-red-950/30 transition text-left"
                     >
-                      <LogOut className="h-4 w-4 text-red-400" />
+                      <LogOut className="h-3.5 w-3.5 text-red-400" />
                       <span>Sign Out (Logout)</span>
                     </button>
                   </div>
@@ -444,8 +574,54 @@ export default function AppShell({
           </div>
         </header>
 
-        {/* Content Body */}
-        <div className="p-8 max-w-7xl w-full">{children}</div>
+        {/* Content Body with RBAC Guard */}
+        <div className="p-8 max-w-7xl w-full">
+          {accessDeniedReason ? (
+            <div className="max-w-2xl mx-auto my-12 p-8 rounded-3xl border border-red-500/40 bg-[#071329] shadow-2xl shadow-red-500/10 text-center space-y-5 animate-in fade-in">
+              <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 flex items-center justify-center mx-auto">
+                <Lock className="h-8 w-8" />
+              </div>
+
+              <div className="space-y-2">
+                <h2 className="text-2xl font-extrabold text-white">
+                  Access Restricted by Role
+                </h2>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-mono">
+                  <span>Current Role:</span>
+                  <strong className="uppercase">{currentTenant.userRole}</strong>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-300 leading-relaxed max-w-lg mx-auto">
+                {accessDeniedReason}
+              </p>
+
+              {requiredRole && (
+                <div className="p-3.5 rounded-xl border border-gray-800 bg-[#040f26] text-xs font-mono text-gray-400">
+                  Required Role: <span className="text-cyan-400 font-bold">{requiredRole}</span>
+                </div>
+              )}
+
+              <div className="pt-2 flex items-center justify-center gap-3">
+                <Link
+                  href="/"
+                  className="px-5 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-semibold text-xs transition"
+                >
+                  Return to Dashboard
+                </Link>
+
+                <button
+                  onClick={() => switchRole("owner")}
+                  className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition shadow-lg shadow-cyan-500/20"
+                >
+                  Switch to Owner (Test Mode)
+                </button>
+              </div>
+            </div>
+          ) : (
+            children
+          )}
+        </div>
       </main>
     </div>
   );

@@ -34,10 +34,66 @@ To ensure strict zero-leakage multi-tenant security:
   - `email` (VARCHAR(255) NOT NULL)
   - `name` (VARCHAR(255))
   - `password_hash` (VARCHAR(255))
-  - `role` (VARCHAR(50) NOT NULL DEFAULT 'team') — **The 3 User Roles:**
-    1. **`owner`**: Founder / administrator. Full write access to Settings (connection keys, prompt versions, agent roles, models), business deletion, readiness threshold adjustment, and weekly executive digest email recipient.
-    2. **`team`** (support specialist): Ask & Teach Chat access, persona selection, mid-chat persona switching, thumbs up/down feedback, and teaching notes.
-    3. **`expert`** (approver): Human escalation task recipient, approves/rejects proposed skill updates, and reviews/approves or reverts autonomous Self-Improve git PRs.
+  - `role` (VARCHAR(50) NOT NULL DEFAULT 'team') — **The 4 User Roles (Architecture Design):**
+    > *Architectural Design Note:* While the core brief refers generically to "the owner", "the team", and "a human", our SaaS architecture defines 4 formal user roles (`admin`, `owner`, `team`, `expert`) with strict zero-leakage boundaries:
+    1. **`admin` (Platform Admin / SaaS Operator):**
+       - **Workflow:** Login &rarr; Admin Dashboard (`/admin`) &rarr; Fleet overview &amp; list of registered businesses.
+       - **Capabilities:** Seed demo businesses, view aggregate usage &amp; model spend per business, inspect background worker failed jobs, suspend or reactivate tenant accounts.
+       - **Security Boundary:** **STRICTLY CANNOT** view or inspect any business's private knowledge chunks, prompts, API vault keys, or chat conversations. No cross-tenant data leakage under any condition.
+    2. **`owner` (Business Owner / Client):**
+       - **Workflow:**
+         1. Register (`name`, `email`, `password`, `business_name`).
+         2. Go Live Wizard (`/onboarding`): Configure API keys &rarr; Sitemap / Docs &rarr; Gmail integration &rarr; Select Agent Roles &rarr; Tone of Voice &rarr; Benchmark Readiness Score.
+         3. Set the readiness threshold level that switches the customer chat on, then invite support team members.
+         4. Daily Operations: Login &rarr; Executive Dashboard (`/`).
+       - **Dashboard:** Readiness score, knowledge statistics (processed, failed, pending, last sync timestamp), model spend telemetry, recent customer chats, pending human approvals.
+       - **Access & Edit:** Full root access across the workspace:
+         - **Settings (`/settings`):** All 5 connections (Claude, Gemini, OpenRouter, Ollama, Gmail), prompt studio with version history and rollback, agent roles editor, model routing matrix.
+         - **Knowledge Brain (`/knowledge`):** All 5 tabs, scheduled sync interval, URL health quarantining rules.
+         - **Advanced:** Eval Lab (`/evals`), Self-Improvement merge approvals (`/self-improve`), weekly executive digest email, and workspace deletion protocol (confirm-by-typing-name).
+    3. **`team` (Team Member / Frontline Support Person):**
+       - **Workflow:** Login &rarr; Dashboard &rarr; Ask &amp; Teach Chat (`/chat`) &rarr; New Chat ("Ask something" or "Teach me") &rarr; Select Agent Persona (`Support Engineer`, `Support Executive`, `AI Consultant`) &rarr; Paste end-customer question &rarr; Inspect cited answer &amp; trace &rarr; Thumbs up/down feedback or teach a correction note.
+       - **Access:**
+         - Ask &amp; Teach Chat (`/chat`) with mid-conversation role switching.
+         - Teaching notes, correction entries, and notes on past email threads.
+         - Knowledge Brain (`/knowledge`) in read-only mode.
+       - **Restrictions:** Cannot view API vault keys, cannot edit system prompts, cannot approve learned lessons, and cannot delete the business workspace.
+    4. **`expert` (Expert / Approver):**
+       - **Workflow:** Login &rarr; Approvals Inbox (`/approvals`).
+       - **Capabilities:**
+         - Answer escalated questions that exceeded the autonomous confidence threshold or triggered human-handover rules; submitted answers automatically flow into Knowledge Memory.
+         - Approve, edit, or reject learned lessons and proposed skill updates.
+         - Review, approve, and merge autonomous Self-Improvement pull requests (`/self-improve`).
+       - **Restrictions:** Cannot delete the business and cannot view raw API vault keys.
+
+    > **Who is NOT a user:** The end customer never logs in. Their questions are submitted via Gmail or pasted into Ask &amp; Teach Chat by the internal support team member.
+
+    > **What a business must provide at setup:**
+    > - **Claude API Key:** Anthropic Console (Required to start).
+    > - **Gemini Key:** Google AI Studio (for Eval Lab judge).
+    > - **OpenRouter Key:** openrouter.ai (for multi-model benchmarking).
+    > - **Ollama Address:** `http://localhost:11434` (no key required; for Local-Only Mode).
+    > - **Google Account:** Gmail OAuth connection (`gmail.readonly`).
+    > - **Knowledge Base:** Sitemap URL, page URLs, or uploaded technical documentation.
+    > - **Choices:** Corporate tone of voice, agent roles, readiness threshold level.
+    > - **Rules:** Vault keys are stored AES-256-GCM encrypted, shown once, and never written to logs. Each connection features an instant Test button.
+
+    > **RBAC Permissions Matrix:**
+    > | Feature / Capability | Platform Admin (`admin`) | Business Owner (`owner`) | Team Member (`team`) | Expert / Approver (`expert`) |
+    > |----------------------|:------------------------:|:-----------------------:|:-------------------:|:---------------------------:|
+    > | Admin Dashboard (`/admin`) | ✅ Yes | ❌ No | ❌ No | ❌ No |
+    > | Fleet Health & Suspend Biz | ✅ Yes | ❌ No | ❌ No | ❌ No |
+    > | Executive Hub (`/`) | ✅ Fleet | ✅ Workspace | ✅ Workspace | ✅ Workspace |
+    > | Go-Live Setup (`/onboarding`) | ❌ No | ✅ Full | ❌ Blocked | ❌ Blocked |
+    > | Ask & Teach Chat (`/chat`) | ❌ No | ✅ Full | ✅ Full | ✅ Full |
+    > | Knowledge Brain (`/knowledge`) | ❌ No | ✅ Full (R/W) | 👁️ Read-Only | 👁️ Read-Only |
+    > | Settings & Vault Keys (`/settings`) | ❌ No | ✅ Full | ❌ Blocked | ❌ Blocked |
+    > | Role & Prompt Studio | ❌ No | ✅ Full | ❌ Blocked | ❌ Blocked |
+    > | Approvals Inbox (`/approvals`) | ❌ No | ✅ Full | ❌ Blocked | ✅ Full |
+    > | Eval Lab (`/evals`) | ❌ No | ✅ Full | ❌ Blocked | ✅ Full |
+    > | Self-Improve PR Merges | ❌ No | ✅ Full | ❌ Blocked | ✅ Full |
+    > | Delete Business | ❌ No | ✅ Full (Name Confirm) | ❌ Blocked | ❌ Blocked |
+
   - `created_at` (TIMESTAMPTZ DEFAULT NOW())
   - *Index:* `UNIQUE (business_id, email)`
 - `email_verifications` (Real Email OTP System):

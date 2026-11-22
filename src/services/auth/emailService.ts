@@ -1,27 +1,40 @@
 import nodemailer from "nodemailer";
 
+export interface SmtpConfig {
+  host?: string;
+  port?: number;
+  user?: string;
+  pass?: string;
+  secure?: boolean;
+  from?: string;
+}
+
 export interface SendOtpParams {
   toEmail: string;
   otpCode: string;
   purpose?: string;
   businessName?: string;
+  customSmtp?: SmtpConfig;
 }
 
-export async function sendOtpEmail(params: SendOtpParams): Promise<{
+export interface SendEmailResult {
   success: boolean;
   messageId?: string;
   previewUrl?: string;
+  isRealSmtp?: boolean;
   error?: string;
-}> {
-  const { toEmail, otpCode, purpose = "registration", businessName = "Your Workspace" } = params;
+}
 
-  // 1. Check if custom SMTP is configured in environment
-  const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
-  const smtpPort = parseInt(process.env.SMTP_PORT || "587", 10);
-  const smtpUser = process.env.SMTP_USER;
-  const smtpPass = process.env.SMTP_PASS;
-  const smtpSecure = process.env.SMTP_SECURE === "true" || smtpPort === 465;
-  const smtpFrom = process.env.SMTP_FROM || '"AI Technologies & Consulting" <no-reply@aitechconsults.com>';
+export async function sendOtpEmail(params: SendOtpParams): Promise<SendEmailResult> {
+  const { toEmail, otpCode, purpose = "registration", businessName = "Your Workspace", customSmtp } = params;
+
+  // 1. Resolve SMTP configuration (custom > env > defaults)
+  const smtpHost = customSmtp?.host || process.env.SMTP_HOST || "smtp.gmail.com";
+  const smtpPort = customSmtp?.port || parseInt(process.env.SMTP_PORT || "587", 10);
+  const smtpUser = customSmtp?.user || process.env.SMTP_USER;
+  const smtpPass = customSmtp?.pass || process.env.SMTP_PASS;
+  const smtpSecure = customSmtp?.secure ?? (process.env.SMTP_SECURE === "true" || smtpPort === 465);
+  const smtpFrom = customSmtp?.from || process.env.SMTP_FROM || '"AI Technologies & Consulting" <no-reply@aitechconsults.com>';
 
   const subject = `Your Verification Code: ${otpCode} — AI Technologies & Consulting`;
 
@@ -46,7 +59,7 @@ export async function sendOtpEmail(params: SendOtpParams): Promise<{
     <body>
       <div class="container">
         <div class="logo">α</div>
-        <div class="title">Verify Your Workspace Email</div>
+        <div class="title">Verify Your Corporate Workspace</div>
         <div class="subtitle">
           You are verifying your account for <strong>${businessName}</strong> on the AI Technologies &amp; Consulting Multi-Tenant SaaS platform.
         </div>
@@ -55,7 +68,7 @@ export async function sendOtpEmail(params: SendOtpParams): Promise<{
           <div class="otp-expiry">Valid for 10 minutes &bull; Single-use security token</div>
         </div>
         <div class="notice">
-          If you did not request this verification code, please disregard this email or report unauthorized attempts to our security desk.
+          If you did not request this verification code, please disregard this email. Never share your OTP with anyone.
         </div>
         <div class="footer">
           &copy; ${new Date().getFullYear()} AI Technologies &amp; Consulting &bull; Strict Tenant Isolation Protocol
@@ -67,7 +80,7 @@ export async function sendOtpEmail(params: SendOtpParams): Promise<{
 
   const textContent = `Your AI Technologies & Consulting Verification Code: ${otpCode}\n\nValid for 10 minutes for ${businessName}.\nIf you did not request this code, please ignore this email.`;
 
-  // 2. Dispatch using configured SMTP credentials if provided
+  // 2. Dispatch using configured real SMTP credentials if provided
   if (smtpUser && smtpPass) {
     try {
       const transporter = nodemailer.createTransport({
@@ -89,24 +102,58 @@ export async function sendOtpEmail(params: SendOtpParams): Promise<{
       });
 
       console.log(`[Email Dispatch] Real SMTP OTP dispatched to ${toEmail}: messageId=${info.messageId}`);
-      return { success: true, messageId: info.messageId };
+      return { success: true, messageId: info.messageId, isRealSmtp: true };
     } catch (err) {
-      console.error("[Email Dispatch] SMTP transport failed, falling back to simulated sandbox logger:", err);
+      console.error("[Email Dispatch] SMTP transport failed, falling back to sandbox logger/test account:", err);
     }
   }
 
-  // 3. Fallback: Log OTP securely to server telemetry/console
+  // 3. Fallback: Try Ethereal live test account
+  try {
+    const testAccount = await nodemailer.createTestAccount();
+    const testTransporter = nodemailer.createTransport({
+      host: "smtp.ethereal.email",
+      port: 587,
+      secure: false,
+      auth: {
+        user: testAccount.user,
+        pass: testAccount.pass,
+      },
+    });
+
+    const info = await testTransporter.sendMail({
+      from: smtpFrom,
+      to: toEmail,
+      subject,
+      text: textContent,
+      html: htmlContent,
+    });
+
+    const previewUrl = nodemailer.getTestMessageUrl(info) || undefined;
+    console.log(`[Email Dispatch] Ethereal test email dispatched for ${toEmail}: ${previewUrl}`);
+    return {
+      success: true,
+      messageId: info.messageId,
+      previewUrl,
+      isRealSmtp: false,
+    };
+  } catch (etherealErr) {
+    console.warn("[Email Dispatch] Ethereal service skipped/offline:", etherealErr);
+  }
+
+  // 4. Secure Development Telemetry Log
   console.log(`\n======================================================`);
-  console.log(`📧 [EMAIL SERVICE] OUTBOUND REAL OTP DISPATCH`);
+  console.log(`📧 [EMAIL SERVICE] OUTBOUND OTP DISPATCH`);
   console.log(`Recipient:   ${toEmail}`);
   console.log(`OTP Code:    ${otpCode}`);
   console.log(`Purpose:     ${purpose}`);
   console.log(`Expires In:  10 Minutes`);
-  console.log(`Status:      DISPATCHED TO INBOX (SMTP or Mock Transport)`);
+  console.log(`Notice:      Configure SMTP_USER & SMTP_PASS in .env for direct inbox delivery.`);
   console.log(`======================================================\n`);
 
   return {
     success: true,
-    messageId: `mock-msg-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+    messageId: `dev-msg-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+    isRealSmtp: false,
   };
 }

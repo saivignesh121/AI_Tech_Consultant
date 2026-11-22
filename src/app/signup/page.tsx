@@ -93,10 +93,12 @@ function SignUpContent() {
       } else {
         setOtpSent(true);
         setCountdown(60);
-        let notice = `Real verification code dispatched to ${email.trim()}.`;
         if (data.devPreviewOtp) {
-          notice += ` (Development preview code: ${data.devPreviewOtp} or demo code: 123456)`;
+          setOtpCode(data.devPreviewOtp);
         }
+        let notice = data.isRealSmtp
+          ? `✓ Real verification email sent to ${email.trim()} via SMTP! Check your inbox or spam.`
+          : `Verification code: ${data.devPreviewOtp || "123456"} (auto-filled below). To receive real emails to your personal inbox, add SMTP_USER & SMTP_PASS in .env.`;
         setOtpNotification(notice);
       }
     } catch (err) {

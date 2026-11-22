@@ -60,8 +60,12 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Verification code dispatched to ${cleanEmail}. Check your inbox or spam folder.`,
+      message: emailResult.isRealSmtp
+        ? `Real OTP email successfully dispatched to ${cleanEmail}. Please check your inbox and spam folder.`
+        : `Verification code generated for ${cleanEmail}. Code: ${otpCode}`,
       emailResult,
+      previewUrl: emailResult.previewUrl || null,
+      isRealSmtp: Boolean(emailResult.isRealSmtp),
       // For instant local testing / dev environment preview
       devPreviewOtp: otpCode,
     });

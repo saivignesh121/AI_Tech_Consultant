@@ -1,0 +1,180 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getTenantContext } from "@/lib/auth";
+import { db } from "@/db";
+import { chatMessages, chatSessions, lessons } from "@/db/schema/chat";
+import { selfImproveRuns } from "@/db/schema/evals";
+import { eq, and, desc } from "drizzle-orm";
+
+export async function GET() {
+  try {
+    const tenant = await getTenantContext();
+
+    // Verify role: expert or owner
+    if (tenant.userRole !== "expert" && tenant.userRole !== "owner") {
+      return NextResponse.json(
+        { error: "Forbidden. Expert / Approver or Owner permissions required." },
+        { status: 403 }
+      );
+    }
+
+    // 1. Fetch escalated chat tasks
+    const escalatedTasks = await db
+      .select({
+        id: chatMessages.id,
+        sessionId: chatMessages.sessionId,
+        content: chatMessages.content,
+        escalationReason: chatMessages.escalationReason,
+        isResolved: chatMessages.isResolved,
+        expertReply: chatMessages.expertReply,
+        createdAt: chatMessages.createdAt,
+      })
+      .from(chatMessages)
+      .where(
+        and(
+          eq(chatMessages.businessId, tenant.businessId),
+          eq(chatMessages.isEscalated, true)
+        )
+      )
+      .orderBy(desc(chatMessages.createdAt))
+      .limit(30);
+
+    // 2. Fetch pending lessons
+    const pendingLessons = await db
+      .select()
+      .from(lessons)
+      .where(eq(lessons.businessId, tenant.businessId))
+      .orderBy(desc(lessons.createdAt))
+      .limit(30);
+
+    // 3. Fetch self-improve PRs
+    const prRuns = await db
+      .select()
+      .from(selfImproveRuns)
+      .where(eq(selfImproveRuns.businessId, tenant.businessId))
+      .orderBy(desc(selfImproveRuns.createdAt))
+      .limit(20);
+
+    return NextResponse.json({
+      success: true,
+      escalatedTasks,
+      pendingLessons,
+      selfImproveRuns: prRuns,
+      summary: {
+        pendingEscalations: escalatedTasks.filter((t) => !t.isResolved).length,
+        pendingLessons: pendingLessons.filter((l) => l.status === "pending").length,
+        pendingPrs: prRuns.filter((r) => r.status === "passed" || r.status === "running").length,
+      },
+    });
+  } catch (error) {
+    console.error("Failed to fetch approvals:", error);
+    return NextResponse.json(
+      { error: "Failed to retrieve approvals data", details: String(error) },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const tenant = await getTenantContext();
+
+    if (tenant.userRole !== "expert" && tenant.userRole !== "owner") {
+      return NextResponse.json(
+        { error: "Forbidden. Expert / Approver or Owner permissions required." },
+        { status: 403 }
+      );
+    }
+
+    const body = await req.json();
+    const { action } = body;
+
+    // Action 1: Resolve escalated chat task with human expert answer
+    if (action === "resolve_escalation") {
+      const { messageId, expertReply } = body;
+      if (!messageId || !expertReply) {
+        return NextResponse.json(
+          { error: "Missing messageId or expertReply" },
+          { status: 400 }
+        );
+      }
+
+      await db
+        .update(chatMessages)
+        .set({
+          isResolved: true,
+          expertReply,
+        })
+        .where(
+          and(
+            eq(chatMessages.id, messageId),
+            eq(chatMessages.businessId, tenant.businessId)
+          )
+        );
+
+      return NextResponse.json({
+        success: true,
+        message: "Escalated task resolved. Expert answer injected into knowledge memory.",
+      });
+    }
+
+    // Action 2: Approve or Reject a Lesson / Skill change
+    if (action === "approve_lesson" || action === "reject_lesson") {
+      const { lessonId } = body;
+      const newStatus = action === "approve_lesson" ? "approved" : "rejected";
+
+      await db
+        .update(lessons)
+        .set({
+          status: newStatus,
+          approvedAt: new Date(),
+          approvedBy: tenant.userId || undefined,
+        })
+        .where(
+          and(
+            eq(lessons.id, lessonId),
+            eq(lessons.businessId, tenant.businessId)
+          )
+        );
+
+      return NextResponse.json({
+        success: true,
+        lessonId,
+        status: newStatus,
+        message: `Lesson successfully ${newStatus}.`,
+      });
+    }
+
+    // Action 3: Approve or Revert a Self-Improvement PR
+    if (action === "approve_pr" || action === "revert_pr") {
+      const { runId } = body;
+      const newStatus = action === "approve_pr" ? "merged" : "reverted";
+
+      await db
+        .update(selfImproveRuns)
+        .set({
+          status: newStatus,
+        })
+        .where(
+          and(
+            eq(selfImproveRuns.id, runId),
+            eq(selfImproveRuns.businessId, tenant.businessId)
+          )
+        );
+
+      return NextResponse.json({
+        success: true,
+        runId,
+        status: newStatus,
+        message: `Self-improvement patch ${newStatus === "merged" ? "approved and merged" : "reverted"}.`,
+      });
+    }
+
+    return NextResponse.json({ error: "Unsupported approval action" }, { status: 400 });
+  } catch (error) {
+    console.error("Failed to process approval action:", error);
+    return NextResponse.json(
+      { error: "Approval operation failed", details: String(error) },
+      { status: 500 }
+    );
+  }
+}

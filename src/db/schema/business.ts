@@ -5,6 +5,7 @@ export const businesses = pgTable("businesses", {
   name: varchar("name", { length: 255 }).notNull(),
   slug: varchar("slug", { length: 100 }).unique().notNull(),
   readinessScore: integer("readiness_score").default(0).notNull(),
+  status: varchar("status", { length: 50 }).default("active").notNull(), // 'active' | 'suspended'
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });

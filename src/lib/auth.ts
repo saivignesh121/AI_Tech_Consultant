@@ -5,13 +5,15 @@ import { eq, and, gt } from "drizzle-orm";
 import * as argon2 from "argon2";
 import crypto from "crypto";
 
+export type UserRole = "owner" | "admin" | "team" | "expert" | "member";
+
 export interface TenantContext {
   businessId: string;
   businessName: string;
   businessSlug: string;
   userId: string;
   userEmail: string;
-  userRole: "owner" | "admin" | "member";
+  userRole: UserRole;
 }
 
 export const DEMO_BUSINESSES: Record<string, TenantContext> = {
@@ -173,13 +175,18 @@ export async function getTenantContext(): Promise<TenantContext> {
 
         if (activeSessions.length > 0) {
           const row = activeSessions[0];
+          const testRole = cookieStore.get("active_test_role")?.value as UserRole | undefined;
+          const finalRole = (testRole && ["owner", "admin", "team", "expert", "member"].includes(testRole))
+            ? testRole
+            : ((row.userRole as UserRole) || "team");
+
           return {
             businessId: row.businessId,
             businessName: row.businessName,
             businessSlug: row.businessSlug,
             userId: row.userId,
             userEmail: row.userEmail,
-            userRole: (row.userRole as "owner" | "admin" | "member") || "member",
+            userRole: finalRole,
           };
         }
       } catch (dbErr) {
@@ -190,9 +197,21 @@ export async function getTenantContext(): Promise<TenantContext> {
 
     // 2. Demo workspace cookie lookup
     const slug = cookieStore.get("active_tenant_slug")?.value;
+    let baseContext = DEFAULT_TENANT;
     if (slug && DEMO_BUSINESSES[slug]) {
-      return DEMO_BUSINESSES[slug];
+      baseContext = DEMO_BUSINESSES[slug];
     }
+
+    // 3. Check for role override cookie (for developer/tester testing on localhost)
+    const testRole = cookieStore.get("active_test_role")?.value as UserRole | undefined;
+    if (testRole && ["owner", "admin", "team", "expert", "member"].includes(testRole)) {
+      return {
+        ...baseContext,
+        userRole: testRole,
+      };
+    }
+
+    return baseContext;
   } catch {
     // If called outside request context (e.g. in standalone scripts or tests)
   }
