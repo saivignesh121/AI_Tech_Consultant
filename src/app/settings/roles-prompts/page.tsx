@@ -21,9 +21,45 @@ import {
   Clock,
   DollarSign,
   ShieldCheck,
+  BookOpen,
+  FileText,
+  History,
+  Copy,
+  Check,
+  Wrench,
 } from "lucide-react";
 import { validatePromptVariables } from "@/services/chat/prompts";
 import { SUPPORTED_MODELS } from "@/services/llm/pricing";
+
+interface SkillVersionItem {
+  id: string;
+  skillId: string;
+  versionNumber: number;
+  stepsMarkdown: string;
+  changeNotes: string | null;
+  createdAt: string;
+}
+
+interface SkillExample {
+  question: string;
+  answer: string;
+}
+
+interface SkillItem {
+  id: string;
+  businessId: string;
+  name: string;
+  slug: string;
+  description: string;
+  triggerConditions: string;
+  stepsMarkdown: string;
+  examples: SkillExample[];
+  currentVersionNumber: number;
+  currentVersionId: string | null;
+  versions: SkillVersionItem[];
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface PromptVersion {
   id: string;
@@ -73,7 +109,7 @@ interface ChatTestMessage {
 }
 
 export default function RolesAndPromptsPage() {
-  const [activeTab, setActiveTab] = useState<"prompts" | "roles">("prompts");
+  const [activeTab, setActiveTab] = useState<"prompts" | "roles" | "skills">("prompts");
 
   // ================= Prompts Tab State =================
   const [promptsList, setPromptsList] = useState<PromptItem[]>([]);
@@ -131,10 +167,54 @@ export default function RolesAndPromptsPage() {
   const [testInput, setTestInput] = useState("");
   const [testSending, setTestSending] = useState(false);
 
+  // ================= Skills Tab State (Task 2.5) =================
+  const [skillsList, setSkillsList] = useState<SkillItem[]>([]);
+  const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
+  const [skillForm, setSkillForm] = useState({
+    name: "",
+    slug: "",
+    description: "",
+    triggerConditions: "",
+    stepsMarkdown: "",
+    examples: [{ question: "", answer: "" }],
+    changeNotes: "",
+  });
+  const [savingSkill, setSavingSkill] = useState(false);
+  const [skillSuccessMsg, setSkillSuccessMsg] = useState("");
+  const [skillRollbackLoading, setSkillRollbackLoading] = useState(false);
+
+  // AI Drafting Modal State
+  const [draftModalOpen, setDraftModalOpen] = useState(false);
+  const [draftName, setDraftName] = useState("");
+  const [draftDesc, setDraftDesc] = useState("");
+  const [draftingSkill, setDraftingSkill] = useState(false);
+
+  // Markdown File View Modal State
+  const [markdownViewOpen, setMarkdownViewOpen] = useState(false);
+  const [copiedMd, setCopiedMd] = useState(false);
+
+  // Split-Screen Skill Test Chat State
+  const [skillTestMessages, setSkillTestMessages] = useState<ChatTestMessage[]>([
+    {
+      sender: "consultant",
+      text: "Skill test sandbox initialized. Enter a question or paste an email to test how this skill's step-by-step SOP resolves customer inquiries before saving.",
+    },
+  ]);
+  const [skillTestInput, setSkillTestInput] = useState("");
+  const [skillTestSending, setSkillTestSending] = useState(false);
+
   useEffect(() => {
     fetchPrompts();
     fetchRoles();
+    fetchSkills();
     runSimulator();
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get("tab");
+      if (tabParam === "skills" || tabParam === "roles" || tabParam === "prompts") {
+        setActiveTab(tabParam);
+      }
+    }
   }, []);
 
   // Update simulator whenever sliders change
@@ -189,6 +269,203 @@ export default function RolesAndPromptsPage() {
       handoverRule: role.handoverRule || "Escalate to human expert on angry customer sentiment > 0.8, legal threats, or refund disputes.",
       isBuiltin: role.isBuiltin,
     });
+  };
+
+  const fetchSkills = async () => {
+    try {
+      const res = await fetch("/api/brain/skills");
+      const data = await res.json();
+      if (data.skills && data.skills.length > 0) {
+        setSkillsList(data.skills);
+        if (!selectedSkillId) {
+          selectSkill(data.skills[0]);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const selectSkill = (skill: SkillItem) => {
+    setSelectedSkillId(skill.id);
+    setSkillForm({
+      name: skill.name,
+      slug: skill.slug,
+      description: skill.description,
+      triggerConditions: skill.triggerConditions,
+      stepsMarkdown: skill.stepsMarkdown,
+      examples: skill.examples && skill.examples.length > 0 ? skill.examples : [{ question: "", answer: "" }],
+      changeNotes: "",
+    });
+  };
+
+  const handleNewSkillByHand = () => {
+    setSelectedSkillId(null);
+    setSkillForm({
+      name: "",
+      slug: "",
+      description: "",
+      triggerConditions: "",
+      stepsMarkdown: `# New Skill SOP Protocol\n\n## When to Use This Skill\nDescribe query trigger here...\n\n## Step-by-Step Resolution Protocol\n1. Initial verification...\n2. Configure parameter...\n3. Execute validation command...\n`,
+      examples: [{ question: "", answer: "" }],
+      changeNotes: "Initial human-authored baseline",
+    });
+    setSkillSuccessMsg("Editor cleared. You can now write your skill by hand.");
+    setTimeout(() => setSkillSuccessMsg(""), 3000);
+  };
+
+  const handleSaveSkillVersion = async () => {
+    if (!skillForm.name.trim() || !skillForm.stepsMarkdown.trim()) return;
+    setSavingSkill(true);
+    setSkillSuccessMsg("");
+    try {
+      const res = await fetch("/api/brain/skills", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "save",
+          id: selectedSkillId,
+          name: skillForm.name,
+          slug: skillForm.slug,
+          description: skillForm.description,
+          triggerConditions: skillForm.triggerConditions,
+          stepsMarkdown: skillForm.stepsMarkdown,
+          examples: skillForm.examples.filter((ex) => ex.question.trim() || ex.answer.trim()),
+          changeNotes: skillForm.changeNotes || "Updated via Skill Studio",
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSkillSuccessMsg(data.message || "Skill saved successfully!");
+        await fetchSkills();
+        if (data.skill) {
+          selectSkill(data.skill);
+        }
+        setTimeout(() => setSkillSuccessMsg(""), 4000);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSavingSkill(false);
+    }
+  };
+
+  const handleSkillRollback = async (versionId: string) => {
+    if (!selectedSkillId) return;
+    setSkillRollbackLoading(true);
+    try {
+      const res = await fetch("/api/brain/skills", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "rollback",
+          id: selectedSkillId,
+          versionId,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSkillSuccessMsg(data.message);
+        await fetchSkills();
+        if (data.skill) {
+          selectSkill(data.skill);
+        }
+        setTimeout(() => setSkillSuccessMsg(""), 4000);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSkillRollbackLoading(false);
+    }
+  };
+
+  const handleDraftSkill = async () => {
+    if (!draftName.trim() || !draftDesc.trim()) return;
+    setDraftingSkill(true);
+    try {
+      const res = await fetch("/api/brain/skills", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "draft",
+          name: draftName,
+          description: draftDesc,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success && data.draftedSkill) {
+        setSelectedSkillId(null);
+        setSkillForm({
+          name: data.draftedSkill.name,
+          slug: data.draftedSkill.slug,
+          description: data.draftedSkill.description,
+          triggerConditions: data.draftedSkill.triggerConditions,
+          stepsMarkdown: data.draftedSkill.stepsMarkdown,
+          examples: data.draftedSkill.examples,
+          changeNotes: "AI-drafted baseline from description",
+        });
+        setDraftModalOpen(false);
+        setDraftName("");
+        setDraftDesc("");
+        setSkillSuccessMsg(`AI drafted skill '${data.draftedSkill.name}'! Test it in the chat beside and click Save.`);
+        setTimeout(() => setSkillSuccessMsg(""), 5000);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setDraftingSkill(false);
+    }
+  };
+
+  const handleSendSkillTestChat = async () => {
+    if (!skillTestInput.trim() || skillTestSending) return;
+    const userMsg = skillTestInput;
+    setSkillTestInput("");
+    setSkillTestSending(true);
+
+    setSkillTestMessages((prev) => [...prev, { sender: "user", text: userMsg }]);
+
+    try {
+      const res = await fetch("/api/brain/skills", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "test",
+          testQuery: userMsg,
+          name: skillForm.name || "Draft Skill",
+          stepsMarkdown: skillForm.stepsMarkdown,
+          roleTone: "Technical, step-by-step resolution",
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.testResult) {
+        setSkillTestMessages((prev) => [
+          ...prev,
+          {
+            sender: "consultant",
+            text: data.testResult.answer,
+            telemetry: {
+              latencyMs: data.testResult.latencyMs,
+              inputTokens: data.testResult.inputTokens,
+              outputTokens: data.testResult.outputTokens,
+              costUsd: data.testResult.costUsd,
+              modelId: "claude-sonnet-5.5",
+            },
+          },
+        ]);
+      }
+    } catch (e) {
+      console.error(e);
+      setSkillTestMessages((prev) => [
+        ...prev,
+        {
+          sender: "consultant",
+          text: "Error executing skill test call.",
+        },
+      ]);
+    } finally {
+      setSkillTestSending(false);
+    }
   };
 
   const runSimulator = async () => {
@@ -362,6 +639,30 @@ export default function RolesAndPromptsPage() {
   };
 
   const comparedVersion = activePrompt?.versions.find((v) => v.id === selectedCompareVersionId);
+  const activeSkill = skillsList.find((s) => s.id === selectedSkillId) || skillsList[0];
+
+  const formatCurrentSkillAsMarkdown = () => {
+    return `---
+name: "${skillForm.name || "Untitled Skill"}"
+slug: "${skillForm.slug || "untitled"}"
+version: ${activeSkill?.currentVersionNumber || 1}
+description: "${skillForm.description || ""}"
+trigger_conditions: "${skillForm.triggerConditions || ""}"
+---
+
+${skillForm.stepsMarkdown}
+
+## Verified Few-Shot Examples
+${skillForm.examples
+  .filter((e) => e.question && e.answer)
+  .map(
+    (ex, i) => `### Example ${i + 1}
+**Question:** ${ex.question}
+**Answer:** ${ex.answer}`
+  )
+  .join("\n\n")}
+`;
+  };
 
   return (
     <AppShell breadcrumbs={[{ label: "Role & Prompt Studio" }]}>
@@ -400,6 +701,18 @@ export default function RolesAndPromptsPage() {
           >
             <Users className="h-4 w-4" />
             <span>Agent Roles & Live Split-Screen Test</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("skills")}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+              activeTab === "skills"
+                ? "border-indigo-500 text-indigo-400"
+                : "border-transparent text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            <BookOpen className="h-4 w-4" />
+            <span>Skills & SOP Studio (Task 2.5)</span>
           </button>
         </div>
 
@@ -1072,6 +1385,543 @@ export default function RolesAndPromptsPage() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ================= TAB 3: SKILLS & SOP STUDIO (Task 2.5) ================= */}
+        {activeTab === "skills" && (
+          <div className="space-y-6">
+            {/* Success message banner */}
+            {skillSuccessMsg && (
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-3.5 text-xs text-emerald-300 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+                  <span>{skillSuccessMsg}</span>
+                </div>
+                <button
+                  onClick={() => setSkillSuccessMsg("")}
+                  className="text-gray-400 hover:text-white text-xs"
+                >
+                  &times;
+                </button>
+              </div>
+            )}
+
+            {/* Top Toolbar & Skills Pills */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                {skillsList.map((skill) => (
+                  <button
+                    key={skill.id}
+                    onClick={() => selectSkill(skill)}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono transition border ${
+                      selectedSkillId === skill.id
+                        ? "bg-purple-950/40 border-purple-500 text-purple-300"
+                        : "bg-gray-900 border-gray-800 text-gray-400 hover:border-gray-700 hover:text-gray-200"
+                    }`}
+                  >
+                    <BookOpen className="h-3.5 w-3.5 text-purple-400" />
+                    <span>{skill.name}</span>
+                    <span className="rounded bg-purple-500/20 text-purple-300 text-[10px] px-1.5 py-0.5 font-bold">
+                      v{skill.currentVersionNumber}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button
+                  onClick={handleNewSkillByHand}
+                  className="flex items-center gap-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 px-3 py-1.5 text-xs font-medium text-white transition border border-gray-700"
+                >
+                  <Plus className="h-3.5 w-3.5 text-gray-300" />
+                  <span>Write by Hand</span>
+                </button>
+
+                <button
+                  onClick={() => setDraftModalOpen(true)}
+                  className="flex items-center gap-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-3.5 py-1.5 text-xs font-medium text-white transition shadow-sm"
+                >
+                  <Sparkles className="h-3.5 w-3.5 text-indigo-200" />
+                  <span>Draft with AI</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Split Screen: Left = Editor & Version History, Right = Test Chat */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Column (7 Cols): Skill SOP Editor */}
+              <div className="lg:col-span-7 space-y-5">
+                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+                    <div>
+                      <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                        <Wrench className="h-4 w-4 text-purple-400" />
+                        <span>Skill Specification &amp; SOP Instructions</span>
+                      </h3>
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        Markdown file skill definition. The agent autonomously matches questions and emails to this procedure.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {activeSkill && (
+                        <span className="text-[11px] font-mono bg-purple-950/50 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded">
+                          Active Version: v{activeSkill.currentVersionNumber}
+                        </span>
+                      )}
+                      <button
+                        onClick={() => setMarkdownViewOpen(true)}
+                        className="flex items-center gap-1 text-[11px] font-mono text-gray-300 hover:text-white bg-gray-900 border border-gray-800 hover:border-gray-700 px-2.5 py-1 rounded transition"
+                      >
+                        <FileText className="h-3 w-3 text-gray-400" />
+                        <span>View .md</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Basic Metadata Fields */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-medium text-gray-400 mb-1">Skill Name *</label>
+                      <input
+                        type="text"
+                        value={skillForm.name}
+                        onChange={(e) => setSkillForm({ ...skillForm, name: e.target.value })}
+                        placeholder="e.g. DNS & Custom CNAME Setup"
+                        className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-400 mb-1">Slug Identifier</label>
+                      <input
+                        type="text"
+                        value={skillForm.slug}
+                        onChange={(e) => setSkillForm({ ...skillForm, slug: e.target.value })}
+                        placeholder="dns-cname-setup"
+                        className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1">Short Description</label>
+                    <input
+                      type="text"
+                      value={skillForm.description}
+                      onChange={(e) => setSkillForm({ ...skillForm, description: e.target.value })}
+                      placeholder="e.g. Configuring custom root domains and subdomains with Cloudflare DNS proxying."
+                      className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+
+                  {/* When to Use It (Trigger Conditions) */}
+                  <div>
+                    <label className="block text-xs font-medium text-amber-300 mb-1">
+                      When to Use This Skill (Trigger Conditions) *
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={skillForm.triggerConditions}
+                      onChange={(e) => setSkillForm({ ...skillForm, triggerConditions: e.target.value })}
+                      placeholder="When a customer asks about domain setup, custom CNAME, mapping a subdomain, or DNS records."
+                      className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3.5 py-2 text-xs text-amber-200 placeholder-gray-500 focus:outline-none focus:border-amber-500 font-mono"
+                    />
+                    <span className="text-[10px] text-gray-500 mt-1 block">
+                      Autonomous skill router checks semantic intent, trigger conditions, and example queries to pick this skill automatically.
+                    </span>
+                  </div>
+
+                  {/* Steps to Follow (Markdown) */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-medium text-gray-400">
+                        The Steps to Follow (Markdown SOP) *
+                      </label>
+                      <span className="text-[10px] text-gray-500 font-mono">
+                        Markdown supported (headings, lists, code blocks)
+                      </span>
+                    </div>
+                    <textarea
+                      rows={10}
+                      value={skillForm.stepsMarkdown}
+                      onChange={(e) => setSkillForm({ ...skillForm, stepsMarkdown: e.target.value })}
+                      placeholder="# Step-by-Step Resolution Protocol&#10;1. Initial diagnosis...&#10;2. Apply configuration...&#10;3. Verify with CLI: dig +short CNAME custom.domain.com"
+                      className="w-full rounded-lg border border-gray-700 bg-gray-950 p-3.5 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-purple-500 font-mono leading-relaxed"
+                    />
+                  </div>
+
+                  {/* Verified Few-Shot Examples */}
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-medium text-gray-300">
+                        Verified Examples (1 or 2 examples)
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSkillForm({
+                            ...skillForm,
+                            examples: [...skillForm.examples, { question: "", answer: "" }],
+                          })
+                        }
+                        className="text-[11px] text-purple-400 hover:text-purple-300 flex items-center gap-1 font-mono"
+                      >
+                        <Plus className="h-3 w-3" />
+                        <span>Add Example</span>
+                      </button>
+                    </div>
+
+                    {skillForm.examples.map((ex, idx) => (
+                      <div
+                        key={idx}
+                        className="rounded-lg border border-gray-800 bg-gray-950 p-3 space-y-2 text-xs"
+                      >
+                        <div className="flex items-center justify-between text-[11px] text-gray-400 font-mono">
+                          <span>Example #{idx + 1}</span>
+                          {skillForm.examples.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = skillForm.examples.filter((_, i) => i !== idx);
+                                setSkillForm({ ...skillForm, examples: updated });
+                              }}
+                              className="text-red-400 hover:text-red-300 text-[10px]"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                        <input
+                          type="text"
+                          value={ex.question}
+                          onChange={(e) => {
+                            const updated = [...skillForm.examples];
+                            updated[idx].question = e.target.value;
+                            setSkillForm({ ...skillForm, examples: updated });
+                          }}
+                          placeholder="Example Customer Question (e.g. How do I configure my CNAME?)"
+                          className="w-full rounded border border-gray-800 bg-gray-900 px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-purple-500"
+                        />
+                        <textarea
+                          rows={2}
+                          value={ex.answer}
+                          onChange={(e) => {
+                            const updated = [...skillForm.examples];
+                            updated[idx].answer = e.target.value;
+                            setSkillForm({ ...skillForm, examples: updated });
+                          }}
+                          placeholder="Example Resolution Answer Grounded in this Skill..."
+                          className="w-full rounded border border-gray-800 bg-gray-900 px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-purple-500"
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Save New Version Card */}
+                  <div className="pt-3 border-t border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <input
+                      type="text"
+                      value={skillForm.changeNotes}
+                      onChange={(e) => setSkillForm({ ...skillForm, changeNotes: e.target.value })}
+                      placeholder="Change notes (e.g. Added Cloudflare orange-cloud proxy check)..."
+                      className="flex-1 rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                    />
+
+                    <button
+                      onClick={handleSaveSkillVersion}
+                      disabled={savingSkill || !skillForm.name.trim() || !skillForm.stepsMarkdown.trim()}
+                      className="flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-5 py-2 text-xs font-semibold text-white transition disabled:opacity-50 flex-shrink-0 shadow-sm"
+                    >
+                      <Save className="h-4 w-4" />
+                      <span>{savingSkill ? "Saving Version..." : "Save New Version"}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Version History Drawer with 1-Click Rollback */}
+                {activeSkill && activeSkill.versions && activeSkill.versions.length > 0 && (
+                  <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-3">
+                    <div className="flex items-center justify-between border-b border-gray-800 pb-2.5">
+                      <div className="flex items-center gap-2">
+                        <History className="h-4 w-4 text-indigo-400" />
+                        <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-300">
+                          Version History &amp; 1-Click Rollback
+                        </h4>
+                      </div>
+                      <span className="text-[10px] text-gray-500 font-mono">
+                        {activeSkill.versions.length} versions recorded
+                      </span>
+                    </div>
+
+                    <div className="space-y-2 divide-y divide-gray-800/40">
+                      {activeSkill.versions.map((v) => {
+                        const isCurrent = v.versionNumber === activeSkill.currentVersionNumber;
+                        return (
+                          <div
+                            key={v.id}
+                            className="pt-2 flex items-center justify-between gap-3 text-xs hover:bg-gray-900/30 p-2 rounded transition"
+                          >
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={`rounded px-1.5 py-0.5 text-[10px] font-mono font-bold ${
+                                    isCurrent
+                                      ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                                      : "bg-gray-800 text-gray-400"
+                                  }`}
+                                >
+                                  v{v.versionNumber} {isCurrent && "(Active)"}
+                                </span>
+                                <span className="text-[11px] text-gray-400">
+                                  {new Date(v.createdAt).toLocaleDateString()} at{" "}
+                                  {new Date(v.createdAt).toLocaleTimeString()}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-gray-300 italic">{v.changeNotes || "No notes"}</p>
+                            </div>
+
+                            {!isCurrent && (
+                              <button
+                                onClick={() => handleSkillRollback(v.id)}
+                                disabled={skillRollbackLoading}
+                                className="flex items-center gap-1 rounded bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 text-[10px] font-mono px-2.5 py-1 transition border border-indigo-500/30 disabled:opacity-50"
+                              >
+                                <RotateCcw className="h-3 w-3" />
+                                <span>Rollback to v{v.versionNumber}</span>
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column (5 Cols): Split-Screen Test Chat */}
+              <div className="lg:col-span-5 rounded-xl border border-gray-800 bg-[#0E1322] flex flex-col h-[780px] shadow-sm overflow-hidden sticky top-6">
+                {/* Test Chat Header */}
+                <div className="p-3.5 bg-gray-950 border-b border-gray-800 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-purple-400 animate-pulse"></div>
+                    <div>
+                      <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+                        <span>Side-by-Side Test Chat</span>
+                      </h4>
+                      <p className="text-[10px] text-gray-400">
+                        Testing skill: <span className="text-purple-300 font-mono">{skillForm.name || "Draft Skill"}</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <span className="text-[10px] bg-purple-950/60 text-purple-300 px-2 py-0.5 rounded border border-purple-500/20 font-mono">
+                    [skill test]
+                  </span>
+                </div>
+
+                {/* Test Chat Message Stream */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-[#090D16]">
+                  {skillTestMessages.map((msg, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}
+                    >
+                      {msg.telemetry && (
+                        <div className="flex items-center gap-1 text-[9px] font-mono text-gray-500 mb-1 px-1">
+                          <span className="text-purple-400 font-semibold">Attribution: [skill]</span>
+                          <span>&bull;</span>
+                          <span>{msg.telemetry.latencyMs}ms</span>
+                          <span>&bull;</span>
+                          <span className="text-emerald-400 font-semibold">
+                            ${msg.telemetry.costUsd.toFixed(6)}
+                          </span>
+                        </div>
+                      )}
+
+                      <div
+                        className={`rounded-xl p-3 text-xs max-w-[90%] leading-relaxed ${
+                          msg.sender === "user"
+                            ? "bg-purple-600 text-white rounded-br-none"
+                            : "bg-gray-900/90 text-gray-200 border border-gray-800 rounded-bl-none whitespace-pre-wrap font-sans"
+                        }`}
+                      >
+                        {msg.text}
+                      </div>
+                    </div>
+                  ))}
+                  {skillTestSending && (
+                    <div className="flex items-center gap-2 text-xs text-gray-400 font-mono p-2">
+                      <div className="h-2 w-2 rounded-full bg-purple-500 animate-ping"></div>
+                      <span>Simulating skill SOP execution against draft protocol...</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Pre-fill Quick Chips for Testing */}
+                <div className="px-4 py-2 bg-gray-950/60 border-t border-gray-800/80 flex items-center gap-1.5 overflow-x-auto text-[11px]">
+                  <span className="text-gray-500 whitespace-nowrap">Try:</span>
+                  <button
+                    onClick={() => setSkillTestInput("How do I point my custom subdomain to the platform?")}
+                    className="text-gray-400 hover:text-white rounded bg-gray-900 px-2 py-0.5 truncate max-w-[150px]"
+                  >
+                    Custom subdomain?
+                  </button>
+                  <button
+                    onClick={() => setSkillTestInput("Why is SSL verification failing on Cloudflare?")}
+                    className="text-gray-400 hover:text-white rounded bg-gray-900 px-2 py-0.5 truncate max-w-[150px]"
+                  >
+                    SSL verification fail?
+                  </button>
+                  <button
+                    onClick={() => setSkillTestInput("How do I verify webhook signature HMAC SHA256?")}
+                    className="text-gray-400 hover:text-white rounded bg-gray-900 px-2 py-0.5 truncate max-w-[150px]"
+                  >
+                    Webhook 401 error?
+                  </button>
+                </div>
+
+                {/* Test Chat Input Bar */}
+                <div className="p-3 bg-gray-950 border-t border-gray-800 flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={skillTestInput}
+                    onChange={(e) => setSkillTestInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSendSkillTestChat();
+                    }}
+                    placeholder={`Test "${skillForm.name || "this skill"}" with a question...`}
+                    className="flex-1 rounded-lg border border-gray-800 bg-gray-900 px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                  />
+                  <button
+                    onClick={handleSendSkillTestChat}
+                    disabled={!skillTestInput.trim() || skillTestSending}
+                    className="rounded-lg bg-purple-600 hover:bg-purple-500 p-2 text-white transition disabled:opacity-40"
+                  >
+                    <Send className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Drafting Modal: Mode B ("Describe it in a few words and let the agent draft it") */}
+            {draftModalOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+                <div className="rounded-2xl border border-gray-800 bg-[#0E1322] w-full max-w-lg p-6 shadow-2xl space-y-4">
+                  <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-indigo-400" />
+                      <h3 className="text-base font-bold text-white">AI Skill Drafting Assistant</h3>
+                    </div>
+                    <button
+                      onClick={() => setDraftModalOpen(false)}
+                      className="text-gray-400 hover:text-white text-sm"
+                    >
+                      &times;
+                    </button>
+                  </div>
+
+                  <p className="text-xs text-gray-400 leading-relaxed">
+                    Describe what this skill should do in a few words. The agent will autonomously author the complete Markdown SOP protocol, including trigger conditions, step-by-step resolution, and few-shot examples.
+                  </p>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-300 mb-1">Skill Name *</label>
+                      <input
+                        type="text"
+                        value={draftName}
+                        onChange={(e) => setDraftName(e.target.value)}
+                        placeholder="e.g. Stripe Webhook & Event Reconciliation"
+                        className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-300 mb-1">
+                        Short Description of the Procedure *
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={draftDesc}
+                        onChange={(e) => setDraftDesc(e.target.value)}
+                        placeholder="e.g. Handling invoice payment failures, verifying Stripe secret signatures, and checking idempotency keys."
+                        className="w-full rounded-lg border border-gray-700 bg-gray-950 p-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-800">
+                    <button
+                      type="button"
+                      onClick={() => setDraftModalOpen(false)}
+                      className="rounded-lg bg-gray-800 hover:bg-gray-700 px-4 py-2 text-xs font-medium text-gray-300"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDraftSkill}
+                      disabled={draftingSkill || !draftName.trim() || !draftDesc.trim()}
+                      className="flex items-center gap-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-5 py-2 text-xs font-semibold text-white transition disabled:opacity-50"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      <span>{draftingSkill ? "Drafting SOP..." : "Draft Skill with AI"}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Markdown File View Modal */}
+            {markdownViewOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+                <div className="rounded-2xl border border-gray-800 bg-[#0E1322] w-full max-w-2xl p-6 shadow-2xl space-y-4">
+                  <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+                    <div className="flex items-center gap-2">
+                      <FileCode className="h-5 w-5 text-purple-400" />
+                      <h3 className="text-base font-bold text-white">
+                        Markdown File Representation ({skillForm.slug || "skill"}.md)
+                      </h3>
+                    </div>
+                    <button
+                      onClick={() => setMarkdownViewOpen(false)}
+                      className="text-gray-400 hover:text-white text-sm"
+                    >
+                      &times;
+                    </button>
+                  </div>
+
+                  <p className="text-xs text-gray-400">
+                    Each skill is stored as a formatted Markdown file with YAML frontmatter, operational SOP steps, and verified few-shot examples.
+                  </p>
+
+                  <pre className="rounded-lg border border-gray-800 bg-gray-950 p-4 text-xs font-mono text-purple-200 whitespace-pre-wrap max-h-96 overflow-y-auto leading-relaxed">
+                    {formatCurrentSkillAsMarkdown()}
+                  </pre>
+
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-800">
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(formatCurrentSkillAsMarkdown());
+                        setCopiedMd(true);
+                        setTimeout(() => setCopiedMd(false), 2000);
+                      }}
+                      className="flex items-center gap-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 px-4 py-2 text-xs font-semibold text-white transition"
+                    >
+                      {copiedMd ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                      <span>{copiedMd ? "Copied!" : "Copy Markdown"}</span>
+                    </button>
+                    <button
+                      onClick={() => setMarkdownViewOpen(false)}
+                      className="rounded-lg bg-gray-800 hover:bg-gray-700 px-4 py-2 text-xs font-medium text-gray-300"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

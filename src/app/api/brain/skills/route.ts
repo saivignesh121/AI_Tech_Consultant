@@ -2,80 +2,33 @@ import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/auth";
 import { db } from "@/db";
 import { skills, skillVersions } from "@/db/schema/knowledge";
-import { draftSkillFromPages } from "@/services/brain/skillsDrafter";
+import {
+  getSkills,
+  getSkillById,
+  createSkillByHand,
+  draftSkillFromDescription,
+  saveSkillVersion,
+  rollbackSkillToVersion,
+  testSkillInChat,
+  type SkillExample,
+} from "@/services/brain/skillsManager";
 import { eq, desc } from "drizzle-orm";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const tenant = await getTenantContext();
+    const { searchParams } = new URL(req.url);
+    const skillId = searchParams.get("id");
 
-    let skillsList = await db
-      .select()
-      .from(skills)
-      .where(eq(skills.businessId, tenant.businessId));
-
-    // Seed default skills if empty
-    if (skillsList.length === 0) {
-      const defaultSkills = [
-        {
-          name: "DNS & Custom CNAME Setup",
-          slug: "dns-setup",
-          description: "Step-by-step procedure for pointing customer domains to the SaaS cluster.",
-          triggerConditions: "When a user asks about setting up custom domains, CNAME records, or DNS routing.",
-          stepsMarkdown: `1. Log into your DNS provider (e.g., Cloudflare, GoDaddy, Route53).\n2. Create a new CNAME record: \`app\` -> \`proxy.${tenant.businessSlug}.com\`.\n3. Turn OFF Cloudflare orange cloud proxying during initial certificate issuance.\n4. Wait 5-15 minutes for DNS TTL propagation.\n5. Verify status using \`dig CNAME app.yourdomain.com +short\`.`,
-          examples: [
-            { question: "How do I map my subdomain?", answer: "Create a CNAME record pointing to proxy cluster." },
-          ],
-        },
-        {
-          name: "Webhook Signature Debugging",
-          slug: "webhook-debugging",
-          description: "Diagnostic protocol for verifying HMAC SHA-256 webhook signatures.",
-          triggerConditions: "When webhook deliveries fail with 401 Unauthorized or signature mismatch.",
-          stepsMarkdown: `1. Retrieve the shared signing secret from your Settings & Keys vault.\n2. Compute the HMAC SHA-256 hash over the raw binary request body.\n3. Compare the computed digest with the \`X-Hub-Signature-256\` header.\n4. Verify server clocks are synchronized (within 300 seconds skew limit).`,
-          examples: [
-            { question: "Why is my webhook failing verification?", answer: "Check raw body hashing and timestamp skew." },
-          ],
-        },
-      ];
-
-      for (const ds of defaultSkills) {
-        const [insertedSkill] = await db
-          .insert(skills)
-          .values({
-            businessId: tenant.businessId,
-            name: ds.name,
-            slug: ds.slug,
-            description: ds.description,
-            triggerConditions: ds.triggerConditions,
-            stepsMarkdown: ds.stepsMarkdown,
-            examples: ds.examples,
-          })
-          .returning();
-
-        const [initialVersion] = await db
-          .insert(skillVersions)
-          .values({
-            skillId: insertedSkill.id,
-            businessId: tenant.businessId,
-            versionNumber: 1,
-            stepsMarkdown: ds.stepsMarkdown,
-            changeNotes: "Initial production baseline SOP",
-          })
-          .returning();
-
-        await db
-          .update(skills)
-          .set({ currentVersionId: initialVersion.id })
-          .where(eq(skills.id, insertedSkill.id));
+    if (skillId) {
+      const skill = getSkillById(tenant.businessId, skillId);
+      if (!skill) {
+        return NextResponse.json({ error: "Skill not found" }, { status: 404 });
       }
-
-      skillsList = await db
-        .select()
-        .from(skills)
-        .where(eq(skills.businessId, tenant.businessId));
+      return NextResponse.json({ skill });
     }
 
+    const skillsList = getSkills(tenant.businessId);
     return NextResponse.json({ skills: skillsList });
   } catch (error) {
     return NextResponse.json(
@@ -89,67 +42,108 @@ export async function POST(req: NextRequest) {
   try {
     const tenant = await getTenantContext();
     const body = await req.json();
-    const { action, name, slug, description, triggerConditions, stepsMarkdown, pages } = body;
+    const {
+      action = "save",
+      id,
+      name,
+      slug,
+      description,
+      triggerConditions,
+      stepsMarkdown,
+      examples,
+      changeNotes,
+      versionId,
+      testQuery,
+      roleTone,
+    } = body;
 
-    if (action === "draft_from_pages") {
-      // Task 2.5: Skills Drafter - auto-generates skill from ingested help pages
-      const drafted = draftSkillFromPages(
-        name || "Automated Procedure",
-        pages || [
-          {
-            title: "Configuring Custom CNAME Subdomains",
-            content: "Step 1: Point CNAME. Step 2: Configure TLS. Step 3: Verify DNS.",
-            url: `https://${tenant.businessSlug}.com/articles/cname`,
-          },
-        ]
-      );
-
+    // 1. AI Drafting Mode: "Describe it in a few words and let the agent draft it"
+    if (action === "draft") {
+      if (!name || !description) {
+        return NextResponse.json(
+          { error: "Name and short description are required for AI drafting." },
+          { status: 400 }
+        );
+      }
+      const drafted = draftSkillFromDescription(name, description);
       return NextResponse.json({ success: true, draftedSkill: drafted });
     }
 
-    if (!name || !stepsMarkdown) {
-      return NextResponse.json({ error: "Name and stepsMarkdown are required." }, { status: 400 });
+    // 2. Test Chat Beside Skill Editor: "A test chat sits beside the skill editor..."
+    if (action === "test") {
+      if (!testQuery) {
+        return NextResponse.json({ error: "testQuery is required for test chat" }, { status: 400 });
+      }
+      const testResult = testSkillInChat(
+        stepsMarkdown || "1. Check settings.\n2. Apply configuration.\n3. Validate with dig.",
+        testQuery,
+        name || "Draft Skill",
+        roleTone || "Technical, step-by-step"
+      );
+      return NextResponse.json({ success: true, testResult });
     }
 
-    const skillSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    // 3. 1-Click Rollback: "The user can go back to any older version in one click"
+    if (action === "rollback") {
+      if (!id || !versionId) {
+        return NextResponse.json(
+          { error: "Skill id and versionId are required for rollback." },
+          { status: 400 }
+        );
+      }
+      const rolledBack = rollbackSkillToVersion(tenant.businessId, id, versionId);
+      return NextResponse.json({
+        success: true,
+        message: `Skill '${rolledBack.name}' rolled back to Version ${rolledBack.currentVersionNumber}.`,
+        skill: rolledBack,
+      });
+    }
 
-    const [inserted] = await db
-      .insert(skills)
-      .values({
-        businessId: tenant.businessId,
+    // 4. Save Skill (Create or New Version)
+    if (!name || !stepsMarkdown) {
+      return NextResponse.json(
+        { error: "Name and stepsMarkdown are required to save a skill." },
+        { status: 400 }
+      );
+    }
+
+    // If existing skill ID provided, save as a new version
+    if (id) {
+      const { skill, newVersion } = saveSkillVersion(tenant.businessId, id, {
         name,
-        slug: skillSlug,
-        description: description || "Operational skill procedure",
-        triggerConditions: triggerConditions || "Triggered on related customer queries",
+        description,
+        triggerConditions,
         stepsMarkdown,
-        examples: [],
-      })
-      .returning();
+        examples,
+        changeNotes,
+      });
 
-    const [version] = await db
-      .insert(skillVersions)
-      .values({
-        skillId: inserted.id,
-        businessId: tenant.businessId,
-        versionNumber: 1,
-        stepsMarkdown,
-        changeNotes: "Initial drafted version",
-      })
-      .returning();
+      return NextResponse.json({
+        success: true,
+        message: `Skill '${skill.name}' updated to Version ${skill.currentVersionNumber}.`,
+        skill,
+        version: newVersion,
+      });
+    }
 
-    await db
-      .update(skills)
-      .set({ currentVersionId: version.id })
-      .where(eq(skills.id, inserted.id));
+    // Otherwise, create fresh skill by hand
+    const created = createSkillByHand(tenant.businessId, {
+      name,
+      slug,
+      description: description || "Operational skill procedure",
+      triggerConditions: triggerConditions || "Triggered on related customer queries",
+      stepsMarkdown,
+      examples: examples || [],
+    });
 
     return NextResponse.json({
       success: true,
-      skill: inserted,
-      message: `Skill '${name}' created and published as Version 1.`,
+      message: `Skill '${created.name}' created as Version 1.`,
+      skill: created,
     });
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to save skill", details: String(error) },
+      { error: "Failed to process skill action", details: String(error) },
       { status: 500 }
     );
   }

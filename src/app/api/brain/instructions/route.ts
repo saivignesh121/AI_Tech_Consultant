@@ -1,63 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/auth";
-import { db } from "@/db";
-import { instructions } from "@/db/schema/knowledge";
-import { eq, and, desc } from "drizzle-orm";
+import {
+  getInstructions,
+  createInstruction,
+  updateInstruction,
+  toggleInstruction,
+  deleteInstruction,
+} from "@/services/brain/instructionsManager";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const tenant = await getTenantContext();
+    const { searchParams } = new URL(req.url);
+    const roleSlug = searchParams.get("role");
 
-    let list = await db
-      .select()
-      .from(instructions)
-      .where(eq(instructions.businessId, tenant.businessId))
-      .orderBy(desc(instructions.createdAt));
+    const list = getInstructions(tenant.businessId);
 
-    // Seed default instructions if empty
-    if (list.length === 0) {
-      const defaultRules = [
-        {
-          title: "Refund Escalation Policy",
-          ruleText: "Never promise a refund. Send every refund question to the Billing team for human approval.",
-          appliesToRoles: ["all"],
-          isActive: true,
-        },
-        {
-          title: "Technical Command Attribution",
-          ruleText: "Include exact CLI commands (e.g. dig, curl) and link to verified Knowledge Brain documentation.",
-          appliesToRoles: ["support-engineer"],
-          isActive: true,
-        },
-        {
-          title: "Warm Greeting & Simplicity",
-          ruleText: "Greet customers warmly with friendly phrasing, avoid technical jargon, and check if they need more help.",
-          appliesToRoles: ["support-executive"],
-          isActive: true,
-        },
-        {
-          title: "Solution & Quote Steering",
-          ruleText: "Highlight ROI and scalable SaaS benefits, steering the discussion toward an implementation quote.",
-          appliesToRoles: ["ai-consultant"],
-          isActive: true,
-        },
-      ];
-
-      for (const rule of defaultRules) {
-        await db.insert(instructions).values({
-          businessId: tenant.businessId,
-          title: rule.title,
-          ruleText: rule.ruleText,
-          appliesToRoles: rule.appliesToRoles,
-          isActive: rule.isActive,
-        });
-      }
-
-      list = await db
-        .select()
-        .from(instructions)
-        .where(eq(instructions.businessId, tenant.businessId))
-        .orderBy(desc(instructions.createdAt));
+    if (roleSlug) {
+      const filtered = list.filter(
+        (i) => i.isActive && (i.appliesToRoles.includes("all") || i.appliesToRoles.includes(roleSlug))
+      );
+      return NextResponse.json({ instructions: filtered });
     }
 
     return NextResponse.json({ instructions: list });
@@ -79,38 +42,61 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Title and ruleText are required." }, { status: 400 });
     }
 
-    const isUuid = typeof id === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    if (id) {
+      const updated = updateInstruction(tenant.businessId, id, {
+        title,
+        ruleText,
+        appliesToRoles: Array.isArray(appliesToRoles) ? appliesToRoles : ["all"],
+        isActive: Boolean(isActive),
+      });
 
-    if (id && isUuid) {
-      const [updated] = await db
-        .update(instructions)
-        .set({
-          title,
-          ruleText,
-          appliesToRoles: Array.isArray(appliesToRoles) ? appliesToRoles : ["all"],
-          isActive: Boolean(isActive),
-        })
-        .where(and(eq(instructions.id, id), eq(instructions.businessId, tenant.businessId)))
-        .returning();
-
-      return NextResponse.json({ success: true, instruction: updated, message: "Instruction updated." });
-    } else {
-      const [inserted] = await db
-        .insert(instructions)
-        .values({
-          businessId: tenant.businessId,
-          title,
-          ruleText,
-          appliesToRoles: Array.isArray(appliesToRoles) ? appliesToRoles : ["all"],
-          isActive: Boolean(isActive),
-        })
-        .returning();
-
-      return NextResponse.json({ success: true, instruction: inserted, message: "Instruction created." });
+      return NextResponse.json({
+        success: true,
+        instruction: updated,
+        message: `Instruction '${updated.title}' updated.`,
+      });
     }
+
+    const created = createInstruction(tenant.businessId, {
+      title,
+      ruleText,
+      appliesToRoles: Array.isArray(appliesToRoles) ? appliesToRoles : ["all"],
+      isActive: Boolean(isActive),
+    });
+
+    return NextResponse.json({
+      success: true,
+      instruction: created,
+      message: `Instruction '${created.title}' created successfully.`,
+    });
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to save instruction", details: String(error) },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const tenant = await getTenantContext();
+    const body = await req.json();
+    const { id, isActive } = body;
+
+    if (!id || typeof isActive !== "boolean") {
+      return NextResponse.json({ error: "id and isActive boolean are required" }, { status: 400 });
+    }
+
+    const toggled = toggleInstruction(tenant.businessId, id, isActive);
+
+    return NextResponse.json({
+      success: true,
+      instruction: toggled,
+      message: `Instruction rule '${toggled.title}' switched ${isActive ? "ON" : "OFF"}.`,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to toggle instruction", details: String(error) },
       { status: 500 }
     );
   }
@@ -126,11 +112,12 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Instruction ID is required" }, { status: 400 });
     }
 
-    await db
-      .delete(instructions)
-      .where(and(eq(instructions.id, id), eq(instructions.businessId, tenant.businessId)));
+    const deleted = deleteInstruction(tenant.businessId, id);
 
-    return NextResponse.json({ success: true, message: "Instruction deleted." });
+    return NextResponse.json({
+      success: true,
+      message: deleted ? "Instruction deleted." : "Instruction not found or already deleted.",
+    });
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to delete instruction", details: String(error) },

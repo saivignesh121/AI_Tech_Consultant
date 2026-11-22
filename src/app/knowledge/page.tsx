@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import AppShell from "@/components/layout/AppShell";
 import {
   Brain,
@@ -40,6 +41,8 @@ import {
   ChevronUp,
   Calendar,
   Check,
+  Wrench,
+  Edit2,
 } from "lucide-react";
 
 interface LiveCrawlProgress {
@@ -215,6 +218,7 @@ export default function KnowledgeBrainPage() {
   // --- Instructions Tab State (Knowledge Type 3) ---
   const [instructionsList, setInstructionsList] = useState<InstructionItem[]>([]);
   const [loadingInstructions, setLoadingInstructions] = useState(false);
+  const [editingInstructionId, setEditingInstructionId] = useState<string | null>(null);
   const [newInstTitle, setNewInstTitle] = useState("");
   const [newInstRuleText, setNewInstRuleText] = useState("");
   const [newInstRole, setNewInstRole] = useState("all");
@@ -545,6 +549,7 @@ export default function KnowledgeBrainPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          id: editingInstructionId || undefined,
           title: newInstTitle.trim(),
           ruleText: newInstRuleText.trim(),
           appliesToRoles: [newInstRole],
@@ -553,10 +558,15 @@ export default function KnowledgeBrainPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setInstructionSuccessMsg("Rule successfully registered into Knowledge Brain!");
+        setInstructionSuccessMsg(
+          editingInstructionId
+            ? "Instruction rule updated successfully!"
+            : "Rule successfully registered into Knowledge Brain!"
+        );
         setNewInstTitle("");
         setNewInstRuleText("");
         setNewInstRole("all");
+        setEditingInstructionId(null);
         fetchInstructions();
         setTimeout(() => setInstructionSuccessMsg(""), 4000);
       }
@@ -1656,14 +1666,32 @@ export default function KnowledgeBrainPage() {
             <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Create Plain-English Rule</h3>
+                  <h3 className="text-sm font-semibold text-white">
+                    {editingInstructionId ? "Edit Plain-English Rule" : "Create Plain-English Rule"}
+                  </h3>
                   <p className="text-xs text-gray-400 mt-0.5">
                     Written by people to guide agent behavior. Example: &quot;Never promise a refund. Send every refund question to the Billing team.&quot;
                   </p>
                 </div>
-                <span className="text-[10px] bg-emerald-950/60 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/20 font-mono">
-                  Attribution: [instruction]
-                </span>
+                <div className="flex items-center gap-2">
+                  {editingInstructionId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingInstructionId(null);
+                        setNewInstTitle("");
+                        setNewInstRuleText("");
+                        setNewInstRole("all");
+                      }}
+                      className="text-xs text-gray-400 hover:text-white px-2 py-0.5 rounded bg-gray-800"
+                    >
+                      Cancel Edit
+                    </button>
+                  )}
+                  <span className="text-[10px] bg-emerald-950/60 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/20 font-mono">
+                    Attribution: [instruction]
+                  </span>
+                </div>
               </div>
 
               {instructionSuccessMsg && (
@@ -1713,14 +1741,34 @@ export default function KnowledgeBrainPage() {
                   />
                 </div>
 
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-2">
+                  {editingInstructionId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingInstructionId(null);
+                        setNewInstTitle("");
+                        setNewInstRuleText("");
+                        setNewInstRole("all");
+                      }}
+                      className="rounded-lg bg-gray-800 hover:bg-gray-700 px-3 py-2 text-xs font-semibold text-gray-300"
+                    >
+                      Cancel
+                    </button>
+                  )}
                   <button
                     type="submit"
                     disabled={savingInstruction || !newInstTitle.trim() || !newInstRuleText.trim()}
                     className="flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-xs font-semibold text-white transition disabled:opacity-50"
                   >
                     <Plus className="h-3.5 w-3.5" />
-                    <span>{savingInstruction ? "Saving..." : "Add Instruction Rule"}</span>
+                    <span>
+                      {savingInstruction
+                        ? "Saving..."
+                        : editingInstructionId
+                        ? "Update Instruction Rule"
+                        : "Add Instruction Rule"}
+                    </span>
                   </button>
                 </div>
               </form>
@@ -1755,6 +1803,19 @@ export default function KnowledgeBrainPage() {
                     </div>
 
                     <div className="flex items-center gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => {
+                          setEditingInstructionId(inst.id);
+                          setNewInstTitle(inst.title);
+                          setNewInstRuleText(inst.ruleText);
+                          setNewInstRole(inst.appliesToRoles[0] || "all");
+                          window.scrollTo({ top: 300, behavior: "smooth" });
+                        }}
+                        className="text-[11px] font-mono px-2.5 py-1 rounded transition border bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 flex items-center gap-1"
+                      >
+                        <Edit2 className="h-3 w-3 text-gray-400" />
+                        <span>Edit</span>
+                      </button>
                       <button
                         onClick={() => handleToggleInstruction(inst)}
                         className={`text-[11px] font-mono px-2.5 py-1 rounded transition border ${
@@ -1801,6 +1862,13 @@ export default function KnowledgeBrainPage() {
                 <span className="text-[10px] bg-purple-950/60 text-purple-300 px-2 py-0.5 rounded border border-purple-500/20 font-mono">
                   Attribution: [skill]
                 </span>
+                <Link
+                  href="/settings/roles-prompts?tab=skills"
+                  className="flex items-center gap-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 px-4 py-2 text-xs font-semibold text-white transition shadow-sm"
+                >
+                  <Wrench className="h-4 w-4" />
+                  <span>Open in Settings Skill Studio</span>
+                </Link>
                 <button
                   onClick={handleAutoDraftSkill}
                   disabled={draftingSkill}
