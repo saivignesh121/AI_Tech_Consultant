@@ -20,13 +20,13 @@ export async function POST(req: NextRequest) {
     const {
       sessionId,
       message,
-      roleSlug = "support-engineer",
       mode = "ask",
       modelId = "claude-sonnet-5.5",
       contexts = [],
       feedbackCorrection,
       imageUrl,
     } = body;
+    const roleSlug = body.roleSlug || body.role || "support-engineer";
 
     if (!message) {
       return NextResponse.json({ error: "Message content is required" }, { status: 400 });
@@ -226,6 +226,7 @@ export async function POST(req: NextRequest) {
       mode: "ask",
       sessionId: targetSessionId,
       messageId: savedConsultantMsg.id,
+      reply: response.reply,
       response,
     });
   } catch (error: unknown) {

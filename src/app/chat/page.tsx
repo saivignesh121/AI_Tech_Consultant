@@ -337,20 +337,30 @@ export default function ChatPage() {
 
           {/* ================= CENTER COLUMN: CHAT STREAM & INPUT (6 Cols) ================= */}
           <div className="lg:col-span-6 rounded-xl border border-gray-800 bg-[#0E1322] flex flex-col justify-between overflow-hidden shadow-sm">
-            {/* Chat Header */}
+            {/* Chat Header with Mid-Chat Role Switcher */}
             <div className="p-3.5 border-b border-gray-800 bg-gray-900/60 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-emerald-400"></div>
-                <span className="text-xs font-semibold text-white truncate">
-                  {currentRole.name} Persona
-                </span>
-                <span className="rounded bg-indigo-500/10 text-indigo-400 text-[10px] px-2 py-0.5 font-mono border border-indigo-500/20">
+                <div className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></div>
+                <label className="text-xs text-gray-300 font-medium hidden sm:inline">Active Persona:</label>
+                <select
+                  value={activeRoleSlug}
+                  onChange={(e) => setActiveRoleSlug(e.target.value)}
+                  className="rounded-lg border border-cyan-500/30 bg-[#071329] px-2.5 py-1 text-xs text-cyan-300 font-semibold focus:outline-none focus:border-cyan-400 transition cursor-pointer"
+                  title="Switch Agent Role Persona mid-chat"
+                >
+                  {roles.map((r) => (
+                    <option key={r.slug} value={r.slug} className="bg-[#071329] text-white">
+                      {r.name}
+                    </option>
+                  ))}
+                </select>
+                <span className="rounded bg-cyan-500/10 text-cyan-400 text-[10px] px-2 py-0.5 font-mono border border-cyan-500/20 hidden md:inline">
                   {currentRole.slug}
                 </span>
               </div>
 
               <span className="text-[10px] text-gray-400 flex items-center gap-1 font-mono">
-                <ShieldCheck className="h-3 w-3 text-indigo-400" />
+                <ShieldCheck className="h-3 w-3 text-cyan-400" />
                 Zero-Leakage
               </span>
             </div>

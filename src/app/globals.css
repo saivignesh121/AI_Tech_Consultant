@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
 @layer base {
+  html {
+    scrollbar-gutter: stable;
+  }
   body {
     background-color: #050B18;
     color: #F3F4F6;

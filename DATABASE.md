@@ -32,10 +32,22 @@ To ensure strict zero-leakage multi-tenant security:
   - `id` (UUID PK)
   - `business_id` (UUID FK -> `businesses(id) ON DELETE CASCADE`)
   - `email` (VARCHAR(255) NOT NULL)
+  - `name` (VARCHAR(255))
   - `password_hash` (VARCHAR(255))
-  - `role` (VARCHAR(50) NOT NULL DEFAULT 'member') — `owner`, `admin`, `member`
+  - `role` (VARCHAR(50) NOT NULL DEFAULT 'team') — **The 3 User Roles:**
+    1. **`owner`**: Founder / administrator. Full write access to Settings (connection keys, prompt versions, agent roles, models), business deletion, readiness threshold adjustment, and weekly executive digest email recipient.
+    2. **`team`** (support specialist): Ask & Teach Chat access, persona selection, mid-chat persona switching, thumbs up/down feedback, and teaching notes.
+    3. **`expert`** (approver): Human escalation task recipient, approves/rejects proposed skill updates, and reviews/approves or reverts autonomous Self-Improve git PRs.
   - `created_at` (TIMESTAMPTZ DEFAULT NOW())
   - *Index:* `UNIQUE (business_id, email)`
+- `email_verifications` (Real Email OTP System):
+  - `id` (UUID PK)
+  - `email` (VARCHAR(255) NOT NULL)
+  - `otp_code` (VARCHAR(10) NOT NULL) — 6-digit numeric token
+  - `purpose` (VARCHAR(50) DEFAULT 'registration') — `registration`, `login`, `security`
+  - `expires_at` (TIMESTAMPTZ NOT NULL) — 10-minute expiry window
+  - `consumed` (BOOLEAN DEFAULT FALSE)
+  - `created_at` (TIMESTAMPTZ DEFAULT NOW())
 - `api_connections`:
   - `id` (UUID PK)
   - `business_id` (UUID FK -> `businesses(id) ON DELETE CASCADE`)
@@ -65,17 +77,20 @@ To ensure strict zero-leakage multi-tenant security:
   - `created_by` (UUID FK -> `users(id) ON DELETE SET NULL`)
   - `created_at` (TIMESTAMPTZ DEFAULT NOW())
   - *Index:* `UNIQUE (prompt_id, version_number)`
-- `agent_roles`:
+- `agent_roles` (Task 1.4 & Role Editor):
   - `id` (UUID PK)
   - `business_id` (UUID FK -> `businesses(id) ON DELETE CASCADE`)
-  - `name` (VARCHAR(100) NOT NULL)
+  - `name` (VARCHAR(100) NOT NULL) — e.g. `Support Engineer`, `Support Executive`, `AI Consultant`
   - `slug` (VARCHAR(100) NOT NULL) — `support-engineer`, `support-executive`, `ai-consultant`
-  - `goal` (TEXT NOT NULL)
-  - `tone` (VARCHAR(100) NOT NULL)
-  - `system_prompt` (TEXT NOT NULL)
+  - `goal` (TEXT NOT NULL) — primary objective
+  - `tone` (VARCHAR(100) NOT NULL) — objective, friendly, consultative
+  - `system_prompt` (TEXT NOT NULL) — base system instructions
   - `model_id` (VARCHAR(100) NOT NULL DEFAULT 'claude-sonnet-5.5')
-  - `allowed_skills` (JSONB DEFAULT '[]'::jsonb)
-  - `is_builtin` (BOOLEAN DEFAULT FALSE)
+  - `allowed_skills` (JSONB DEFAULT '[]'::jsonb) — e.g. `answer_from_brain`, `write_reply`, `create_expert_task`, `share_price`
+    > **Note on Price Sharing Rule:** Only the `AI Consultant` role is permitted to execute `share_price` and quote commercial tier rates. If a customer asks for pricing while talking to Support Engineer or Support Executive, the persona instructs the customer to switch to the AI Consultant.
+  - `knowledge_sources` (JSONB DEFAULT '[]'::jsonb) — e.g. `technical_docs`, `sitemaps`, `troubleshooting_sop`, `pricing_matrix`
+  - `handover_rule` (TEXT NOT NULL) — explicit escalation policy (e.g. angry sentiment > 0.8, legal threats, refund disputes)
+  - `is_builtin` (BOOLEAN DEFAULT FALSE) — protects core roles from deletion while allowing businesses to create unlimited custom roles with zero code changes
   - `created_at` (TIMESTAMPTZ DEFAULT NOW())
   - *Index:* `UNIQUE (business_id, slug)`
 

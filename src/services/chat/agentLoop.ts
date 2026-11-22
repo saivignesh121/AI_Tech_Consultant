@@ -151,14 +151,24 @@ export async function executeConsultantTurn(params: {
     };
   }
 
-  // 5. Synthesize grounded answer adopting role tone
+  // 5. Synthesize grounded answer adopting role tone & skill authorization
   let answerContent = "";
-  if (role.slug === "support-engineer") {
+  const isPricingInquiry = /price|pricing|cost|quote|quotation|tier|subscription|rate|how much/i.test(params.userMessage);
+
+  if (isPricingInquiry) {
+    // Task rule: Only the AI Consultant is described as quote and next-step focused, so it is the one that should share prices
+    const canSharePrice = role.slug === "ai-consultant" || (Array.isArray(role.allowedSkills) && role.allowedSkills.includes("share_price"));
+    if (canSharePrice) {
+      answerContent = `Enterprise Pricing & Solution Quotation for: "${parsed.extractedCoreQuery}"\n\n• Standard Workspace Tier: $1,200/month (Includes pgvector hybrid search, 14-model intelligent router, dynamic citations, and 98.8% accuracy pass bar [1]).\n• Enterprise Autonomous Cluster: $3,500/month (Includes automated Opus 5.5 self-improve loops, dedicated pg-boss queues, and human escalation triage).\n\nBased on your scale, we recommend starting with the Standard Workspace Tier [1]. Shall we proceed with generating a custom quote or scheduling an architectural review?`;
+    } else {
+      answerContent = `I am currently operating in the ${role.name} persona. Commercial tier pricing, tailored implementation quotes, and contract options are handled exclusively by our AI Consultant persona.\n\nPlease switch your active role to "AI Consultant" using the persona selector above to discuss pricing and next steps.`;
+    }
+  } else if (role.slug === "support-engineer") {
     answerContent = `Diagnostic Analysis for: "${parsed.extractedCoreQuery}"\n\n1. Review configuration parameters in your administration panel [1].\n2. Execute configuration updates according to specifications.\n3. Validate status code response.\n\nAll settings verified per documentation.`;
   } else if (role.slug === "support-executive") {
     answerContent = `Hello! I'd be happy to help you with that. Here are the simple steps to follow:\n\n1. Open your settings menu [1].\n2. Follow the prompt instructions on your screen.\n\nPlease let me know if you need any additional assistance!`;
   } else {
-    // AI Consultant
+    // AI Consultant (Non-pricing general inquiries)
     answerContent = `Regarding your inquiry on "${parsed.extractedCoreQuery}":\n\nOur platform architecture natively supports this capability [1]. Depending on your business volume, we recommend aligning this with our standard implementation plan to maximize operational efficiency. Would you like to schedule a deep-dive call with an architect?`;
   }
 

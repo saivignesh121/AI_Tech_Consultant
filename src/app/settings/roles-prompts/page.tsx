@@ -53,6 +53,8 @@ interface RoleItem {
   systemPrompt: string;
   modelId: string;
   allowedSkills: string[];
+  knowledgeSources?: string[];
+  handoverRule?: string;
   isBuiltin: boolean;
 }
 
@@ -111,6 +113,8 @@ export default function RolesAndPromptsPage() {
     systemPrompt: "",
     modelId: "claude-sonnet-5.5",
     allowedSkills: [] as string[],
+    knowledgeSources: ["technical_docs", "sitemaps"] as string[],
+    handoverRule: "Escalate to human expert on angry customer sentiment > 0.8, legal threats, or refund disputes.",
     isBuiltin: false,
   });
   const [savingRole, setSavingRole] = useState(false);
@@ -180,6 +184,8 @@ export default function RolesAndPromptsPage() {
       systemPrompt: role.systemPrompt,
       modelId: role.modelId,
       allowedSkills: role.allowedSkills || [],
+      knowledgeSources: role.knowledgeSources || ["technical_docs", "sitemaps"],
+      handoverRule: role.handoverRule || "Escalate to human expert on angry customer sentiment > 0.8, legal threats, or refund disputes.",
       isBuiltin: role.isBuiltin,
     });
   };
@@ -721,7 +727,9 @@ export default function RolesAndPromptsPage() {
                         tone: "Professional, structured, precise",
                         systemPrompt: "You are a specialized consultant for...",
                         modelId: "claude-sonnet-5.5",
-                        allowedSkills: ["api-integration"],
+                        allowedSkills: ["answer_from_brain", "write_reply"],
+                        knowledgeSources: ["technical_docs", "sitemaps"],
+                        handoverRule: "Escalate to human expert on angry customer sentiment > 0.8, legal threats, or refund disputes.",
                         isBuiltin: false,
                       });
                     }}
@@ -795,10 +803,114 @@ export default function RolesAndPromptsPage() {
                   <div>
                     <label className="block text-xs font-medium text-gray-300 mb-1">System Prompt Persona</label>
                     <textarea
-                      rows={6}
+                      rows={5}
                       value={roleForm.systemPrompt}
                       onChange={(e) => setRoleForm({ ...roleForm, systemPrompt: e.target.value })}
                       className="w-full rounded-lg border border-gray-700 bg-gray-950 p-3 text-xs font-mono text-gray-200 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  {/* Authorized Role Skills Matrix (Task 1.4) */}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-300 mb-1.5">
+                      Authorized Role Skills
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {[
+                        { id: "answer_from_brain", label: "Answer from Knowledge Brain", desc: "Attributed answers with citations" },
+                        { id: "write_reply", label: "Write Reply Human Can Send", desc: "Draft ready-to-send polite customer replies" },
+                        { id: "create_expert_task", label: "Create Expert Task", desc: "File task for human specialist review" },
+                        { id: "share_price", label: "Share a Price (Quote & Next Steps)", desc: "Commercial quote & tier rates (AI Consultant only)" },
+                      ].map((sk) => {
+                        const isChecked = roleForm.allowedSkills?.includes(sk.id);
+                        const isPrice = sk.id === "share_price";
+                        const isConsultant = roleForm.slug === "ai-consultant";
+                        const disabled = isPrice && !isConsultant;
+
+                        return (
+                          <div
+                            key={sk.id}
+                            onClick={() => {
+                              if (disabled) return;
+                              const current = roleForm.allowedSkills || [];
+                              const updated = current.includes(sk.id)
+                                ? current.filter((s) => s !== sk.id)
+                                : [...current, sk.id];
+                              setRoleForm({ ...roleForm, allowedSkills: updated });
+                            }}
+                            className={`p-2.5 rounded-lg border text-xs cursor-pointer transition flex items-start gap-2.5 ${
+                              isChecked
+                                ? "border-cyan-500/50 bg-cyan-950/20 text-cyan-200"
+                                : disabled
+                                ? "border-gray-800 bg-gray-900/40 text-gray-500 cursor-not-allowed opacity-60"
+                                : "border-gray-800 bg-gray-950 text-gray-400 hover:border-gray-700"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              disabled={disabled}
+                              onChange={() => {}}
+                              className="mt-0.5 accent-cyan-400"
+                            />
+                            <div>
+                              <div className="font-semibold text-white flex items-center gap-1.5">
+                                <span>{sk.label}</span>
+                                {isPrice && (
+                                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                    AI Consultant Only
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[10px] text-gray-400">{sk.desc}</div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Grounding Knowledge Sources */}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-300 mb-1.5">
+                      Grounding Knowledge Sources
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {["technical_docs", "sitemaps", "github_repo", "troubleshooting_sop", "pricing_matrix"].map((src) => {
+                        const isSelected = roleForm.knowledgeSources?.includes(src);
+                        return (
+                          <button
+                            key={src}
+                            type="button"
+                            onClick={() => {
+                              const curr = roleForm.knowledgeSources || [];
+                              const updated = curr.includes(src) ? curr.filter((s) => s !== src) : [...curr, src];
+                              setRoleForm({ ...roleForm, knowledgeSources: updated });
+                            }}
+                            className={`px-2.5 py-1 rounded-md text-[11px] font-mono border transition ${
+                              isSelected
+                                ? "border-cyan-400 bg-cyan-500/20 text-cyan-300"
+                                : "border-gray-800 bg-gray-950 text-gray-400 hover:border-gray-700"
+                            }`}
+                          >
+                            {src}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Handover-to-Human Rule */}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-300 mb-1">
+                      Handover-to-Human Rule
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={roleForm.handoverRule || ""}
+                      onChange={(e) => setRoleForm({ ...roleForm, handoverRule: e.target.value })}
+                      placeholder="e.g. Escalate to human expert on angry customer sentiment > 0.8, legal threats, or refund disputes."
+                      className="w-full rounded-lg border border-gray-700 bg-gray-950 p-2.5 text-xs text-white focus:outline-none focus:border-cyan-400"
                     />
                   </div>
 

@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, integer, timestamp, uniqueIndex, text } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, integer, timestamp, uniqueIndex, text, boolean } from "drizzle-orm/pg-core";
 
 export const businesses = pgTable("businesses", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -19,7 +19,7 @@ export const users = pgTable(
     email: varchar("email", { length: 255 }).notNull(),
     name: varchar("name", { length: 255 }),
     passwordHash: varchar("password_hash", { length: 255 }),
-    role: varchar("role", { length: 50 }).default("member").notNull(), // 'owner' | 'admin' | 'member'
+    role: varchar("role", { length: 50 }).default("team").notNull(), // 'owner' | 'team' | 'expert' (compat: 'admin' | 'member')
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
@@ -37,7 +37,7 @@ export const memberships = pgTable(
     businessId: uuid("business_id")
       .references(() => businesses.id, { onDelete: "cascade" })
       .notNull(),
-    role: varchar("role", { length: 50 }).default("member").notNull(), // 'owner' | 'admin' | 'member'
+    role: varchar("role", { length: 50 }).default("team").notNull(), // 'owner' | 'team' | 'expert' (compat: 'admin' | 'member')
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
@@ -91,4 +91,17 @@ export const apiConnections = pgTable(
   (table) => [
     uniqueIndex("uq_api_conn_business_provider").on(table.businessId, table.provider),
   ]
+);
+
+export const emailVerifications = pgTable(
+  "email_verifications",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    email: varchar("email", { length: 255 }).notNull(),
+    otpCode: varchar("otp_code", { length: 10 }).notNull(),
+    purpose: varchar("purpose", { length: 50 }).default("registration").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    consumed: boolean("consumed").default(false).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  }
 );

@@ -53,6 +53,8 @@ export const agentRoles = pgTable(
     systemPrompt: text("system_prompt").notNull(),
     modelId: varchar("model_id", { length: 100 }).default("claude-sonnet-5.5").notNull(),
     allowedSkills: jsonb("allowed_skills").$type<string[]>().default([]).notNull(),
+    knowledgeSources: jsonb("knowledge_sources").$type<string[]>().default([]).notNull(),
+    handoverRule: text("handover_rule").default("Escalate to human expert on angry customer sentiment > 0.8, legal threats, or refund disputes.").notNull(),
     isBuiltin: boolean("is_builtin").default(false).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },

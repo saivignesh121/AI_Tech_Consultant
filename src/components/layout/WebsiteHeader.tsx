@@ -9,10 +9,18 @@ import {
   Menu,
   X,
   Building2,
-  User,
   LogOut,
-  LayoutDashboard,
 } from "lucide-react";
+
+interface UserSessionType {
+  userEmail: string;
+  businessName: string;
+  businessSlug: string;
+}
+
+// Module-level cache to eliminate layout shift / fluctuation on page navigation
+let cachedUserSession: UserSessionType | null = null;
+let isSessionFetched = false;
 
 export default function WebsiteHeader({
   onConnectClick,
@@ -21,25 +29,35 @@ export default function WebsiteHeader({
 }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [userSession, setUserSession] = useState<{
-    userEmail: string;
-    businessName: string;
-    businessSlug: string;
-  } | null>(null);
+  const [userSession, setUserSession] = useState<UserSessionType | null>(cachedUserSession);
+  const [isLoaded, setIsLoaded] = useState(isSessionFetched);
 
   useEffect(() => {
-    fetch("/api/auth/context")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.currentTenant && d.currentTenant.userEmail) {
-          setUserSession({
-            userEmail: d.currentTenant.userEmail,
-            businessName: d.currentTenant.businessName,
-            businessSlug: d.currentTenant.businessSlug,
-          });
-        }
-      })
-      .catch(console.error);
+    if (!isSessionFetched) {
+      fetch("/api/auth/context")
+        .then((r) => r.json())
+        .then((d) => {
+          isSessionFetched = true;
+          if (d.currentTenant && d.currentTenant.userEmail) {
+            const sess: UserSessionType = {
+              userEmail: d.currentTenant.userEmail,
+              businessName: d.currentTenant.businessName,
+              businessSlug: d.currentTenant.businessSlug,
+            };
+            cachedUserSession = sess;
+            setUserSession(sess);
+          } else {
+            cachedUserSession = null;
+            setUserSession(null);
+          }
+          setIsLoaded(true);
+        })
+        .catch((e) => {
+          console.error(e);
+          isSessionFetched = true;
+          setIsLoaded(true);
+        });
+    }
   }, []);
 
   const handleLogout = async () => {
@@ -48,6 +66,8 @@ export default function WebsiteHeader({
     } catch (e) {
       console.error(e);
     } finally {
+      cachedUserSession = null;
+      isSessionFetched = false;
       window.location.href = "/signin";
     }
   };
@@ -63,29 +83,27 @@ export default function WebsiteHeader({
     <header className="sticky top-0 z-40 w-full border-b border-cyan-950/40 bg-[#050B18]/90 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand Logo matching user screenshot */}
-        <Link href="/" className="flex items-center gap-3 group">
+        <Link href="/" className="flex items-center gap-3 group shrink-0">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-black border border-gray-700 text-white font-serif text-xl font-bold shadow-md shadow-cyan-500/20 group-hover:border-cyan-400 transition">
             α
           </div>
-          <div>
-            <span className="text-base font-bold tracking-tight text-white group-hover:text-cyan-300 transition">
-              AI Technologies &amp; Consulting
-            </span>
-          </div>
+          <span className="text-base font-bold tracking-tight text-white group-hover:text-cyan-300 transition whitespace-nowrap">
+            AI Technologies &amp; Consulting
+          </span>
         </Link>
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-7">
+        {/* Desktop Navigation Links — stable font metrics to eliminate layout jitter */}
+        <nav className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-medium transition ${
+                className={`text-sm font-medium transition-colors duration-150 py-1 relative ${
                   isActive
-                    ? "text-cyan-400 font-semibold"
-                    : "text-gray-300 hover:text-white hover:text-cyan-300"
+                    ? "text-cyan-400 after:absolute after:bottom-[-2px] after:left-0 after:right-0 after:h-[2px] after:bg-cyan-400 after:shadow-[0_0_8px_#00F0FF]"
+                    : "text-gray-300 hover:text-cyan-300"
                 }`}
               >
                 {link.label}
@@ -94,13 +112,13 @@ export default function WebsiteHeader({
           })}
         </nav>
 
-        {/* Right Action Buttons */}
-        <div className="hidden sm:flex items-center gap-3">
+        {/* Right Action Buttons with Stable Layout Container */}
+        <div className="hidden sm:flex items-center gap-3 shrink-0 min-h-[36px]">
           {userSession ? (
             <>
               <Link
                 href="/chat"
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-xs font-semibold transition"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-xs font-semibold transition shadow-sm"
               >
                 <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
                 <span>AI Consultant</span>
@@ -108,7 +126,7 @@ export default function WebsiteHeader({
 
               <Link
                 href="/settings"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-900 border border-gray-800 text-xs text-gray-200 hover:text-white transition"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#071329] border border-cyan-950/60 text-xs text-gray-200 hover:border-cyan-500/40 transition"
               >
                 <Building2 className="w-3.5 h-3.5 text-cyan-400" />
                 <span className="max-w-[120px] truncate">{userSession.businessName}</span>
@@ -126,7 +144,7 @@ export default function WebsiteHeader({
             <>
               <Link
                 href="/signin"
-                className="px-3.5 py-1.5 text-xs font-medium text-gray-300 hover:text-white transition"
+                className="px-3.5 py-1.5 text-xs font-medium text-gray-300 hover:text-cyan-300 transition"
               >
                 Sign In
               </Link>
@@ -167,7 +185,7 @@ export default function WebsiteHeader({
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-b border-gray-800 bg-[#071126] px-4 pt-3 pb-5 space-y-3 animate-in slide-in-from-top duration-200">
+        <div className="md:hidden border-b border-cyan-950/40 bg-[#071126] px-4 pt-3 pb-5 space-y-3 animate-in slide-in-from-top duration-200">
           <div className="flex flex-col space-y-2">
             {navLinks.map((link) => (
               <Link

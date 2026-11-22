@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/auth";
 import { db } from "@/db";
 import { agentRoles } from "@/db/schema/prompts";
-import { BUILTIN_ROLES } from "@/services/chat/roles";
+import { BUILTIN_ROLES, canRoleSharePrice } from "@/services/chat/roles";
 import { eq, and } from "drizzle-orm";
 
 export async function GET() {
@@ -26,6 +26,8 @@ export async function GET() {
           systemPrompt: br.systemPrompt,
           modelId: br.modelId,
           allowedSkills: br.allowedSkills,
+          knowledgeSources: br.knowledgeSources,
+          handoverRule: br.handoverRule,
           isBuiltin: br.isBuiltin,
         });
       }
@@ -49,7 +51,7 @@ export async function POST(req: NextRequest) {
   try {
     const tenant = await getTenantContext();
     const body = await req.json();
-    const { id, name, slug, goal, tone, systemPrompt, modelId, allowedSkills } = body;
+    const { id, name, slug, goal, tone, systemPrompt, modelId, allowedSkills, knowledgeSources, handoverRule } = body;
 
     if (!name || !goal || !tone || !systemPrompt) {
       return NextResponse.json(
@@ -59,6 +61,15 @@ export async function POST(req: NextRequest) {
     }
 
     const roleSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+    // Enforce Rule: Only AI Consultant can share prices & quotes
+    let sanitizedSkills: string[] = Array.isArray(allowedSkills) ? allowedSkills : [];
+    if (sanitizedSkills.includes("share_price") && !canRoleSharePrice(roleSlug)) {
+      sanitizedSkills = sanitizedSkills.filter((s) => s !== "share_price");
+    }
+
+    const sanitizedSources: string[] = Array.isArray(knowledgeSources) ? knowledgeSources : ["sitemaps", "technical_docs"];
+    const sanitizedRule: string = handoverRule || "Escalate to human expert on angry customer sentiment > 0.8, legal threats, or refund disputes.";
 
     const isUuid = typeof id === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
@@ -82,7 +93,9 @@ export async function POST(req: NextRequest) {
           tone,
           systemPrompt,
           modelId: modelId || "claude-sonnet-5.5",
-          allowedSkills: allowedSkills || [],
+          allowedSkills: sanitizedSkills,
+          knowledgeSources: sanitizedSources,
+          handoverRule: sanitizedRule,
         })
         .where(eq(agentRoles.id, id));
 
@@ -99,7 +112,9 @@ export async function POST(req: NextRequest) {
           tone,
           systemPrompt,
           modelId: modelId || "claude-sonnet-5.5",
-          allowedSkills: allowedSkills || [],
+          allowedSkills: sanitizedSkills,
+          knowledgeSources: sanitizedSources,
+          handoverRule: sanitizedRule,
           isBuiltin: false,
         })
         .returning();
