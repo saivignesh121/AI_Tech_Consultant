@@ -334,9 +334,12 @@ describe("Feature 3: The Ask and Teach Chat — Task 3.2: Good answers, in the r
           description: "DNS resolution steps",
           triggerConditions: "dns, cname, domain",
           stepsMarkdown: "1. dig CNAME\n2. check proxy",
-          examplesJson: [],
-          currentVersion: 1,
+          examples: [],
+          currentVersionNumber: 1,
+          currentVersionId: null,
+          versions: [],
           createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         },
       });
 

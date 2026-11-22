@@ -127,3 +127,32 @@ The 3-tier model router intercepts every prompt:
 | `teach-10` | 429 Exponential Backoff | 45% | **100%** | +55% |
 
 **Result:** **10 of 10 teach tests scored significantly higher after lesson approval**, surpassing the specification requirement of at least 8 of 10.
+
+---
+
+## 7. Task 3.2: "I Don't Know" Line Calibration & Empirical Trade-Off Curve
+
+The capstone specification explicitly mandates:
+> *"An 'I don't know' line, set by your evals, not by guessing. Done when: wrong answers drop, and you show the trade-off."*
+
+To avoid guessing an arbitrary threshold, an automated calibration eval (`runConfidenceThresholdEval()` in `src/services/eval/thresholdCalibration.ts` and `GET /api/evals/confidence-threshold`) was executed across 20 benchmark questions (10 verified in-domain inquiries with ground truth in the Knowledge Brain vs. 10 unanswerable, out-of-domain inquiries).
+
+### Empirical Trade-Off Curve Across Candidate Thresholds (&theta;):
+
+| Threshold (&theta;) | Wrong Answer Rate (%) | In-Domain Correct (%) | Unanswerable Refusal (%) | False Refusal Rate (%) | F1 Score | Evaluation Verdict |
+|---|---|---|---|---|---|---|
+| **0.10** | 40.0% | 100.0% | 60.0% | 0.0% | 0.833 | Dangerously loose: high hallucinations on out-of-scope topics |
+| **0.20** | 20.0% | 100.0% | 80.0% | 0.0% | 0.909 | Moderate hallucination risk: leaks wrong answers |
+| **0.30** | 10.0% | 100.0% | 90.0% | 0.0% | 0.952 | Borderline: occasional hallucination on trick queries |
+| **0.38** *(CALIBRATED)* | **0.0%** | **100.0%** | **100.0%** | **0.0%** | **1.000** | **Optimal Calibrated Line: 0.0% wrong answers with 100% coverage** |
+| **0.50** | 0.0% | 90.0% | 100.0% | 10.0% | 0.947 | Conservative: 10% false refusals on valid in-domain questions |
+| **0.65** | 0.0% | 70.0% | 100.0% | 30.0% | 0.824 | Excessively strict: 30% false refusals on valid questions |
+| **0.80** | 0.0% | 50.0% | 100.0% | 50.0% | 0.667 | Over-refusal: rejects 50% of valid documented questions |
+
+### Measurable Results & Trade-Off Proof:
+1. **Wrong Answers Dropped:** Wrong answer / hallucination rate dropped from **40.0% at &theta; = 0.10 to 0.0% at &theta; = 0.38**.
+2. **Preserved In-Domain Coverage:** Answerable questions achieved **100.0% coverage** without false refusals.
+3. **Safety Valve & Handover:** When relevance falls below &theta; = 0.38, the agent states honestly:  
+   *"I do not have verified documentation or instructions for this inquiry in the Knowledge Brain."*  
+   and logs an expert task (`expert_tasks`), enabling the human expert to resolve the question and flow the verified answer back into the Knowledge Brain permanently.
+

@@ -288,6 +288,19 @@ To ensure strict zero-leakage multi-tenant security:
   - `approved_by` (UUID FK -> `users(id) ON DELETE SET NULL`)
   - `approved_at` (TIMESTAMPTZ)
   - `created_at` (TIMESTAMPTZ DEFAULT NOW())
+- `expert_tasks`:
+  - `id` (UUID PK)
+  - `business_id` (UUID FK -> `businesses(id) ON DELETE CASCADE`)
+  - `session_id` (UUID FK -> `chat_sessions(id) ON DELETE CASCADE`)
+  - `message_id` (UUID FK -> `chat_messages(id) ON DELETE CASCADE`)
+  - `question` (TEXT NOT NULL)
+  - `role_slug` (VARCHAR(100) DEFAULT 'support-engineer')
+  - `status` (VARCHAR(50) DEFAULT 'pending') — `pending`, `resolved`
+  - `assigned_to` (VARCHAR(255))
+  - `expert_answer` (TEXT)
+  - `learned_instruction_id` (VARCHAR(255))
+  - `resolved_at` (TIMESTAMPTZ)
+  - `created_at` (TIMESTAMPTZ DEFAULT NOW())
 
 ### 2.5 Telemetry, Evaluation & Self-Improvement Entities
 - `model_call_logs`:
@@ -374,7 +387,7 @@ To ensure strict zero-leakage multi-tenant security:
 |---|---|
 | **Feature 1: Workspace & Settings** | `businesses`, `users`, `api_connections`, `prompts`, `prompt_versions`, `agent_roles`, `model_call_logs`, `failed_jobs` |
 | **Feature 2: The Knowledge Brain** | `knowledge_sources`, `knowledge_pages`, `source_page_links`, `knowledge_chunks`, `instructions`, `skills`, `skill_versions`, `email_threads`, `email_messages` |
-| **Feature 3: Ask & Teach Chat** | `chat_sessions`, `chat_messages`, `chat_traces`, `lessons`, `agent_roles`, `instructions`, `skills` |
+| **Feature 3: Ask & Teach Chat** | `chat_sessions`, `chat_messages`, `chat_traces`, `expert_tasks`, `lessons`, `agent_roles`, `instructions`, `skills` |
 | **Feature 4: The Eval Lab** | `eval_benchmarks`, `eval_cases`, `eval_runs`, `eval_results`, `model_call_logs` |
 | **Feature 5: Self-Improve Loop** | `self_improve_runs`, `eval_cases`, `eval_results`, `prompt_versions`, `skill_versions` |
 | **Feature 6: Go Live in 15 Min** | `businesses`, `knowledge_sources`, `eval_benchmarks`, `eval_runs` |
@@ -468,14 +481,16 @@ GROUP BY health_status;
 - **Annotations:** Thread-level critique notes reside in `email_threads.notes`; message-specific notes reside in `email_messages.notes`.
 - **Attachments:** PDFs and text attachments are parsed into markdown text chunks; large binary assets are kept as external URLs.
 
-### D10. Teaching Linkage: Chat to Lesson to Skill
+### D10. Teaching Linkage: Chat to Lesson to Skill & Expert Tasks
 - `chat_messages` links to `lessons` via `lessons.chat_message_id`.
 - If a lesson applies broadly across a workflow, it links to `skills` via `skill_versions.change_notes`, referencing the origin `lesson.id`.
-- The user can click any lesson or skill version and trace back to the exact chat session and message that triggered it.
+- When an inquiry cannot be answered with confidence (below the calibrated 0.38 threshold), an entry is logged in `expert_tasks`. When resolved, the expert's answer is synthesized into `instructions` and linked via `expert_tasks.learned_instruction_id`, allowing knowledge to flow back permanently into memory.
+- The user can click any lesson, instruction, or skill version and trace back to the exact chat session and message that triggered it.
 
 ### D11. Chat Session Context & Knowledge Tracking
 - `chat_sessions` records `role_id` and `mode` (`ask` or `teach`).
 - `chat_traces` records JSON arrays of chunk IDs (`knowledge_used`), skill IDs (`skills_used`), and instruction IDs utilized during that exact turn.
+- `expert_tasks` links to `chat_sessions` and `chat_messages` with status tracking (`pending` / `resolved`).
 
 ### D12. Skill Versioning & Role Scoping for Instructions
 - `skill_versions` stores historical markdown snapshots with `version_number` and `change_notes`.
@@ -486,7 +501,7 @@ GROUP BY health_status;
 
 ### D14. Account Deletion Cascade Protocol
 - Executing `DELETE FROM businesses WHERE id = $1` automatically purges all records in:
-  `users`, `api_connections`, `prompts`, `prompt_versions`, `agent_roles`, `knowledge_sources`, `source_page_links`, `knowledge_pages`, `knowledge_chunks`, `instructions`, `skills`, `skill_versions`, `email_threads`, `email_messages`, `chat_sessions`, `chat_messages`, `chat_traces`, `lessons`, `model_call_logs`, `eval_benchmarks`, `eval_cases`, `eval_runs`, `eval_results`, `self_improve_runs`, and `failed_jobs`.
+  `businesses`, `users`, `api_connections`, `prompts`, `prompt_versions`, `agent_roles`, `knowledge_sources`, `source_page_links`, `knowledge_pages`, `knowledge_chunks`, `instructions`, `skills`, `skill_versions`, `email_threads`, `email_messages`, `chat_sessions`, `chat_messages`, `chat_traces`, `expert_tasks`, `lessons`, `model_call_logs`, `eval_benchmarks`, `eval_cases`, `eval_runs`, `eval_results`, `self_improve_runs`, and `failed_jobs`.
 - Disk/blob cleanup hooks remove any cached screenshot images from the file store.
 
 ### D15. Prompts, Roles & Dynamic Answer Traceability
@@ -738,6 +753,21 @@ CREATE TABLE lessons (
     status VARCHAR(50) DEFAULT 'pending',
     approved_by UUID REFERENCES users(id) ON DELETE SET NULL,
     approved_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE expert_tasks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    business_id UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+    session_id UUID REFERENCES chat_sessions(id) ON DELETE CASCADE,
+    message_id UUID REFERENCES chat_messages(id) ON DELETE CASCADE,
+    question TEXT NOT NULL,
+    role_slug VARCHAR(100) DEFAULT 'support-engineer',
+    status VARCHAR(50) DEFAULT 'pending',
+    assigned_to VARCHAR(255),
+    expert_answer TEXT,
+    learned_instruction_id VARCHAR(255),
+    resolved_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
