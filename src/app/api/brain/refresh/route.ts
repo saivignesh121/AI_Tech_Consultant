@@ -12,6 +12,7 @@ import {
 } from "@/services/brain/freshnessChecker";
 import { db } from "@/db";
 import { knowledgePages } from "@/db/schema/knowledge";
+import { scheduleFreshnessRecheckJob } from "@/jobs/queue";
 import { eq } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
@@ -50,6 +51,10 @@ export async function POST(req: NextRequest) {
         actionRule: policy?.actionRule,
         recheckSchedule: policy?.recheckSchedule || schedule,
       });
+
+      if (updated.recheckSchedule) {
+        await scheduleFreshnessRecheckJob(tenant.businessId, updated.recheckSchedule as any);
+      }
 
       return NextResponse.json({
         success: true,

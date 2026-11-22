@@ -98,3 +98,40 @@ export async function registerWorker<T = unknown>(
     }
   });
 }
+
+/**
+ * Task 2.4: Converts user recheck schedule into a cron expression.
+ */
+export function getCronForSchedule(schedule: "daily" | "weekly" | "15_days" | "30_days"): string {
+  switch (schedule) {
+    case "weekly":
+      return "0 0 * * 0"; // Every Sunday at midnight
+    case "15_days":
+      return "0 0 1,15 * *"; // 1st and 15th of every month
+    case "30_days":
+      return "0 0 1 * *"; // 1st of every month
+    case "daily":
+    default:
+      return "0 0 * * *"; // Every day at midnight
+  }
+}
+
+/**
+ * Task 2.4: Schedules a recurring background freshness sync job with pg-boss.
+ */
+export async function scheduleFreshnessRecheckJob(
+  businessId: string,
+  schedule: "daily" | "weekly" | "15_days" | "30_days"
+): Promise<void> {
+  if (process.env.VITEST || process.env.NODE_ENV === "test") {
+    return; // Skip pg-boss scheduling in unit tests
+  }
+  try {
+    const boss = getBoss();
+    const cron = getCronForSchedule(schedule);
+    const queueName = `freshness-sync-${businessId}`;
+    await boss.schedule(queueName, cron, { businessId, schedule });
+  } catch (err) {
+    console.error(`Failed to register pg-boss schedule for ${businessId}:`, err);
+  }
+}
