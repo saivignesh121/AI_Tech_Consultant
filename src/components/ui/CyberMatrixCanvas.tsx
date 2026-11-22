@@ -22,6 +22,8 @@ export default function CyberMatrixCanvas({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
+    // Respect prefers-reduced-motion
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -60,12 +62,12 @@ export default function CyberMatrixCanvas({
       parent.addEventListener("mouseleave", handleMouseLeave);
     }
 
-    // Color palette: Cyan, Electric Blue, Violet
+    // Color palette for Aurora Light: #93C5FD at 40-60% opacity and accents in cyan/indigo
     const colors = [
-      "rgba(0, 240, 255, ",
-      "rgba(14, 165, 233, ",
-      "rgba(99, 102, 241, ",
-      "rgba(168, 85, 247, ",
+      "rgba(147, 197, 253, ",
+      "rgba(37, 99, 235, ",
+      "rgba(6, 182, 212, ",
+      "rgba(79, 70, 229, ",
     ];
 
     // Initialize particles
@@ -74,32 +76,32 @@ export default function CyberMatrixCanvas({
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.75,
-        vy: (Math.random() - 0.5) * 0.75,
+        vx: prefersReducedMotion ? 0 : (Math.random() - 0.5) * 0.6,
+        vy: prefersReducedMotion ? 0 : (Math.random() - 0.5) * 0.6,
         radius: Math.random() * 2 + 1,
-        alpha: Math.random() * 0.6 + 0.3,
+        alpha: Math.random() * 0.2 + 0.4, // 40-60% opacity
         color: colors[Math.floor(Math.random() * colors.length)],
       });
     }
 
-    // Binary / Tech code fragments floating in background
+    // Floating DATA / JSON / AI labels in #93C5FD / #1E3A8A
     const codeTokens = ["01", "10", "AI.run", "sys.conn", "DATA", "SSL", "RRF", "HTTP/2", "TOKEN", "JSON"];
     const floatingTokens = Array.from({ length: 8 }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      vy: -0.3 - Math.random() * 0.3,
+      vy: prefersReducedMotion ? 0 : -0.2 - Math.random() * 0.25,
       text: codeTokens[Math.floor(Math.random() * codeTokens.length)],
-      alpha: 0.15 + Math.random() * 0.2,
+      alpha: 0.35 + Math.random() * 0.25,
     }));
 
     // Animation loop
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // 1. Draw floating code tokens
+      // 1. Draw floating code tokens in #93C5FD at 40-60% opacity
       ctx.font = "10px monospace";
       for (const tok of floatingTokens) {
-        ctx.fillStyle = `rgba(0, 240, 255, ${tok.alpha})`;
+        ctx.fillStyle = `rgba(147, 197, 253, ${tok.alpha})`;
         ctx.fillText(tok.text, tok.x, tok.y);
         tok.y += tok.vy;
         if (tok.y < -20) {
@@ -123,8 +125,8 @@ export default function CyberMatrixCanvas({
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fillStyle = `${p.color}${p.alpha})`;
-        ctx.shadowColor = "#00F0FF";
-        ctx.shadowBlur = 8;
+        ctx.shadowColor = "rgba(37, 99, 235, 0.25)";
+        ctx.shadowBlur = 4;
         ctx.fill();
         ctx.shadowBlur = 0;
 
@@ -136,13 +138,13 @@ export default function CyberMatrixCanvas({
           ctx.beginPath();
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(mouse.x, mouse.y);
-          const mouseAlpha = (1 - distMouse / mouse.radius) * 0.7;
-          ctx.strokeStyle = `rgba(0, 240, 255, ${mouseAlpha})`;
-          ctx.lineWidth = 1.2;
+          const mouseAlpha = (1 - distMouse / mouse.radius) * 0.45;
+          ctx.strokeStyle = `rgba(147, 197, 253, ${mouseAlpha})`;
+          ctx.lineWidth = 1.1;
           ctx.stroke();
         }
 
-        // Connect to neighboring particles
+        // Connect to neighboring particles with #93C5FD at 40-60% opacity
         for (let j = i + 1; j < particles.length; j++) {
           const p2 = particles[j];
           const dx = p.x - p2.x;
@@ -153,15 +155,17 @@ export default function CyberMatrixCanvas({
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
-            const lineAlpha = (1 - dist / 110) * 0.25;
-            ctx.strokeStyle = `rgba(0, 240, 255, ${lineAlpha})`;
+            const lineAlpha = (1 - dist / 110) * 0.35;
+            ctx.strokeStyle = `rgba(147, 197, 253, ${lineAlpha})`;
             ctx.lineWidth = 0.8;
             ctx.stroke();
           }
         }
       }
 
-      animationFrameId = requestAnimationFrame(render);
+      if (!prefersReducedMotion) {
+        animationFrameId = requestAnimationFrame(render);
+      }
     };
 
     render();

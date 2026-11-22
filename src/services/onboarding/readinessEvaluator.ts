@@ -34,7 +34,14 @@ export interface ReadinessEvaluationResult {
  * Shows clear human-readable meaning: e.g. "Answers 85 of 100 test questions correctly (85.0% readiness)."
  */
 export function evaluateBusinessReadiness(
-  testCases: SyntheticTestCase[],
+  testCases: Array<
+    | SyntheticTestCase
+    | (Pick<SyntheticTestCase, "id" | "question" | "expectedAnswer" | "sourceUrl" | "sourceTitle"> & {
+        category?: string;
+        sourceExcerpt?: string;
+        confidence?: number;
+      })
+  >,
   candidateModelId: string = "claude-sonnet-5.5",
   targetThreshold: number = 85.0
 ): ReadinessEvaluationResult {

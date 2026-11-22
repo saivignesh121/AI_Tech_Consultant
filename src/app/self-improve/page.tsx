@@ -611,9 +611,9 @@ export default function SelfImprovePage() {
                       <span className="text-xs text-gray-500 font-mono">+12 / -4 lines</span>
                     </div>
 
-                    <div className="p-4 bg-slate-900 text-gray-100 font-mono text-xs overflow-x-auto flex-1 leading-relaxed">
+                    <div className="p-4 bg-[#F1F6FF] text-[#1E3A8A] font-mono text-xs border border-[#DCE6F5] overflow-x-auto flex-1 leading-relaxed">
                       <div className="text-gray-400">@@ -14,8 +14,12 @@ Instruction Set:</div>
-                      <div className="text-red-400 bg-red-950/40 px-2 py-0.5 rounded">
+                      <div className="text-red-400 bg-red-50 px-2 py-0.5 rounded">
                         - When customer asks about DNS proxying, suggest localhost or standard IPs.
                       </div>
                       <div className="text-green-400 bg-green-950/40 px-2 py-0.5 rounded">
@@ -711,7 +711,7 @@ export default function SelfImprovePage() {
 
         {/* Trigger New Run Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 bg-[#0B1B3A]/35 backdrop-blur-sm flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl border border-gray-200">
               <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                 <div className="flex items-center gap-2">

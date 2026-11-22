@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Cpu, Database, Sparkles, Users, ArrowRight, ShieldCheck, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
@@ -9,8 +9,6 @@ export default function ServicesSection({
 }: {
   onConnectClick?: () => void;
 }) {
-  const [activeTab, setActiveTab] = useState<number>(0);
-
   const services = [
     {
       id: "digital-transformation",
@@ -18,6 +16,7 @@ export default function ServicesSection({
       subtitle: "Forward-Thinking Enterprise Tech Stacks",
       icon: Cpu,
       badge: "Core Service",
+      badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
       description:
         "Modernizing legacy enterprise systems with cloud-native microservices, strict multi-tenant isolation, and zero-downtime database migrations.",
       capabilities: [
@@ -35,6 +34,7 @@ export default function ServicesSection({
       subtitle: "24/7 Grounded Engineering Problem Solver",
       icon: Sparkles,
       badge: "AI Powered",
+      badgeColor: "bg-indigo-50 text-indigo-700 border-indigo-200",
       description:
         "Instant, verified answers with automated citation attribution. Combines dense vector similarity with sparse keyword matching using Reciprocal Rank Fusion.",
       capabilities: [
@@ -52,6 +52,7 @@ export default function ServicesSection({
       subtitle: "High-Throughput, Low-Latency Resilience",
       icon: Database,
       badge: "Infrastructure",
+      badgeColor: "bg-sky-50 text-sky-700 border-sky-200",
       description:
         "Ensuring mission-critical database availability and sub-20ms retrieval latency across distributed multi-region deployments.",
       capabilities: [
@@ -69,6 +70,7 @@ export default function ServicesSection({
       subtitle: "Approachable, Tailored Recruitment Solutions",
       icon: Users,
       badge: "Staffing Solutions",
+      badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
       description:
         "Simplifying organizational decision-making through tailored technology recruitment, candidate skill benchmarking, and workforce augmentation.",
       capabilities: [
@@ -84,45 +86,45 @@ export default function ServicesSection({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {services.map((srv, idx) => {
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {services.map((srv) => {
           const Icon = srv.icon;
           return (
             <div
               key={srv.id}
-              className="rounded-2xl border border-gray-800 bg-gradient-to-b from-[#0B152A] to-[#060D1E] p-6 hover:border-cyan-500/50 transition group flex flex-col justify-between"
+              className="rounded-2xl border border-[#DCE6F5] bg-white p-7 shadow-sm hover:border-blue-300 hover:shadow-md transition group flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <div className="h-10 w-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center">
+                  <div className="h-11 w-11 rounded-xl bg-[#EEF4FF] border border-[#BFDBFE] text-[#2563EB] flex items-center justify-center shadow-xs">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-gray-900 border border-gray-800 text-gray-300 text-[10px] font-mono">
+                  <span className={`px-2.5 py-0.5 rounded-full border text-[11px] font-mono font-medium ${srv.badgeColor}`}>
                     {srv.badge}
                   </span>
                 </div>
 
-                <h4 className="text-lg font-bold text-white group-hover:text-cyan-300 transition">
+                <h4 className="text-lg font-bold text-[#0B1B3A] group-hover:text-[#2563EB] transition">
                   {srv.title}
                 </h4>
-                <div className="text-xs font-mono text-cyan-400 mt-0.5">{srv.subtitle}</div>
-                <p className="text-xs text-gray-400 mt-3 leading-relaxed">{srv.description}</p>
+                <div className="text-xs font-mono text-[#2563EB] mt-1">{srv.subtitle}</div>
+                <p className="text-xs text-[#4A5B78] mt-3 leading-relaxed">{srv.description}</p>
 
-                <div className="space-y-2 mt-5">
+                <div className="space-y-2.5 mt-5">
                   {srv.capabilities.map((cap, cIdx) => (
-                    <div key={cIdx} className="flex items-start gap-2 text-xs text-gray-300">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0 mt-0.5" />
+                    <div key={cIdx} className="flex items-start gap-2.5 text-xs text-[#4A5B78]">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#15803D] flex-shrink-0 mt-0.5" />
                       <span>{cap}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-gray-800/80 mt-6 flex items-center justify-between">
+              <div className="pt-6 border-t border-[#DCE6F5] mt-6 flex items-center justify-between">
                 {srv.actionHref.startsWith("#") ? (
                   <a
                     href={srv.actionHref}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2563EB] hover:text-[#1D4ED8] transition"
                   >
                     <span>{srv.actionLabel}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -130,7 +132,7 @@ export default function ServicesSection({
                 ) : (
                   <Link
                     href={srv.actionHref}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2563EB] hover:text-[#1D4ED8] transition"
                   >
                     <span>{srv.actionLabel}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -139,7 +141,7 @@ export default function ServicesSection({
 
                 <button
                   onClick={onConnectClick}
-                  className="px-3 py-1.5 rounded-lg bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 text-xs font-medium transition"
+                  className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-[#EEF4FF] border border-[#2563EB] text-[#2563EB] text-xs font-semibold transition shadow-xs"
                 >
                   Consult an Expert
                 </button>

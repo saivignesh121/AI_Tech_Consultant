@@ -93,7 +93,6 @@ function SignUpContent() {
       } else {
         setOtpSent(true);
         setCountdown(60);
-        // Do NOT auto-fill the OTP; user must read and manually enter the code from their email
         setOtpCode("");
         let notice = data.isRealSmtp
           ? `✓ Real verification email sent to ${email.trim()} via SMTP! Please check your inbox or spam for the 6-digit code.`
@@ -187,58 +186,58 @@ function SignUpContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050B18] text-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans selection:bg-cyan-500 selection:text-black relative overflow-hidden">
-      {/* Background Cyber Ambient Glow */}
+    <div className="min-h-screen bg-[#F6F9FF] text-[#0B1B3A] flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans selection:bg-blue-100 selection:text-blue-900 relative overflow-hidden">
+      {/* Background Ambient Glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-cyan-500/10 blur-[140px] rounded-full" />
-        <div className="absolute bottom-1/4 right-1/4 w-[450px] h-[300px] bg-indigo-600/10 blur-[130px] rounded-full" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-blue-500/10 blur-[140px] rounded-full" />
+        <div className="absolute bottom-1/4 right-1/4 w-[450px] h-[300px] bg-indigo-500/8 blur-[130px] rounded-full" />
       </div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center relative z-10 space-y-3">
         <Link href="/" className="inline-flex items-center gap-2 group">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-black border border-gray-700 text-white font-serif text-2xl font-bold shadow-md shadow-cyan-500/20 group-hover:border-cyan-400 transition">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#0284C7] to-[#2563EB] text-white font-serif text-2xl font-bold shadow-sm group-hover:brightness-105 transition">
             α
           </div>
-          <span className="text-xl font-extrabold tracking-tight text-white group-hover:text-cyan-300 transition">
+          <span className="text-xl font-extrabold tracking-tight text-[#0B1B3A] group-hover:text-[#2563EB] transition">
             AI Technologies &amp; Consulting
           </span>
         </Link>
-        <p className="text-xs text-gray-400 max-w-sm mx-auto">
+        <p className="text-xs text-[#4A5B78] max-w-sm mx-auto">
           Sign up to initialize your isolated business tenant with real OTP email verification.
         </p>
       </div>
 
       <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md px-4 space-y-4 relative z-10">
-        {/* Tab Toggle: Sign In vs Register (Sign Up) */}
-        <div className="flex rounded-xl bg-[#071329] p-1 border border-cyan-950/60 shadow-inner">
+        {/* Tab Toggle: Sign In vs Register (Sign Up) in --surface-subtle with white active pill */}
+        <div className="flex rounded-xl bg-[#EEF4FF] p-1 border border-[#DCE6F5] shadow-inner">
           <Link
             href={redirectParam ? `/signin?redirect=${encodeURIComponent(redirectParam)}` : "/signin"}
-            className="flex-1 py-2 text-center text-xs font-semibold rounded-lg text-gray-400 hover:text-cyan-300 transition"
+            className="flex-1 py-2 text-center text-xs font-semibold rounded-lg text-[#4A5B78] hover:text-[#0B1B3A] transition"
           >
             Sign In
           </Link>
           <Link
             href={redirectParam ? `/signup?redirect=${encodeURIComponent(redirectParam)}` : "/signup"}
-            className="flex-1 py-2 text-center text-xs font-bold rounded-lg bg-cyan-500 text-black shadow-md shadow-cyan-500/25 transition"
+            className="flex-1 py-2 text-center text-xs font-bold rounded-lg bg-white text-[#2563EB] shadow-sm transition"
           >
             Create Workspace (Sign Up)
           </Link>
         </div>
 
-        {/* Already Logged In Notification */}
+        {/* Already Logged In Notification: white card with blue accent */}
         {activeSession && (
-          <div className="p-3.5 rounded-xl bg-cyan-950/30 border border-cyan-500/30 flex items-center justify-between">
+          <div className="p-3.5 rounded-xl bg-white border border-[#DCE6F5] border-l-4 border-l-[#2563EB] shadow-sm flex items-center justify-between">
             <div>
-              <div className="text-xs text-gray-300">
-                Signed in as: <strong className="text-white">{activeSession.userEmail}</strong>
+              <div className="text-xs text-[#4A5B78]">
+                Signed in as: <strong className="text-[#0B1B3A]">{activeSession.userEmail}</strong>
               </div>
-              <div className="text-[11px] text-cyan-400 font-medium mt-0.5">
+              <div className="text-[11px] text-[#2563EB] font-medium mt-0.5">
                 {activeSession.businessName} &bull; <span className="capitalize">{activeSession.userRole}</span>
               </div>
             </div>
             <Link
               href={redirectParam || "/"}
-              className="px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold rounded-lg text-xs transition flex items-center gap-1 shadow-md shadow-cyan-500/20 shrink-0"
+              className="px-3 py-1.5 bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 text-white font-bold rounded-lg text-xs transition flex items-center gap-1 shadow-sm shrink-0"
             >
               <span>{redirectParam ? "Proceed" : "Dashboard"}</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -246,35 +245,35 @@ function SignUpContent() {
           </div>
         )}
 
-        <div className="bg-[#040f26]/90 backdrop-blur-xl py-8 px-6 shadow-2xl shadow-cyan-500/10 rounded-2xl border border-cyan-500/30 sm:px-10">
+        <div className="bg-white py-8 px-6 shadow-md rounded-2xl border border-[#DCE6F5] sm:px-10">
           {errorMsg && (
-            <div className="mb-5 p-3.5 rounded-xl bg-red-950/40 border border-red-500/30 text-red-300 text-xs flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+            <div className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="mb-5 p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <div className="mb-5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>{successMsg}</span>
             </div>
           )}
 
           {otpNotification && (
-            <div className="mb-5 p-3.5 rounded-xl bg-cyan-950/40 border border-cyan-500/40 text-cyan-300 text-xs flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+            <div className="mb-5 p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-[#0369A1] text-xs flex items-start gap-2">
+              <CheckCircle2 className="w-4 h-4 text-[#2563EB] shrink-0 mt-0.5" />
               <span>{otpNotification}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-gray-300 mb-1">
+              <label className="block text-xs font-medium text-[#4A5B78] mb-1">
                 Full Name
               </label>
-              <div className="relative rounded-lg shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+              <div className="relative rounded-lg shadow-xs">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#7B8AA6]">
                   <User className="h-4 w-4" />
                 </div>
                 <input
@@ -283,21 +282,21 @@ function SignUpContent() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Alex Turner"
-                  className="block w-full pl-10 pr-3 py-2 text-sm bg-[#071329] border border-cyan-950/60 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400"
+                  className="block w-full pl-10 pr-3 py-2 text-sm bg-white border border-[#C3D3EA] rounded-lg text-[#0B1B3A] placeholder-[#94A3B8] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-medium text-gray-300">
+                <label className="block text-xs font-medium text-[#4A5B78]">
                   Work Email Address
                 </label>
                 <button
                   type="button"
                   onClick={handleSendOtp}
                   disabled={sendingOtp || countdown > 0}
-                  className="text-[11px] font-semibold text-cyan-400 hover:text-cyan-300 transition flex items-center gap-1 disabled:opacity-50"
+                  className="text-[11px] font-semibold text-[#2563EB] hover:text-[#1D4ED8] transition flex items-center gap-1 disabled:opacity-50"
                 >
                   <RotateCw className={`w-3 h-3 ${sendingOtp ? "animate-spin" : ""}`} />
                   <span>
@@ -312,8 +311,8 @@ function SignUpContent() {
                 </button>
               </div>
 
-              <div className="relative rounded-lg shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+              <div className="relative rounded-lg shadow-xs">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#7B8AA6]">
                   <Mail className="h-4 w-4" />
                 </div>
                 <input
@@ -322,19 +321,19 @@ function SignUpContent() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="alex@acmecorp.com"
-                  className="block w-full pl-10 pr-3 py-2 text-sm bg-[#071329] border border-cyan-950/60 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400"
+                  className="block w-full pl-10 pr-3 py-2 text-sm bg-white border border-[#C3D3EA] rounded-lg text-[#0B1B3A] placeholder-[#94A3B8] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
             </div>
 
-            {/* 6-Digit Email OTP Input Box */}
-            <div className="rounded-xl border border-cyan-500/40 bg-[#071329]/90 p-3.5 space-y-2">
+            {/* 6-Digit Email OTP Input Box (Aurora Light token style: bg-white text-[#2563EB] border-2 border-dashed border-[#BFDBFE]) */}
+            <div className="rounded-xl border-2 border-dashed border-[#BFDBFE] bg-white p-3.5 space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
-                  <KeyRound className="w-3.5 h-3.5 text-cyan-400" />
+                <label className="text-xs font-bold text-[#2563EB] flex items-center gap-1.5">
+                  <KeyRound className="w-3.5 h-3.5 text-[#2563EB]" />
                   <span>6-Digit Verification Code (OTP)</span>
                 </label>
-                <span className="text-[10px] text-gray-400 font-mono">10 min expiry</span>
+                <span className="text-[10px] text-[#7B8AA6] font-mono">10 min expiry</span>
               </div>
 
               <div className="relative">
@@ -344,20 +343,20 @@ function SignUpContent() {
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
                   placeholder="e.g. 123456"
-                  className="block w-full px-3 py-2 text-center text-lg font-mono font-bold tracking-widest bg-[#040F26] border border-cyan-500/50 rounded-lg text-cyan-300 placeholder-gray-600 focus:outline-none focus:border-cyan-400 shadow-[0_0_12px_rgba(0,240,255,0.15)]"
+                  className="block w-full px-3 py-2 text-center text-xl font-mono font-bold tracking-widest bg-[#EEF4FF] border border-[#BFDBFE] rounded-lg text-[#2563EB] placeholder-[#94A3B8] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
-              <p className="text-[11px] text-gray-400 leading-tight">
+              <p className="text-[11px] text-[#7B8AA6] leading-tight">
                 Check your email inbox or spam folder for the 6-digit verification code and enter it above.
               </p>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-300 mb-1">
+              <label className="block text-xs font-medium text-[#4A5B78] mb-1">
                 Password (min. 8 characters)
               </label>
-              <div className="relative rounded-lg shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+              <div className="relative rounded-lg shadow-xs">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#7B8AA6]">
                   <Lock className="h-4 w-4" />
                 </div>
                 <input
@@ -366,17 +365,17 @@ function SignUpContent() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="block w-full pl-10 pr-3 py-2 text-sm bg-[#071329] border border-cyan-950/60 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400"
+                  className="block w-full pl-10 pr-3 py-2 text-sm bg-white border border-[#C3D3EA] rounded-lg text-[#0B1B3A] placeholder-[#94A3B8] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-300 mb-1">
+              <label className="block text-xs font-medium text-[#4A5B78] mb-1">
                 Business / Company Name
               </label>
-              <div className="relative rounded-lg shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+              <div className="relative rounded-lg shadow-xs">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#7B8AA6]">
                   <Building2 className="h-4 w-4" />
                 </div>
                 <input
@@ -385,7 +384,7 @@ function SignUpContent() {
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
                   placeholder="Acme Corporation"
-                  className="block w-full pl-10 pr-3 py-2 text-sm bg-[#071329] border border-cyan-950/60 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400"
+                  className="block w-full pl-10 pr-3 py-2 text-sm bg-white border border-[#C3D3EA] rounded-lg text-[#0B1B3A] placeholder-[#94A3B8] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
             </div>
@@ -394,7 +393,7 @@ function SignUpContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl shadow-lg shadow-cyan-500/25 text-sm font-bold text-black bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 focus:outline-none transition disabled:opacity-50"
+                className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl shadow-md shadow-blue-500/20 text-sm font-bold text-white bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 focus:outline-none transition disabled:opacity-50"
               >
                 <span>{loading ? "Verifying OTP & Creating Workspace..." : "Verify OTP & Create Workspace"}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -403,11 +402,11 @@ function SignUpContent() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-[#4A5B78]">
               Already have an account?{" "}
               <Link
                 href={redirectParam ? `/signin?redirect=${encodeURIComponent(redirectParam)}` : "/signin"}
-                className="font-semibold text-cyan-400 hover:text-cyan-300 transition"
+                className="font-semibold text-[#2563EB] hover:text-[#1D4ED8] transition"
               >
                 Sign in to your workspace &rarr;
               </Link>
@@ -416,8 +415,8 @@ function SignUpContent() {
         </div>
 
         {/* Security & Isolation Guarantee Note */}
-        <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400 text-center">
-          <ShieldCheck className="w-4 h-4 text-cyan-400" />
+        <div className="mt-4 flex items-center justify-center gap-2 text-xs text-[#7B8AA6] text-center">
+          <ShieldCheck className="w-4 h-4 text-[#2563EB]" />
           <span>Real OTP email verification with atomic business, user, owner role, and session creation.</span>
         </div>
       </div>
@@ -427,7 +426,7 @@ function SignUpContent() {
 
 export default function SignUpPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#050B18] flex items-center justify-center text-cyan-400">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#F6F9FF] flex items-center justify-center text-[#2563EB]">Loading...</div>}>
       <SignUpContent />
     </Suspense>
   );

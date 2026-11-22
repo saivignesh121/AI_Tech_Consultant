@@ -680,9 +680,9 @@ export default function ChatPage() {
     <AppShell breadcrumbs={[{ label: "Ask & Teach Chat" }]}>
       <div className="space-y-4">
         {/* Top Mode Toggle & Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-800 pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#DCE6F5] pb-3">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+            <h1 className="text-2xl font-bold tracking-tight text-[#0B1B3A] flex items-center gap-2">
               <MessageSquare className="h-6 w-6 text-indigo-400" />
               <span>Ask &amp; Teach Consultant Hub</span>
             </h1>
@@ -692,7 +692,7 @@ export default function ChatPage() {
           </div>
 
           {/* Mode Switcher: Ask vs Teach */}
-          <div className="flex items-center gap-2 bg-[#0E1322] border border-gray-800 rounded-xl p-1.5 shadow-sm">
+          <div className="flex items-center gap-2 bg-white border border-[#DCE6F5] rounded-xl p-1.5 shadow-sm">
             <button
               onClick={() => setMode("ask")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
@@ -717,7 +717,7 @@ export default function ChatPage() {
             </button>
             <button
               onClick={handleOpenThresholdModal}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-800/80 border border-gray-700/60 transition"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-300 hover:text-white hover:bg-[#EEF4FF]/80 border border-[#DCE6F5] transition"
               title="Calibrated Confidence Threshold and Trade-Off Curve"
             >
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
@@ -729,7 +729,7 @@ export default function ChatPage() {
         {/* 3-Column Layout: Left (Sessions), Center (Chat Stream), Right (Inspector) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 h-[680px]">
           {/* ================= LEFT COLUMN: SESSIONS LIST (3 Cols) ================= */}
-          <div className="lg:col-span-3 rounded-xl border border-gray-800 bg-[#0E1322] p-4 flex flex-col justify-between overflow-hidden">
+          <div className="lg:col-span-3 rounded-xl border border-[#DCE6F5] bg-white p-4 flex flex-col justify-between overflow-hidden">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
@@ -752,8 +752,8 @@ export default function ChatPage() {
                     onClick={() => handleSelectSession(s)}
                     className={`cursor-pointer rounded-lg p-3 transition border text-left ${
                       activeSessionId === s.id
-                        ? "border-indigo-500 bg-indigo-950/20"
-                        : "border-gray-800 bg-gray-900/40 hover:border-gray-700"
+                        ? "border-indigo-500 bg-indigo-50"
+                        : "border-[#DCE6F5] bg-[#EEF4FF] hover:border-[#C3D3EA]"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-1.5">
@@ -761,8 +761,8 @@ export default function ChatPage() {
                       <span
                         className={`text-[9px] font-mono px-1.5 py-0.2 rounded uppercase font-bold shrink-0 ${
                           s.mode === "teach"
-                            ? "bg-purple-950/60 text-purple-300 border border-purple-500/30"
-                            : "bg-indigo-950/60 text-indigo-300 border border-indigo-500/30"
+                            ? "bg-purple-50 text-purple-300 border border-purple-500/30"
+                            : "bg-indigo-50 text-indigo-300 border border-[#BFDBFE]"
                         }`}
                       >
                         {s.mode === "teach" ? "Teach" : "Ask"}
@@ -778,12 +778,12 @@ export default function ChatPage() {
             </div>
 
             {/* Active Role Selector at Bottom of Sidebar */}
-            <div className="pt-3 border-t border-gray-800">
+            <div className="pt-3 border-t border-[#DCE6F5]">
               <label className="block text-[11px] font-medium text-gray-400 mb-1">Active Role Persona</label>
               <select
                 value={activeRoleSlug}
                 onChange={(e) => setActiveRoleSlug(e.target.value)}
-                className="w-full rounded-lg border border-gray-700 bg-gray-950 px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                className="w-full rounded-lg border border-[#C3D3EA] bg-white px-2.5 py-1.5 text-xs text-white focus:outline-none"
               >
                 {roles.map((r) => (
                   <option key={r.slug} value={r.slug}>
@@ -795,25 +795,25 @@ export default function ChatPage() {
           </div>
 
           {/* ================= CENTER COLUMN: CHAT STREAM & INPUT (6 Cols) ================= */}
-          <div className="lg:col-span-6 rounded-xl border border-gray-800 bg-[#0E1322] flex flex-col justify-between overflow-hidden shadow-sm">
+          <div className="lg:col-span-6 rounded-xl border border-[#DCE6F5] bg-white flex flex-col justify-between overflow-hidden shadow-sm">
             {/* Chat Header with Mid-Chat Role Switcher */}
-            <div className="p-3.5 border-b border-gray-800 bg-gray-900/60 flex items-center justify-between">
+            <div className="p-3.5 border-b border-[#DCE6F5] bg-[#F6F9FF] flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></div>
                 <label className="text-xs text-gray-300 font-medium hidden sm:inline">Active Persona:</label>
                 <select
                   value={activeRoleSlug}
                   onChange={(e) => setActiveRoleSlug(e.target.value)}
-                  className="rounded-lg border border-cyan-500/30 bg-[#071329] px-2.5 py-1 text-xs text-cyan-300 font-semibold focus:outline-none focus:border-cyan-400 transition cursor-pointer"
+                  className="rounded-lg border border-[#BFDBFE] bg-white px-2.5 py-1 text-xs text-cyan-300 font-semibold focus:outline-none focus:border-cyan-400 transition cursor-pointer"
                   title="Switch Agent Role Persona mid-chat"
                 >
                   {roles.map((r) => (
-                    <option key={r.slug} value={r.slug} className="bg-[#071329] text-white">
+                    <option key={r.slug} value={r.slug} className="bg-white text-white">
                       {r.name}
                     </option>
                   ))}
                 </select>
-                <span className="rounded bg-cyan-500/10 text-cyan-400 text-[10px] px-2 py-0.5 font-mono border border-cyan-500/20 hidden md:inline">
+                <span className="rounded bg-blue-50 text-cyan-400 text-[10px] px-2 py-0.5 font-mono border border-[#DCE6F5] hidden md:inline">
                   {currentRole.slug}
                 </span>
               </div>
@@ -826,7 +826,7 @@ export default function ChatPage() {
                       setLessonsModalOpen(true);
                       fetchLessons();
                     }}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-purple-500/40 bg-purple-950/40 hover:bg-purple-900/40 text-purple-300 text-[11px] font-semibold transition"
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-purple-500/40 bg-purple-50 hover:bg-purple-900/40 text-purple-300 text-[11px] font-semibold transition"
                     title="Manage learned lessons, view Markdown files, or approve pending rules"
                   >
                     <BookOpen className="h-3.5 w-3.5 text-purple-400" />
@@ -850,15 +850,15 @@ export default function ChatPage() {
                   <div
                     className={`h-12 w-12 rounded-2xl flex items-center justify-center ${
                       mode === "teach"
-                        ? "bg-purple-950/60 text-purple-400 border border-purple-500/30"
-                        : "bg-indigo-950/60 text-indigo-400 border border-indigo-500/30"
+                        ? "bg-purple-50 text-purple-400 border border-purple-500/30"
+                        : "bg-indigo-50 text-indigo-400 border border-[#BFDBFE]"
                     }`}
                   >
                     {mode === "teach" ? <GraduationCap className="h-6 w-6" /> : <Bot className="h-6 w-6" />}
                   </div>
 
                   <div className="max-w-md space-y-1">
-                    <h3 className="text-sm font-bold text-white">
+                    <h3 className="text-sm font-bold text-[#0B1B3A]">
                       {mode === "teach" ? "Teach the Agent on Purpose" : `Ask ${currentRole.name} Something`}
                     </h3>
                     <p className="text-xs text-gray-400 leading-relaxed">
@@ -891,7 +891,7 @@ export default function ChatPage() {
                               "This is wrong, the right answer is you must verify HMAC SHA-256 signatures with the shared secret."
                             )
                           }
-                          className="w-full rounded-lg border border-gray-800 bg-gray-900/40 hover:bg-gray-800 p-2.5 text-xs text-gray-300 transition text-left"
+                          className="w-full rounded-lg border border-[#DCE6F5] bg-[#EEF4FF] hover:bg-[#EEF4FF] p-2.5 text-xs text-gray-300 transition text-left"
                         >
                           <span className="font-semibold block text-[11px] text-gray-400">Correct an Answer:</span>
                           &quot;This is wrong, the right answer is verify HMAC SHA-256 signatures with secret.&quot;
@@ -902,7 +902,7 @@ export default function ChatPage() {
                               "Here is how you should reply to DNS questions: always give the 3 steps first."
                             )
                           }
-                          className="w-full rounded-lg border border-gray-800 bg-gray-900/40 hover:bg-gray-800 p-2.5 text-xs text-gray-300 transition text-left"
+                          className="w-full rounded-lg border border-[#DCE6F5] bg-[#EEF4FF] hover:bg-[#EEF4FF] p-2.5 text-xs text-gray-300 transition text-left"
                         >
                           <span className="font-semibold block text-[11px] text-gray-400">Show How to Reply:</span>
                           &quot;For DNS questions, always give the 3 steps first.&quot;
@@ -914,7 +914,7 @@ export default function ChatPage() {
                           onClick={() =>
                             handleSendMessage("How do I configure custom CNAME subdomains with SSL on Cloudflare?")
                           }
-                          className="w-full rounded-lg border border-indigo-500/30 bg-indigo-950/20 hover:bg-indigo-900/30 p-2.5 text-xs text-indigo-200 transition text-left"
+                          className="w-full rounded-lg border border-[#BFDBFE] bg-indigo-50 hover:bg-indigo-900/30 p-2.5 text-xs text-indigo-200 transition text-left"
                         >
                           <span className="font-semibold block text-[11px] text-indigo-300">Technical Inquiry:</span>
                           &quot;How do I configure custom CNAME subdomains with SSL on Cloudflare?&quot;
@@ -925,7 +925,7 @@ export default function ChatPage() {
                               `From: client@acme.corp\nTo: support@example.com\nSubject: URGENT: SSL broken on custom domain\nHi team,\nWe migrated our subdomain over the weekend and customers are reporting a redirect loop error. How do we configure our Cloudflare SSL Full Strict mode so we do not get the redirect loop?\nThanks,\nJane Doe, Lead Engineer`
                             )
                           }
-                          className="w-full rounded-lg border border-gray-800 bg-gray-900/40 hover:bg-gray-800 p-2.5 text-xs text-gray-300 transition text-left font-mono"
+                          className="w-full rounded-lg border border-[#DCE6F5] bg-[#EEF4FF] hover:bg-[#EEF4FF] p-2.5 text-xs text-gray-300 transition text-left font-mono"
                         >
                           <span className="font-semibold block text-[11px] text-gray-400 font-sans">
                             Paste Long Customer Email:
@@ -936,7 +936,7 @@ export default function ChatPage() {
                           onClick={() =>
                             handleSendMessage("What are your enterprise subscription pricing tiers and quotation options?")
                           }
-                          className="w-full rounded-lg border border-gray-800 bg-gray-900/40 hover:bg-gray-800 p-2.5 text-xs text-gray-300 transition text-left"
+                          className="w-full rounded-lg border border-[#DCE6F5] bg-[#EEF4FF] hover:bg-[#EEF4FF] p-2.5 text-xs text-gray-300 transition text-left"
                         >
                           <span className="font-semibold block text-[11px] text-gray-400">Commercial Quote:</span>
                           &quot;What are your enterprise subscription pricing tiers?&quot;
@@ -968,7 +968,7 @@ export default function ChatPage() {
 
                   {/* Isolated Core Question Callout for Pasted Customer Emails */}
                   {m.isPastedThread && m.extractedCoreQuery && (
-                    <div className="mb-2 w-full rounded-lg bg-indigo-950/50 border border-indigo-500/40 p-2.5 text-xs text-indigo-200 flex items-start gap-2 shadow-sm">
+                    <div className="mb-2 w-full rounded-lg bg-indigo-950/50 border border-[#BFDBFE] p-2.5 text-xs text-indigo-200 flex items-start gap-2 shadow-sm">
                       <Sparkles className="h-4 w-4 text-indigo-400 mt-0.5 shrink-0" />
                       <div>
                         <span className="text-[10px] uppercase font-bold text-indigo-300 block tracking-wider">
@@ -981,7 +981,7 @@ export default function ChatPage() {
 
                   {/* Telemetry metadata chip above consultant response */}
                   {m.telemetry && (
-                    <div className="mb-1 flex items-center gap-2 text-[10px] font-mono text-gray-400 bg-gray-900/80 px-2 py-0.5 rounded border border-gray-800">
+                    <div className="mb-1 flex items-center gap-2 text-[10px] font-mono text-gray-400 bg-[#F6F9FF] px-2 py-0.5 rounded border border-[#DCE6F5]">
                       <span className="text-amber-400 flex items-center gap-1">
                         <Clock className="h-3 w-3" /> {m.telemetry.latencyMs}ms
                       </span>
@@ -998,17 +998,17 @@ export default function ChatPage() {
                   <div
                     className={`rounded-xl p-3.5 text-xs max-w-[90%] leading-relaxed ${
                       m.sender === "user"
-                        ? "bg-indigo-600 text-white rounded-br-none"
+                        ? "bg-[#2563EB] text-white rounded-br-none shadow-sm"
                         : m.isTeachingTurn
-                        ? "bg-purple-950/40 text-purple-100 border border-purple-500/40 rounded-bl-none whitespace-pre-wrap font-sans"
-                        : "bg-gray-900/90 text-gray-200 border border-gray-800 rounded-bl-none whitespace-pre-wrap font-sans"
+                        ? "bg-purple-50 text-purple-100 border border-purple-500/40 rounded-bl-none whitespace-pre-wrap font-sans"
+                        : "bg-white text-[#0B1B3A] border border-[#DCE6F5] rounded-bl-none whitespace-pre-wrap font-sans shadow-xs"
                     }`}
                   >
                     {m.content}
 
                     {/* Citations block with One-Click Inspection */}
                     {m.citations && m.citations.length > 0 && (
-                      <div className="mt-3 pt-2.5 border-t border-gray-800/80 space-y-1.5">
+                      <div className="mt-3 pt-2.5 border-t border-[#DCE6F5] space-y-1.5">
                         <span className="text-[10px] uppercase font-semibold text-gray-400 tracking-wider flex items-center gap-1">
                           <BookOpen className="h-3 w-3 text-indigo-400" />
                           <span>Verified Sources (Click to inspect paragraph or screenshot):</span>
@@ -1022,7 +1022,7 @@ export default function ChatPage() {
                                 key={c.id || cIdx}
                                 type="button"
                                 onClick={() => setSelectedCitation(c)}
-                                className="flex items-center gap-1.5 px-2 py-1 rounded bg-gray-950/80 border border-gray-700/60 hover:border-indigo-400 hover:bg-indigo-950/30 transition text-left group"
+                                className="flex items-center gap-1.5 px-2 py-1 rounded bg-[#F6F9FF] border border-[#DCE6F5] hover:border-indigo-400 hover:bg-indigo-50 transition text-left group"
                               >
                                 <span className="font-bold text-indigo-300 font-mono text-[11px]">[{num}]</span>
                                 <span
@@ -1037,7 +1037,7 @@ export default function ChatPage() {
                                       ? "bg-pink-500/10 text-pink-400 border border-pink-500/20"
                                       : badge === "[page_url]"
                                       ? "bg-sky-500/10 text-sky-400 border border-sky-500/20"
-                                      : "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
+                                      : "bg-indigo-500/10 text-indigo-400 border border-[#DCE6F5]"
                                   }`}
                                 >
                                   {badge}
@@ -1161,7 +1161,7 @@ export default function ChatPage() {
                           className={`flex items-center gap-1 transition rounded px-2 py-0.5 border font-mono ${
                             openTraceIdx === idx
                               ? "bg-indigo-950/80 text-indigo-300 border-indigo-500/60 shadow-sm"
-                              : "bg-gray-900 border-gray-800 hover:text-indigo-300 hover:border-gray-700"
+                              : "bg-[#EEF4FF] border-[#DCE6F5] hover:text-indigo-300 hover:border-[#C3D3EA]"
                           }`}
                           title="Inspect which knowledge, skills, lessons, and model were used, and exact cost"
                         >
@@ -1176,7 +1176,7 @@ export default function ChatPage() {
                           className={`flex items-center gap-1 transition rounded px-2 py-0.5 border ${
                             activePraiseIdx === idx || m.feedbackState === "right"
                               ? "bg-emerald-950/80 text-emerald-300 border-emerald-500/60"
-                              : "bg-gray-900 border-gray-800 hover:text-emerald-300 hover:border-gray-700"
+                              : "bg-[#EEF4FF] border-[#DCE6F5] hover:text-emerald-300 hover:border-[#C3D3EA]"
                           }`}
                           title="Endorse this answer as accurate with a rationale"
                         >
@@ -1191,7 +1191,7 @@ export default function ChatPage() {
                           className={`flex items-center gap-1 transition rounded px-2 py-0.5 border ${
                             activeCommentIdx === idx || m.feedbackState === "wrong"
                               ? "bg-amber-950/80 text-amber-300 border-amber-500/60"
-                              : "bg-gray-900 border-gray-800 hover:text-amber-300 hover:border-gray-700"
+                              : "bg-[#EEF4FF] border-[#DCE6F5] hover:text-amber-300 hover:border-[#C3D3EA]"
                           }`}
                           title="Flag an issue, teach the agent, and create a new regression test"
                         >
@@ -1206,7 +1206,7 @@ export default function ChatPage() {
                             const prevUserMsg = messages[idx - 1]?.content || "User question";
                             handleOpenTeachModal(prevUserMsg, m.content);
                           }}
-                          className="flex items-center gap-1 hover:text-purple-300 transition rounded px-2 py-0.5 bg-gray-900 border border-gray-800 hover:border-gray-700"
+                          className="flex items-center gap-1 hover:text-purple-300 transition rounded px-2 py-0.5 bg-[#EEF4FF] border border-[#DCE6F5] hover:border-[#C3D3EA]"
                         >
                           <GraduationCap className="h-3 w-3 text-purple-400" />
                           <span>Teach Modal</span>
@@ -1214,7 +1214,7 @@ export default function ChatPage() {
 
                         {/* Success chip for "This was right" */}
                         {m.feedbackState === "right" && (
-                          <span className="text-[10px] text-emerald-400 font-medium flex items-center gap-1 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/30">
+                          <span className="text-[10px] text-emerald-400 font-medium flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-500/30">
                             <CheckCircle2 className="h-3 w-3" /> Confirmed accurate
                             {m.feedbackTestCaseId && (
                               <span className="text-gray-300 font-mono text-[9px] bg-emerald-900/50 px-1 py-0.2 rounded border border-emerald-500/30">
@@ -1227,9 +1227,9 @@ export default function ChatPage() {
 
                       {/* Task 3.3: Inline Expandable Trace Panel */}
                       {openTraceIdx === idx && (
-                        <div className="w-full max-w-[90%] rounded-xl border border-indigo-500/40 bg-[#090e1f] p-3 text-xs space-y-2.5 shadow-xl animate-in fade-in duration-200">
-                          <div className="flex items-center justify-between border-b border-gray-800 pb-1.5">
-                            <span className="font-bold text-white flex items-center gap-1.5">
+                        <div className="w-full max-w-[90%] rounded-xl border border-[#BFDBFE] bg-[#EEF4FF] p-3 text-xs space-y-2.5 shadow-xl animate-in fade-in duration-200">
+                          <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-1.5">
+                            <span className="font-bold text-[#0B1B3A] flex items-center gap-1.5">
                               <Activity className="h-3.5 w-3.5 text-indigo-400" />
                               <span>Response Generation Trace &amp; Citations</span>
                             </span>
@@ -1244,19 +1244,19 @@ export default function ChatPage() {
 
                           {/* Quick Stats Grid */}
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono">
-                            <div className="p-2 rounded bg-gray-950 border border-gray-800">
+                            <div className="p-2 rounded bg-[#F1F6FF] border border-[#DCE6F5]">
                               <span className="text-gray-500 block text-[9px] uppercase tracking-wider">Model Used</span>
                               <span className="text-indigo-300 font-semibold">{m.trace?.modelId || "claude-sonnet-5.5"}</span>
                             </div>
-                            <div className="p-2 rounded bg-gray-950 border border-gray-800">
+                            <div className="p-2 rounded bg-[#F1F6FF] border border-[#DCE6F5]">
                               <span className="text-gray-500 block text-[9px] uppercase tracking-wider">Exact Cost ($)</span>
                               <span className="text-emerald-400 font-bold">${(m.trace?.costUsd ?? m.telemetry?.costUsd ?? 0.00075).toFixed(6)}</span>
                             </div>
-                            <div className="p-2 rounded bg-gray-950 border border-gray-800">
+                            <div className="p-2 rounded bg-[#F1F6FF] border border-[#DCE6F5]">
                               <span className="text-gray-500 block text-[9px] uppercase tracking-wider">Tokens</span>
                               <span className="text-gray-300">{m.trace?.inputTokens ?? m.telemetry?.inputTokens ?? 1200}in / {m.trace?.outputTokens ?? m.telemetry?.outputTokens ?? 250}out</span>
                             </div>
-                            <div className="p-2 rounded bg-gray-950 border border-gray-800">
+                            <div className="p-2 rounded bg-[#F1F6FF] border border-[#DCE6F5]">
                               <span className="text-gray-500 block text-[9px] uppercase tracking-wider">Latency</span>
                               <span className="text-amber-300">{m.trace?.latencyMs ?? m.telemetry?.latencyMs ?? 32} ms</span>
                             </div>
@@ -1271,7 +1271,7 @@ export default function ChatPage() {
                               {(m.trace?.knowledgeUsed && m.trace.knowledgeUsed.length > 0) || (m.citations && m.citations.length > 0) ? (
                                 <div className="flex flex-wrap gap-1">
                                   {(m.trace?.knowledgeUsed || m.citations?.map((c) => c.sourceTitle || c.title || "Document Chunk") || []).map((k, ki) => (
-                                    <span key={ki} className="px-2 py-0.5 rounded bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 font-mono text-[10px]">
+                                    <span key={ki} className="px-2 py-0.5 rounded bg-indigo-50 border border-[#BFDBFE] text-indigo-300 font-mono text-[10px]">
                                       {k || "Document Chunk"}
                                     </span>
                                   ))}
@@ -1288,7 +1288,7 @@ export default function ChatPage() {
                               {m.trace?.skillsUsed && m.trace.skillsUsed.length > 0 ? (
                                 <div className="flex flex-wrap gap-1">
                                   {m.trace.skillsUsed.map((s: string, si: number) => (
-                                    <span key={si} className="px-2 py-0.5 rounded bg-purple-950/60 border border-purple-500/30 text-purple-300 font-mono text-[10px]">
+                                    <span key={si} className="px-2 py-0.5 rounded bg-purple-50 border border-purple-500/30 text-purple-300 font-mono text-[10px]">
                                       {s}
                                     </span>
                                   ))}
@@ -1305,7 +1305,7 @@ export default function ChatPage() {
                               {m.trace?.lessonsUsed && m.trace.lessonsUsed.length > 0 ? (
                                 <div className="flex flex-wrap gap-1">
                                   {m.trace.lessonsUsed.map((l: string, li: number) => (
-                                    <span key={li} className="px-2 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 font-mono text-[10px]">
+                                    <span key={li} className="px-2 py-0.5 rounded bg-blue-50 border border-[#BFDBFE] text-cyan-300 font-mono text-[10px]">
                                       {l}
                                     </span>
                                   ))}
@@ -1320,8 +1320,8 @@ export default function ChatPage() {
 
                       {/* Task 3.4: Comment Box on Answer ("this was wrong" and "why") */}
                       {activeCommentIdx === idx && (
-                        <div className="w-full max-w-[90%] rounded-xl border border-amber-500/40 bg-gray-950 p-3 space-y-2.5 shadow-xl animate-in fade-in duration-200">
-                          <div className="flex items-center justify-between text-xs text-amber-300 font-semibold border-b border-gray-800 pb-1.5">
+                        <div className="w-full max-w-[90%] rounded-xl border border-amber-500/40 bg-[#F1F6FF] p-3 space-y-2.5 shadow-xl animate-in fade-in duration-200">
+                          <div className="flex items-center justify-between text-xs text-amber-300 font-semibold border-b border-[#DCE6F5] pb-1.5">
                             <span className="flex items-center gap-1.5">
                               <AlertTriangle className="h-3.5 w-3.5 text-amber-400" />
                               <span>Teach the Agent: What was wrong and why?</span>
@@ -1342,7 +1342,7 @@ export default function ChatPage() {
                             value={commentWhyText}
                             onChange={(e) => setCommentWhyText(e.target.value)}
                             placeholder="Why: The consultant gave an incorrect reply. The golden rule to follow is..."
-                            className="w-full rounded-lg border border-gray-700 bg-gray-900 p-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-400 font-sans"
+                            className="w-full rounded-lg border border-[#C3D3EA] bg-white p-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-400 font-sans"
                           />
                           <div className="flex items-center justify-between pt-1">
                             <span className="text-[10px] text-gray-500 italic">
@@ -1385,7 +1385,7 @@ export default function ChatPage() {
                             value={praiseReasonText}
                             onChange={(e) => setPraiseReasonText(e.target.value)}
                             placeholder="Why: Accurate technical guidance grounded in documentation..."
-                            className="w-full rounded-lg border border-gray-700 bg-gray-900 p-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400 font-sans"
+                            className="w-full rounded-lg border border-[#C3D3EA] bg-white p-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400 font-sans"
                           />
                           <div className="flex items-center justify-between pt-1">
                             <span className="text-[10px] text-gray-500 italic">
@@ -1416,7 +1416,7 @@ export default function ChatPage() {
                             )}
                             {m.feedbackTestCaseId && (
                               <span className="font-semibold block text-indigo-300 text-[11px]">
-                                🧪 New Regression Test Case Created: <code className="text-white font-mono bg-indigo-950 px-1 py-0.5 rounded border border-indigo-500/40">{m.feedbackTestCaseId}</code>
+                                🧪 New Regression Test Case Created: <code className="text-white font-mono bg-indigo-950 px-1 py-0.5 rounded border border-[#BFDBFE]">{m.feedbackTestCaseId}</code>
                               </span>
                             )}
                             <p className="text-[11px] text-gray-300">
@@ -1438,11 +1438,11 @@ export default function ChatPage() {
             </div>
 
             {/* Quick Test Chips & Multimodal Bar */}
-            <div className="px-4 py-2 bg-gray-950/80 border-t border-gray-800 flex items-center gap-1.5 overflow-x-auto text-[11px]">
+            <div className="px-4 py-2 bg-[#F6F9FF] border-t border-[#DCE6F5] flex items-center gap-1.5 overflow-x-auto text-[11px]">
               <span className="text-gray-500 whitespace-nowrap">Try:</span>
               <button
                 onClick={() => setInputMessage("How do I configure custom CNAME subdomains with SSL on Cloudflare?")}
-                className="text-gray-400 hover:text-white rounded bg-gray-900 px-2 py-0.5 truncate max-w-[150px]"
+                className="text-gray-400 hover:text-white rounded bg-[#EEF4FF] px-2 py-0.5 truncate max-w-[150px]"
               >
                 CNAME with SSL?
               </button>
@@ -1454,7 +1454,7 @@ export default function ChatPage() {
               </button>
               <button
                 onClick={() => setInputMessage("I am furious with your broken service. I want my lawyer to process a refund right now!")}
-                className="text-red-400 hover:text-red-300 rounded bg-red-950/30 border border-red-500/20 px-2 py-0.5 truncate max-w-[150px]"
+                className="text-red-400 hover:text-red-300 rounded bg-red-50 border border-red-500/20 px-2 py-0.5 truncate max-w-[150px]"
               >
                 Angry legal escalation test
               </button>
@@ -1462,7 +1462,7 @@ export default function ChatPage() {
 
             {/* Multimodal Preview chip */}
             {attachedImageName && (
-              <div className="px-4 py-1.5 bg-indigo-950/40 border-t border-indigo-500/30 flex items-center justify-between text-xs text-indigo-300">
+              <div className="px-4 py-1.5 bg-indigo-50 border-t border-[#BFDBFE] flex items-center justify-between text-xs text-indigo-300">
                 <span className="flex items-center gap-1.5">
                   <ImageIcon className="h-3.5 w-3.5" />
                   <span>Attached: {attachedImageName} (Multimodal OCR Active)</span>
@@ -1474,8 +1474,8 @@ export default function ChatPage() {
             )}
 
             {/* Input Bar */}
-            <div className="p-3 bg-gray-950 border-t border-gray-800 flex items-center gap-2">
-              <label className="cursor-pointer rounded-lg p-2 text-gray-400 hover:text-white hover:bg-gray-900 transition">
+            <div className="p-3 bg-white border-t border-[#DCE6F5] flex items-center gap-2">
+              <label className="cursor-pointer rounded-lg p-2 text-[#7B8AA6] hover:text-[#0B1B3A] hover:bg-[#EEF4FF] transition">
                 <Paperclip className="h-4 w-4" />
                 <input
                   type="file"
@@ -1501,13 +1501,13 @@ export default function ChatPage() {
                     ? "Enter customer question to review or correct..."
                     : `Ask ${currentRole.name} anything...`
                 }
-                className="flex-1 rounded-lg border border-gray-800 bg-gray-900 px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                className="flex-1 rounded-xl border border-[#C3D3EA] bg-white px-3.5 py-2.5 text-xs text-[#0B1B3A] placeholder-[#94A3B8] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/20 shadow-xs"
               />
 
               <button
                 onClick={() => handleSendMessage()}
                 disabled={!inputMessage.trim() || sending}
-                className="rounded-lg bg-indigo-600 hover:bg-indigo-500 p-2.5 text-white transition disabled:opacity-40 shadow-sm"
+                className="rounded-xl bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 p-2.5 text-white transition disabled:opacity-40 shadow-sm"
               >
                 <Send className="h-4 w-4" />
               </button>
@@ -1515,9 +1515,9 @@ export default function ChatPage() {
           </div>
 
           {/* ================= RIGHT COLUMN: LIVE INSPECTOR DRAWER (3 Cols) ================= */}
-          <div className="lg:col-span-3 rounded-xl border border-gray-800 bg-[#0E1322] p-4 flex flex-col justify-between overflow-y-auto space-y-4">
+          <div className="lg:col-span-3 rounded-xl border border-[#DCE6F5] bg-white p-4 flex flex-col justify-between overflow-y-auto space-y-4">
             <div className="space-y-4">
-              <div className="border-b border-gray-800 pb-2 flex items-center justify-between">
+              <div className="border-b border-[#DCE6F5] pb-2 flex items-center justify-between">
                 <span className="text-xs font-semibold text-white flex items-center gap-1.5">
                   <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
                   Consultant Inspector
@@ -1526,7 +1526,7 @@ export default function ChatPage() {
               </div>
 
               {/* Active Role Card */}
-              <div className="rounded-lg border border-gray-800 bg-gray-900/60 p-3 space-y-1">
+              <div className="rounded-lg border border-[#DCE6F5] bg-[#F6F9FF] p-3 space-y-1">
                 <span className="text-[10px] uppercase font-semibold text-gray-400 tracking-wider">
                   Active Persona &amp; Tone
                 </span>
@@ -1548,12 +1548,12 @@ export default function ChatPage() {
                       <div
                         key={i}
                         onClick={() => setSelectedCitation(c)}
-                        className="rounded-lg border border-gray-800 bg-gray-950 p-2.5 text-xs space-y-1 cursor-pointer hover:border-indigo-400 hover:bg-indigo-950/20 transition"
+                        className="rounded-lg border border-[#DCE6F5] bg-[#F1F6FF] p-2.5 text-xs space-y-1 cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition"
                       >
                         <div className="text-indigo-300 font-semibold font-mono text-[11px] truncate flex items-center gap-1.5">
                           <span>[{c.citationNumber || c.citationIndex || i + 1}]</span>
                           {c.attributionBadge && (
-                            <span className="text-[9px] text-gray-400 bg-gray-900 px-1 rounded border border-gray-800">
+                            <span className="text-[9px] text-gray-400 bg-[#EEF4FF] px-1 rounded border border-[#DCE6F5]">
                               {c.attributionBadge}
                             </span>
                           )}
@@ -1568,7 +1568,7 @@ export default function ChatPage() {
               </div>
 
               {/* Safety Shield Status */}
-              <div className="rounded-lg border border-gray-800 bg-gray-900/60 p-3 space-y-1.5">
+              <div className="rounded-lg border border-[#DCE6F5] bg-[#F6F9FF] p-3 space-y-1.5">
                 <span className="text-[10px] uppercase font-semibold text-gray-400 tracking-wider flex items-center gap-1">
                   <ShieldCheck className="h-3 w-3 text-emerald-400" />
                   Shield Status
@@ -1580,7 +1580,7 @@ export default function ChatPage() {
               </div>
             </div>
 
-            <div className="text-[10px] text-gray-500 font-mono text-center pt-2 border-t border-gray-800">
+            <div className="text-[10px] text-gray-500 font-mono text-center pt-2 border-t border-[#DCE6F5]">
               Model: Claude Sonnet 5.5 &bull; Prompt Caching ON
             </div>
           </div>
@@ -1588,9 +1588,9 @@ export default function ChatPage() {
 
         {/* ================= TEACH MODAL ("Teach AI with Expert Correction") ================= */}
         {teachModalOpen && selectedForTeaching && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="max-w-lg w-full rounded-2xl border border-purple-500/40 bg-[#0E1322] p-6 shadow-2xl space-y-4">
-              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+          <div className="fixed inset-0 bg-[#0B1B3A]/35 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="max-w-lg w-full rounded-2xl border border-purple-500/40 bg-white p-6 shadow-2xl space-y-4">
+              <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-3">
                 <div className="flex items-center gap-2 text-purple-300">
                   <GraduationCap className="h-5 w-5 text-purple-400" />
                   <h3 className="text-base font-bold">Teach AI with Expert Correction</h3>
@@ -1609,14 +1609,14 @@ export default function ChatPage() {
                 <div className="space-y-3">
                   <div>
                     <span className="text-[11px] font-semibold text-gray-400 block mb-1">Original Question:</span>
-                    <div className="p-2.5 rounded bg-gray-950 border border-gray-800 text-xs text-gray-300">
+                    <div className="p-2.5 rounded bg-white border border-[#DCE6F5] text-xs text-gray-300">
                       {selectedForTeaching.question}
                     </div>
                   </div>
 
                   <div>
                     <span className="text-[11px] font-semibold text-gray-400 block mb-1">Previous AI Response:</span>
-                    <div className="p-2.5 rounded bg-gray-950 border border-gray-800 text-xs text-gray-400 max-h-24 overflow-y-auto">
+                    <div className="p-2.5 rounded bg-[#F1F6FF] border border-[#DCE6F5] text-xs text-gray-400 max-h-24 overflow-y-auto">
                       {selectedForTeaching.answer}
                     </div>
                   </div>
@@ -1630,14 +1630,14 @@ export default function ChatPage() {
                       value={teachCorrectionText}
                       onChange={(e) => setTeachCorrectionText(e.target.value)}
                       placeholder="Explain what was wrong with the answer and state the durable correct protocol/rule..."
-                      className="w-full rounded-lg border border-purple-500/40 bg-gray-950 p-3 text-xs text-white focus:outline-none focus:border-purple-400"
+                      className="w-full rounded-lg border border-purple-500/40 bg-white p-3 text-xs text-white focus:outline-none focus:border-purple-400"
                     />
                   </div>
 
-                  <div className="flex justify-end gap-2 pt-2 border-t border-gray-800">
+                  <div className="flex justify-end gap-2 pt-2 border-t border-[#DCE6F5]">
                     <button
                       onClick={() => setTeachModalOpen(false)}
-                      className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-xs text-gray-300 hover:text-white"
+                      className="rounded-lg border border-[#C3D3EA] bg-gray-800 px-4 py-2 text-xs text-gray-300 hover:text-white"
                     >
                       Cancel
                     </button>
@@ -1657,11 +1657,11 @@ export default function ChatPage() {
 
         {/* ================= TASK 3.1: TWO WAYS TO START A CHAT MODAL ================= */}
         {showNewChatModal && (
-          <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="max-w-xl w-full rounded-2xl border border-gray-700 bg-[#0E1322] p-6 shadow-2xl space-y-5">
-              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+          <div className="fixed inset-0 bg-[#0B1B3A]/35 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="max-w-xl w-full rounded-2xl border border-[#C3D3EA] bg-white p-6 shadow-2xl space-y-5">
+              <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-3">
                 <div>
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <h3 className="text-base font-bold text-[#0B1B3A] flex items-center gap-2">
                     <Plus className="h-4 w-4 text-indigo-400" />
                     <span>Start a New Consultation</span>
                   </h3>
@@ -1681,13 +1681,13 @@ export default function ChatPage() {
                 {/* Option A: Ask Something */}
                 <div
                   onClick={() => handleStartChat("ask")}
-                  className="cursor-pointer rounded-xl border border-indigo-500/40 bg-gradient-to-br from-indigo-950/40 to-gray-950 p-5 space-y-3 hover:border-indigo-400 transition shadow-sm group text-left"
+                  className="cursor-pointer rounded-xl border border-[#BFDBFE] bg-gradient-to-br from-indigo-950/40 to-gray-950 p-5 space-y-3 hover:border-indigo-400 transition shadow-sm group text-left"
                 >
-                  <div className="h-10 w-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30 group-hover:scale-105 transition">
+                  <div className="h-10 w-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center border border-[#BFDBFE] group-hover:scale-105 transition">
                     <Bot className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white group-hover:text-indigo-300 transition">
+                    <h4 className="text-sm font-bold text-[#0B1B3A] group-hover:text-indigo-300 transition">
                       Ask something
                     </h4>
                     <p className="text-xs text-gray-400 mt-1 leading-relaxed">
@@ -1708,7 +1708,7 @@ export default function ChatPage() {
                     <GraduationCap className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white group-hover:text-purple-300 transition">
+                    <h4 className="text-sm font-bold text-[#0B1B3A] group-hover:text-purple-300 transition">
                       Teach me
                     </h4>
                     <p className="text-xs text-gray-400 mt-1 leading-relaxed">
@@ -1721,7 +1721,7 @@ export default function ChatPage() {
                 </div>
               </div>
 
-              <div className="rounded-lg bg-gray-950 border border-gray-800 p-3 text-[11px] text-gray-400 flex items-center justify-between">
+              <div className="rounded-lg bg-[#F1F6FF] border border-[#DCE6F5] p-3 text-[11px] text-gray-400 flex items-center justify-between">
                 <span>💡 You can also teach inline inside any Ask chat by replying &quot;This is wrong, the right answer is...&quot;</span>
               </div>
             </div>
@@ -1730,11 +1730,11 @@ export default function ChatPage() {
 
         {/* ================= TASK 3.2: ONE-CLICK CITATION & PARAGRAPH INSPECTOR MODAL ================= */}
         {selectedCitation && (
-          <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="max-w-2xl w-full rounded-2xl border border-indigo-500/40 bg-[#0E1322] p-6 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
-              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+          <div className="fixed inset-0 bg-[#0B1B3A]/35 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="max-w-2xl w-full rounded-2xl border border-[#BFDBFE] bg-white p-6 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
+              <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-3">
                 <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-lg bg-indigo-600/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+                  <div className="h-8 w-8 rounded-lg bg-indigo-600/20 text-indigo-400 flex items-center justify-center border border-[#BFDBFE]">
                     <BookOpen className="h-4 w-4" />
                   </div>
                   <div>
@@ -1742,11 +1742,11 @@ export default function ChatPage() {
                       <span className="text-xs font-mono font-bold text-indigo-400">
                         [{selectedCitation.citationNumber || selectedCitation.citationIndex || 1}]
                       </span>
-                      <h3 className="text-sm font-bold text-white">
+                      <h3 className="text-sm font-bold text-[#0B1B3A]">
                         {selectedCitation.sourceTitle || selectedCitation.title || "Document Source"}
                       </h3>
                       {selectedCitation.attributionBadge && (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold uppercase bg-indigo-500/10 text-indigo-300 border border-indigo-500/30">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold uppercase bg-indigo-500/10 text-indigo-300 border border-[#BFDBFE]">
                           {selectedCitation.attributionBadge}
                         </span>
                       )}
@@ -1769,19 +1769,19 @@ export default function ChatPage() {
                 <span className="text-xs font-semibold text-gray-300 uppercase tracking-wider block">
                   Exact Paragraph Content (One-Click Inspection):
                 </span>
-                <div className="p-4 rounded-xl bg-gray-950 border border-gray-800 text-xs text-gray-200 leading-relaxed font-sans whitespace-pre-wrap">
+                <div className="p-4 rounded-xl bg-white border border-[#DCE6F5] text-xs text-gray-200 leading-relaxed font-sans whitespace-pre-wrap">
                   {selectedCitation.paragraphText || selectedCitation.snippet || "No additional paragraph text available."}
                 </div>
               </div>
 
               {/* Multimodal Screenshot Viewer (if available) */}
               {selectedCitation.imageUrl && (
-                <div className="space-y-2 pt-2 border-t border-gray-800">
+                <div className="space-y-2 pt-2 border-t border-[#DCE6F5]">
                   <span className="text-xs font-semibold text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
                     <ImageIcon className="h-3.5 w-3.5 text-pink-400" />
                     <span>Associated Help Center Screenshot:</span>
                   </span>
-                  <div className="rounded-xl border border-gray-800 overflow-hidden bg-gray-950 p-2">
+                  <div className="rounded-xl border border-[#DCE6F5] overflow-hidden bg-[#F1F6FF] p-2">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={selectedCitation.imageUrl}
@@ -1818,7 +1818,7 @@ export default function ChatPage() {
               )}
 
               {/* External Source Link Action */}
-              <div className="pt-2 flex items-center justify-between border-t border-gray-800 text-xs">
+              <div className="pt-2 flex items-center justify-between border-t border-[#DCE6F5] text-xs">
                 <span className="text-gray-400">Grounded Knowledge Type: {selectedCitation.type || "sitemap"}</span>
                 {selectedCitation.url && selectedCitation.url.startsWith("http") && (
                   <a
@@ -1838,15 +1838,15 @@ export default function ChatPage() {
 
         {/* ================= TASK 3.2: EXPERT TASK HANDOVER & RESOLUTION MODAL ================= */}
         {expertModalTask && (
-          <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="max-w-xl w-full rounded-2xl border border-amber-500/40 bg-[#0E1322] p-6 shadow-2xl space-y-4">
-              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+          <div className="fixed inset-0 bg-[#0B1B3A]/35 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="max-w-xl w-full rounded-2xl border border-amber-500/40 bg-white p-6 shadow-2xl space-y-4">
+              <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-3">
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-lg bg-amber-600/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
                     <CheckCircle2 className="h-4 w-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-white">Resolve Human Expert Task</h3>
+                    <h3 className="text-sm font-bold text-[#0B1B3A]">Resolve Human Expert Task</h3>
                     <p className="text-[11px] text-gray-400 font-mono mt-0.5">
                       Task ID: #{expertModalTask.id.slice(0, 16)} &bull; Knowledge Flowback
                     </p>
@@ -1871,7 +1871,7 @@ export default function ChatPage() {
                     <span className="text-[11px] font-semibold text-gray-400 block mb-1">
                       Customer Question (Unanswered by AI):
                     </span>
-                    <div className="p-2.5 rounded bg-gray-950 border border-gray-800 text-xs text-amber-200">
+                    <div className="p-2.5 rounded bg-[#F1F6FF] border border-[#DCE6F5] text-xs text-amber-200">
                       &quot;{expertModalTask.question}&quot;
                     </div>
                   </div>
@@ -1885,24 +1885,24 @@ export default function ChatPage() {
                       value={expertAnswerText}
                       onChange={(e) => setExpertAnswerText(e.target.value)}
                       placeholder="Type the verified answer. This will be sent to the customer and permanently taught to the Knowledge Brain..."
-                      className="w-full rounded-xl border border-gray-800 bg-gray-950 p-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500"
+                      className="w-full rounded-xl border border-[#DCE6F5] bg-white p-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500"
                     />
                   </div>
 
-                  <div className="flex items-center gap-2 bg-gray-950 p-2.5 rounded-lg border border-gray-800">
+                  <div className="flex items-center gap-2 bg-[#F1F6FF] p-2.5 rounded-lg border border-[#DCE6F5]">
                     <input
                       type="checkbox"
                       id="flowIntoMemoryCheck"
                       checked={expertFlowIntoMemory}
                       onChange={(e) => setExpertFlowIntoMemory(e.target.checked)}
-                      className="rounded border-gray-700 text-amber-500 focus:ring-amber-500"
+                      className="rounded border-[#C3D3EA] text-amber-500 focus:ring-amber-500"
                     />
                     <label htmlFor="flowIntoMemoryCheck" className="text-xs text-gray-300 cursor-pointer">
                       Flow this expert answer back into Knowledge Brain as an active instruction
                     </label>
                   </div>
 
-                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-800">
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#DCE6F5]">
                     <button
                       onClick={() => setExpertModalTask(null)}
                       className="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-white"
@@ -1926,15 +1926,15 @@ export default function ChatPage() {
 
         {/* ================= TASK 3.2: CONFIDENCE THRESHOLD & "I DON'T KNOW" LINE CALIBRATION MODAL ================= */}
         {thresholdModalOpen && (
-          <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="max-w-2xl w-full rounded-2xl border border-emerald-500/40 bg-[#0E1322] p-6 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
-              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+          <div className="fixed inset-0 bg-[#0B1B3A]/35 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="max-w-2xl w-full rounded-2xl border border-emerald-500/40 bg-white p-6 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
+              <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-3">
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-lg bg-emerald-600/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
                     <ShieldCheck className="h-4 w-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-white">
+                    <h3 className="text-sm font-bold text-[#0B1B3A]">
                       &quot;I Don&apos;t Know&quot; Line Calibration &amp; Trade-Off Inspector
                     </h3>
                     <p className="text-[11px] text-gray-400 mt-0.5">
@@ -1980,9 +1980,9 @@ export default function ChatPage() {
                     <span className="text-xs font-semibold text-gray-300 uppercase tracking-wider block mb-2">
                       Empirical Trade-Off Curve Across Candidate Cut-Offs:
                     </span>
-                    <div className="rounded-xl border border-gray-800 overflow-hidden">
+                    <div className="rounded-xl border border-[#DCE6F5] overflow-hidden">
                       <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-900/90 text-gray-400 uppercase text-[10px]">
+                        <thead className="bg-[#EEF4FF]/90 text-gray-400 uppercase text-[10px]">
                           <tr>
                             <th className="p-2.5">Threshold (&theta;)</th>
                             <th className="p-2.5 text-red-400">Wrong Answers %</th>
@@ -1997,7 +1997,7 @@ export default function ChatPage() {
                             return (
                               <tr
                                 key={sIdx}
-                                className={isOptimal ? "bg-emerald-950/30 font-bold text-emerald-200" : "hover:bg-gray-900/50"}
+                                className={isOptimal ? "bg-emerald-950/30 font-bold text-emerald-200" : "hover:bg-[#EEF4FF]/50"}
                               >
                                 <td className="p-2.5 flex items-center gap-1.5">
                                   <span>{step.threshold.toFixed(2)}</span>
@@ -2027,15 +2027,15 @@ export default function ChatPage() {
         )}
         {/* ================= TASK 3.4: LESSONS & KNOWLEDGE MEMORY MANAGEMENT MODAL ================= */}
         {lessonsModalOpen && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="max-w-3xl w-full rounded-2xl border border-purple-500/40 bg-[#0E1322] p-6 shadow-2xl space-y-4 max-h-[88vh] overflow-y-auto">
-              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+          <div className="fixed inset-0 bg-[#0B1B3A]/35 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="max-w-3xl w-full rounded-2xl border border-purple-500/40 bg-white p-6 shadow-2xl space-y-4 max-h-[88vh] overflow-y-auto">
+              <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-3">
                 <div className="flex items-center gap-2.5">
                   <div className="h-9 w-9 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center border border-purple-500/30">
                     <BookOpen className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <h3 className="text-base font-bold text-[#0B1B3A] flex items-center gap-2">
                       <span>Lessons &amp; Learned Protocols</span>
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">
                         Governance Active
@@ -2056,7 +2056,7 @@ export default function ChatPage() {
               </div>
 
               {lessonActionMsg && (
-                <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-500/40 text-purple-300 text-xs flex items-center gap-2">
+                <div className="p-3 rounded-xl bg-purple-50 border border-purple-500/40 text-purple-300 text-xs flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-purple-400 flex-shrink-0" />
                   <span>{lessonActionMsg}</span>
                 </div>
@@ -2081,10 +2081,10 @@ export default function ChatPage() {
                         key={lesson.id}
                         className={`p-4 rounded-xl border transition space-y-3 ${
                           !isActive
-                            ? "border-gray-800 bg-gray-950/50 opacity-60"
+                            ? "border-[#DCE6F5] bg-[#F1F6FF]/50 opacity-60"
                             : isPending
                             ? "border-amber-500/40 bg-amber-950/10 shadow-sm"
-                            : "border-purple-500/30 bg-[#071329]"
+                            : "border-purple-500/30 bg-white"
                         }`}
                       >
                         {/* Header & Badges */}
@@ -2109,14 +2109,14 @@ export default function ChatPage() {
                               <span
                                 className={`px-2 py-0.2 rounded text-[10px] font-mono ${
                                   isActive
-                                    ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
+                                    ? "bg-blue-50 text-cyan-400 border border-[#DCE6F5]"
                                     : "bg-gray-800 text-gray-400"
                                 }`}
                               >
                                 {isActive ? "ACTIVE" : "SWITCHED OFF"}
                               </span>
                             </div>
-                            <h4 className="text-sm font-bold text-white mt-1">{lesson.title}</h4>
+                            <h4 className="text-sm font-bold text-[#0B1B3A] mt-1">{lesson.title}</h4>
                           </div>
 
                           {/* Action Buttons: Switch Off, Edit, Delete */}
@@ -2124,7 +2124,7 @@ export default function ChatPage() {
                             <button
                               type="button"
                               onClick={() => handleToggleLessonActive(lesson.id, isActive)}
-                              className="px-2 py-1 rounded bg-gray-900 border border-gray-800 hover:border-gray-700 text-[11px] text-gray-300 flex items-center gap-1 transition"
+                              className="px-2 py-1 rounded bg-[#EEF4FF] border border-[#DCE6F5] hover:border-[#C3D3EA] text-[11px] text-gray-300 flex items-center gap-1 transition"
                               title={isActive ? "Switch off lesson (deactivate from RAG)" : "Switch on lesson (activate for RAG)"}
                             >
                               {isActive ? (
@@ -2152,7 +2152,7 @@ export default function ChatPage() {
                                   setEditMarkdown(lesson.lessonMarkdown);
                                 }
                               }}
-                              className="p-1 rounded bg-gray-900 border border-gray-800 hover:text-white text-gray-400 transition"
+                              className="p-1 rounded bg-[#EEF4FF] border border-[#DCE6F5] hover:text-white text-gray-400 transition"
                               title="Edit lesson title and markdown"
                             >
                               <Edit2 className="h-3.5 w-3.5" />
@@ -2161,7 +2161,7 @@ export default function ChatPage() {
                             <button
                               type="button"
                               onClick={() => handleDeleteLesson(lesson.id)}
-                              className="p-1 rounded bg-gray-900 border border-gray-800 hover:text-red-400 text-gray-400 transition"
+                              className="p-1 rounded bg-[#EEF4FF] border border-[#DCE6F5] hover:text-red-400 text-gray-400 transition"
                               title="Delete lesson record and Markdown file"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -2170,7 +2170,7 @@ export default function ChatPage() {
                         </div>
 
                         {/* Metadata: Who said it, When, Which example, How sure it is */}
-                        <div className="p-2.5 rounded-lg bg-gray-950/80 border border-gray-800/80 text-[11px] space-y-1 font-mono text-gray-300">
+                        <div className="p-2.5 rounded-lg bg-[#F6F9FF] border border-[#DCE6F5] text-[11px] space-y-1 font-mono text-gray-300">
                           <div className="flex items-center justify-between text-gray-400 flex-wrap gap-2">
                             <span>
                               <strong>Author:</strong> {lesson.author || "Support Team Member"}
@@ -2196,14 +2196,14 @@ export default function ChatPage() {
 
                         {/* Edit Form or Markdown View */}
                         {isEditing ? (
-                          <div className="space-y-2.5 p-3 rounded-lg bg-gray-950 border border-purple-500/40">
+                          <div className="space-y-2.5 p-3 rounded-lg bg-[#F1F6FF] border border-purple-500/40">
                             <div>
                               <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1">Title</label>
                               <input
                                 type="text"
                                 value={editTitle}
                                 onChange={(e) => setEditTitle(e.target.value)}
-                                className="w-full rounded bg-gray-900 border border-gray-700 p-1.5 text-xs text-white"
+                                className="w-full rounded bg-[#EEF4FF] border border-[#C3D3EA] p-1.5 text-xs text-white"
                               />
                             </div>
                             <div>
@@ -2212,7 +2212,7 @@ export default function ChatPage() {
                                 type="text"
                                 value={editCategory}
                                 onChange={(e) => setEditCategory(e.target.value)}
-                                className="w-full rounded bg-gray-900 border border-gray-700 p-1.5 text-xs text-white"
+                                className="w-full rounded bg-[#EEF4FF] border border-[#C3D3EA] p-1.5 text-xs text-white"
                               />
                             </div>
                             <div>
@@ -2221,14 +2221,14 @@ export default function ChatPage() {
                                 rows={6}
                                 value={editMarkdown}
                                 onChange={(e) => setEditMarkdown(e.target.value)}
-                                className="w-full rounded bg-gray-900 border border-gray-700 p-2 text-xs font-mono text-white"
+                                className="w-full rounded bg-[#EEF4FF] border border-[#C3D3EA] p-2 text-xs font-mono text-white"
                               />
                             </div>
                             <div className="flex justify-end gap-2">
                               <button
                                 type="button"
                                 onClick={() => setEditingLessonId(null)}
-                                className="px-3 py-1 rounded border border-gray-700 text-xs text-gray-400 hover:text-white"
+                                className="px-3 py-1 rounded border border-[#C3D3EA] text-xs text-gray-400 hover:text-white"
                               >
                                 Cancel
                               </button>
@@ -2242,7 +2242,7 @@ export default function ChatPage() {
                             </div>
                           </div>
                         ) : (
-                          <div className="p-3 rounded-lg bg-gray-950 border border-gray-800 text-xs text-gray-300 font-mono whitespace-pre-wrap max-h-36 overflow-y-auto">
+                          <div className="p-3 rounded-lg bg-white border border-[#DCE6F5] text-xs text-gray-300 font-mono whitespace-pre-wrap max-h-36 overflow-y-auto">
                             {lesson.lessonMarkdown}
                           </div>
                         )}

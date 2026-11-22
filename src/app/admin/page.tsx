@@ -129,13 +129,13 @@ export default function AdminPage() {
     <AppShell breadcrumbs={[{ label: "Platform Admin", href: "/admin" }]}>
       <div className="space-y-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-800 pb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#DCE6F5] pb-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono font-medium mb-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-[#BFDBFE] text-cyan-400 text-xs font-mono font-medium mb-2">
               <ShieldAlert className="h-3.5 w-3.5" />
               <span>SaaS Operator Fleet Command</span>
             </div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-3xl font-extrabold text-[#0B1B3A] tracking-tight">
               Platform Admin Dashboard
             </h1>
             <p className="text-sm text-gray-400 mt-1">
@@ -147,7 +147,7 @@ export default function AdminPage() {
             <button
               onClick={handleSeedDemo}
               disabled={Boolean(actionLoading)}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold text-xs transition flex items-center gap-2 shadow-lg shadow-cyan-500/20 disabled:opacity-50"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold text-xs transition flex items-center gap-2 shadow-lg shadow-blue-500/20 disabled:opacity-50"
             >
               <PlusCircle className="h-4 w-4" />
               <span>{actionLoading === "seed" ? "Seeding..." : "Seed Demo Workspaces"}</span>
@@ -156,7 +156,7 @@ export default function AdminPage() {
             <button
               onClick={fetchAdminData}
               disabled={loading}
-              className="p-2 rounded-xl border border-gray-700 bg-gray-900 text-gray-300 hover:text-white hover:border-cyan-400 transition"
+              className="p-2 rounded-xl border border-[#C3D3EA] bg-white text-gray-300 hover:text-white hover:border-cyan-400 transition"
               title="Refresh Fleet"
             >
               <RotateCw className={`h-4 w-4 ${loading ? "animate-spin text-cyan-400" : ""}`} />
@@ -166,7 +166,7 @@ export default function AdminPage() {
 
         {/* Toast Notification */}
         {toastMessage && (
-          <div className="p-4 rounded-xl bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 text-xs flex items-center gap-2">
+          <div className="p-4 rounded-xl bg-blue-50 border border-[#BFDBFE] text-cyan-300 text-xs flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 shrink-0 text-cyan-400" />
             <span>{toastMessage}</span>
           </div>
@@ -184,9 +184,9 @@ export default function AdminPage() {
         )}
 
         {/* Zero-Leakage Architecture Banner */}
-        <div className="rounded-2xl border border-cyan-500/20 bg-gradient-to-r from-[#040f26] to-[#081b3d] p-5 shadow-lg">
+        <div className="rounded-2xl border border-[#DCE6F5] bg-gradient-to-r from-[#040f26] to-[#081b3d] p-5 shadow-lg">
           <div className="flex items-start gap-4">
-            <div className="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+            <div className="p-2.5 rounded-xl bg-blue-50 border border-[#BFDBFE] text-cyan-400">
               <Lock className="h-6 w-6" />
             </div>
             <div className="space-y-1">
@@ -207,12 +207,12 @@ export default function AdminPage() {
         {/* Fleet KPI Cards */}
         {summary && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-5 rounded-2xl border border-gray-800 bg-[#071329]">
+            <div className="p-5 rounded-2xl border border-[#DCE6F5] bg-white">
               <div className="text-xs font-mono text-gray-400 uppercase tracking-wider flex items-center gap-2">
                 <Building2 className="h-3.5 w-3.5 text-cyan-400" />
                 <span>Total Workspaces</span>
               </div>
-              <div className="text-3xl font-extrabold text-white mt-2 font-mono">
+              <div className="text-3xl font-extrabold text-[#0B1B3A] mt-2 font-mono">
                 {summary.totalBusinesses}
               </div>
               <div className="text-[11px] text-gray-400 mt-1">
@@ -220,34 +220,34 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div className="p-5 rounded-2xl border border-gray-800 bg-[#071329]">
+            <div className="p-5 rounded-2xl border border-[#DCE6F5] bg-white">
               <div className="text-xs font-mono text-gray-400 uppercase tracking-wider flex items-center gap-2">
                 <Activity className="h-3.5 w-3.5 text-indigo-400" />
                 <span>Fleet Invocations</span>
               </div>
-              <div className="text-3xl font-extrabold text-indigo-400 mt-2 font-mono">
+              <div className="text-3xl font-extrabold text-[#2563EB] mt-2 font-mono">
                 {summary.totalCalls}
               </div>
               <div className="text-[11px] text-gray-400 mt-1">Across 14 Supported Models</div>
             </div>
 
-            <div className="p-5 rounded-2xl border border-gray-800 bg-[#071329]">
+            <div className="p-5 rounded-2xl border border-[#DCE6F5] bg-white">
               <div className="text-xs font-mono text-gray-400 uppercase tracking-wider flex items-center gap-2">
                 <DollarSign className="h-3.5 w-3.5 text-emerald-400" />
                 <span>Total Fleet Spend</span>
               </div>
-              <div className="text-3xl font-extrabold text-emerald-400 mt-2 font-mono">
+              <div className="text-3xl font-extrabold text-[#15803D] mt-2 font-mono">
                 ${summary.totalSpendUsd.toFixed(4)}
               </div>
               <div className="text-[11px] text-gray-400 mt-1">Ready for Billing Invoicing</div>
             </div>
 
-            <div className="p-5 rounded-2xl border border-gray-800 bg-[#071329]">
+            <div className="p-5 rounded-2xl border border-[#DCE6F5] bg-white">
               <div className="text-xs font-mono text-gray-400 uppercase tracking-wider flex items-center gap-2">
                 <AlertTriangle className="h-3.5 w-3.5 text-amber-400" />
                 <span>Failed Background Jobs</span>
               </div>
-              <div className="text-3xl font-extrabold text-amber-400 mt-2 font-mono">
+              <div className="text-3xl font-extrabold text-[#B45309] mt-2 font-mono">
                 {summary.failedJobCount}
               </div>
               <div className="text-[11px] text-gray-400 mt-1">pg-boss Worker Runner</div>
@@ -256,9 +256,9 @@ export default function AdminPage() {
         )}
 
         {/* Businesses Table */}
-        <div className="rounded-2xl border border-gray-800 bg-[#071329] overflow-hidden">
-          <div className="p-5 border-b border-gray-800 flex items-center justify-between">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
+        <div className="rounded-2xl border border-[#DCE6F5] bg-white overflow-hidden">
+          <div className="p-5 border-b border-[#DCE6F5] flex items-center justify-between">
+            <h2 className="text-base font-bold text-[#0B1B3A] flex items-center gap-2">
               <Layers className="h-4 w-4 text-cyan-400" />
               <span>Registered Business Tenants</span>
             </h2>
@@ -267,7 +267,7 @@ export default function AdminPage() {
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#050B18] text-gray-400 uppercase font-mono border-b border-gray-800">
+              <thead className="bg-[#EEF4FF] text-[#4A5B78] uppercase font-mono border-b border-[#DCE6F5] font-semibold">
                 <tr>
                   <th className="py-3 px-4">Business / Slug</th>
                   <th className="py-3 px-4">Status</th>
@@ -282,7 +282,7 @@ export default function AdminPage() {
                 {businesses.map((biz) => {
                   const isSuspended = biz.status === "suspended";
                   return (
-                    <tr key={biz.id} className="hover:bg-gray-800/30 transition">
+                    <tr key={biz.id} className="hover:bg-[#EEF4FF]/30 transition">
                       <td className="py-3.5 px-4">
                         <div className="font-bold text-white text-sm">{biz.name}</div>
                         <div className="font-mono text-gray-400 text-[11px]">{biz.slug}</div>
@@ -348,9 +348,9 @@ export default function AdminPage() {
         </div>
 
         {/* Failed Background Jobs Table */}
-        <div className="rounded-2xl border border-gray-800 bg-[#071329] overflow-hidden">
-          <div className="p-5 border-b border-gray-800 flex items-center justify-between">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
+        <div className="rounded-2xl border border-[#DCE6F5] bg-white overflow-hidden">
+          <div className="p-5 border-b border-[#DCE6F5] flex items-center justify-between">
+            <h2 className="text-base font-bold text-[#0B1B3A] flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-400" />
               <span>Failed Background Jobs Log</span>
             </h2>
@@ -359,7 +359,7 @@ export default function AdminPage() {
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#050B18] text-gray-400 uppercase font-mono border-b border-gray-800">
+              <thead className="bg-[#EEF4FF] text-[#4A5B78] uppercase font-mono border-b border-[#DCE6F5] font-semibold">
                 <tr>
                   <th className="py-3 px-4">Queue Name</th>
                   <th className="py-3 px-4">Business ID</th>
@@ -370,7 +370,7 @@ export default function AdminPage() {
               </thead>
               <tbody className="divide-y divide-gray-800/60">
                 {failedJobs.map((job) => (
-                  <tr key={job.id} className="hover:bg-gray-800/30 transition">
+                  <tr key={job.id} className="hover:bg-[#EEF4FF]/30 transition">
                     <td className="py-3 px-4 font-mono font-bold text-cyan-400">
                       {job.queueName}
                     </td>

@@ -994,7 +994,7 @@ export default function KnowledgeBrainPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+            <h1 className="text-2xl font-bold tracking-tight text-[#0B1B3A] flex items-center gap-2">
               <Brain className="h-6 w-6 text-indigo-400" />
               <span>The Knowledge Brain</span>
             </h1>
@@ -1004,26 +1004,26 @@ export default function KnowledgeBrainPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="rounded-lg border border-indigo-500/20 bg-indigo-950/20 px-3 py-1.5 text-xs font-mono text-indigo-300">
+            <span className="rounded-lg border border-[#DCE6F5] bg-indigo-50 px-3 py-1.5 text-xs font-mono text-indigo-300">
               5 Knowledge Types Active
             </span>
           </div>
         </div>
 
         {/* 5 Primary Knowledge Types Tabs + Hybrid Search Sandbox */}
-        <div className="flex border-b border-gray-800 space-x-1 overflow-x-auto">
+        <div className="flex border-b border-[#DCE6F5] space-x-1 overflow-x-auto">
           {/* Tab 1: Sitemaps */}
           <button
             onClick={() => setActiveTab("sitemaps")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap ${
               activeTab === "sitemaps"
-                ? "border-indigo-500 text-indigo-400"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF]"
+                : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
             }`}
           >
             <Globe className="h-4 w-4" />
             <span>1. Sitemaps</span>
-            <span className="text-[10px] bg-indigo-950/60 text-indigo-300 px-1.5 py-0.2 rounded border border-indigo-500/20 font-mono">
+            <span className="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200 font-mono font-medium">
               [sitemap]
             </span>
           </button>
@@ -1031,15 +1031,15 @@ export default function KnowledgeBrainPage() {
           {/* Tab 2: Page URLs */}
           <button
             onClick={() => setActiveTab("pages")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap ${
               activeTab === "pages"
-                ? "border-indigo-500 text-indigo-400"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF]"
+                : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
             }`}
           >
             <FileText className="h-4 w-4" />
             <span>2. Page URLs</span>
-            <span className="text-[10px] bg-sky-950/60 text-sky-300 px-1.5 py-0.2 rounded border border-sky-500/20 font-mono">
+            <span className="text-[10px] bg-sky-50 text-sky-700 px-1.5 py-0.5 rounded border border-sky-200 font-mono font-medium">
               [page_url]
             </span>
           </button>
@@ -1047,15 +1047,15 @@ export default function KnowledgeBrainPage() {
           {/* Tab 3: Instructions */}
           <button
             onClick={() => setActiveTab("instructions")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap ${
               activeTab === "instructions"
-                ? "border-indigo-500 text-indigo-400"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF]"
+                : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
             }`}
           >
             <BookOpen className="h-4 w-4" />
             <span>3. Instructions</span>
-            <span className="text-[10px] bg-emerald-950/60 text-emerald-300 px-1.5 py-0.2 rounded border border-emerald-500/20 font-mono">
+            <span className="text-[10px] bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-200 font-mono font-medium">
               [instruction]
             </span>
           </button>
@@ -1063,15 +1063,15 @@ export default function KnowledgeBrainPage() {
           {/* Tab 4: Skills */}
           <button
             onClick={() => setActiveTab("skills")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap ${
               activeTab === "skills"
-                ? "border-indigo-500 text-indigo-400"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF]"
+                : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
             }`}
           >
             <Sparkles className="h-4 w-4" />
             <span>4. Skills</span>
-            <span className="text-[10px] bg-purple-950/60 text-purple-300 px-1.5 py-0.2 rounded border border-purple-500/20 font-mono">
+            <span className="text-[10px] bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded border border-purple-200 font-mono font-medium">
               [skill]
             </span>
           </button>
@@ -1079,15 +1079,15 @@ export default function KnowledgeBrainPage() {
           {/* Tab 5: Past Emails */}
           <button
             onClick={() => setActiveTab("emails")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap ${
               activeTab === "emails"
-                ? "border-indigo-500 text-indigo-400"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF]"
+                : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
             }`}
           >
             <Mail className="h-4 w-4" />
             <span>5. Past Emails</span>
-            <span className="text-[10px] bg-amber-950/60 text-amber-300 px-1.5 py-0.2 rounded border border-amber-500/20 font-mono">
+            <span className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded border border-amber-200 font-mono font-medium">
               [past_email]
             </span>
           </button>
@@ -1095,10 +1095,10 @@ export default function KnowledgeBrainPage() {
           {/* Tab 6: Search & Health */}
           <button
             onClick={() => setActiveTab("search")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap ${
               activeTab === "search"
-                ? "border-indigo-500 text-indigo-400"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF]"
+                : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
             }`}
           >
             <Search className="h-4 w-4" />
@@ -1108,15 +1108,15 @@ export default function KnowledgeBrainPage() {
           {/* Tab 7: Stay Fresh & URL Health (Task 2.4) */}
           <button
             onClick={() => setActiveTab("freshness")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap ${
               activeTab === "freshness"
-                ? "border-indigo-500 text-indigo-400"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+                ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF]"
+                : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
             }`}
           >
             <RotateCw className="h-4 w-4" />
             <span>Stay Fresh &amp; Health</span>
-            <span className="text-[10px] bg-emerald-950/60 text-emerald-300 px-1.5 py-0.2 rounded border border-emerald-500/20 font-mono">
+            <span className="text-[10px] bg-emerald-50 text-emerald-300 px-1.5 py-0.2 rounded border border-emerald-500/20 font-mono">
               Auto-Sync
             </span>
           </button>
@@ -1125,21 +1125,21 @@ export default function KnowledgeBrainPage() {
         {/* ================= TAB 1: SITEMAPS ================= */}
         {activeTab === "sitemaps" && (
           <div className="space-y-6">
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 shadow-sm space-y-4">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-6 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Documentation Sitemaps &amp; Knowledge Crawling</h3>
+                  <h3 className="text-sm font-semibold text-[#0B1B3A]">Documentation Sitemaps &amp; Knowledge Crawling</h3>
                   <p className="text-xs text-gray-400 mt-0.5">
                     Add one or more XML sitemap URLs. Automatically inspects links on entry, resolves nested sitemaps recursively, eliminates duplicates, and generates pre-flight read plans.
                   </p>
                 </div>
-                <span className="rounded bg-indigo-500/10 text-indigo-400 px-2.5 py-0.5 text-xs font-mono border border-indigo-500/20">
+                <span className="rounded bg-indigo-500/10 text-indigo-400 px-2.5 py-0.5 text-xs font-mono border border-[#DCE6F5]">
                   Rate: 450 pages/hr &bull; 8s polite batch pause
                 </span>
               </div>
 
               {ingestSuccessMsg && (
-                <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3.5 text-xs text-emerald-300 flex items-center gap-2">
+                <div className="rounded-lg border border-emerald-500/30 bg-emerald-50 p-3.5 text-xs text-emerald-300 flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
                   <span>{ingestSuccessMsg}</span>
                 </div>
@@ -1155,7 +1155,7 @@ export default function KnowledgeBrainPage() {
                       "https://support.brilliantdirectories.com/support/sitemap.xml"
                     )
                   }
-                  className="rounded bg-indigo-950/40 border border-indigo-500/30 hover:bg-indigo-900/40 px-2.5 py-1 text-indigo-300 font-mono text-[11px]"
+                  className="rounded bg-indigo-50 border border-[#BFDBFE] hover:bg-indigo-900/40 px-2.5 py-1 text-indigo-300 font-mono text-[11px]"
                 >
                   Brilliant Directories (Default Benchmark)
                 </button>
@@ -1166,7 +1166,7 @@ export default function KnowledgeBrainPage() {
                       "https://support.brilliantdirectories.com/support/sitemap.xml\nhttps://docs.stripe.com/sitemap.xml"
                     )
                   }
-                  className="rounded bg-purple-950/40 border border-purple-500/30 hover:bg-purple-900/40 px-2.5 py-1 text-purple-300 font-mono text-[11px]"
+                  className="rounded bg-purple-50 border border-purple-500/30 hover:bg-purple-900/40 px-2.5 py-1 text-purple-300 font-mono text-[11px]"
                 >
                   Multi-Sitemap Batch (Nested Demo)
                 </button>
@@ -1196,7 +1196,7 @@ export default function KnowledgeBrainPage() {
                   value={sitemapsInput}
                   onChange={(e) => handleSitemapsInputChange(e.target.value)}
                   placeholder="https://example.com/sitemap.xml&#10;https://example.com/sitemap_index.xml"
-                  className="w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 font-mono"
+                  className="w-full rounded-lg border border-[#C3D3EA] bg-white px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 font-mono"
                 />
 
                 {/* Live URL Validation Feedback List (Task 2.2: Check each URL when it is entered) */}
@@ -1208,7 +1208,7 @@ export default function KnowledgeBrainPage() {
                         key={idx}
                         className={`flex items-center justify-between text-xs px-2.5 py-1.5 rounded border font-mono ${
                           check.valid
-                            ? "bg-emerald-950/20 border-emerald-500/30 text-emerald-300"
+                            ? "bg-emerald-50 border-emerald-500/30 text-emerald-300"
                             : "bg-red-950/20 border-red-500/30 text-red-300"
                         }`}
                       >
@@ -1235,7 +1235,7 @@ export default function KnowledgeBrainPage() {
                       ingesting ||
                       urlValidationChecks.filter((u) => u.valid).length === 0
                     }
-                    className="flex items-center gap-2 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 px-4 py-2.5 text-xs font-semibold text-white transition disabled:opacity-40"
+                    className="flex items-center gap-2 rounded-lg bg-gray-800 hover:bg-gray-700 border border-[#C3D3EA] px-4 py-2.5 text-xs font-semibold text-white transition disabled:opacity-40"
                   >
                     <Search className="h-4 w-4 text-cyan-400" />
                     <span>{ingesting ? "Analyzing Sitemaps..." : "Analyze Sitemaps (Pre-Flight Plan)"}</span>
@@ -1276,12 +1276,12 @@ export default function KnowledgeBrainPage() {
 
               {/* Pre-Crawl Summary Modal / Preview Card */}
               {previewSummary && (
-                <div className="rounded-xl border border-indigo-500/40 bg-indigo-950/20 p-6 space-y-6 mt-4">
-                  <div className="flex items-center justify-between border-b border-indigo-500/30 pb-3">
+                <div className="rounded-xl border border-[#BFDBFE] bg-indigo-50 p-6 space-y-6 mt-4">
+                  <div className="flex items-center justify-between border-b border-[#BFDBFE] pb-3">
                     <div className="flex items-center gap-2 text-indigo-300">
                       <Sparkles className="h-5 w-5 text-indigo-400" />
                       <div>
-                        <h4 className="text-base font-bold text-white">Pre-Flight Read Plan</h4>
+                        <h4 className="text-base font-bold text-[#0B1B3A]">Pre-Flight Read Plan</h4>
                         <p className="text-xs text-gray-400 mt-0.5">
                           Review discovered nested sitemaps, duplicate URLs, and throughput estimates. Click confirm to start crawling.
                         </p>
@@ -1290,7 +1290,7 @@ export default function KnowledgeBrainPage() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setPreviewSummary(null)}
-                        className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:text-white"
+                        className="rounded-lg border border-[#C3D3EA] bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:text-white"
                       >
                         Cancel
                       </button>
@@ -1307,9 +1307,9 @@ export default function KnowledgeBrainPage() {
 
                   {/* Grand Totals KPI Grid */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-                    <div className="bg-gray-950/80 p-3.5 rounded-lg border border-gray-800">
+                    <div className="bg-[#F6F9FF] p-3.5 rounded-lg border border-[#DCE6F5]">
                       <span className="text-gray-400">Total Sitemaps:</span>
-                      <div className="text-2xl font-bold text-white mt-1 font-mono">
+                      <div className="text-2xl font-bold text-[#0B1B3A] mt-1 font-mono">
                         {previewSummary.totalSitemapsFound}
                       </div>
                       <span className="text-[10px] text-gray-500 mt-0.5 block">
@@ -1317,9 +1317,9 @@ export default function KnowledgeBrainPage() {
                       </span>
                     </div>
 
-                    <div className="bg-gray-950/80 p-3.5 rounded-lg border border-gray-800">
+                    <div className="bg-[#F6F9FF] p-3.5 rounded-lg border border-[#DCE6F5]">
                       <span className="text-gray-400">Total URLs Discovered:</span>
-                      <div className="text-2xl font-bold text-indigo-300 mt-1 font-mono">
+                      <div className="text-2xl font-bold text-[#2563EB] mt-1 font-mono">
                         {previewSummary.totalUrls}
                       </div>
                       <span className="text-[10px] text-gray-500 mt-0.5 block">
@@ -1327,10 +1327,10 @@ export default function KnowledgeBrainPage() {
                       </span>
                     </div>
 
-                    <div className="bg-gray-950/80 p-3.5 rounded-lg border border-gray-800">
+                    <div className="bg-[#F6F9FF] p-3.5 rounded-lg border border-[#DCE6F5]">
                       <span className="text-gray-400">Duplicate URLs:</span>
                       <div className={`text-2xl font-bold mt-1 font-mono ${
-                        previewSummary.duplicateUrlsCount > 0 ? "text-amber-400" : "text-emerald-400"
+                        previewSummary.duplicateUrlsCount > 0 ? "text-[#B45309]" : "text-[#15803D]"
                       }`}>
                         {previewSummary.duplicateUrlsCount}
                       </div>
@@ -1339,9 +1339,9 @@ export default function KnowledgeBrainPage() {
                       </span>
                     </div>
 
-                    <div className="bg-gray-950/80 p-3.5 rounded-lg border border-gray-800">
+                    <div className="bg-[#F6F9FF] p-3.5 rounded-lg border border-[#DCE6F5]">
                       <span className="text-gray-400">Expected Finish Time:</span>
-                      <div className="text-2xl font-bold text-emerald-400 mt-1 font-mono">
+                      <div className="text-2xl font-bold text-[#15803D] mt-1 font-mono">
                         {previewSummary.formattedEta}
                       </div>
                       <span className="text-[10px] text-gray-500 mt-0.5 block">
@@ -1351,7 +1351,7 @@ export default function KnowledgeBrainPage() {
                   </div>
 
                   {/* Throughput Specs */}
-                  <div className="bg-gray-950/60 p-3.5 rounded-lg border border-gray-800 flex items-center justify-between text-xs font-mono">
+                  <div className="bg-[#F6F9FF] p-3.5 rounded-lg border border-[#DCE6F5] flex items-center justify-between text-xs font-mono">
                     <span className="text-gray-400 flex items-center gap-1.5">
                       <Clock className="h-4 w-4 text-indigo-400" />
                       Polite Crawler Throughput:
@@ -1367,7 +1367,7 @@ export default function KnowledgeBrainPage() {
 
                   {/* First & Last URL Overall */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    <div className="bg-gray-950/80 p-3 rounded-lg border border-gray-800 space-y-1">
+                    <div className="bg-[#F6F9FF] p-3 rounded-lg border border-[#DCE6F5] space-y-1">
                       <span className="text-[10px] uppercase font-semibold text-gray-400 tracking-wider">
                         First Discovered URL (Overall)
                       </span>
@@ -1375,7 +1375,7 @@ export default function KnowledgeBrainPage() {
                         {previewSummary.firstUrl || "N/A"}
                       </div>
                     </div>
-                    <div className="bg-gray-950/80 p-3 rounded-lg border border-gray-800 space-y-1">
+                    <div className="bg-[#F6F9FF] p-3 rounded-lg border border-[#DCE6F5] space-y-1">
                       <span className="text-[10px] uppercase font-semibold text-gray-400 tracking-wider">
                         Last Discovered URL (Overall)
                       </span>
@@ -1388,7 +1388,7 @@ export default function KnowledgeBrainPage() {
                   {/* Per-Nested Sitemap Breakdown Table (Task 2.2) */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white uppercase tracking-wider">
+                      <span className="text-xs font-bold text-[#0B1B3A] uppercase tracking-wider">
                         Nested Sitemaps Breakdown ({previewSummary.nestedBreakdown.length} sitemaps)
                       </span>
                       <span className="text-[11px] text-gray-400 font-mono">
@@ -1396,9 +1396,9 @@ export default function KnowledgeBrainPage() {
                       </span>
                     </div>
 
-                    <div className="rounded-lg border border-gray-800 overflow-hidden bg-gray-950">
+                    <div className="rounded-lg border border-[#DCE6F5] overflow-hidden bg-[#F1F6FF]">
                       <table className="w-full text-left text-xs font-mono">
-                        <thead className="bg-gray-900 border-b border-gray-800 text-gray-400 uppercase text-[10px]">
+                        <thead className="bg-[#EEF4FF] border-b border-[#DCE6F5] text-[#4A5B78] uppercase text-[10px] font-semibold">
                           <tr>
                             <th className="px-3.5 py-2.5">Sitemap Source URL</th>
                             <th className="px-3.5 py-2.5 text-right">Page Count</th>
@@ -1408,11 +1408,11 @@ export default function KnowledgeBrainPage() {
                         </thead>
                         <tbody className="divide-y divide-gray-800/60">
                           {previewSummary.nestedBreakdown.map((item, idx) => (
-                            <tr key={idx} className="hover:bg-gray-900/40">
-                              <td className="px-3.5 py-2 text-white truncate max-w-xs">{item.sitemapUrl}</td>
-                              <td className="px-3.5 py-2 text-right text-indigo-300 font-bold">{item.pageCount}</td>
-                              <td className="px-3.5 py-2 text-gray-400 truncate max-w-xs">{item.firstUrl || "-"}</td>
-                              <td className="px-3.5 py-2 text-gray-400 truncate max-w-xs">{item.lastUrl || "-"}</td>
+                            <tr key={idx} className="hover:bg-[#EEF4FF]">
+                              <td className="px-3.5 py-2 text-[#0B1B3A] truncate max-w-xs font-semibold">{item.sitemapUrl}</td>
+                              <td className="px-3.5 py-2 text-right text-[#2563EB] font-bold">{item.pageCount}</td>
+                              <td className="px-3.5 py-2 text-[#7B8AA6] truncate max-w-xs">{item.firstUrl || "-"}</td>
+                              <td className="px-3.5 py-2 text-[#7B8AA6] truncate max-w-xs">{item.lastUrl || "-"}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -1437,7 +1437,7 @@ export default function KnowledgeBrainPage() {
                         {previewSummary.duplicates.map((dup, idx) => (
                           <div
                             key={idx}
-                            className="bg-gray-950/90 border border-gray-800 p-2.5 rounded space-y-1"
+                            className="bg-[#F1F6FF]/90 border border-[#DCE6F5] p-2.5 rounded space-y-1"
                           >
                             <div className="flex items-center justify-between text-white text-[11px]">
                               <span className="truncate max-w-lg text-amber-200 font-semibold">{dup.url}</span>
@@ -1450,7 +1450,7 @@ export default function KnowledgeBrainPage() {
                               {dup.foundIn.map((src, sIdx) => (
                                 <span
                                   key={sIdx}
-                                  className="bg-gray-900 border border-gray-700 px-1.5 py-0.2 rounded text-indigo-300 truncate max-w-xs"
+                                  className="bg-[#EEF4FF] border border-[#C3D3EA] px-1.5 py-0.2 rounded text-indigo-300 truncate max-w-xs"
                                 >
                                   {src}
                                 </span>
@@ -1463,14 +1463,14 @@ export default function KnowledgeBrainPage() {
                   )}
 
                   {/* Confirmation Actions Bar (Task 2.2: User must confirm before processing starts) */}
-                  <div className="flex items-center justify-between pt-3 border-t border-indigo-500/30">
+                  <div className="flex items-center justify-between pt-3 border-t border-[#BFDBFE]">
                     <span className="text-xs text-gray-400 font-sans">
                       Click confirm to queue background crawler jobs across all discovered sitemaps.
                     </span>
                     <div className="flex gap-2">
                       <button
                         onClick={() => setPreviewSummary(null)}
-                        className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-xs text-gray-300 hover:text-white"
+                        className="rounded-lg border border-[#C3D3EA] bg-gray-800 px-4 py-2 text-xs text-gray-300 hover:text-white"
                       >
                         Cancel
                       </button>
@@ -1489,12 +1489,12 @@ export default function KnowledgeBrainPage() {
             </div>
 
             {/* Live Polite Crawl Monitor & Image Understanding (Task 2.3) */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-gray-800 pb-3">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[#DCE6F5] pb-3">
                 <div className="flex items-center gap-2">
                   <Activity className="h-5 w-5 text-indigo-400" />
                   <div>
-                    <h3 className="text-sm font-semibold text-white">Live Knowledge Ingestion &amp; Crawler Monitor</h3>
+                    <h3 className="text-sm font-semibold text-[#0B1B3A]">Live Knowledge Ingestion &amp; Crawler Monitor</h3>
                     <p className="text-xs text-gray-400 mt-0.5">
                       Batching: 5 pages/batch &bull; Polite rate: 450 pages/hr with 8s pause &bull; Resumes halfway if interrupted.
                     </p>
@@ -1505,12 +1505,12 @@ export default function KnowledgeBrainPage() {
                   <span
                     className={`rounded px-2.5 py-1 text-xs font-mono font-bold uppercase flex items-center gap-1.5 border ${
                       crawlProgress?.status === "running"
-                        ? "bg-emerald-950/40 text-emerald-300 border-emerald-500/40 animate-pulse"
+                        ? "bg-emerald-50 text-emerald-300 border-emerald-500/40 animate-pulse"
                         : crawlProgress?.status === "paused"
-                        ? "bg-amber-950/40 text-amber-300 border-amber-500/40"
+                        ? "bg-amber-50 text-amber-300 border-amber-500/40"
                         : crawlProgress?.status === "completed"
-                        ? "bg-indigo-950/40 text-indigo-300 border-indigo-500/40"
-                        : "bg-gray-900 text-gray-400 border-gray-800"
+                        ? "bg-indigo-50 text-indigo-300 border-[#BFDBFE]"
+                        : "bg-white text-[#4A5B78] border-[#DCE6F5]"
                     }`}
                   >
                     <span className="h-2 w-2 rounded-full bg-current"></span>
@@ -1519,7 +1519,7 @@ export default function KnowledgeBrainPage() {
 
                   <button
                     onClick={crawlProgress?.status === "running" ? handlePauseCrawl : handleResumeCrawl}
-                    className="flex items-center gap-1 rounded bg-gray-800 hover:bg-gray-700 px-2.5 py-1 text-xs text-gray-200 transition font-mono border border-gray-700"
+                    className="flex items-center gap-1 rounded bg-gray-800 hover:bg-gray-700 px-2.5 py-1 text-xs text-gray-200 transition font-mono border border-[#C3D3EA]"
                   >
                     {crawlProgress?.status === "running" ? (
                       <>
@@ -1536,7 +1536,7 @@ export default function KnowledgeBrainPage() {
 
                   <button
                     onClick={handleSimulateBatchStep}
-                    className="flex items-center gap-1 rounded bg-indigo-950/60 border border-indigo-500/30 hover:bg-indigo-900/60 px-2.5 py-1 text-xs text-indigo-300 transition font-mono"
+                    className="flex items-center gap-1 rounded bg-indigo-50 border border-[#BFDBFE] hover:bg-indigo-900/60 px-2.5 py-1 text-xs text-indigo-300 transition font-mono"
                   >
                     <RefreshCw className="h-3 w-3" />
                     <span>Next Batch Step</span>
@@ -1546,7 +1546,7 @@ export default function KnowledgeBrainPage() {
 
               {/* Progress Bar & KPI Metrics */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                <div className="bg-gray-950/80 p-3 rounded-lg border border-gray-800">
+                <div className="bg-[#F6F9FF] p-3 rounded-lg border border-[#DCE6F5]">
                   <span className="text-gray-400">Pages Processed:</span>
                   <div className="text-xl font-bold text-white mt-1 font-mono">
                     {crawlProgress?.processedUrls || 0} / {crawlProgress?.totalUrls || 0}
@@ -1556,7 +1556,7 @@ export default function KnowledgeBrainPage() {
                   </span>
                 </div>
 
-                <div className="bg-gray-950/80 p-3 rounded-lg border border-gray-800">
+                <div className="bg-[#F6F9FF] p-3 rounded-lg border border-[#DCE6F5]">
                   <span className="text-gray-400">Time Left (Polite 450/hr):</span>
                   <div className="text-xl font-bold text-emerald-400 mt-1 font-mono">
                     {crawlProgress?.formattedTimeLeft || "0 mins left"}
@@ -1566,7 +1566,7 @@ export default function KnowledgeBrainPage() {
                   </span>
                 </div>
 
-                <div className="bg-gray-950/80 p-3 rounded-lg border border-gray-800">
+                <div className="bg-[#F6F9FF] p-3 rounded-lg border border-[#DCE6F5]">
                   <span className="text-gray-400">Multimodal Screenshots:</span>
                   <div className="text-xl font-bold text-purple-400 mt-1 font-mono">
                     {crawlProgress?.imagesDiscovered || 0}
@@ -1576,7 +1576,7 @@ export default function KnowledgeBrainPage() {
                   </span>
                 </div>
 
-                <div className="bg-gray-950/80 p-3 rounded-lg border border-gray-800">
+                <div className="bg-[#F6F9FF] p-3 rounded-lg border border-[#DCE6F5]">
                   <span className="text-gray-400">Semantic Chunks:</span>
                   <div className="text-xl font-bold text-sky-400 mt-1 font-mono">
                     {crawlProgress?.chunksCreated || 0}
@@ -1593,7 +1593,7 @@ export default function KnowledgeBrainPage() {
                   <span>Crawl Completion</span>
                   <span>{crawlProgress?.progressPercent || 0}%</span>
                 </div>
-                <div className="w-full bg-gray-900 rounded-full h-2.5 overflow-hidden border border-gray-800">
+                <div className="w-full bg-[#EEF4FF] rounded-full h-2.5 overflow-hidden border border-[#DCE6F5]">
                   <div
                     className="bg-indigo-500 h-2.5 rounded-full transition-all duration-500"
                     style={{ width: `${crawlProgress?.progressPercent || 0}%` }}
@@ -1603,7 +1603,7 @@ export default function KnowledgeBrainPage() {
 
               {/* Current Page Indicator */}
               {crawlProgress?.currentUrl && (
-                <div className="flex items-center gap-2 text-xs font-mono bg-gray-950 p-2.5 rounded-lg border border-gray-800 text-gray-300">
+                <div className="flex items-center gap-2 text-xs font-mono bg-white p-2.5 rounded-lg border border-[#DCE6F5] text-gray-300">
                   <div className="h-2 w-2 rounded-full bg-indigo-400 animate-ping flex-shrink-0"></div>
                   <span className="text-gray-500">Currently Reading:</span>
                   <span className="text-indigo-300 truncate">{crawlProgress.currentUrl}</span>
@@ -1618,7 +1618,7 @@ export default function KnowledgeBrainPage() {
                     crawlProgress.recentActivity.slice(0, 5).map((act, i) => (
                       <div
                         key={i}
-                        className="bg-gray-950 border border-gray-800 p-2 rounded flex items-center justify-between gap-2"
+                        className="bg-[#F1F6FF] border border-[#DCE6F5] p-2 rounded flex items-center justify-between gap-2"
                       >
                         <div className="flex items-center gap-2 truncate">
                           <span className="text-gray-500 text-[10px]">{act.timestamp}</span>
@@ -1627,7 +1627,7 @@ export default function KnowledgeBrainPage() {
                               act.status === "ok"
                                 ? "bg-emerald-950 text-emerald-400 border border-emerald-500/20"
                                 : act.status === "skipped"
-                                ? "bg-gray-900 text-gray-400 border border-gray-800"
+                                ? "bg-white text-[#4A5B78] border border-[#DCE6F5]"
                                 : "bg-red-950 text-red-400 border border-red-500/20"
                             }`}
                           >
@@ -1639,7 +1639,7 @@ export default function KnowledgeBrainPage() {
                       </div>
                     ))
                   ) : (
-                    <div className="text-gray-500 text-xs italic p-2 bg-gray-950 rounded border border-gray-800">
+                    <div className="text-gray-500 text-xs italic p-2 bg-[#F1F6FF] rounded border border-[#DCE6F5]">
                       Crawl monitor idle. Confirm sitemaps above or click &quot;Next Batch Step&quot; to initiate live polite reading.
                     </div>
                   )}
@@ -1648,17 +1648,17 @@ export default function KnowledgeBrainPage() {
             </div>
 
             {/* Ingested Sources Table */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] overflow-hidden">
-              <div className="p-4 border-b border-gray-800 flex items-center justify-between">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white overflow-hidden">
+              <div className="p-4 border-b border-[#DCE6F5] flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Active Knowledge Sources</h3>
+                  <h3 className="text-sm font-semibold text-[#0B1B3A]">Active Knowledge Sources</h3>
                   <p className="text-xs text-gray-400 mt-0.5">Sitemaps continuously polled and monitored for updates.</p>
                 </div>
                 <span className="text-xs text-gray-400 font-mono">{sources.length} sources registered</span>
               </div>
 
               <table className="w-full text-left text-xs">
-                <thead className="bg-gray-900/60 border-b border-gray-800 text-gray-400 uppercase font-semibold text-[10px] tracking-wider">
+                <thead className="bg-[#F6F9FF] border-b border-[#DCE6F5] text-gray-400 uppercase font-semibold text-[10px] tracking-wider">
                   <tr>
                     <th className="px-4 py-3">Source URL</th>
                     <th className="px-4 py-3">Schedule</th>
@@ -1669,7 +1669,7 @@ export default function KnowledgeBrainPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-800/60 font-mono">
                   {sources.map((s) => (
-                    <tr key={s.id} className="hover:bg-gray-900/40 transition">
+                    <tr key={s.id} className="hover:bg-[#EEF4FF] transition">
                       <td className="px-4 py-3 text-white truncate max-w-sm">{s.rootUrl}</td>
                       <td className="px-4 py-3 text-gray-400">{s.crawlSchedule}</td>
                       <td className="px-4 py-3 text-right text-gray-300">{s.pageCount}</td>
@@ -1691,10 +1691,10 @@ export default function KnowledgeBrainPage() {
         {activeTab === "pages" && (
           <div className="space-y-6">
             {/* Add Standalone Page URL Form */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-4">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Add Standalone Page URL</h3>
+                  <h3 className="text-sm font-semibold text-[#0B1B3A]">Add Standalone Page URL</h3>
                   <p className="text-xs text-gray-400 mt-0.5">
                     Single pages added one by one, without a sitemap. Read, kept fresh, and health-checked the same way as sitemap pages.
                   </p>
@@ -1705,7 +1705,7 @@ export default function KnowledgeBrainPage() {
               </div>
 
               {singlePageSuccessMsg && (
-                <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3 text-xs text-emerald-300 flex items-center gap-2">
+                <div className="rounded-lg border border-emerald-500/30 bg-emerald-50 p-3 text-xs text-emerald-300 flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
                   <span>{singlePageSuccessMsg}</span>
                 </div>
@@ -1721,7 +1721,7 @@ export default function KnowledgeBrainPage() {
                       value={singlePageUrl}
                       onChange={(e) => setSinglePageUrl(e.target.value)}
                       placeholder="https://example.com/standalone-article"
-                      className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                   <div>
@@ -1731,7 +1731,7 @@ export default function KnowledgeBrainPage() {
                       value={singlePageTitle}
                       onChange={(e) => setSinglePageTitle(e.target.value)}
                       placeholder="e.g. Setting up Custom Webhooks"
-                      className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                 </div>
@@ -1743,7 +1743,7 @@ export default function KnowledgeBrainPage() {
                     value={singlePageContent}
                     onChange={(e) => setSinglePageContent(e.target.value)}
                     placeholder="Paste article body or documentation text to index immediately..."
-                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
@@ -1763,9 +1763,9 @@ export default function KnowledgeBrainPage() {
             {/* Ingested Pages & Chunk Inspector */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Left Column (5 Cols): Pages List */}
-              <div className="lg:col-span-5 rounded-xl border border-gray-800 bg-[#0E1322] p-4 space-y-3">
-                <div className="flex items-center justify-between border-b border-gray-800 pb-2">
-                  <h3 className="text-sm font-semibold text-white">Indexed Pages</h3>
+              <div className="lg:col-span-5 rounded-xl border border-[#DCE6F5] bg-white p-4 space-y-3">
+                <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-2">
+                  <h3 className="text-sm font-semibold text-[#0B1B3A]">Indexed Pages</h3>
                   <span className="text-xs text-gray-400 font-mono">{filteredPages.length} pages</span>
                 </div>
 
@@ -1774,7 +1774,7 @@ export default function KnowledgeBrainPage() {
                   value={pageSearchFilter}
                   onChange={(e) => setPageSearchFilter(e.target.value)}
                   placeholder="Filter pages by title or URL..."
-                  className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full rounded-lg border border-[#DCE6F5] bg-white px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
                 />
 
                 <div className="space-y-2 max-h-[520px] overflow-y-auto">
@@ -1784,20 +1784,22 @@ export default function KnowledgeBrainPage() {
                       onClick={() => setSelectedPage(p)}
                       className={`cursor-pointer rounded-lg p-3 transition border ${
                         selectedPage?.id === p.id
-                          ? "border-sky-500 bg-sky-950/20"
-                          : "border-gray-800 bg-gray-900/40 hover:border-gray-700"
+                          ? "border-[#2563EB] bg-[#EEF4FF] shadow-xs"
+                          : "border-[#DCE6F5] bg-white hover:bg-[#F6F9FF] hover:border-blue-200"
                       }`}
                     >
-                      <div className="text-xs font-semibold text-white truncate">{p.title || p.url}</div>
+                      <div className="text-xs font-semibold text-[#0B1B3A] truncate">{p.title || p.url}</div>
                       <div className="text-[10px] text-gray-500 font-mono truncate mt-0.5">{p.url}</div>
                       <div className="flex items-center gap-2 mt-2">
                         <span
                           className={`rounded px-1.5 py-0.2 text-[9px] font-mono uppercase ${
                             p.healthStatus === "active"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              ? "bg-emerald-50 text-[#15803D] border border-emerald-200"
                               : p.healthStatus === "watch"
-                              ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                              : "bg-red-500/10 text-red-400 border border-red-500/20"
+                              ? "bg-amber-50 text-[#B45309] border border-amber-200"
+                              : p.healthStatus === "archived"
+                              ? "bg-slate-100 text-slate-700 border border-slate-200"
+                              : "bg-red-50 text-[#DC2626] border border-red-200"
                           }`}
                         >
                           {p.healthStatus}
@@ -1810,14 +1812,14 @@ export default function KnowledgeBrainPage() {
               </div>
 
               {/* Right Column (7 Cols): Chunk Inspector */}
-              <div className="lg:col-span-7 rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-4">
+              <div className="lg:col-span-7 rounded-xl border border-[#DCE6F5] bg-white p-5 space-y-4">
                 {selectedPage ? (
                   <>
-                    <div className="border-b border-gray-800 pb-3">
+                    <div className="border-b border-[#DCE6F5] pb-3">
                       <span className="text-[10px] uppercase font-semibold text-sky-400 tracking-wider">
                         Page Semantic Chunk Inspector (400 Tokens)
                       </span>
-                      <h3 className="text-base font-bold text-white mt-1">{selectedPage.title}</h3>
+                      <h3 className="text-base font-bold text-[#0B1B3A] mt-1">{selectedPage.title}</h3>
                       <a
                         href={selectedPage.url}
                         target="_blank"
@@ -1833,7 +1835,7 @@ export default function KnowledgeBrainPage() {
                       {selectedPage.chunks?.map((chunk) => (
                         <div
                           key={chunk.id}
-                          className="rounded-lg border border-gray-800 bg-gray-950 p-4 space-y-2 text-xs"
+                          className="rounded-lg border border-[#DCE6F5] bg-[#F1F6FF] p-4 space-y-2 text-xs"
                         >
                           <div className="flex items-center justify-between text-[11px] font-mono text-gray-400 border-b border-gray-900 pb-1">
                             <span className="text-sky-300 font-semibold">{chunk.heading}</span>
@@ -1847,7 +1849,7 @@ export default function KnowledgeBrainPage() {
                                 <ImageIcon className="h-3.5 w-3.5 text-purple-400" />
                                 <span>Multimodal Screenshot Understood &amp; Grounded:</span>
                               </div>
-                              <div className="text-[11px] text-gray-200 italic font-sans bg-gray-900/80 p-2 rounded border border-gray-800">
+                              <div className="text-[11px] text-gray-200 italic font-sans bg-[#F6F9FF] p-2 rounded border border-[#DCE6F5]">
                                 {chunk.imageCaption || "Visual screenshot part of the answer."}
                               </div>
                               <div className="text-[10px] text-gray-500 font-mono truncate">
@@ -1873,10 +1875,10 @@ export default function KnowledgeBrainPage() {
         {activeTab === "instructions" && (
           <div className="space-y-6">
             {/* Create Instruction Form */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-4">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">
+                  <h3 className="text-sm font-semibold text-[#0B1B3A]">
                     {editingInstructionId ? "Edit Plain-English Rule" : "Create Plain-English Rule"}
                   </h3>
                   <p className="text-xs text-gray-400 mt-0.5">
@@ -1898,14 +1900,14 @@ export default function KnowledgeBrainPage() {
                       Cancel Edit
                     </button>
                   )}
-                  <span className="text-[10px] bg-emerald-950/60 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/20 font-mono">
+                  <span className="text-[10px] bg-emerald-50 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/20 font-mono">
                     Attribution: [instruction]
                   </span>
                 </div>
               </div>
 
               {instructionSuccessMsg && (
-                <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3 text-xs text-emerald-300 flex items-center gap-2">
+                <div className="rounded-lg border border-emerald-500/30 bg-emerald-50 p-3 text-xs text-emerald-300 flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
                   <span>{instructionSuccessMsg}</span>
                 </div>
@@ -1921,7 +1923,7 @@ export default function KnowledgeBrainPage() {
                       value={newInstTitle}
                       onChange={(e) => setNewInstTitle(e.target.value)}
                       placeholder="e.g. Refund Policy Guidance"
-                      className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                   <div>
@@ -1929,7 +1931,7 @@ export default function KnowledgeBrainPage() {
                     <select
                       value={newInstRole}
                       onChange={(e) => setNewInstRole(e.target.value)}
-                      className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                     >
                       <option value="all">All Roles</option>
                       <option value="support-engineer">Support Engineer only</option>
@@ -1947,7 +1949,7 @@ export default function KnowledgeBrainPage() {
                     value={newInstRuleText}
                     onChange={(e) => setNewInstRuleText(e.target.value)}
                     placeholder="Never promise a refund. Send every refund question to the Billing team for human approval."
-                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
@@ -1985,10 +1987,10 @@ export default function KnowledgeBrainPage() {
             </div>
 
             {/* Active Instructions Table */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] overflow-hidden">
-              <div className="p-4 border-b border-gray-800 flex items-center justify-between">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white overflow-hidden">
+              <div className="p-4 border-b border-[#DCE6F5] flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Active Business Instructions</h3>
+                  <h3 className="text-sm font-semibold text-[#0B1B3A]">Active Business Instructions</h3>
                   <p className="text-xs text-gray-400 mt-0.5">Rules injected into consultant grounding turn based on role targeting.</p>
                 </div>
                 <span className="text-xs text-gray-400 font-mono">{instructionsList.length} rules active</span>
@@ -1996,10 +1998,10 @@ export default function KnowledgeBrainPage() {
 
               <div className="divide-y divide-gray-800/60">
                 {instructionsList.map((inst) => (
-                  <div key={inst.id} className="p-4 flex items-start justify-between gap-4 hover:bg-gray-900/40 transition">
+                  <div key={inst.id} className="p-4 flex items-start justify-between gap-4 hover:bg-[#EEF4FF] transition">
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-white">{inst.title}</span>
+                        <span className="text-xs font-bold text-[#0B1B3A]">{inst.title}</span>
                         <span className="rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-mono px-2 py-0.5 border border-emerald-500/20">
                           {inst.appliesToRoles.join(", ")}
                         </span>
@@ -2021,7 +2023,7 @@ export default function KnowledgeBrainPage() {
                           setNewInstRole(inst.appliesToRoles[0] || "all");
                           window.scrollTo({ top: 300, behavior: "smooth" });
                         }}
-                        className="text-[11px] font-mono px-2.5 py-1 rounded transition border bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 flex items-center gap-1"
+                        className="text-[11px] font-mono px-2.5 py-1 rounded transition border bg-gray-800 border-[#C3D3EA] text-gray-300 hover:bg-gray-700 flex items-center gap-1"
                       >
                         <Edit2 className="h-3 w-3 text-gray-400" />
                         <span>Edit</span>
@@ -2030,8 +2032,8 @@ export default function KnowledgeBrainPage() {
                         onClick={() => handleToggleInstruction(inst)}
                         className={`text-[11px] font-mono px-2.5 py-1 rounded transition border ${
                           inst.isActive
-                            ? "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
-                            : "bg-emerald-950/40 border-emerald-500/30 text-emerald-300 hover:bg-emerald-900/40"
+                            ? "bg-gray-800 border-[#C3D3EA] text-gray-300 hover:bg-gray-700"
+                            : "bg-emerald-50 border-emerald-500/30 text-emerald-300 hover:bg-emerald-900/40"
                         }`}
                       >
                         {inst.isActive ? "Pause" : "Activate"}
@@ -2054,7 +2056,7 @@ export default function KnowledgeBrainPage() {
         {activeTab === "skills" && (
           <div className="space-y-6">
             {skillSuccessMsg && (
-              <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-3.5 text-xs text-emerald-300 flex items-center gap-2">
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-50 p-3.5 text-xs text-emerald-300 flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
                 <span>{skillSuccessMsg}</span>
               </div>
@@ -2062,14 +2064,14 @@ export default function KnowledgeBrainPage() {
 
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-white">Standard Operating Procedures (Skills)</h3>
+                <h3 className="text-sm font-semibold text-[#0B1B3A]">Standard Operating Procedures (Skills)</h3>
                 <p className="text-xs text-gray-400 mt-0.5">
                   Step-by-step guides the agent follows for one kind of work. People can write skills, and the agent can draft and improve them.
                 </p>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-[10px] bg-purple-950/60 text-purple-300 px-2 py-0.5 rounded border border-purple-500/20 font-mono">
+                <span className="text-[10px] bg-purple-50 text-purple-300 px-2 py-0.5 rounded border border-purple-500/20 font-mono">
                   Attribution: [skill]
                 </span>
                 <Link
@@ -2092,7 +2094,7 @@ export default function KnowledgeBrainPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Left Column (4 Cols): Skills List */}
-              <div className="lg:col-span-4 rounded-xl border border-gray-800 bg-[#0E1322] p-4 space-y-3">
+              <div className="lg:col-span-4 rounded-xl border border-[#DCE6F5] bg-white p-4 space-y-3">
                 <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block">
                   Active SOP Skills
                 </span>
@@ -2105,7 +2107,7 @@ export default function KnowledgeBrainPage() {
                       className={`cursor-pointer rounded-lg p-3 transition border ${
                         selectedSkill?.id === s.id
                           ? "border-purple-500 bg-purple-950/20"
-                          : "border-gray-800 bg-gray-900/40 hover:border-gray-700"
+                          : "border-[#DCE6F5] bg-white hover:bg-[#F6F9FF] hover:border-blue-200"
                       }`}
                     >
                       <div className="text-xs font-semibold text-white">{s.name}</div>
@@ -2119,20 +2121,20 @@ export default function KnowledgeBrainPage() {
               </div>
 
               {/* Right Column (8 Cols): Skill Step Viewer */}
-              <div className="lg:col-span-8 rounded-xl border border-gray-800 bg-[#0E1322] p-6 space-y-4">
+              <div className="lg:col-span-8 rounded-xl border border-[#DCE6F5] bg-white p-6 space-y-4">
                 {selectedSkill ? (
                   <>
-                    <div className="border-b border-gray-800 pb-3">
+                    <div className="border-b border-[#DCE6F5] pb-3">
                       <span className="text-[10px] uppercase font-semibold text-purple-400 tracking-wider">
                         Active SOP Procedure
                       </span>
-                      <h3 className="text-base font-bold text-white mt-1">{selectedSkill.name}</h3>
+                      <h3 className="text-base font-bold text-[#0B1B3A] mt-1">{selectedSkill.name}</h3>
                       <p className="text-xs text-gray-400 mt-1">{selectedSkill.description}</p>
                     </div>
 
                     <div>
                       <span className="text-xs font-semibold text-gray-400 block mb-1">Trigger Condition:</span>
-                      <div className="rounded-lg border border-gray-800 bg-gray-950 p-2.5 text-xs text-amber-300 font-mono">
+                      <div className="rounded-lg border border-[#DCE6F5] bg-[#F1F6FF] p-2.5 text-xs text-amber-300 font-mono">
                         {selectedSkill.triggerConditions}
                       </div>
                     </div>
@@ -2141,7 +2143,7 @@ export default function KnowledgeBrainPage() {
                       <span className="text-xs font-semibold text-gray-400 block mb-1">
                         Step-by-Step Instructions (Markdown):
                       </span>
-                      <pre className="rounded-lg border border-gray-800 bg-gray-950 p-4 text-xs font-mono text-gray-200 whitespace-pre-wrap leading-relaxed">
+                      <pre className="rounded-lg border border-[#DCE6F5] bg-white p-4 text-xs font-mono text-gray-200 whitespace-pre-wrap leading-relaxed">
                         {selectedSkill.stepsMarkdown}
                       </pre>
                     </div>
@@ -2161,7 +2163,7 @@ export default function KnowledgeBrainPage() {
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
-                <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-[#0B1B3A] flex items-center gap-2">
                   <Mail className="h-4 w-4 text-amber-400" />
                   <span>Customer Email History &amp; Agent Learning</span>
                 </h3>
@@ -2171,7 +2173,7 @@ export default function KnowledgeBrainPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-[10px] bg-amber-950/60 text-amber-300 px-2 py-0.5 rounded border border-amber-500/20 font-mono">
+                <span className="text-[10px] bg-amber-50 text-amber-300 px-2 py-0.5 rounded border border-amber-500/20 font-mono">
                   Attribution: [past_email]
                 </span>
                 <button
@@ -2190,7 +2192,7 @@ export default function KnowledgeBrainPage() {
             </div>
 
             {notesSuccessMsg && (
-              <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-3.5 text-xs text-emerald-300 flex items-center justify-between">
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-50 p-3.5 text-xs text-emerald-300 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
                   <span>{notesSuccessMsg}</span>
@@ -2203,7 +2205,7 @@ export default function KnowledgeBrainPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               {/* Left Column (5 Cols): Email Threads List */}
-              <div className="lg:col-span-5 rounded-xl border border-gray-800 bg-[#0E1322] p-4 space-y-3">
+              <div className="lg:col-span-5 rounded-xl border border-[#DCE6F5] bg-white p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block">
                     Synced Gmail Threads
@@ -2222,7 +2224,7 @@ export default function KnowledgeBrainPage() {
                       className={`cursor-pointer rounded-lg p-3 transition border ${
                         selectedThread?.id === t.id
                           ? "border-amber-500 bg-amber-950/20"
-                          : "border-gray-800 bg-gray-900/40 hover:border-gray-700"
+                          : "border-[#DCE6F5] bg-white hover:bg-[#F6F9FF] hover:border-blue-200"
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -2233,7 +2235,7 @@ export default function KnowledgeBrainPage() {
                       </div>
                       <div className="text-[10px] text-gray-400 line-clamp-2 mt-1">{t.snippet}</div>
                       {t.notes && (
-                        <div className="mt-2 text-[10px] text-amber-300 font-mono bg-amber-950/40 border border-amber-500/20 p-1.5 rounded truncate">
+                        <div className="mt-2 text-[10px] text-amber-300 font-mono bg-amber-50 border border-amber-500/20 p-1.5 rounded truncate">
                           Thread Note: &quot;{t.notes}&quot;
                         </div>
                       )}
@@ -2243,15 +2245,15 @@ export default function KnowledgeBrainPage() {
               </div>
 
               {/* Right Column (7 Cols): Thread Details & Staff Teaching Notes */}
-              <div className="lg:col-span-7 rounded-xl border border-gray-800 bg-[#0E1322] p-6 space-y-4">
+              <div className="lg:col-span-7 rounded-xl border border-[#DCE6F5] bg-white p-6 space-y-4">
                 {selectedThread ? (
                   <>
-                    <div className="border-b border-gray-800 pb-3 flex items-start justify-between">
+                    <div className="border-b border-[#DCE6F5] pb-3 flex items-start justify-between">
                       <div>
                         <span className="text-[10px] uppercase font-semibold text-amber-400 tracking-wider font-mono">
                           Gmail Thread &bull; {selectedThread.gmailThreadId}
                         </span>
-                        <h3 className="text-base font-bold text-white mt-1">{selectedThread.subject}</h3>
+                        <h3 className="text-base font-bold text-[#0B1B3A] mt-1">{selectedThread.subject}</h3>
                         <p className="text-xs text-gray-400 mt-1">{selectedThread.snippet}</p>
                       </div>
                     </div>
@@ -2262,8 +2264,8 @@ export default function KnowledgeBrainPage() {
                         Thread Messages (Annotate notes on any single message):
                       </span>
                       {selectedThread.messages?.map((m) => (
-                        <div key={m.id} className="rounded-lg border border-gray-800 bg-gray-950 p-3.5 space-y-2">
-                          <div className="flex items-center justify-between text-[10px] text-gray-500 font-mono border-b border-gray-800/60 pb-1.5">
+                        <div key={m.id} className="rounded-lg border border-[#DCE6F5] bg-[#F1F6FF] p-3.5 space-y-2">
+                          <div className="flex items-center justify-between text-[10px] text-gray-500 font-mono border-b border-[#DCE6F5]/60 pb-1.5">
                             <span>From: {m.fromAddress}</span>
                             <span>{new Date(m.sentAt).toLocaleString()}</span>
                           </div>
@@ -2288,7 +2290,7 @@ export default function KnowledgeBrainPage() {
                                 setMessageNoteInputs({ ...messageNoteInputs, [m.id]: e.target.value })
                               }
                               placeholder="Write note on this specific message (e.g. This reply was too long. For DNS questions, always give the 3 steps first)..."
-                              className="flex-1 rounded border border-gray-800 bg-gray-900 px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500"
+                              className="flex-1 rounded border border-[#DCE6F5] bg-[#EEF4FF] px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500"
                             />
                             <button
                               type="button"
@@ -2306,7 +2308,7 @@ export default function KnowledgeBrainPage() {
                     </div>
 
                     {/* Teach Agent Whole-Thread Notes Editor */}
-                    <div className="pt-3 border-t border-gray-800 space-y-2">
+                    <div className="pt-3 border-t border-[#DCE6F5] space-y-2">
                       <div className="flex items-center justify-between">
                         <label className="block text-xs font-semibold text-amber-300">
                           Whole-Thread Teaching Note (Teaches the Agent):
@@ -2346,7 +2348,7 @@ export default function KnowledgeBrainPage() {
                         value={threadNotes}
                         onChange={(e) => setThreadNotes(e.target.value)}
                         placeholder="e.g. This reply was too long. For DNS questions, always give the 3 steps first."
-                        className="w-full rounded-lg border border-gray-700 bg-gray-950 p-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 font-sans"
+                        className="w-full rounded-lg border border-[#C3D3EA] bg-white p-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 font-sans"
                       />
 
                       <div className="flex justify-end gap-2">
@@ -2371,10 +2373,10 @@ export default function KnowledgeBrainPage() {
             </div>
 
             {/* ================= SKILL IMPROVEMENTS & HUMAN APPROVAL GATE ================= */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-gray-800 pb-3">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[#DCE6F5] pb-3">
                 <div>
-                  <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+                  <h4 className="text-sm font-semibold text-[#0B1B3A] flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-purple-400" />
                     <span>Skill Improvements from Teaching Notes (Human Approval Gate)</span>
                   </h4>
@@ -2384,14 +2386,14 @@ export default function KnowledgeBrainPage() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono bg-purple-950/60 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded">
+                  <span className="text-[10px] font-mono bg-purple-50 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded">
                     Approval Gate: Enforced
                   </span>
                 </div>
               </div>
 
               {skillProposals.length === 0 ? (
-                <div className="p-8 text-center text-xs text-gray-400 bg-gray-950/40 rounded-xl border border-gray-800">
+                <div className="p-8 text-center text-xs text-gray-400 bg-[#EEF4FF] rounded-xl border border-[#DCE6F5]">
                   <p>No pending skill improvement proposals. Click &quot;Optimize Skills from Notes&quot; above to run Claude Opus 5.5 evaluation.</p>
                 </div>
               ) : (
@@ -2399,12 +2401,12 @@ export default function KnowledgeBrainPage() {
                   {skillProposals.map((prop) => (
                     <div
                       key={prop.id}
-                      className="rounded-xl border border-gray-800 bg-gray-950 p-5 space-y-4"
+                      className="rounded-xl border border-[#DCE6F5] bg-[#F1F6FF] p-5 space-y-4"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-white">Target Skill: {prop.targetSkillName}</span>
+                            <span className="text-xs font-bold text-[#0B1B3A]">Target Skill: {prop.targetSkillName}</span>
                             <span className="text-[10px] font-mono text-purple-300 bg-purple-950/50 border border-purple-500/30 px-2 py-0.5 rounded">
                               {prop.modelUsed}
                             </span>
@@ -2458,7 +2460,7 @@ export default function KnowledgeBrainPage() {
                       </div>
 
                       {/* Notes Used Attribution */}
-                      <div className="p-3 bg-gray-900/60 rounded-lg border border-gray-800 text-xs space-y-1">
+                      <div className="p-3 bg-[#F6F9FF] rounded-lg border border-[#DCE6F5] text-xs space-y-1">
                         <span className="text-[10px] uppercase font-mono text-amber-400 font-semibold block">
                           Teaching Notes Used by Model:
                         </span>
@@ -2475,7 +2477,7 @@ export default function KnowledgeBrainPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
                         <div className="space-y-1">
                           <span className="text-[10px] text-gray-500 uppercase">Previous SOP Steps (v1):</span>
-                          <pre className="rounded bg-gray-900 p-3 text-gray-400 whitespace-pre-wrap max-h-48 overflow-y-auto border border-gray-800 leading-relaxed text-[11px]">
+                          <pre className="rounded bg-[#EEF4FF] p-3 text-gray-400 whitespace-pre-wrap max-h-48 overflow-y-auto border border-[#DCE6F5] leading-relaxed text-[11px]">
                             {prop.previousStepsMarkdown}
                           </pre>
                         </div>
@@ -2483,7 +2485,7 @@ export default function KnowledgeBrainPage() {
                           <span className="text-[10px] text-emerald-400 uppercase">
                             Proposed SOP Steps (3 Steps Prioritized First):
                           </span>
-                          <pre className="rounded bg-emerald-950/20 p-3 text-emerald-200 whitespace-pre-wrap max-h-48 overflow-y-auto border border-emerald-500/20 leading-relaxed text-[11px]">
+                          <pre className="rounded bg-emerald-50 p-3 text-emerald-200 whitespace-pre-wrap max-h-48 overflow-y-auto border border-emerald-500/20 leading-relaxed text-[11px]">
                             {prop.proposedStepsMarkdown}
                           </pre>
                         </div>
@@ -2496,12 +2498,12 @@ export default function KnowledgeBrainPage() {
 
             {/* ================= DONE-WHEN SHOWCASE: NOTE -> SKILL DIFF -> BETTER ANSWER ================= */}
             {demonstration && (
-              <div className="rounded-xl border border-indigo-500/30 bg-indigo-950/10 p-5 shadow-sm space-y-4">
-                <div className="flex items-center justify-between border-b border-indigo-500/20 pb-2.5">
+              <div className="rounded-xl border border-[#BFDBFE] bg-indigo-950/10 p-5 shadow-sm space-y-4">
+                <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-2.5">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-indigo-400" />
                     <div>
-                      <h4 className="text-sm font-bold text-white">
+                      <h4 className="text-sm font-bold text-[#0B1B3A]">
                         Training Impact: Note &rarr; Skill Update &rarr; Improved Resolution
                       </h4>
                       <p className="text-xs text-gray-400">
@@ -2542,7 +2544,7 @@ export default function KnowledgeBrainPage() {
                   </div>
 
                   {/* Column 3: The Improvement Impact */}
-                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 space-y-2">
+                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-50 p-4 space-y-2">
                     <span className="text-[10px] uppercase font-mono font-bold text-emerald-400 block tracking-wider">
                       3. Operational Impact
                     </span>
@@ -2561,7 +2563,7 @@ export default function KnowledgeBrainPage() {
                     <div className="flex items-center justify-between text-xs text-gray-400">
                       <span className="font-semibold text-red-400">Before (Too Long / Preliminary Prose):</span>
                     </div>
-                    <pre className="rounded-xl border border-gray-800 bg-gray-950 p-4 text-xs font-mono text-gray-400 whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto">
+                    <pre className="rounded-xl border border-[#DCE6F5] bg-[#F1F6FF] text-[#1E3A8A] border border-[#DCE6F5] p-4 text-xs font-mono text-gray-400 whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto">
                       {demonstration.beforeAnswer}
                     </pre>
                   </div>
@@ -2572,7 +2574,7 @@ export default function KnowledgeBrainPage() {
                         Better Answer (3 Steps Given First Directly):
                       </span>
                     </div>
-                    <pre className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 text-xs font-mono text-emerald-200 whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto">
+                    <pre className="rounded-xl border border-emerald-500/30 bg-emerald-50 p-4 text-xs font-mono text-emerald-200 whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto">
                       {demonstration.betterAnswer}
                     </pre>
                   </div>
@@ -2586,7 +2588,7 @@ export default function KnowledgeBrainPage() {
         {activeTab === "search" && (
           <div className="space-y-6">
             {/* Search Controls & Mode Selector */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-4">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 shadow-sm space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <Database className="h-4 w-4 text-indigo-400" />
@@ -2597,7 +2599,7 @@ export default function KnowledgeBrainPage() {
 
                 <div className="flex items-center gap-2 flex-wrap">
                   {/* Mode Selector Tabs */}
-                  <div className="flex rounded-lg border border-gray-800 bg-gray-950 p-1 text-xs">
+                  <div className="flex rounded-lg border border-[#DCE6F5] bg-[#F1F6FF] p-1 text-xs">
                     <button
                       onClick={() => {
                         setSearchMode("hybrid");
@@ -2642,7 +2644,7 @@ export default function KnowledgeBrainPage() {
                   {/* API Docs Button */}
                   <button
                     onClick={() => setShowApiModal(true)}
-                    className="flex items-center gap-1.5 rounded-lg border border-gray-700 bg-gray-800 hover:bg-gray-700 px-3 py-1.5 text-xs text-gray-200 transition"
+                    className="flex items-center gap-1.5 rounded-lg border border-[#C3D3EA] bg-gray-800 hover:bg-gray-700 px-3 py-1.5 text-xs text-gray-200 transition"
                   >
                     <Terminal className="h-3.5 w-3.5 text-indigo-400" />
                     <span>API Docs &amp; cURL</span>
@@ -2652,7 +2654,7 @@ export default function KnowledgeBrainPage() {
                   <button
                     onClick={runBenchmarkEval}
                     disabled={runningEval}
-                    className="flex items-center gap-1.5 rounded-lg border border-indigo-500/40 bg-indigo-950/40 hover:bg-indigo-900/40 px-3 py-1.5 text-xs font-semibold text-indigo-300 transition disabled:opacity-50"
+                    className="flex items-center gap-1.5 rounded-lg border border-[#BFDBFE] bg-indigo-50 hover:bg-indigo-900/40 px-3 py-1.5 text-xs font-semibold text-indigo-300 transition disabled:opacity-50"
                   >
                     <RotateCw className={`h-3.5 w-3.5 ${runningEval ? "animate-spin" : ""}`} />
                     <span>{runningEval ? "Evaluating..." : "Run Evals"}</span>
@@ -2670,7 +2672,7 @@ export default function KnowledgeBrainPage() {
                     if (e.key === "Enter") executeSearch(searchQuery);
                   }}
                   placeholder="Enter a technical question, code snippet, or policy query..."
-                  className="flex-1 rounded-lg border border-gray-700 bg-gray-950 px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                  className="flex-1 rounded-lg border border-[#C3D3EA] bg-white px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
                 />
                 <button
                   onClick={() => executeSearch(searchQuery)}
@@ -2683,11 +2685,11 @@ export default function KnowledgeBrainPage() {
               </div>
 
               {/* Morphology & Typo Invariance Quick Test Chips */}
-              <div className="space-y-2 pt-1 border-t border-gray-800/80">
+              <div className="space-y-2 pt-1 border-t border-[#DCE6F5]">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-gray-400 font-medium">Retrieval Precision &amp; Quality Benchmarks:</span>
                   {searchDurationMs > 0 && (
-                    <span className="font-mono text-[11px] text-gray-400 bg-gray-900 px-2 py-0.5 rounded border border-gray-800">
+                    <span className="font-mono text-[11px] text-gray-400 bg-[#EEF4FF] px-2 py-0.5 rounded border border-[#DCE6F5]">
                       Retrieved in {searchDurationMs}ms &bull; Mode: {searchMode}
                     </span>
                   )}
@@ -2700,7 +2702,7 @@ export default function KnowledgeBrainPage() {
                       setSearchQuery(q);
                       executeSearch(q);
                     }}
-                    className="rounded bg-gray-800/80 hover:bg-gray-700 px-2.5 py-1 text-gray-300 font-mono text-[11px] border border-gray-700"
+                    className="rounded bg-gray-800/80 hover:bg-gray-700 px-2.5 py-1 text-gray-300 font-mono text-[11px] border border-[#C3D3EA]"
                   >
                     1. Canonical: &quot;custom domain setup&quot;
                   </button>
@@ -2710,7 +2712,7 @@ export default function KnowledgeBrainPage() {
                       setSearchQuery(q);
                       executeSearch(q);
                     }}
-                    className="rounded bg-indigo-950/40 border border-indigo-500/30 hover:bg-indigo-900/40 px-2.5 py-1 text-indigo-300 font-mono text-[11px]"
+                    className="rounded bg-indigo-50 border border-[#BFDBFE] hover:bg-indigo-900/40 px-2.5 py-1 text-indigo-300 font-mono text-[11px]"
                   >
                     2. Morphology: &quot;customize domain setup&quot;
                   </button>
@@ -2720,7 +2722,7 @@ export default function KnowledgeBrainPage() {
                       setSearchQuery(q);
                       executeSearch(q);
                     }}
-                    className="rounded bg-amber-950/40 border border-amber-500/30 hover:bg-amber-900/40 px-2.5 py-1 text-amber-300 font-mono text-[11px]"
+                    className="rounded bg-amber-50 border border-amber-500/30 hover:bg-amber-900/40 px-2.5 py-1 text-amber-300 font-mono text-[11px]"
                   >
                     3. Typo: &quot;custm CNAME subdoamin&quot;
                   </button>
@@ -2740,13 +2742,13 @@ export default function KnowledgeBrainPage() {
                       setSearchQuery(q);
                       executeSearch(q);
                     }}
-                    className="rounded bg-emerald-950/40 border border-emerald-500/30 hover:bg-emerald-900/40 px-2.5 py-1 text-emerald-300 font-mono text-[11px]"
+                    className="rounded bg-emerald-50 border border-emerald-500/30 hover:bg-emerald-900/40 px-2.5 py-1 text-emerald-300 font-mono text-[11px]"
                   >
                     5. Policy: &quot;Never promise refund&quot;
                   </button>
                 </div>
 
-                <div className="rounded-lg bg-indigo-950/20 border border-indigo-500/20 p-2.5 flex items-center justify-between text-xs">
+                <div className="rounded-lg bg-indigo-50 border border-[#DCE6F5] p-2.5 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2 text-indigo-300">
                     <Sparkles className="h-4 w-4 text-indigo-400 shrink-0" />
                     <span>
@@ -2762,14 +2764,14 @@ export default function KnowledgeBrainPage() {
 
             {/* Task 2.7 Done-When Benchmark Evaluation Card */}
             {evalBenchmark && (
-              <div className="rounded-xl border border-emerald-500/40 bg-[#0E1322] p-5 shadow-sm space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-gray-800 pb-3">
+              <div className="rounded-xl border border-emerald-500/40 bg-white p-5 shadow-sm space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[#DCE6F5] pb-3">
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="rounded bg-emerald-500/10 text-emerald-400 font-mono text-xs px-2 py-0.5 font-bold border border-emerald-500/30">
                         SEARCH RELEVANCE BENCHMARK
                       </span>
-                      <h3 className="text-sm font-semibold text-white">
+                      <h3 className="text-sm font-semibold text-[#0B1B3A]">
                         Hybrid Search vs. Meaning-Only Search Benchmark
                       </h3>
                     </div>
@@ -2785,7 +2787,7 @@ export default function KnowledgeBrainPage() {
                     </span>
                     <button
                       onClick={() => setShowBenchmarkDetails(!showBenchmarkDetails)}
-                      className="rounded border border-gray-700 bg-gray-800 px-2.5 py-1 text-xs text-gray-300 hover:text-white"
+                      className="rounded border border-[#C3D3EA] bg-gray-800 px-2.5 py-1 text-xs text-gray-300 hover:text-white"
                     >
                       {showBenchmarkDetails ? "Hide Breakdown" : "View Breakdown"}
                     </button>
@@ -2794,25 +2796,25 @@ export default function KnowledgeBrainPage() {
 
                 {/* Benchmark Metrics Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs font-mono">
-                  <div className="rounded-lg border border-gray-800 bg-gray-950 p-3">
+                  <div className="rounded-lg border border-[#DCE6F5] bg-[#F1F6FF] p-3">
                     <span className="text-gray-400">Hybrid MRR</span>
                     <div className="text-xl font-bold text-emerald-400 mt-1">{evalBenchmark.hybridMRR}</div>
                     <span className="text-[10px] text-gray-500">Reciprocal Rank Fusion</span>
                   </div>
 
-                  <div className="rounded-lg border border-gray-800 bg-gray-950 p-3">
+                  <div className="rounded-lg border border-[#DCE6F5] bg-[#F1F6FF] p-3">
                     <span className="text-gray-400">Meaning-Only MRR</span>
                     <div className="text-xl font-bold text-purple-400 mt-1">{evalBenchmark.meaningOnlyMRR}</div>
                     <span className="text-[10px] text-gray-500">Vector Cosine Only</span>
                   </div>
 
-                  <div className="rounded-lg border border-gray-800 bg-gray-950 p-3">
+                  <div className="rounded-lg border border-[#DCE6F5] bg-[#F1F6FF] p-3">
                     <span className="text-gray-400">MRR Improvement</span>
                     <div className="text-xl font-bold text-amber-400 mt-1">+{evalBenchmark.mrrImprovementPercent}%</div>
                     <span className="text-[10px] text-gray-500">Accuracy &amp; Rank Lift</span>
                   </div>
 
-                  <div className="rounded-lg border border-gray-800 bg-gray-950 p-3">
+                  <div className="rounded-lg border border-[#DCE6F5] bg-[#F1F6FF] p-3">
                     <span className="text-gray-400">Benchmark Test Suite</span>
                     <div className="text-xl font-bold text-white mt-1">{evalBenchmark.totalQueries} Queries</div>
                     <span className="text-[10px] text-gray-500">Technical, Typos &amp; Stems</span>
@@ -2821,7 +2823,7 @@ export default function KnowledgeBrainPage() {
 
                 {/* Expandable Benchmark Queries Breakdown */}
                 {showBenchmarkDetails && evalBenchmark.benchmarkDetails && (
-                  <div className="rounded-lg border border-gray-800 bg-gray-950/80 p-4 space-y-3 text-xs">
+                  <div className="rounded-lg border border-[#DCE6F5] bg-[#F6F9FF] p-4 space-y-3 text-xs">
                     <div className="font-semibold text-gray-300 flex items-center justify-between">
                       <span>Benchmark Query Comparison Matrix</span>
                       <span className="text-[11px] font-mono text-gray-500">RRF = 1/(60+vec) + 1/(60+bm25)</span>
@@ -2872,11 +2874,11 @@ export default function KnowledgeBrainPage() {
               {searchResults.map((res) => (
                 <div
                   key={res.citationIndex}
-                  className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-3 hover:border-gray-700 transition"
+                  className="rounded-xl border border-[#DCE6F5] bg-white p-5 shadow-sm space-y-3 hover:border-[#C3D3EA] transition"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-gray-800/80 pb-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[#DCE6F5] pb-3">
                     <div className="flex items-center gap-2">
-                      <span className="rounded bg-indigo-600/20 text-indigo-400 font-mono font-bold text-xs px-2 py-0.5 border border-indigo-500/30">
+                      <span className="rounded bg-indigo-600/20 text-indigo-400 font-mono font-bold text-xs px-2 py-0.5 border border-[#BFDBFE]">
                         [{res.citationIndex}]
                       </span>
                       {res.attributionBadge && (
@@ -2890,13 +2892,13 @@ export default function KnowledgeBrainPage() {
                               ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                               : res.attributionBadge === "[page_url]"
                               ? "bg-sky-500/10 text-sky-400 border border-sky-500/20"
-                              : "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
+                              : "bg-indigo-500/10 text-indigo-400 border border-[#DCE6F5]"
                           }`}
                         >
                           {res.attributionBadge}
                         </span>
                       )}
-                      <h3 className="text-sm font-semibold text-white">{res.pageTitle}</h3>
+                      <h3 className="text-sm font-semibold text-[#0B1B3A]">{res.pageTitle}</h3>
                       <span className="text-xs text-gray-500 font-mono">&bull; {res.heading}</span>
                     </div>
 
@@ -2933,13 +2935,13 @@ export default function KnowledgeBrainPage() {
 
             {/* Developer API Documentation Modal (Task 2.8) */}
             {showApiModal && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-                <div className="w-full max-w-3xl rounded-xl border border-gray-700 bg-[#0E1322] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-                  <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B1B3A]/35 backdrop-blur-sm p-4">
+                <div className="w-full max-w-3xl rounded-xl border border-[#C3D3EA] bg-white p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+                  <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-3">
                     <div className="flex items-center gap-2">
                       <Terminal className="h-5 w-5 text-indigo-400" />
                       <div>
-                        <h2 className="text-base font-bold text-white">Knowledge Brain REST API Documentation</h2>
+                        <h2 className="text-base font-bold text-[#0B1B3A]">Knowledge Brain REST API Documentation</h2>
                         <p className="text-xs text-gray-400">
                           Production-grade multi-tenant API called by Ask &amp; Teach Chat and Eval Lab.
                         </p>
@@ -2956,7 +2958,7 @@ export default function KnowledgeBrainPage() {
                   <div className="space-y-4 text-xs">
                     <div>
                       <span className="font-semibold text-white">HTTP POST Endpoint:</span>
-                      <div className="mt-1 flex items-center justify-between rounded-lg bg-gray-950 border border-gray-800 px-3 py-2 font-mono text-gray-300">
+                      <div className="mt-1 flex items-center justify-between rounded-lg bg-white border border-[#DCE6F5] px-3 py-2 font-mono text-gray-300">
                         <span>POST /api/brain/query</span>
                         <span className="text-[10px] text-emerald-400 uppercase font-bold">Multi-Tenant Scoped</span>
                       </div>
@@ -2979,7 +2981,7 @@ export default function KnowledgeBrainPage() {
                           <span>{copiedCurl ? "Copied!" : "Copy cURL"}</span>
                         </button>
                       </div>
-                      <pre className="rounded-lg bg-gray-950 border border-gray-800 p-3 font-mono text-[11px] text-gray-300 overflow-x-auto">
+                      <pre className="rounded-lg bg-white border border-[#DCE6F5] p-3 font-mono text-[11px] text-gray-300 overflow-x-auto">
 {`curl -X POST http://localhost:3000/api/brain/query \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -2993,7 +2995,7 @@ export default function KnowledgeBrainPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <span className="font-semibold text-white">Request JSON Payload:</span>
-                        <pre className="mt-1 rounded-lg bg-gray-950 border border-gray-800 p-3 font-mono text-[11px] text-gray-300 overflow-x-auto">
+                        <pre className="mt-1 rounded-lg bg-white border border-[#DCE6F5] p-3 font-mono text-[11px] text-gray-300 overflow-x-auto">
 {`{
   "query": string, // required
   "limit": number, // optional (1-20, default 5)
@@ -3004,7 +3006,7 @@ export default function KnowledgeBrainPage() {
                       </div>
                       <div>
                         <span className="font-semibold text-white">Knowledge Attribution Badges:</span>
-                        <ul className="mt-1 space-y-1 rounded-lg bg-gray-950 border border-gray-800 p-3 font-mono text-[11px] text-gray-300">
+                        <ul className="mt-1 space-y-1 rounded-lg bg-white border border-[#DCE6F5] p-3 font-mono text-[11px] text-gray-300">
                           <li><span className="text-indigo-400 font-bold">[sitemap]</span> : Sitemap XML Article</li>
                           <li><span className="text-sky-400 font-bold">[page_url]</span> : Standalone Web Page</li>
                           <li><span className="text-emerald-400 font-bold">[instruction]</span> : Human Policy Rule</li>
@@ -3014,7 +3016,7 @@ export default function KnowledgeBrainPage() {
                       </div>
                     </div>
 
-                    <div className="rounded-lg bg-gray-950 border border-gray-800 p-3 text-gray-300 text-[11px] flex items-center justify-between">
+                    <div className="rounded-lg bg-white border border-[#DCE6F5] p-3 text-gray-300 text-[11px] flex items-center justify-between">
                       <span>Complete technical manual and SDK contracts:</span>
                       <a
                         href="/api/brain/query?view=spec"
@@ -3028,7 +3030,7 @@ export default function KnowledgeBrainPage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-end pt-2 border-t border-gray-800">
+                  <div className="flex justify-end pt-2 border-t border-[#DCE6F5]">
                     <button
                       onClick={() => setShowApiModal(false)}
                       className="rounded-lg bg-gray-800 hover:bg-gray-700 px-4 py-2 text-xs font-semibold text-white transition"
@@ -3041,10 +3043,10 @@ export default function KnowledgeBrainPage() {
             )}
 
             {/* URL Health Lifecycle Section */}
-            <div className="mt-8 pt-6 border-t border-gray-800 space-y-4">
+            <div className="mt-8 pt-6 border-t border-[#DCE6F5] space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">URL Health Lifecycle &amp; Quarantine State Machine</h3>
+                  <h3 className="text-sm font-semibold text-[#0B1B3A]">URL Health Lifecycle &amp; Quarantine State Machine</h3>
                   <p className="text-xs text-gray-400 mt-0.5">
                     Prevents hallucinations and broken links. 2 consecutive 404s trigger immediate Quarantine.
                   </p>
@@ -3054,7 +3056,7 @@ export default function KnowledgeBrainPage() {
                     fetchHealth();
                     fetchPages();
                   }}
-                  className="flex items-center gap-1.5 rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:text-white"
+                  className="flex items-center gap-1.5 rounded-lg border border-[#C3D3EA] bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:text-white"
                 >
                   <RotateCw className="h-3 w-3" />
                   <span>Refresh Health</span>
@@ -3063,17 +3065,17 @@ export default function KnowledgeBrainPage() {
 
               {healthSummary && (
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                  <div className="rounded-xl border border-emerald-500/30 bg-[#0E1322] p-4">
+                  <div className="rounded-xl border border-emerald-500/30 bg-white p-4">
                     <div className="flex items-center justify-between text-xs text-gray-400">
                       <span>Active (Healthy)</span>
                       <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                     </div>
-                    <div className="text-2xl font-bold text-emerald-400 mt-1 font-mono">
+                    <div className="text-2xl font-bold text-[#15803D] mt-1 font-mono">
                       {healthSummary.active}
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-amber-500/30 bg-[#0E1322] p-4">
+                  <div className="rounded-xl border border-amber-500/30 bg-white p-4">
                     <div className="flex items-center justify-between text-xs text-gray-400">
                       <span>Watch (1 Fail)</span>
                       <AlertTriangle className="h-4 w-4 text-amber-400" />
@@ -3083,7 +3085,7 @@ export default function KnowledgeBrainPage() {
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-red-500/30 bg-[#0E1322] p-4">
+                  <div className="rounded-xl border border-red-500/30 bg-white p-4">
                     <div className="flex items-center justify-between text-xs text-gray-400">
                       <span>Quarantined</span>
                       <ShieldAlert className="h-4 w-4 text-red-400" />
@@ -3093,7 +3095,7 @@ export default function KnowledgeBrainPage() {
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4">
+                  <div className="rounded-xl border border-[#DCE6F5] bg-white p-4">
                     <div className="flex items-center justify-between text-xs text-gray-400">
                       <span>Archived</span>
                       <Layers className="h-4 w-4 text-gray-500" />
@@ -3112,10 +3114,10 @@ export default function KnowledgeBrainPage() {
         {activeTab === "freshness" && (
           <div className="space-y-6">
             {/* Header & Recheck Trigger */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 shadow-sm space-y-4">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-6 shadow-sm space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                  <h3 className="text-sm font-semibold text-[#0B1B3A] flex items-center gap-2">
                     <RotateCw className="h-4 w-4 text-emerald-400" />
                     <span>Content Freshness &amp; Health Lifecycle</span>
                   </h3>
@@ -3136,7 +3138,7 @@ export default function KnowledgeBrainPage() {
               </div>
 
               {refreshStatusMsg && (
-                <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3 text-xs text-emerald-300 flex items-center gap-2">
+                <div className="rounded-lg border border-emerald-500/30 bg-emerald-50 p-3 text-xs text-emerald-300 flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
                   <span>{refreshStatusMsg}</span>
                 </div>
@@ -3149,15 +3151,15 @@ export default function KnowledgeBrainPage() {
                 Freshness &amp; Ingestion Dashboard
               </span>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-4">
                   <div className="text-xs text-gray-400">Pages Processed</div>
-                  <div className="text-2xl font-bold text-white mt-1 font-mono">
+                  <div className="text-2xl font-bold text-[#0B1B3A] mt-1 font-mono">
                     {freshnessMetrics.pagesProcessed}
                   </div>
                   <div className="text-[10px] text-gray-500 mt-0.5">Verified URLs</div>
                 </div>
 
-                <div className="rounded-xl border border-indigo-500/30 bg-[#0E1322] p-4">
+                <div className="rounded-xl border border-[#BFDBFE] bg-white p-4">
                   <div className="text-xs text-indigo-400">Pages Embedded</div>
                   <div className="text-2xl font-bold text-indigo-400 mt-1 font-mono">
                     {freshnessMetrics.pagesEmbedded}
@@ -3165,7 +3167,7 @@ export default function KnowledgeBrainPage() {
                   <div className="text-[10px] text-indigo-300/70 mt-0.5">Content hash checked</div>
                 </div>
 
-                <div className="rounded-xl border border-red-500/30 bg-[#0E1322] p-4">
+                <div className="rounded-xl border border-red-500/30 bg-white p-4">
                   <div className="text-xs text-red-400">Pages Failed</div>
                   <div className="text-2xl font-bold text-red-400 mt-1 font-mono">
                     {freshnessMetrics.pagesFailed}
@@ -3173,7 +3175,7 @@ export default function KnowledgeBrainPage() {
                   <div className="text-[10px] text-red-300/70 mt-0.5">404 / HTTP errors</div>
                 </div>
 
-                <div className="rounded-xl border border-amber-500/30 bg-[#0E1322] p-4">
+                <div className="rounded-xl border border-amber-500/30 bg-white p-4">
                   <div className="text-xs text-amber-400">Pages Pending</div>
                   <div className="text-2xl font-bold text-amber-400 mt-1 font-mono">
                     {freshnessMetrics.pagesPending}
@@ -3181,7 +3183,7 @@ export default function KnowledgeBrainPage() {
                   <div className="text-[10px] text-amber-300/70 mt-0.5">On Watch (1 fail)</div>
                 </div>
 
-                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-4">
                   <div className="text-xs text-gray-400">Duplicates Skipped</div>
                   <div className="text-2xl font-bold text-purple-400 mt-1 font-mono">
                     {freshnessMetrics.duplicateUrlsSkipped}
@@ -3189,7 +3191,7 @@ export default function KnowledgeBrainPage() {
                   <div className="text-[10px] text-gray-500 mt-0.5">Single URL row kept</div>
                 </div>
 
-                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-4">
                   <div className="text-xs text-gray-400">Last Sync Time</div>
                   <div className="text-xs font-bold text-emerald-400 mt-2 font-mono truncate">
                     {freshnessMetrics.lastSyncTime
@@ -3206,13 +3208,13 @@ export default function KnowledgeBrainPage() {
             {/* Recheck Schedule & URL Health Settings (User Controls) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Setting 1: Recheck Schedule */}
-              <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-4">
+              <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm font-semibold text-white">
                     <Calendar className="h-4 w-4 text-indigo-400" />
                     <span>Recheck Schedule</span>
                   </div>
-                  <span className="rounded bg-indigo-500/10 text-indigo-300 px-2 py-0.5 text-xs font-mono border border-indigo-500/20">
+                  <span className="rounded bg-indigo-500/10 text-indigo-300 px-2 py-0.5 text-xs font-mono border border-[#DCE6F5]">
                     Active: {healthPolicy.recheckSchedule.replace("_", " ")}
                   </span>
                 </div>
@@ -3233,8 +3235,8 @@ export default function KnowledgeBrainPage() {
                       onClick={() => setHealthPolicyState((prev) => ({ ...prev, recheckSchedule: s.id as any }))}
                       className={`p-3 rounded-lg border text-left transition ${
                         healthPolicy.recheckSchedule === s.id
-                          ? "border-indigo-500 bg-indigo-950/40 text-white"
-                          : "border-gray-800 bg-gray-950/50 text-gray-400 hover:border-gray-700"
+                          ? "border-indigo-500 bg-indigo-50 text-white"
+                          : "border-[#DCE6F5] bg-[#F1F6FF]/50 text-gray-400 hover:border-[#C3D3EA]"
                       }`}
                     >
                       <div className="font-semibold text-white flex items-center justify-between">
@@ -3250,7 +3252,7 @@ export default function KnowledgeBrainPage() {
               </div>
 
               {/* Setting 2: URL Health Action Policy (Threshold X & Action Rule) */}
-              <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-4">
+              <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm font-semibold text-white">
                     <Sliders className="h-4 w-4 text-emerald-400" />
@@ -3280,8 +3282,8 @@ export default function KnowledgeBrainPage() {
                           onClick={() => setHealthPolicyState((prev) => ({ ...prev, failureThresholdX: item.val }))}
                           className={`px-2.5 py-1.5 rounded border text-center font-mono text-xs transition ${
                             healthPolicy.failureThresholdX === item.val
-                              ? "border-emerald-500 bg-emerald-950/40 text-emerald-300 font-bold"
-                              : "border-gray-800 bg-gray-950 text-gray-400 hover:border-gray-700"
+                              ? "border-emerald-500 bg-emerald-50 text-emerald-300 font-bold"
+                              : "border-[#DCE6F5] bg-white text-[#4A5B78] hover:border-[#C3D3EA]"
                           }`}
                         >
                           {item.label}
@@ -3306,8 +3308,8 @@ export default function KnowledgeBrainPage() {
                           onClick={() => setHealthPolicyState((prev) => ({ ...prev, actionRule: rule.id as any }))}
                           className={`px-2.5 py-1.5 rounded border text-center text-xs transition ${
                             healthPolicy.actionRule === rule.id
-                              ? "border-emerald-500 bg-emerald-950/40 text-emerald-300 font-bold"
-                              : "border-gray-800 bg-gray-950 text-gray-400 hover:border-gray-700"
+                              ? "border-emerald-500 bg-emerald-50 text-emerald-300 font-bold"
+                              : "border-[#DCE6F5] bg-white text-[#4A5B78] hover:border-[#C3D3EA]"
                           }`}
                         >
                           {rule.label}
@@ -3330,10 +3332,10 @@ export default function KnowledgeBrainPage() {
             </div>
 
             {/* Pending URLs Review Panel (Task 2.4 requirement: Before any action, show user pending URLs and counts) */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-3">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+                  <h4 className="text-sm font-semibold text-[#0B1B3A] flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4 text-amber-400" />
                     <span>Pending URLs Review ({pendingUrlsList.length} Pending Actions)</span>
                   </h4>
@@ -3347,14 +3349,14 @@ export default function KnowledgeBrainPage() {
               </div>
 
               {pendingUrlsList.length === 0 ? (
-                <div className="rounded-lg border border-gray-800 bg-gray-950/60 p-4 text-center text-xs text-gray-400">
+                <div className="rounded-lg border border-[#DCE6F5] bg-[#F6F9FF] p-4 text-center text-xs text-gray-400">
                   <CheckCircle2 className="h-5 w-5 text-emerald-400 mx-auto mb-1" />
                   <span>All knowledge URLs are healthy! No pending failures or quarantined items.</span>
                 </div>
               ) : (
-                <div className="rounded-lg border border-gray-800 overflow-hidden bg-gray-950">
+                <div className="rounded-lg border border-[#DCE6F5] overflow-hidden bg-[#F1F6FF]">
                   <table className="w-full text-left text-xs font-mono">
-                    <thead className="bg-gray-900 border-b border-gray-800 text-gray-400 uppercase text-[10px]">
+                    <thead className="bg-[#EEF4FF] border-b border-[#DCE6F5] text-[#4A5B78] uppercase text-[10px] font-semibold">
                       <tr>
                         <th className="px-3.5 py-2.5">URL / Title</th>
                         <th className="px-3.5 py-2.5 text-center">Consecutive Failures</th>
@@ -3365,7 +3367,7 @@ export default function KnowledgeBrainPage() {
                     </thead>
                     <tbody className="divide-y divide-gray-800 text-gray-300">
                       {pendingUrlsList.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-gray-900/40">
+                        <tr key={idx} className="hover:bg-[#EEF4FF]">
                           <td className="px-3.5 py-2.5 font-sans">
                             <div className="font-medium text-white truncate max-w-sm">{item.title || "Help Page"}</div>
                             <div className="text-xs text-indigo-400 font-mono truncate max-w-md">{item.url}</div>
@@ -3376,7 +3378,7 @@ export default function KnowledgeBrainPage() {
                           <td className="px-3.5 py-2.5">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
                               item.healthStatus === "watch"
-                                ? "bg-amber-950/60 text-amber-300 border border-amber-500/30"
+                                ? "bg-amber-50 text-amber-300 border border-amber-500/30"
                                 : item.healthStatus === "quarantined"
                                 ? "bg-red-950/60 text-red-300 border border-red-500/30"
                                 : "bg-gray-800 text-gray-400"
@@ -3401,10 +3403,10 @@ export default function KnowledgeBrainPage() {
             </div>
 
             {/* Refresh Run View (Task 2.4 requirement: First/Last fetch date & time, Total fetched at bottom, Full URL list) */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-4">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+                  <h4 className="text-sm font-semibold text-[#0B1B3A] flex items-center gap-2">
                     <Clock className="h-4 w-4 text-indigo-400" />
                     <span>Refresh Run View ({refreshRuns.length} Runs Logged)</span>
                   </h4>
@@ -3419,7 +3421,7 @@ export default function KnowledgeBrainPage() {
                   <select
                     value={urlListFilter}
                     onChange={(e) => setUrlListFilter(e.target.value)}
-                    className="rounded border border-gray-700 bg-gray-900 px-2 py-1 text-xs text-gray-300 font-mono"
+                    className="rounded border border-[#C3D3EA] bg-white px-2 py-1 text-xs text-gray-300 font-mono"
                   >
                     <option value="all">All Statuses</option>
                     <option value="200">200 OK (Clean)</option>
@@ -3430,7 +3432,7 @@ export default function KnowledgeBrainPage() {
               </div>
 
               {refreshRuns.length === 0 ? (
-                <div className="rounded-lg border border-gray-800 bg-gray-950/60 p-6 text-center text-xs text-gray-400 space-y-2">
+                <div className="rounded-lg border border-[#DCE6F5] bg-[#F6F9FF] p-6 text-center text-xs text-gray-400 space-y-2">
                   <Clock className="h-6 w-6 text-indigo-400 mx-auto" />
                   <p>No refresh runs recorded yet. Click "Trigger Recheck Now" to perform the first scheduled sync.</p>
                 </div>
@@ -3448,14 +3450,14 @@ export default function KnowledgeBrainPage() {
                     return (
                       <div
                         key={run.runId}
-                        className="rounded-lg border border-gray-800 bg-gray-950/70 overflow-hidden"
+                        className="rounded-lg border border-[#DCE6F5] bg-[#F1F6FF]/70 overflow-hidden"
                       >
                         {/* Run Header Card */}
-                        <div className="p-4 bg-gray-900/60 border-b border-gray-800 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-xs">
+                        <div className="p-4 bg-[#F6F9FF] border-b border-[#DCE6F5] flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-xs">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2 font-mono">
-                              <span className="font-bold text-white">{run.runId}</span>
-                              <span className="rounded bg-indigo-500/10 text-indigo-300 px-2 py-0.5 border border-indigo-500/20 text-[10px]">
+                              <span className="font-bold text-[#0B1B3A]">{run.runId}</span>
+                              <span className="rounded bg-indigo-500/10 text-indigo-300 px-2 py-0.5 border border-[#DCE6F5] text-[10px]">
                                 {run.schedule}
                               </span>
                               <span className="rounded bg-emerald-500/10 text-emerald-300 px-2 py-0.5 border border-emerald-500/20 text-[10px]">
@@ -3515,9 +3517,9 @@ export default function KnowledgeBrainPage() {
                               </span>
                             </div>
 
-                            <div className="max-h-72 overflow-y-auto rounded border border-gray-800 bg-gray-950">
+                            <div className="max-h-72 overflow-y-auto rounded border border-[#DCE6F5] bg-[#F1F6FF]">
                               <table className="w-full text-left text-xs font-mono">
-                                <thead className="bg-gray-900 border-b border-gray-800 text-gray-400 uppercase text-[10px] sticky top-0">
+                                <thead className="bg-[#EEF4FF] border-b border-[#DCE6F5] text-gray-400 uppercase text-[10px] sticky top-0">
                                   <tr>
                                     <th className="px-3.5 py-2">URL</th>
                                     <th className="px-3.5 py-2 text-center">HTTP Status</th>
@@ -3529,7 +3531,7 @@ export default function KnowledgeBrainPage() {
                                 </thead>
                                 <tbody className="divide-y divide-gray-800/80 text-gray-300">
                                   {filteredUrls.map((u: any, idx: number) => (
-                                    <tr key={idx} className="hover:bg-gray-900/50">
+                                    <tr key={idx} className="hover:bg-[#EEF4FF]/50">
                                       <td className="px-3.5 py-2 text-indigo-400 truncate max-w-sm">
                                         {u.url}
                                         {u.redirectUrl && (
@@ -3552,10 +3554,10 @@ export default function KnowledgeBrainPage() {
                                       <td className="px-3.5 py-2">
                                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                                           u.healthStatus === "active"
-                                            ? "text-emerald-400 bg-emerald-950/40"
+                                            ? "text-emerald-400 bg-emerald-50"
                                             : u.healthStatus === "watch"
-                                            ? "text-amber-400 bg-amber-950/40"
-                                            : "text-red-400 bg-red-950/40"
+                                            ? "text-amber-400 bg-amber-50"
+                                            : "text-red-400 bg-red-50"
                                         }`}>
                                           {u.healthStatus}
                                         </span>
@@ -3569,7 +3571,7 @@ export default function KnowledgeBrainPage() {
                                             : u.changeType === "updated"
                                             ? "bg-emerald-950 text-emerald-300"
                                             : u.changeType === "recovered"
-                                            ? "bg-cyan-950 text-cyan-300"
+                                            ? "bg-blue-50 text-cyan-300"
                                             : "bg-red-950 text-red-300"
                                         }`}>
                                           {u.changeType === "unchanged" ? "Unchanged (0 tokens)" : u.changeType}
@@ -3590,7 +3592,7 @@ export default function KnowledgeBrainPage() {
                         )}
 
                         {/* Total URLs Fetched Bottom Footer (Task 2.4 requirement) */}
-                        <div className="px-4 py-2.5 bg-gray-900 border-t border-gray-800 flex items-center justify-between text-xs font-mono">
+                        <div className="px-4 py-2.5 bg-[#EEF4FF] border-t border-[#DCE6F5] flex items-center justify-between text-xs font-mono">
                           <span className="text-gray-400">
                             Total URLs Fetched: <strong className="text-white">{run.totalUrlsFetched} URLs</strong>
                           </span>
@@ -3606,10 +3608,10 @@ export default function KnowledgeBrainPage() {
             </div>
 
             {/* Archived Knowledge Base (Task 2.4 requirement: Nothing deleted for good, archived pages move here for audits and recovery) */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-4">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+                  <h4 className="text-sm font-semibold text-[#0B1B3A] flex items-center gap-2">
                     <Archive className="h-4 w-4 text-purple-400" />
                     <span>Archived Knowledge Base ({archivedPagesList.length} Quarantined &amp; Archived Pages)</span>
                   </h4>
@@ -3623,14 +3625,14 @@ export default function KnowledgeBrainPage() {
               </div>
 
               {archivedPagesList.length === 0 ? (
-                <div className="rounded-lg border border-gray-800 bg-gray-950/60 p-6 text-center text-xs text-gray-400">
+                <div className="rounded-lg border border-[#DCE6F5] bg-[#F6F9FF] p-6 text-center text-xs text-gray-400">
                   <Archive className="h-6 w-6 text-gray-500 mx-auto mb-1" />
                   <span>No pages in Quarantine or Archive. Knowledge Brain is fully healthy!</span>
                 </div>
               ) : (
-                <div className="rounded-lg border border-gray-800 overflow-hidden bg-gray-950">
+                <div className="rounded-lg border border-[#DCE6F5] overflow-hidden bg-[#F1F6FF]">
                   <table className="w-full text-left text-xs font-mono">
-                    <thead className="bg-gray-900 border-b border-gray-800 text-gray-400 uppercase text-[10px]">
+                    <thead className="bg-[#EEF4FF] border-b border-[#DCE6F5] text-[#4A5B78] uppercase text-[10px] font-semibold">
                       <tr>
                         <th className="px-3.5 py-2.5">Title &amp; URL</th>
                         <th className="px-3.5 py-2.5">Status</th>
@@ -3642,7 +3644,7 @@ export default function KnowledgeBrainPage() {
                     </thead>
                     <tbody className="divide-y divide-gray-800 text-gray-300">
                       {archivedPagesList.map((page) => (
-                        <tr key={page.id} className="hover:bg-gray-900/50">
+                        <tr key={page.id} className="hover:bg-[#EEF4FF]/50">
                           <td className="px-3.5 py-2.5 font-sans">
                             <div className="font-semibold text-white truncate max-w-sm">{page.title}</div>
                             <div className="text-xs text-indigo-400 font-mono truncate max-w-md">{page.url}</div>
@@ -3651,7 +3653,7 @@ export default function KnowledgeBrainPage() {
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                               page.healthStatus === "quarantined"
                                 ? "bg-red-950/80 text-red-300 border border-red-500/30"
-                                : "bg-gray-800 text-gray-400 border border-gray-700"
+                                : "bg-gray-800 text-gray-400 border border-[#C3D3EA]"
                             }`}>
                               {page.healthStatus}
                             </span>

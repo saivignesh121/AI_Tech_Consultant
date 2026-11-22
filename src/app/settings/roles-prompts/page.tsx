@@ -700,7 +700,7 @@ ${skillForm.examples
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white">Role & Prompt Studio</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-[#0B1B3A]">Role & Prompt Studio</h1>
             <p className="text-sm text-gray-400 mt-1">
               Refine governance prompts with variable validation, simulate prompt caching savings, and test agent personas live.
             </p>
@@ -708,13 +708,11 @@ ${skillForm.examples
         </div>
 
         {/* Tab Selection */}
-        <div className="flex border-b border-gray-800 space-x-1">
+        <div className="flex border-b border-[#DCE6F5] space-x-1">
           <button
             onClick={() => setActiveTab("prompts")}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
-              activeTab === "prompts"
-                ? "border-indigo-500 text-indigo-400"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+              activeTab === "prompts" ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF] font-semibold" : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
             }`}
           >
             <FileCode className="h-4 w-4" />
@@ -724,9 +722,7 @@ ${skillForm.examples
           <button
             onClick={() => setActiveTab("roles")}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
-              activeTab === "roles"
-                ? "border-indigo-500 text-indigo-400"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+              activeTab === "roles" ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF] font-semibold" : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
             }`}
           >
             <Users className="h-4 w-4" />
@@ -736,9 +732,7 @@ ${skillForm.examples
           <button
             onClick={() => setActiveTab("skills")}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
-              activeTab === "skills"
-                ? "border-indigo-500 text-indigo-400"
-                : "border-transparent text-gray-400 hover:text-gray-200"
+              activeTab === "skills" ? "border-[#2563EB] text-[#2563EB] bg-[#EEF4FF] font-semibold" : "border-transparent text-[#4A5B78] hover:text-[#0B1B3A]"
             }`}
           >
             <BookOpen className="h-4 w-4" />
@@ -776,13 +770,13 @@ ${skillForm.examples
                   className={`rounded-lg px-3.5 py-2 text-xs font-medium transition flex items-center gap-2 ${
                     selectedPromptKey === p.key
                       ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
-                      : "bg-[#0E1322] border border-gray-800 text-gray-300 hover:border-gray-700"
+                      : "bg-white border border-[#DCE6F5] text-gray-300 hover:border-[#C3D3EA]"
                   }`}
                 >
                   <FileCode className="h-3.5 w-3.5" />
                   <span>{p.key}</span>
                   {p.currentVersion && (
-                    <span className="rounded bg-black/30 px-1.5 py-0.2 font-mono text-[10px]">
+                    <span className="rounded bg-[#EEF4FF] text-[#2563EB] px-1.5 py-0.2 font-mono text-[10px]">
                       v{p.currentVersion.versionNumber}
                     </span>
                   )}
@@ -792,14 +786,14 @@ ${skillForm.examples
 
             {/* Notification alert */}
             {saveSuccessMsg && (
-              <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-3.5 text-xs text-emerald-300 flex items-center gap-2">
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-50 p-3.5 text-xs text-emerald-300 flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
                 <span>{saveSuccessMsg}</span>
               </div>
             )}
 
             {/* Self-Improve Loop Notice (Task 1.3 requirement) */}
-            <div className="rounded-xl border border-indigo-500/20 bg-indigo-950/20 p-3 text-xs text-indigo-300 flex items-center justify-between gap-3">
+            <div className="rounded-xl border border-[#DCE6F5] bg-indigo-50 p-3 text-xs text-indigo-300 flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-indigo-400 flex-shrink-0" />
                 <span>
@@ -829,10 +823,10 @@ ${skillForm.examples
             )}
 
             {/* Main Prompt Editor Area */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-gray-800 pb-3">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[#DCE6F5] pb-3">
                 <div>
-                  <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                  <h3 className="text-sm font-semibold text-[#0B1B3A] flex items-center gap-2">
                     Template: <span className="font-mono text-indigo-400">{selectedPromptKey}</span>
                   </h3>
                   <p className="text-xs text-gray-400">{activePrompt?.description}</p>
@@ -844,7 +838,7 @@ ${skillForm.examples
                   <select
                     value={selectedCompareVersionId}
                     onChange={(e) => setSelectedCompareVersionId(e.target.value)}
-                    className="rounded-lg border border-gray-700 bg-gray-950 px-2 py-1 text-xs text-gray-200 focus:outline-none max-w-[200px] truncate"
+                    className="rounded-lg border border-[#C3D3EA] bg-white px-2 py-1 text-xs text-gray-200 focus:outline-none max-w-[200px] truncate"
                   >
                     {activePrompt?.versions.map((v) => (
                       <option key={v.id} value={v.id}>
@@ -855,7 +849,7 @@ ${skillForm.examples
                   <button
                     onClick={() => setDiffMode(!diffMode)}
                     className={`rounded-lg px-2.5 py-1 text-xs font-medium transition ${
-                      diffMode ? "bg-indigo-600 text-white" : "border border-gray-700 bg-gray-800 text-gray-300"
+                      diffMode ? "bg-[#2563EB] text-white" : "border border-[#C3D3EA] bg-white text-[#4A5B78] hover:bg-[#EEF4FF]"
                     }`}
                   >
                     {diffMode ? "Close Diff" : "View Diff"}
@@ -873,7 +867,7 @@ ${skillForm.examples
                     )}
                   <button
                     onClick={handleRestoreDefault}
-                    className="flex items-center gap-1 rounded-lg border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/20 px-2.5 py-1 text-xs font-medium text-cyan-300 transition"
+                    className="flex items-center gap-1 rounded-lg border border-[#BFDBFE] bg-blue-50 hover:bg-blue-100 px-2.5 py-1 text-xs font-medium text-cyan-300 transition"
                     title="Load built-in default template into editor"
                   >
                     <RotateCcw className="h-3 w-3" />
@@ -889,7 +883,7 @@ ${skillForm.examples
                     <span className="text-xs font-semibold text-gray-400 block mb-1">
                       Historical Version (v{comparedVersion.versionNumber})
                     </span>
-                    <pre className="rounded-lg border border-gray-800 bg-gray-950 p-4 text-xs font-mono text-gray-400 overflow-x-auto whitespace-pre-wrap h-80">
+                    <pre className="rounded-lg border-l-4 border-l-red-500 border border-red-200 bg-red-50 p-4 text-xs font-mono text-red-900 overflow-x-auto whitespace-pre-wrap h-80">
                       {comparedVersion.templateText}
                     </pre>
                   </div>
@@ -897,7 +891,7 @@ ${skillForm.examples
                     <span className="text-xs font-semibold text-indigo-400 block mb-1">
                       Current Draft / Active (v{activePrompt?.currentVersion?.versionNumber})
                     </span>
-                    <pre className="rounded-lg border border-indigo-500/30 bg-indigo-950/20 p-4 text-xs font-mono text-indigo-200 overflow-x-auto whitespace-pre-wrap h-80">
+                    <pre className="rounded-lg border-l-4 border-l-emerald-500 border border-emerald-200 bg-emerald-50 p-4 text-xs font-mono text-emerald-900 overflow-x-auto whitespace-pre-wrap h-80">
                       {editorText}
                     </pre>
                   </div>
@@ -908,7 +902,7 @@ ${skillForm.examples
                     rows={12}
                     value={editorText}
                     onChange={(e) => setEditorText(e.target.value)}
-                    className="w-full rounded-lg border border-gray-800 bg-gray-950 p-4 text-xs font-mono text-gray-200 focus:border-indigo-500 focus:outline-none"
+                    className="w-full rounded-xl border border-[#DCE6F5] bg-[#F1F6FF] p-4 text-xs font-mono text-[#1E3A8A] focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] focus:outline-none"
                     placeholder="Enter system prompt instructions..."
                   />
 
@@ -933,13 +927,13 @@ ${skillForm.examples
                   </div>
 
                   {/* Change Summary Input & Save */}
-                  <div className="flex flex-col sm:flex-row items-center gap-3 pt-3 border-t border-gray-800">
+                  <div className="flex flex-col sm:flex-row items-center gap-3 pt-3 border-t border-[#DCE6F5]">
                     <input
                       type="text"
                       value={changeSummary}
                       onChange={(e) => setChangeSummary(e.target.value)}
                       placeholder="Summary of changes (e.g. Added citation grounding rule)"
-                      className="flex-1 rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="flex-1 rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                     />
 
                     <button
@@ -956,18 +950,18 @@ ${skillForm.examples
             </div>
 
             {/* ================= 100-Run Prompt Caching Cost Simulator (Task 1.3) ================= */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 shadow-sm space-y-5">
-              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-6 shadow-sm space-y-5">
+              <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-3">
                 <div className="flex items-center gap-2">
                   <Zap className="h-5 w-5 text-amber-400" />
                   <div>
-                    <h3 className="text-sm font-semibold text-white">Prompt Caching &amp; Cost Simulator</h3>
+                    <h3 className="text-sm font-semibold text-[#0B1B3A]">Prompt Caching &amp; Cost Simulator</h3>
                     <p className="text-xs text-gray-400">
                       Simulate 100 customer tech consultations to prove exact dollar and percentage savings with prompt caching ON.
                     </p>
                   </div>
                 </div>
-                <span className="rounded bg-indigo-500/10 text-indigo-400 text-xs px-2.5 py-1 font-mono border border-indigo-500/20">
+                <span className="rounded bg-indigo-500/10 text-indigo-400 text-xs px-2.5 py-1 font-mono border border-[#DCE6F5]">
                   Anthropic Claude Prompt Caching API
                 </span>
               </div>
@@ -981,7 +975,7 @@ ${skillForm.examples
                   <select
                     value={simModel}
                     onChange={(e) => setSimModel(e.target.value)}
-                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-white focus:outline-none"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none"
                   >
                     <option value="claude-sonnet-5.5">Claude Sonnet 5.5 ($2.00 / $10.00)</option>
                     <option value="claude-haiku-5.5">Claude Haiku 5.5 ($0.10 / $0.50)</option>
@@ -1050,7 +1044,7 @@ ${skillForm.examples
               {/* Results Comparison Grid */}
               {simResult && (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-                  <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
+                  <div className="rounded-xl border border-[#DCE6F5] bg-[#F6F9FF] p-4">
                     <span className="text-xs text-gray-400 block">Caching OFF Cost</span>
                     <div className="text-2xl font-bold text-gray-300 font-mono mt-1">
                       ${simResult.costWithoutCachingUsd.toFixed(6)}
@@ -1058,7 +1052,7 @@ ${skillForm.examples
                     <span className="text-[11px] text-gray-500 mt-1 block">Full rate on all {simTasks} calls</span>
                   </div>
 
-                  <div className="rounded-xl border border-indigo-500/30 bg-indigo-950/20 p-4">
+                  <div className="rounded-xl border border-[#BFDBFE] bg-indigo-50 p-4">
                     <span className="text-xs text-indigo-300 block">Caching ON Cost</span>
                     <div className="text-2xl font-bold text-indigo-400 font-mono mt-1">
                       ${simResult.costWithCachingUsd.toFixed(6)}
@@ -1066,7 +1060,7 @@ ${skillForm.examples
                     <span className="text-[11px] text-indigo-300/80 mt-1 block">90% discount on static cache reads</span>
                   </div>
 
-                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4">
+                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-50 p-4">
                     <span className="text-xs text-emerald-300 block">Demonstrated Savings</span>
                     <div className="text-2xl font-bold text-emerald-400 font-mono mt-1 flex items-baseline gap-2">
                       <span>${simResult.dollarsSavedUsd.toFixed(6)}</span>
@@ -1086,7 +1080,7 @@ ${skillForm.examples
         {activeTab === "roles" && (
           <div className="space-y-6">
             {roleSuccessMsg && (
-              <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-3.5 text-xs text-emerald-300 flex items-center gap-2">
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-50 p-3.5 text-xs text-emerald-300 flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
                 <span>{roleSuccessMsg}</span>
               </div>
@@ -1105,7 +1099,7 @@ ${skillForm.examples
                       className={`rounded-lg px-3 py-1.5 text-xs font-medium transition whitespace-nowrap ${
                         selectedRoleId === r.id
                           ? "bg-indigo-600 text-white shadow"
-                          : "bg-[#0E1322] border border-gray-800 text-gray-400 hover:text-white"
+                          : "bg-white border border-[#DCE6F5] text-gray-400 hover:text-white"
                       }`}
                     >
                       {r.name}
@@ -1127,7 +1121,7 @@ ${skillForm.examples
                         isBuiltin: false,
                       });
                     }}
-                    className="flex items-center gap-1 rounded-lg border border-dashed border-gray-700 bg-gray-900 px-3 py-1.5 text-xs text-gray-400 hover:text-white"
+                    className="flex items-center gap-1 rounded-lg border border-dashed border-[#C3D3EA] bg-white px-3 py-1.5 text-xs text-gray-400 hover:text-white"
                   >
                     <Plus className="h-3 w-3" />
                     <span>New Role</span>
@@ -1135,11 +1129,11 @@ ${skillForm.examples
                 </div>
 
                 {/* Role Configuration Form */}
-                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-4">
-                  <div className="flex items-center justify-between border-b border-gray-800 pb-3">
-                    <h3 className="text-sm font-semibold text-white">Configure Role Persona</h3>
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-3">
+                    <h3 className="text-sm font-semibold text-[#0B1B3A]">Configure Role Persona</h3>
                     {roleForm.isBuiltin && (
-                      <span className="rounded bg-indigo-500/10 text-indigo-400 text-[10px] font-mono px-2 py-0.5 border border-indigo-500/20">
+                      <span className="rounded bg-indigo-500/10 text-indigo-400 text-[10px] font-mono px-2 py-0.5 border border-[#DCE6F5]">
                         Built-in Core Role
                       </span>
                     )}
@@ -1152,7 +1146,7 @@ ${skillForm.examples
                         type="text"
                         value={roleForm.name}
                         onChange={(e) => setRoleForm({ ...roleForm, name: e.target.value })}
-                        className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                        className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                       />
                     </div>
 
@@ -1161,7 +1155,7 @@ ${skillForm.examples
                       <select
                         value={roleForm.modelId}
                         onChange={(e) => setRoleForm({ ...roleForm, modelId: e.target.value })}
-                        className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-white focus:outline-none"
+                        className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none"
                       >
                         {Object.values(SUPPORTED_MODELS).map((m) => (
                           <option key={m.id} value={m.id}>
@@ -1179,7 +1173,7 @@ ${skillForm.examples
                       value={roleForm.tone}
                       onChange={(e) => setRoleForm({ ...roleForm, tone: e.target.value })}
                       placeholder="e.g. Technical, precise, step-by-step, code-first"
-                      className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                     />
                   </div>
 
@@ -1190,7 +1184,7 @@ ${skillForm.examples
                       value={roleForm.goal}
                       onChange={(e) => setRoleForm({ ...roleForm, goal: e.target.value })}
                       placeholder="e.g. Provide technical step-by-step fixes..."
-                      className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                     />
                   </div>
 
@@ -1200,7 +1194,7 @@ ${skillForm.examples
                       rows={5}
                       value={roleForm.systemPrompt}
                       onChange={(e) => setRoleForm({ ...roleForm, systemPrompt: e.target.value })}
-                      className="w-full rounded-lg border border-gray-700 bg-gray-950 p-3 text-xs font-mono text-gray-200 focus:outline-none focus:border-indigo-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white p-3 text-xs font-mono text-gray-200 focus:outline-none focus:border-indigo-500"
                     />
                   </div>
 
@@ -1234,10 +1228,10 @@ ${skillForm.examples
                             }}
                             className={`p-2.5 rounded-lg border text-xs cursor-pointer transition flex items-start gap-2.5 ${
                               isChecked
-                                ? "border-cyan-500/50 bg-cyan-950/20 text-cyan-200"
+                                ? "border-[#2563EB] bg-blue-50 text-cyan-200"
                                 : disabled
-                                ? "border-gray-800 bg-gray-900/40 text-gray-500 cursor-not-allowed opacity-60"
-                                : "border-gray-800 bg-gray-950 text-gray-400 hover:border-gray-700"
+                                ? "border-[#DCE6F5] bg-[#EEF4FF] text-gray-500 cursor-not-allowed opacity-60"
+                                : "border-[#DCE6F5] bg-white text-[#4A5B78] hover:border-[#C3D3EA]"
                             }`}
                           >
                             <input
@@ -1283,8 +1277,8 @@ ${skillForm.examples
                             }}
                             className={`px-2.5 py-1 rounded-md text-[11px] font-mono border transition ${
                               isSelected
-                                ? "border-cyan-400 bg-cyan-500/20 text-cyan-300"
-                                : "border-gray-800 bg-gray-950 text-gray-400 hover:border-gray-700"
+                                ? "border-cyan-400 bg-blue-100 text-cyan-300"
+                                : "border-[#DCE6F5] bg-white text-[#4A5B78] hover:border-[#C3D3EA]"
                             }`}
                           >
                             {src}
@@ -1304,7 +1298,7 @@ ${skillForm.examples
                       value={roleForm.handoverRule || ""}
                       onChange={(e) => setRoleForm({ ...roleForm, handoverRule: e.target.value })}
                       placeholder="e.g. Escalate to human expert on angry customer sentiment > 0.8, legal threats, or refund disputes."
-                      className="w-full rounded-lg border border-gray-700 bg-gray-950 p-2.5 text-xs text-white focus:outline-none focus:border-cyan-400"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white p-2.5 text-xs text-white focus:outline-none focus:border-cyan-400"
                     />
                   </div>
 
@@ -1322,13 +1316,13 @@ ${skillForm.examples
               </div>
 
               {/* Right Column (6 Cols): Split-Screen Live Test Chat Sandbox (Task 1.4) */}
-              <div className="lg:col-span-6 flex flex-col rounded-xl border border-gray-800 bg-[#0E1322] shadow-sm overflow-hidden h-[620px]">
+              <div className="lg:col-span-6 flex flex-col rounded-xl border border-[#DCE6F5] bg-white shadow-sm overflow-hidden h-[620px]">
                 {/* Chat Sandbox Header */}
-                <div className="border-b border-gray-800 p-4 bg-gray-900/60 flex items-center justify-between">
+                <div className="border-b border-[#DCE6F5] p-4 bg-[#F6F9FF] flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-indigo-400" />
                     <div>
-                      <h4 className="text-xs font-semibold text-white">Live Role Test Sandbox</h4>
+                      <h4 className="text-xs font-semibold text-[#0B1B3A]">Live Role Test Sandbox</h4>
                       <p className="text-[10px] text-gray-400">
                         Testing as: <span className="text-indigo-300 font-mono">{roleForm.name}</span> ({roleForm.modelId})
                       </p>
@@ -1348,7 +1342,7 @@ ${skillForm.examples
                     >
                       {/* Telemetry metadata chip above consultant response */}
                       {msg.telemetry && (
-                        <div className="mb-1 flex items-center gap-2 text-[10px] font-mono text-gray-400 bg-gray-900/80 px-2 py-0.5 rounded border border-gray-800">
+                        <div className="mb-1 flex items-center gap-2 text-[10px] font-mono text-gray-400 bg-[#F6F9FF] px-2 py-0.5 rounded border border-[#DCE6F5]">
                           <span className="text-amber-400 flex items-center gap-1">
                             <Clock className="h-3 w-3" /> {msg.telemetry.latencyMs}ms
                           </span>
@@ -1367,7 +1361,7 @@ ${skillForm.examples
                         className={`rounded-xl p-3.5 text-xs max-w-[85%] leading-relaxed ${
                           msg.sender === "user"
                             ? "bg-indigo-600 text-white rounded-br-none"
-                            : "bg-gray-900/90 text-gray-200 border border-gray-800 rounded-bl-none whitespace-pre-wrap font-sans"
+                            : "bg-[#EEF4FF]/90 text-gray-200 border border-[#DCE6F5] rounded-bl-none whitespace-pre-wrap font-sans"
                         }`}
                       >
                         {msg.text}
@@ -1383,30 +1377,30 @@ ${skillForm.examples
                 </div>
 
                 {/* Pre-fill Quick Chips */}
-                <div className="px-4 py-2 bg-gray-950/60 border-t border-gray-800/80 flex items-center gap-1.5 overflow-x-auto text-[11px]">
+                <div className="px-4 py-2 bg-[#F6F9FF] border-t border-[#DCE6F5] flex items-center gap-1.5 overflow-x-auto text-[11px]">
                   <span className="text-gray-500 whitespace-nowrap">Try:</span>
                   <button
                     onClick={() => setTestInput("How do I configure custom webhook alerts?")}
-                    className="text-gray-400 hover:text-white rounded bg-gray-900 px-2 py-0.5 truncate max-w-[150px]"
+                    className="text-gray-400 hover:text-white rounded bg-[#EEF4FF] px-2 py-0.5 truncate max-w-[150px]"
                   >
                     Webhook alerts?
                   </button>
                   <button
                     onClick={() => setTestInput("I need quotation pricing for 50 users.")}
-                    className="text-gray-400 hover:text-white rounded bg-gray-900 px-2 py-0.5 truncate max-w-[150px]"
+                    className="text-gray-400 hover:text-white rounded bg-[#EEF4FF] px-2 py-0.5 truncate max-w-[150px]"
                   >
                     50-user quote?
                   </button>
                   <button
                     onClick={() => setTestInput("I am furious, give me a full refund right now!")}
-                    className="text-gray-400 hover:text-white rounded bg-gray-900 px-2 py-0.5 truncate max-w-[150px]"
+                    className="text-gray-400 hover:text-white rounded bg-[#EEF4FF] px-2 py-0.5 truncate max-w-[150px]"
                   >
                     Angry escalation test
                   </button>
                 </div>
 
                 {/* Chat Input Bar */}
-                <div className="p-3 bg-gray-950 border-t border-gray-800 flex items-center gap-2">
+                <div className="p-3 bg-[#F1F6FF] border-t border-[#DCE6F5] flex items-center gap-2">
                   <input
                     type="text"
                     value={testInput}
@@ -1415,7 +1409,7 @@ ${skillForm.examples
                       if (e.key === "Enter") handleSendTestChat();
                     }}
                     placeholder={`Ask ${roleForm.name} a question...`}
-                    className="flex-1 rounded-lg border border-gray-800 bg-gray-900 px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                    className="flex-1 rounded-lg border border-[#DCE6F5] bg-[#EEF4FF] px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
                   />
                   <button
                     onClick={handleSendTestChat}
@@ -1435,7 +1429,7 @@ ${skillForm.examples
           <div className="space-y-6">
             {/* Success message banner */}
             {skillSuccessMsg && (
-              <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-3.5 text-xs text-emerald-300 flex items-center justify-between">
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-50 p-3.5 text-xs text-emerald-300 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
                   <span>{skillSuccessMsg}</span>
@@ -1458,8 +1452,8 @@ ${skillForm.examples
                     onClick={() => selectSkill(skill)}
                     className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono transition border ${
                       selectedSkillId === skill.id
-                        ? "bg-purple-950/40 border-purple-500 text-purple-300"
-                        : "bg-gray-900 border-gray-800 text-gray-400 hover:border-gray-700 hover:text-gray-200"
+                        ? "bg-purple-50 border-purple-500 text-purple-300"
+                        : "bg-[#EEF4FF] border-[#DCE6F5] text-gray-400 hover:border-[#C3D3EA] hover:text-gray-200"
                     }`}
                   >
                     <BookOpen className="h-3.5 w-3.5 text-purple-400" />
@@ -1474,7 +1468,7 @@ ${skillForm.examples
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   onClick={handleNewSkillByHand}
-                  className="flex items-center gap-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 px-3 py-1.5 text-xs font-medium text-white transition border border-gray-700"
+                  className="flex items-center gap-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 px-3 py-1.5 text-xs font-medium text-white transition border border-[#C3D3EA]"
                 >
                   <Plus className="h-3.5 w-3.5 text-gray-300" />
                   <span>Write by Hand</span>
@@ -1494,10 +1488,10 @@ ${skillForm.examples
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               {/* Left Column (7 Cols): Skill SOP Editor */}
               <div className="lg:col-span-7 space-y-5">
-                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-4">
-                  <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-3">
                     <div>
-                      <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                      <h3 className="text-sm font-semibold text-[#0B1B3A] flex items-center gap-2">
                         <Wrench className="h-4 w-4 text-purple-400" />
                         <span>Skill Specification &amp; SOP Instructions</span>
                       </h3>
@@ -1514,7 +1508,7 @@ ${skillForm.examples
                       )}
                       <button
                         onClick={() => setMarkdownViewOpen(true)}
-                        className="flex items-center gap-1 text-[11px] font-mono text-gray-300 hover:text-white bg-gray-900 border border-gray-800 hover:border-gray-700 px-2.5 py-1 rounded transition"
+                        className="flex items-center gap-1 text-[11px] font-mono text-gray-300 hover:text-white bg-[#EEF4FF] border border-[#DCE6F5] hover:border-[#C3D3EA] px-2.5 py-1 rounded transition"
                       >
                         <FileText className="h-3 w-3 text-gray-400" />
                         <span>View .md</span>
@@ -1531,7 +1525,7 @@ ${skillForm.examples
                         value={skillForm.name}
                         onChange={(e) => setSkillForm({ ...skillForm, name: e.target.value })}
                         placeholder="e.g. DNS & Custom CNAME Setup"
-                        className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                        className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
                       />
                     </div>
                     <div>
@@ -1541,7 +1535,7 @@ ${skillForm.examples
                         value={skillForm.slug}
                         onChange={(e) => setSkillForm({ ...skillForm, slug: e.target.value })}
                         placeholder="dns-cname-setup"
-                        className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 font-mono"
+                        className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 font-mono"
                       />
                     </div>
                   </div>
@@ -1553,7 +1547,7 @@ ${skillForm.examples
                       value={skillForm.description}
                       onChange={(e) => setSkillForm({ ...skillForm, description: e.target.value })}
                       placeholder="e.g. Configuring custom root domains and subdomains with Cloudflare DNS proxying."
-                      className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
                     />
                   </div>
 
@@ -1567,7 +1561,7 @@ ${skillForm.examples
                       value={skillForm.triggerConditions}
                       onChange={(e) => setSkillForm({ ...skillForm, triggerConditions: e.target.value })}
                       placeholder="When a customer asks about domain setup, custom CNAME, mapping a subdomain, or DNS records."
-                      className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3.5 py-2 text-xs text-amber-200 placeholder-gray-500 focus:outline-none focus:border-amber-500 font-mono"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-amber-200 placeholder-gray-500 focus:outline-none focus:border-amber-500 font-mono"
                     />
                     <span className="text-[10px] text-gray-500 mt-1 block">
                       Autonomous skill router checks semantic intent, trigger conditions, and example queries to pick this skill automatically.
@@ -1589,7 +1583,7 @@ ${skillForm.examples
                       value={skillForm.stepsMarkdown}
                       onChange={(e) => setSkillForm({ ...skillForm, stepsMarkdown: e.target.value })}
                       placeholder="# Step-by-Step Resolution Protocol&#10;1. Initial diagnosis...&#10;2. Apply configuration...&#10;3. Verify with CLI: dig +short CNAME custom.domain.com"
-                      className="w-full rounded-lg border border-gray-700 bg-gray-950 p-3.5 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-purple-500 font-mono leading-relaxed"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white p-3.5 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-purple-500 font-mono leading-relaxed"
                     />
                   </div>
 
@@ -1617,7 +1611,7 @@ ${skillForm.examples
                     {skillForm.examples.map((ex, idx) => (
                       <div
                         key={idx}
-                        className="rounded-lg border border-gray-800 bg-gray-950 p-3 space-y-2 text-xs"
+                        className="rounded-lg border border-[#DCE6F5] bg-[#F1F6FF] p-3 space-y-2 text-xs"
                       >
                         <div className="flex items-center justify-between text-[11px] text-gray-400 font-mono">
                           <span>Example #{idx + 1}</span>
@@ -1643,7 +1637,7 @@ ${skillForm.examples
                             setSkillForm({ ...skillForm, examples: updated });
                           }}
                           placeholder="Example Customer Question (e.g. How do I configure my CNAME?)"
-                          className="w-full rounded border border-gray-800 bg-gray-900 px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-purple-500"
+                          className="w-full rounded border border-[#DCE6F5] bg-[#EEF4FF] px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-purple-500"
                         />
                         <textarea
                           rows={2}
@@ -1654,20 +1648,20 @@ ${skillForm.examples
                             setSkillForm({ ...skillForm, examples: updated });
                           }}
                           placeholder="Example Resolution Answer Grounded in this Skill..."
-                          className="w-full rounded border border-gray-800 bg-gray-900 px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-purple-500"
+                          className="w-full rounded border border-[#DCE6F5] bg-[#EEF4FF] px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-purple-500"
                         />
                       </div>
                     ))}
                   </div>
 
                   {/* Save New Version Card */}
-                  <div className="pt-3 border-t border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="pt-3 border-t border-[#DCE6F5] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <input
                       type="text"
                       value={skillForm.changeNotes}
                       onChange={(e) => setSkillForm({ ...skillForm, changeNotes: e.target.value })}
                       placeholder="Change notes (e.g. Added Cloudflare orange-cloud proxy check)..."
-                      className="flex-1 rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                      className="flex-1 rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
                     />
 
                     <button
@@ -1683,8 +1677,8 @@ ${skillForm.examples
 
                 {/* Version History Drawer with 1-Click Rollback */}
                 {activeSkill && activeSkill.versions && activeSkill.versions.length > 0 && (
-                  <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-3">
-                    <div className="flex items-center justify-between border-b border-gray-800 pb-2.5">
+                  <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 shadow-sm space-y-3">
+                    <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-2.5">
                       <div className="flex items-center gap-2">
                         <History className="h-4 w-4 text-indigo-400" />
                         <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-300">
@@ -1702,7 +1696,7 @@ ${skillForm.examples
                         return (
                           <div
                             key={v.id}
-                            className="pt-2 flex items-center justify-between gap-3 text-xs hover:bg-gray-900/30 p-2 rounded transition"
+                            className="pt-2 flex items-center justify-between gap-3 text-xs hover:bg-[#EEF4FF] p-2 rounded transition"
                           >
                             <div className="space-y-0.5">
                               <div className="flex items-center gap-2">
@@ -1727,7 +1721,7 @@ ${skillForm.examples
                               <button
                                 onClick={() => handleSkillRollback(v.id)}
                                 disabled={skillRollbackLoading}
-                                className="flex items-center gap-1 rounded bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 text-[10px] font-mono px-2.5 py-1 transition border border-indigo-500/30 disabled:opacity-50"
+                                className="flex items-center gap-1 rounded bg-indigo-50 hover:bg-indigo-900/80 text-indigo-300 text-[10px] font-mono px-2.5 py-1 transition border border-[#BFDBFE] disabled:opacity-50"
                               >
                                 <RotateCcw className="h-3 w-3" />
                                 <span>Rollback to v{v.versionNumber}</span>
@@ -1742,13 +1736,13 @@ ${skillForm.examples
               </div>
 
               {/* Right Column (5 Cols): Split-Screen Test Chat */}
-              <div className="lg:col-span-5 rounded-xl border border-gray-800 bg-[#0E1322] flex flex-col h-[780px] shadow-sm overflow-hidden sticky top-6">
+              <div className="lg:col-span-5 rounded-xl border border-[#DCE6F5] bg-white flex flex-col h-[780px] shadow-sm overflow-hidden sticky top-6">
                 {/* Test Chat Header */}
-                <div className="p-3.5 bg-gray-950 border-b border-gray-800 flex items-center justify-between">
+                <div className="p-3.5 bg-[#F1F6FF] border-b border-[#DCE6F5] flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-purple-400 animate-pulse"></div>
                     <div>
-                      <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <h4 className="text-xs font-bold text-[#0B1B3A] flex items-center gap-1.5">
                         <span>Side-by-Side Test Chat</span>
                       </h4>
                       <p className="text-[10px] text-gray-400">
@@ -1757,7 +1751,7 @@ ${skillForm.examples
                     </div>
                   </div>
 
-                  <span className="text-[10px] bg-purple-950/60 text-purple-300 px-2 py-0.5 rounded border border-purple-500/20 font-mono">
+                  <span className="text-[10px] bg-purple-50 text-purple-300 px-2 py-0.5 rounded border border-purple-500/20 font-mono">
                     [skill test]
                   </span>
                 </div>
@@ -1785,7 +1779,7 @@ ${skillForm.examples
                         className={`rounded-xl p-3 text-xs max-w-[90%] leading-relaxed ${
                           msg.sender === "user"
                             ? "bg-purple-600 text-white rounded-br-none"
-                            : "bg-gray-900/90 text-gray-200 border border-gray-800 rounded-bl-none whitespace-pre-wrap font-sans"
+                            : "bg-[#EEF4FF]/90 text-gray-200 border border-[#DCE6F5] rounded-bl-none whitespace-pre-wrap font-sans"
                         }`}
                       >
                         {msg.text}
@@ -1801,30 +1795,30 @@ ${skillForm.examples
                 </div>
 
                 {/* Pre-fill Quick Chips for Testing */}
-                <div className="px-4 py-2 bg-gray-950/60 border-t border-gray-800/80 flex items-center gap-1.5 overflow-x-auto text-[11px]">
+                <div className="px-4 py-2 bg-[#F6F9FF] border-t border-[#DCE6F5] flex items-center gap-1.5 overflow-x-auto text-[11px]">
                   <span className="text-gray-500 whitespace-nowrap">Try:</span>
                   <button
                     onClick={() => setSkillTestInput("How do I point my custom subdomain to the platform?")}
-                    className="text-gray-400 hover:text-white rounded bg-gray-900 px-2 py-0.5 truncate max-w-[150px]"
+                    className="text-gray-400 hover:text-white rounded bg-[#EEF4FF] px-2 py-0.5 truncate max-w-[150px]"
                   >
                     Custom subdomain?
                   </button>
                   <button
                     onClick={() => setSkillTestInput("Why is SSL verification failing on Cloudflare?")}
-                    className="text-gray-400 hover:text-white rounded bg-gray-900 px-2 py-0.5 truncate max-w-[150px]"
+                    className="text-gray-400 hover:text-white rounded bg-[#EEF4FF] px-2 py-0.5 truncate max-w-[150px]"
                   >
                     SSL verification fail?
                   </button>
                   <button
                     onClick={() => setSkillTestInput("How do I verify webhook signature HMAC SHA256?")}
-                    className="text-gray-400 hover:text-white rounded bg-gray-900 px-2 py-0.5 truncate max-w-[150px]"
+                    className="text-gray-400 hover:text-white rounded bg-[#EEF4FF] px-2 py-0.5 truncate max-w-[150px]"
                   >
                     Webhook 401 error?
                   </button>
                 </div>
 
                 {/* Test Chat Input Bar */}
-                <div className="p-3 bg-gray-950 border-t border-gray-800 flex items-center gap-2">
+                <div className="p-3 bg-[#F1F6FF] border-t border-[#DCE6F5] flex items-center gap-2">
                   <input
                     type="text"
                     value={skillTestInput}
@@ -1833,7 +1827,7 @@ ${skillForm.examples
                       if (e.key === "Enter") handleSendSkillTestChat();
                     }}
                     placeholder={`Test "${skillForm.name || "this skill"}" with a question...`}
-                    className="flex-1 rounded-lg border border-gray-800 bg-gray-900 px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                    className="flex-1 rounded-lg border border-[#DCE6F5] bg-[#EEF4FF] px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
                   />
                   <button
                     onClick={handleSendSkillTestChat}
@@ -1848,12 +1842,12 @@ ${skillForm.examples
 
             {/* AI Drafting Modal: Mode B ("Describe it in a few words and let the agent draft it") */}
             {draftModalOpen && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-                <div className="rounded-2xl border border-gray-800 bg-[#0E1322] w-full max-w-lg p-6 shadow-2xl space-y-4">
-                  <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B1B3A]/35 backdrop-blur-sm p-4">
+                <div className="rounded-2xl border border-[#DCE6F5] bg-white w-full max-w-lg p-6 shadow-2xl space-y-4">
+                  <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-3">
                     <div className="flex items-center gap-2">
                       <Sparkles className="h-5 w-5 text-indigo-400" />
-                      <h3 className="text-base font-bold text-white">AI Skill Drafting Assistant</h3>
+                      <h3 className="text-base font-bold text-[#0B1B3A]">AI Skill Drafting Assistant</h3>
                     </div>
                     <button
                       onClick={() => setDraftModalOpen(false)}
@@ -1875,7 +1869,7 @@ ${skillForm.examples
                         value={draftName}
                         onChange={(e) => setDraftName(e.target.value)}
                         placeholder="e.g. Stripe Webhook & Event Reconciliation"
-                        className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                        className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
                       />
                     </div>
 
@@ -1888,12 +1882,12 @@ ${skillForm.examples
                         value={draftDesc}
                         onChange={(e) => setDraftDesc(e.target.value)}
                         placeholder="e.g. Handling invoice payment failures, verifying Stripe secret signatures, and checking idempotency keys."
-                        className="w-full rounded-lg border border-gray-700 bg-gray-950 p-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                        className="w-full rounded-lg border border-[#C3D3EA] bg-white p-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
                       />
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-800">
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#DCE6F5]">
                     <button
                       type="button"
                       onClick={() => setDraftModalOpen(false)}
@@ -1917,12 +1911,12 @@ ${skillForm.examples
 
             {/* Markdown File View Modal */}
             {markdownViewOpen && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-                <div className="rounded-2xl border border-gray-800 bg-[#0E1322] w-full max-w-2xl p-6 shadow-2xl space-y-4">
-                  <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B1B3A]/35 backdrop-blur-sm p-4">
+                <div className="rounded-2xl border border-[#DCE6F5] bg-white w-full max-w-2xl p-6 shadow-2xl space-y-4">
+                  <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-3">
                     <div className="flex items-center gap-2">
                       <FileCode className="h-5 w-5 text-purple-400" />
-                      <h3 className="text-base font-bold text-white">
+                      <h3 className="text-base font-bold text-[#0B1B3A]">
                         Markdown File Representation ({skillForm.slug || "skill"}.md)
                       </h3>
                     </div>
@@ -1938,11 +1932,11 @@ ${skillForm.examples
                     Each skill is stored as a formatted Markdown file with YAML frontmatter, operational SOP steps, and verified few-shot examples.
                   </p>
 
-                  <pre className="rounded-lg border border-gray-800 bg-gray-950 p-4 text-xs font-mono text-purple-200 whitespace-pre-wrap max-h-96 overflow-y-auto leading-relaxed">
+                  <pre className="rounded-lg border border-[#DCE6F5] bg-[#F1F6FF] text-[#1E3A8A] border border-[#DCE6F5] p-4 text-xs font-mono text-purple-200 whitespace-pre-wrap max-h-96 overflow-y-auto leading-relaxed">
                     {formatCurrentSkillAsMarkdown()}
                   </pre>
 
-                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-800">
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#DCE6F5]">
                     <button
                       onClick={() => {
                         navigator.clipboard.writeText(formatCurrentSkillAsMarkdown());
@@ -1971,7 +1965,7 @@ ${skillForm.examples
         {activeTab === "security_matrix" && (
           <div className="space-y-8 animate-in fade-in duration-200">
             {roleSwitchToast && (
-              <div className="rounded-xl border border-cyan-500/40 bg-cyan-950/30 p-3.5 text-xs text-cyan-300 flex items-center justify-between shadow-lg">
+              <div className="rounded-xl border border-[#BFDBFE] bg-blue-50 p-3.5 text-xs text-cyan-300 flex items-center justify-between shadow-lg">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-cyan-400 flex-shrink-0" />
                   <span>{roleSwitchToast} — Refreshing environment view...</span>
@@ -1980,14 +1974,14 @@ ${skillForm.examples
             )}
 
             {/* Zero Leakage Multi-Tenant Guarantee Banner */}
-            <div className="rounded-2xl border border-cyan-500/30 bg-gradient-to-r from-[#071329] via-[#091C3E] to-[#071329] p-6 shadow-xl space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-cyan-950/80 pb-3">
+            <div className="rounded-2xl border border-[#BFDBFE] bg-gradient-to-r from-[#071329] via-[#091C3E] to-[#071329] p-6 shadow-xl space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#DCE6F5]/80 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="h-9 w-9 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center border border-cyan-500/30">
+                  <div className="h-9 w-9 rounded-xl bg-blue-100 text-cyan-400 flex items-center justify-center border border-[#BFDBFE]">
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <h3 className="text-base font-bold text-[#0B1B3A] flex items-center gap-2">
                       <span>Cross-Tenant Privacy &amp; Zero-Leakage Guarantee</span>
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                         ABSOLUTE ISOLATION
@@ -1998,7 +1992,7 @@ ${skillForm.examples
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1.5 rounded-lg">
+                <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-50 border border-emerald-500/30 px-3 py-1.5 rounded-lg">
                   <Lock className="h-3.5 w-3.5" />
                   <span>SQL: where(eq(table.businessId, currentTenantId))</span>
                 </div>
@@ -2009,10 +2003,10 @@ ${skillForm.examples
             </div>
 
             {/* Part 3: What Each Role Can Access (Dashboard Matrix) */}
-            <div className="rounded-2xl border border-gray-800 bg-[#0E1322] p-6 space-y-5 shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-800 pb-3">
+            <div className="rounded-2xl border border-[#DCE6F5] bg-white p-6 space-y-5 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#DCE6F5] pb-3">
                 <div>
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <h3 className="text-base font-bold text-[#0B1B3A] flex items-center gap-2">
                     <Users className="h-5 w-5 text-indigo-400" />
                     <span>3. What Each Role Can Access (Dashboard Matrix)</span>
                   </h3>
@@ -2020,7 +2014,7 @@ ${skillForm.examples
                     The application enforces strict Role-Based Access Control (RBAC) across every feature and workspace interface:
                   </p>
                 </div>
-                <span className="text-[10px] font-mono text-indigo-300 bg-indigo-950/60 px-2.5 py-1 rounded border border-indigo-500/30">
+                <span className="text-[10px] font-mono text-indigo-300 bg-indigo-50 px-2.5 py-1 rounded border border-[#BFDBFE]">
                   5 Roles &bull; 8 Workspaces Enforced
                 </span>
               </div>
@@ -2028,7 +2022,7 @@ ${skillForm.examples
               {/* Matrix Table */}
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs font-sans">
-                  <thead className="bg-gray-900/80 border-b border-gray-800 text-gray-300 uppercase font-semibold text-[11px] tracking-wider">
+                  <thead className="bg-[#F6F9FF] border-b border-[#DCE6F5] text-gray-300 uppercase font-semibold text-[11px] tracking-wider">
                     <tr>
                       <th className="px-4 py-3 min-w-[200px]">Workspace / Feature</th>
                       <th className="px-3 py-3 text-center">
@@ -2084,7 +2078,7 @@ ${skillForm.examples
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-800/60 font-mono text-[11px]">
-                    <tr className="hover:bg-gray-900/30 transition">
+                    <tr className="hover:bg-[#EEF4FF] transition">
                       <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
                         <span className="font-semibold">Chat Sandbox</span>
                         <code className="text-gray-400 text-[10px]">(/chat)</code>
@@ -2096,19 +2090,19 @@ ${skillForm.examples
                       <td className="px-3 py-3 text-center"><span className="text-cyan-300 font-medium">✓ Interacts with AI</span></td>
                     </tr>
 
-                    <tr className="hover:bg-gray-900/30 transition">
+                    <tr className="hover:bg-[#EEF4FF] transition">
                       <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
                         <span className="font-semibold">Approvals Inbox</span>
                         <code className="text-gray-400 text-[10px]">(/approvals)</code>
                       </td>
                       <td className="px-3 py-3 text-center"><span className="text-emerald-400 font-semibold">✓ Full</span></td>
                       <td className="px-3 py-3 text-center"><span className="text-emerald-400 font-semibold">✓ Full</span></td>
-                      <td className="px-3 py-3 text-center"><span className="text-amber-400 font-bold bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/30">★ Primary Workstation</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-amber-400 font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-500/30">★ Primary Workstation</span></td>
                       <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
                       <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
                     </tr>
 
-                    <tr className="hover:bg-gray-900/30 transition">
+                    <tr className="hover:bg-[#EEF4FF] transition">
                       <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
                         <span className="font-semibold">Knowledge Brain</span>
                         <code className="text-gray-400 text-[10px]">(/knowledge)</code>
@@ -2120,7 +2114,7 @@ ${skillForm.examples
                       <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
                     </tr>
 
-                    <tr className="hover:bg-gray-900/30 transition">
+                    <tr className="hover:bg-[#EEF4FF] transition">
                       <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
                         <span className="font-semibold">The Eval Lab</span>
                         <code className="text-gray-400 text-[10px]">(/evals)</code>
@@ -2132,7 +2126,7 @@ ${skillForm.examples
                       <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
                     </tr>
 
-                    <tr className="hover:bg-gray-900/30 transition">
+                    <tr className="hover:bg-[#EEF4FF] transition">
                       <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
                         <span className="font-semibold">Self-Improve Loop</span>
                         <code className="text-gray-400 text-[10px]">(/self-improve)</code>
@@ -2144,7 +2138,7 @@ ${skillForm.examples
                       <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
                     </tr>
 
-                    <tr className="hover:bg-gray-900/30 transition">
+                    <tr className="hover:bg-[#EEF4FF] transition">
                       <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
                         <span className="font-semibold">Role &amp; Prompt Studio</span>
                         <code className="text-gray-400 text-[10px]">(/settings/roles-prompts)</code>
@@ -2156,7 +2150,7 @@ ${skillForm.examples
                       <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
                     </tr>
 
-                    <tr className="hover:bg-gray-900/30 transition">
+                    <tr className="hover:bg-[#EEF4FF] transition">
                       <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
                         <span className="font-semibold">Settings &amp; API Vault</span>
                         <code className="text-gray-400 text-[10px]">(/settings)</code>
@@ -2168,12 +2162,12 @@ ${skillForm.examples
                       <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
                     </tr>
 
-                    <tr className="hover:bg-gray-900/30 transition">
+                    <tr className="hover:bg-[#EEF4FF] transition">
                       <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
                         <span className="font-semibold">Platform Fleet Admin</span>
                         <code className="text-gray-400 text-[10px]">(/admin)</code>
                       </td>
-                      <td className="px-3 py-3 text-center"><span className="text-cyan-300 font-bold bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/30">Owner Only</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-cyan-300 font-bold bg-blue-50 px-2 py-0.5 rounded border border-[#BFDBFE]">Owner Only</span></td>
                       <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
                       <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
                       <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
@@ -2186,8 +2180,8 @@ ${skillForm.examples
 
             {/* Part 4: Deep-Dive: What Each Dashboard Shows */}
             <div className="space-y-4">
-              <div className="border-b border-gray-800 pb-2">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <div className="border-b border-[#DCE6F5] pb-2">
+                <h3 className="text-base font-bold text-[#0B1B3A] flex items-center gap-2">
                   <Layers className="h-5 w-5 text-indigo-400" />
                   <span>Deep-Dive: What Each Dashboard Shows</span>
                 </h3>
@@ -2198,9 +2192,9 @@ ${skillForm.examples
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* A. Team Member */}
-                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-3">
-                  <div className="flex items-center gap-2 text-cyan-400 font-bold text-xs uppercase tracking-wider border-b border-gray-800 pb-2">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500/20 text-[10px] font-bold">A</span>
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 space-y-3">
+                  <div className="flex items-center gap-2 text-cyan-400 font-bold text-xs uppercase tracking-wider border-b border-[#DCE6F5] pb-2">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold">A</span>
                     <span>Team Member (/chat)</span>
                   </div>
                   <div>
@@ -2213,7 +2207,7 @@ ${skillForm.examples
                     <p>&bull; See citation traces ([1], [2]), model names, and cost in $ for each answer.</p>
                     <p>&bull; Click &quot;This was right&quot; / &quot;This was wrong&quot; to propose lessons.</p>
                   </div>
-                  <div className="pt-2 border-t border-gray-800 text-[11px] text-red-300/80">
+                  <div className="pt-2 border-t border-[#DCE6F5] text-[11px] text-red-300/80">
                     <strong className="text-red-400 block font-mono text-[10px]">Restrictions:</strong>
                     Cannot edit prompt versions, cannot view secret API keys, cannot deploy code changes. Private draft chats are isolated.
                   </div>
@@ -2221,7 +2215,7 @@ ${skillForm.examples
 
                 {/* B. Expert Reviewer */}
                 <div className="rounded-xl border border-amber-500/30 bg-amber-950/10 p-5 space-y-3">
-                  <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider border-b border-gray-800 pb-2">
+                  <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider border-b border-[#DCE6F5] pb-2">
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/20 text-[10px] font-bold">B</span>
                     <span>Expert Reviewer (/approvals)</span>
                   </div>
@@ -2235,15 +2229,15 @@ ${skillForm.examples
                     <p>&bull; <strong>Pending Lessons Queue:</strong> Drafted markdown lessons (<code className="text-amber-200">lessons/*.md</code>).</p>
                     <p>&bull; <strong>Self-Improve Review:</strong> Inspect PRs from Claude Opus 5.5.</p>
                   </div>
-                  <div className="pt-2 border-t border-gray-800 text-[11px] text-amber-200/80">
+                  <div className="pt-2 border-t border-[#DCE6F5] text-[11px] text-amber-200/80">
                     <strong className="text-amber-300 block font-mono text-[10px]">Privacy &amp; Boundaries:</strong>
                     Only sees escalated tasks. Cannot inspect another team member&apos;s private draft chats. Cannot view API vault keys or billing.
                   </div>
                 </div>
 
                 {/* C. Owner & Admin */}
-                <div className="rounded-xl border border-indigo-500/30 bg-indigo-950/10 p-5 space-y-3">
-                  <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs uppercase tracking-wider border-b border-gray-800 pb-2">
+                <div className="rounded-xl border border-[#BFDBFE] bg-indigo-950/10 p-5 space-y-3">
+                  <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs uppercase tracking-wider border-b border-[#DCE6F5] pb-2">
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500/20 text-[10px] font-bold">C</span>
                     <span>Owner &amp; Admin (/settings, /evals)</span>
                   </div>
@@ -2258,15 +2252,15 @@ ${skillForm.examples
                     <p>&bull; <strong>The Eval Lab:</strong> 100+ tests on 14 models, quality vs. cost.</p>
                     <p>&bull; <strong>Release Gate:</strong> Blocks test regressions.</p>
                   </div>
-                  <div className="pt-2 border-t border-gray-800 text-[11px] text-indigo-200/80">
+                  <div className="pt-2 border-t border-[#DCE6F5] text-[11px] text-indigo-200/80">
                     <strong className="text-indigo-300 block font-mono text-[10px]">Full Authority:</strong>
                     Inspect workspace analytics, total spend, and system-wide eval scores across the organization.
                   </div>
                 </div>
 
                 {/* D. Customer / Guest */}
-                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-3">
-                  <div className="flex items-center gap-2 text-purple-400 font-bold text-xs uppercase tracking-wider border-b border-gray-800 pb-2">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 space-y-3">
+                  <div className="flex items-center gap-2 text-purple-400 font-bold text-xs uppercase tracking-wider border-b border-[#DCE6F5] pb-2">
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-purple-500/20 text-[10px] font-bold">D</span>
                     <span>Customer / Guest (/chat)</span>
                   </div>
@@ -2280,7 +2274,7 @@ ${skillForm.examples
                     <p>&bull; Inline citations [1], [2] for verifiable answers.</p>
                     <p>&bull; Seamless automated handover on refund or legal requests.</p>
                   </div>
-                  <div className="pt-2 border-t border-gray-800 text-[11px] text-red-300/80">
+                  <div className="pt-2 border-t border-[#DCE6F5] text-[11px] text-red-300/80">
                     <strong className="text-red-400 block font-mono text-[10px]">Zero Internal Exposure:</strong>
                     Internal prompt engineering, telemetry traces, model cost in $, and evaluation tabs are completely hidden.
                   </div>
@@ -2290,8 +2284,8 @@ ${skillForm.examples
 
             {/* Part 5: Security Architecture for Each Role */}
             <div className="space-y-4">
-              <div className="border-b border-gray-800 pb-2">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <div className="border-b border-[#DCE6F5] pb-2">
+                <h3 className="text-base font-bold text-[#0B1B3A] flex items-center gap-2">
                   <Lock className="h-5 w-5 text-emerald-400" />
                   <span>5. Security Architecture for Each Role</span>
                 </h3>
@@ -2340,20 +2334,20 @@ ${skillForm.examples
                 </div>
 
                 {/* 3. Role Skill Fencing */}
-                <div className="rounded-xl border border-cyan-500/30 bg-cyan-950/10 p-5 space-y-2.5">
+                <div className="rounded-xl border border-[#BFDBFE] bg-blue-50/10 p-5 space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-cyan-400 font-bold text-xs">
                       <ShieldAlert className="h-4 w-4" />
                       <span>Role Skill Fencing (canRoleSharePrice)</span>
                     </div>
-                    <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                    <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-blue-100 text-cyan-300 border border-[#BFDBFE]">
                       Code-Level Gate
                     </span>
                   </div>
                   <p className="text-xs text-gray-300 leading-relaxed">
                     Hardcoded logic guarantees that even if a prompt injection attempts to force the Support Engineer to offer discounts, the model runner rejects the <code className="text-cyan-300">share_price</code> tool execution.
                   </p>
-                  <div className="text-[10px] text-gray-500 font-mono pt-1 border-t border-cyan-950">
+                  <div className="text-[10px] text-gray-500 font-mono pt-1 border-t border-[#DCE6F5]">
                     Function: canRoleSharePrice(slug) === &apos;ai-consultant&apos;
                   </div>
                 </div>
@@ -2397,13 +2391,13 @@ ${skillForm.examples
                 </div>
 
                 {/* 6. Release Gate Protection */}
-                <div className="rounded-xl border border-indigo-500/30 bg-indigo-950/10 p-5 space-y-2.5">
+                <div className="rounded-xl border border-[#BFDBFE] bg-indigo-950/10 p-5 space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs">
                       <CheckCircle2 className="h-4 w-4" />
                       <span>Release Gate Protection</span>
                     </div>
-                    <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-[#BFDBFE]">
                       Hard Automated Bar
                     </span>
                   </div>

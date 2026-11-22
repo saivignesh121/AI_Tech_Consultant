@@ -41,32 +41,32 @@ export default function ConnectModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-      <div className="relative w-full max-w-lg rounded-2xl border border-cyan-500/40 bg-[#071126] p-6 shadow-2xl shadow-cyan-500/20 text-gray-100 animate-in fade-in zoom-in-95 duration-200">
-        {/* Glowing Top Ambient Beam */}
-        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_15px_#00F0FF]" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0B1B3A]/35 backdrop-blur-sm">
+      <div className="relative w-full max-w-lg rounded-2xl border border-[#DCE6F5] bg-white p-6 shadow-2xl text-[#0B1B3A] animate-in fade-in zoom-in-95 duration-200">
+        {/* Top Accent Gradient Bar */}
+        <div className="absolute top-0 inset-x-0 h-1 rounded-t-2xl bg-gradient-to-r from-[#0284C7] to-[#2563EB]" />
 
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white p-1 rounded-lg hover:bg-gray-800 transition"
+          className="absolute top-4 right-4 text-[#7B8AA6] hover:text-[#0B1B3A] p-1.5 rounded-lg hover:bg-[#EEF4FF] transition"
         >
           <X className="w-5 h-5" />
         </button>
 
         {submitted ? (
           <div className="py-8 text-center space-y-4">
-            <div className="w-16 h-16 mx-auto rounded-full bg-cyan-500/20 border border-cyan-400 flex items-center justify-center text-cyan-300 shadow-[0_0_20px_rgba(0,240,255,0.4)]">
+            <div className="w-16 h-16 mx-auto rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shadow-sm">
               <CheckCircle2 className="w-8 h-8" />
             </div>
-            <h3 className="text-xl font-bold text-white tracking-tight">Transmission Acknowledged!</h3>
-            <p className="text-sm text-gray-300 max-w-sm mx-auto">
+            <h3 className="text-xl font-bold text-[#0B1B3A] tracking-tight">Transmission Acknowledged!</h3>
+            <p className="text-sm text-[#4A5B78] max-w-sm mx-auto">
               Thank you, {name || "Client"}. Our senior AI engineering consultants have received your inquiry and will reach out within 4 business hours.
             </p>
             <div className="pt-4">
               <button
                 onClick={handleReset}
-                className="px-6 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-xs transition shadow-lg shadow-cyan-500/30"
+                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 text-white font-semibold text-xs transition shadow-md shadow-blue-500/20"
               >
                 Close &amp; Return
               </button>
@@ -74,25 +74,25 @@ export default function ConnectModal({
           </div>
         ) : (
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-black border border-gray-700 text-cyan-400 font-bold font-serif text-sm">
+            <div className="flex items-center gap-2.5 mb-1.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#0284C7] to-[#2563EB] text-white font-bold font-serif text-sm shadow-sm">
                 α
               </div>
-              <h2 className="text-lg font-bold text-white tracking-tight">Connect with AI Technologies &amp; Consulting</h2>
+              <h2 className="text-lg font-bold text-[#0B1B3A] tracking-tight">Connect with AI Technologies &amp; Consulting</h2>
             </div>
-            <p className="text-xs text-gray-400 mb-5">
+            <p className="text-xs text-[#4A5B78] mb-5">
               Enterprise digital transformation, autonomous tech support engineering, and customized AI architectures.
             </p>
 
             {/* Category Selector Tabs */}
-            <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-gray-900/80 border border-gray-800 mb-5">
+            <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-[#EEF4FF] border border-[#DCE6F5] mb-5">
               <button
                 type="button"
                 onClick={() => setCategory("client")}
                 className={`py-2 text-xs font-semibold rounded-lg transition ${
                   category === "client"
-                    ? "bg-cyan-500 text-black shadow-md shadow-cyan-500/30"
-                    : "text-gray-400 hover:text-white"
+                    ? "bg-white text-[#2563EB] shadow-sm"
+                    : "text-[#4A5B78] hover:text-[#0B1B3A]"
                 }`}
               >
                 Enterprise AI Consultation
@@ -102,8 +102,8 @@ export default function ConnectModal({
                 onClick={() => setCategory("advisory")}
                 className={`py-2 text-xs font-semibold rounded-lg transition ${
                   category === "advisory"
-                    ? "bg-cyan-500 text-black shadow-md shadow-cyan-500/30"
-                    : "text-gray-400 hover:text-white"
+                    ? "bg-white text-[#2563EB] shadow-sm"
+                    : "text-[#4A5B78] hover:text-[#0B1B3A]"
                 }`}
               >
                 Architecture &amp; Strategy
@@ -112,68 +112,76 @@ export default function ConnectModal({
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1">Full Name</label>
+                <label className="block text-xs font-medium text-[#4A5B78] mb-1">Full Name</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                  <User className="absolute left-3 top-2.5 h-4 w-4 text-[#7B8AA6]" />
                   <input
                     type="text"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="David Miller (CTO / VP Engineering)"
-                    className="w-full pl-9 pr-3 py-2 rounded-lg bg-gray-900/90 border border-gray-700 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400"
+                    className="w-full pl-9 pr-3 py-2 rounded-lg bg-white border border-[#C3D3EA] text-xs text-[#0B1B3A] placeholder-[#94A3B8] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/20"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1">Corporate Email</label>
+                <label className="block text-xs font-medium text-[#4A5B78] mb-1">Corporate Email</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                  <Mail className="absolute left-3 top-2.5 h-4 w-4 text-[#7B8AA6]" />
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@organization.com"
-                    className="w-full pl-9 pr-3 py-2 rounded-lg bg-gray-900/90 border border-gray-700 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400"
+                    className="w-full pl-9 pr-3 py-2 rounded-lg bg-white border border-[#C3D3EA] text-xs text-[#0B1B3A] placeholder-[#94A3B8] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/20"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1">Target Initiative / Architecture Scope</label>
+                <label className="block text-xs font-medium text-[#4A5B78] mb-1">Target Initiative / Architecture Scope</label>
                 <div className="relative">
-                  <Briefcase className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                  <Briefcase className="absolute left-3 top-2.5 h-4 w-4 text-[#7B8AA6]" />
                   <input
                     type="text"
                     value={roleOrTopic}
                     onChange={(e) => setRoleOrTopic(e.target.value)}
-                    placeholder="e.g., Autonomous Support Agent, Hybrid Vector Ingestion, Cloud LLM Routing"
-                    className="w-full pl-9 pr-3 py-2 rounded-lg bg-gray-900/90 border border-gray-700 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400"
+                    placeholder="e.g. Migration to Postgres 18 pgvector, SLA Automation"
+                    className="w-full pl-9 pr-3 py-2 rounded-lg bg-white border border-[#C3D3EA] text-xs text-[#0B1B3A] placeholder-[#94A3B8] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/20"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1">Detailed Technical Requirements</label>
+                <label className="block text-xs font-medium text-[#4A5B78] mb-1">Project Details / Requirements</label>
                 <textarea
                   rows={3}
+                  required
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Outline your timeline, current tech stack, and goals..."
-                  className="w-full p-2.5 rounded-lg bg-gray-900/90 border border-gray-700 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 resize-none"
+                  placeholder="Outline current tech stack, pain points, or staffing timeline..."
+                  className="w-full p-2.5 rounded-lg bg-white border border-[#C3D3EA] text-xs text-[#0B1B3A] placeholder-[#94A3B8] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/20 resize-none"
                 />
               </div>
 
-              <div className="pt-2">
+              <div className="pt-2 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2 rounded-lg text-xs font-medium text-[#4A5B78] hover:text-[#0B1B3A] transition"
+                >
+                  Cancel
+                </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/25 transition disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-6 py-2 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 text-white text-xs font-bold transition shadow-md shadow-blue-500/20 disabled:opacity-50"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>{submitting ? "Encrypting & Transmitting..." : "Submit Strategic Consultation"}</span>
+                  <span>{submitting ? "Transmitting..." : "Send Request"}</span>
                 </button>
               </div>
             </form>

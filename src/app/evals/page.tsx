@@ -627,8 +627,8 @@ export default function EvalLabPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-              <FlaskConical className="h-6 w-6 text-indigo-400" />
+            <h1 className="text-2xl font-bold tracking-tight text-[#0B1B3A] flex items-center gap-2">
+              <FlaskConical className="h-6 w-6 text-[#2563EB]" />
               <span>The Eval Lab</span>
             </h1>
             <p className="text-sm text-gray-400 mt-1">
@@ -637,7 +637,7 @@ export default function EvalLabPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="rounded-lg border border-emerald-500/20 bg-emerald-950/20 px-3 py-1.5 text-xs font-mono text-emerald-300 flex items-center gap-1.5">
+            <span className="rounded-lg border border-emerald-500/20 bg-emerald-50 px-3 py-1.5 text-xs font-mono text-emerald-300 flex items-center gap-1.5">
               <CheckCircle2 className="h-4 w-4 text-emerald-400" />
               <span>Pass Bar: 98.8% Active</span>
             </span>
@@ -645,12 +645,12 @@ export default function EvalLabPage() {
         </div>
 
         {/* Tab Selection */}
-        <div className="flex border-b border-gray-800 space-x-1 overflow-x-auto">
+        <div className="flex border-b border-[#DCE6F5] space-x-1 overflow-x-auto">
           <button
             onClick={() => setActiveTab("jobs")}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
               activeTab === "jobs"
-                ? "border-indigo-500 text-indigo-400 font-semibold"
+                ? "border-indigo-500 text-[#2563EB] font-semibold"
                 : "border-transparent text-gray-400 hover:text-gray-200"
             }`}
           >
@@ -662,7 +662,7 @@ export default function EvalLabPage() {
             onClick={() => setActiveTab("models")}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
               activeTab === "models"
-                ? "border-indigo-500 text-indigo-400 font-semibold"
+                ? "border-indigo-500 text-[#2563EB] font-semibold"
                 : "border-transparent text-gray-400 hover:text-gray-200"
             }`}
           >
@@ -674,7 +674,7 @@ export default function EvalLabPage() {
             onClick={() => setActiveTab("local")}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
               activeTab === "local"
-                ? "border-indigo-500 text-indigo-400 font-semibold"
+                ? "border-indigo-500 text-[#2563EB] font-semibold"
                 : "border-transparent text-gray-400 hover:text-gray-200"
             }`}
           >
@@ -686,7 +686,7 @@ export default function EvalLabPage() {
             onClick={() => setActiveTab("judge")}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
               activeTab === "judge"
-                ? "border-indigo-500 text-indigo-400 font-semibold"
+                ? "border-indigo-500 text-[#2563EB] font-semibold"
                 : "border-transparent text-gray-400 hover:text-gray-200"
             }`}
           >
@@ -698,7 +698,7 @@ export default function EvalLabPage() {
             onClick={() => setActiveTab("benchmark")}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
               activeTab === "benchmark"
-                ? "border-indigo-500 text-indigo-400 font-semibold"
+                ? "border-indigo-500 text-[#2563EB] font-semibold"
                 : "border-transparent text-gray-400 hover:text-gray-200"
             }`}
           >
@@ -710,7 +710,7 @@ export default function EvalLabPage() {
             onClick={() => setActiveTab("router")}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
               activeTab === "router"
-                ? "border-indigo-500 text-indigo-400 font-semibold"
+                ? "border-indigo-500 text-[#2563EB] font-semibold"
                 : "border-transparent text-gray-400 hover:text-gray-200"
             }`}
           >
@@ -722,7 +722,7 @@ export default function EvalLabPage() {
             onClick={() => setActiveTab("release-gate")}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
               activeTab === "release-gate"
-                ? "border-indigo-500 text-indigo-400 font-semibold"
+                ? "border-indigo-500 text-[#2563EB] font-semibold"
                 : "border-transparent text-gray-400 hover:text-gray-200"
             }`}
           >
@@ -734,7 +734,7 @@ export default function EvalLabPage() {
             onClick={() => setActiveTab("feedback-tests")}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
               activeTab === "feedback-tests"
-                ? "border-indigo-500 text-indigo-400 font-semibold"
+                ? "border-indigo-500 text-[#2563EB] font-semibold"
                 : "border-transparent text-gray-400 hover:text-gray-200"
             }`}
           >
@@ -777,7 +777,7 @@ export default function EvalLabPage() {
                     className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition border ${
                       isSelected
                         ? "bg-indigo-600 text-white border-indigo-500 shadow-md"
-                        : "bg-gray-900/60 text-gray-400 border-gray-800 hover:bg-gray-800 hover:text-gray-200"
+                        : "bg-[#F6F9FF] text-gray-400 border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-gray-200"
                     }`}
                   >
                     <IconComponent className="h-3.5 w-3.5" />
@@ -800,12 +800,12 @@ export default function EvalLabPage() {
               return (
                 <div className="space-y-6">
                   {/* Job Overview Banner */}
-                  <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-1">
+                  <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 shadow-sm space-y-1">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-base font-bold text-white flex items-center gap-2">
+                      <h2 className="text-base font-bold text-[#0B1B3A] flex items-center gap-2">
                         <span>{currentJob.title}</span>
                       </h2>
-                      <span className="text-[11px] font-mono text-indigo-400 bg-indigo-950/60 px-2.5 py-0.5 rounded border border-indigo-500/30">
+                      <span className="text-[11px] font-mono text-[#2563EB] bg-indigo-50 px-2.5 py-0.5 rounded border border-[#BFDBFE]">
                         Job: {currentJob.jobId}
                       </span>
                     </div>
@@ -815,10 +815,10 @@ export default function EvalLabPage() {
                   {/* 4 Winner Scorecards */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* Recommended Pick */}
-                    <div className="rounded-xl border border-indigo-500/40 bg-indigo-950/20 p-4 space-y-2">
-                      <div className="flex items-center justify-between text-indigo-300">
+                    <div className="rounded-xl border border-[#BFDBFE] bg-indigo-50 p-4 space-y-2">
+                      <div className="flex items-center justify-between text-[#2563EB]">
                         <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-                          <Award className="h-4 w-4 text-indigo-400" />
+                          <Award className="h-4 w-4 text-[#2563EB]" />
                           <span>Recommended Pick</span>
                         </span>
                       </div>
@@ -831,7 +831,7 @@ export default function EvalLabPage() {
                     </div>
 
                     {/* Top Quality */}
-                    <div className="rounded-xl border border-emerald-500/40 bg-emerald-950/20 p-4 space-y-2">
+                    <div className="rounded-xl border border-emerald-500/40 bg-emerald-50 p-4 space-y-2">
                       <div className="flex items-center justify-between text-emerald-300">
                         <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
                           <Sparkles className="h-4 w-4 text-emerald-400" />
@@ -863,7 +863,7 @@ export default function EvalLabPage() {
                     </div>
 
                     {/* Lowest Latency */}
-                    <div className="rounded-xl border border-cyan-500/40 bg-cyan-950/20 p-4 space-y-2">
+                    <div className="rounded-xl border border-[#BFDBFE] bg-blue-50 p-4 space-y-2">
                       <div className="flex items-center justify-between text-cyan-300">
                         <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
                           <Zap className="h-4 w-4 text-cyan-400" />
@@ -880,15 +880,15 @@ export default function EvalLabPage() {
                   </div>
 
                   {/* Candidates Comparison Table */}
-                  <div className="rounded-xl border border-gray-800 bg-[#0E1322] overflow-hidden">
-                    <div className="p-4 border-b border-gray-800 flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-white">Candidate Models Comparison ({currentJob.candidates?.length} models tested)</h3>
+                  <div className="rounded-xl border border-[#DCE6F5] bg-white overflow-hidden">
+                    <div className="p-4 border-b border-[#DCE6F5] flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-[#0B1B3A]">Candidate Models Comparison ({currentJob.candidates?.length} models tested)</h3>
                       <span className="text-xs text-gray-400 font-mono">Measured with empirical numbers</span>
                     </div>
 
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-900/60 border-b border-gray-800 text-gray-400 uppercase font-semibold text-[10px] tracking-wider font-mono">
+                        <thead className="bg-[#EEF4FF] border-b border-[#DCE6F5] text-[#4A5B78] uppercase font-semibold text-[10px] tracking-wider font-mono">
                           <tr>
                             <th className="px-4 py-3">Candidate Model</th>
                             <th className="px-4 py-3">Provider</th>
@@ -901,7 +901,7 @@ export default function EvalLabPage() {
                         </thead>
                         <tbody className="divide-y divide-gray-800/60 font-mono">
                           {currentJob.candidates?.map((c: any) => (
-                            <tr key={c.modelId} className="hover:bg-gray-900/40 transition">
+                            <tr key={c.modelId} className="hover:bg-[#EEF4FF] transition">
                               <td className="px-4 py-3 text-white font-medium">
                                 <div className="flex items-center gap-2">
                                   <span>{c.displayName}</span>
@@ -925,7 +925,7 @@ export default function EvalLabPage() {
                               <td className="px-4 py-3 text-center">
                                 <div className="flex flex-wrap items-center justify-center gap-1">
                                   {c.isRecommended && (
-                                    <span className="rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[9px] px-1.5 py-0.5 font-bold">
+                                    <span className="rounded bg-indigo-500/20 text-[#2563EB] border border-[#BFDBFE] text-[9px] px-1.5 py-0.5 font-bold">
                                       RECOMMENDED
                                     </span>
                                   )}
@@ -940,7 +940,7 @@ export default function EvalLabPage() {
                                     </span>
                                   )}
                                   {c.isFastest && (
-                                    <span className="rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[9px] px-1.5 py-0.5 font-bold">
+                                    <span className="rounded bg-blue-100 text-cyan-300 border border-[#BFDBFE] text-[9px] px-1.5 py-0.5 font-bold">
                                       FASTEST
                                     </span>
                                   )}
@@ -954,8 +954,8 @@ export default function EvalLabPage() {
                   </div>
 
                   {/* Trade-Off & Engineering Rationale */}
-                  <div className="rounded-xl border border-indigo-500/30 bg-[#0E1322] p-5 space-y-2">
-                    <h3 className="text-xs font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-2">
+                  <div className="rounded-xl border border-[#BFDBFE] bg-white p-5 space-y-2">
+                    <h3 className="text-xs font-bold text-[#2563EB] uppercase tracking-wider flex items-center gap-2">
                       <TrendingUp className="h-4 w-4" />
                       <span>Empirical Trade-off &amp; Engineering Rationale</span>
                     </h3>
@@ -973,10 +973,10 @@ export default function EvalLabPage() {
         {activeTab === "models" && (
           <div className="space-y-6">
             {/* Top Toolbar: Local-Only Switch & View Mode Switcher */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Layers className="h-5 w-5 text-indigo-400" />
+                <h3 className="text-base font-bold text-[#0B1B3A] flex items-center gap-2">
+                  <Layers className="h-5 w-5 text-[#2563EB]" />
                   <span>Multi-Model Performance Matrix (14 Models)</span>
                 </h3>
                 <p className="text-[11px] text-gray-400 mt-0.5">
@@ -986,7 +986,7 @@ export default function EvalLabPage() {
 
               <div className="flex flex-wrap items-center gap-3">
                 {/* View Mode Switcher */}
-                <div className="flex items-center rounded-lg bg-gray-900 border border-gray-800 p-0.5 text-xs font-semibold">
+                <div className="flex items-center rounded-lg bg-[#EEF4FF] border border-[#DCE6F5] p-0.5 text-xs font-semibold">
                   <button
                     onClick={() => setMatrixViewMode("overall")}
                     className={`px-3 py-1.5 rounded-md transition ${
@@ -1015,7 +1015,7 @@ export default function EvalLabPage() {
                   className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition border ${
                     localOnly
                       ? "bg-emerald-600/90 text-white border-emerald-500 shadow-md"
-                      : "bg-gray-900 text-gray-300 border-gray-700 hover:bg-gray-800"
+                      : "bg-white text-[#4A5B78] border-[#C3D3EA] hover:bg-[#EEF4FF]"
                   }`}
                   title="Toggle Local-Only Mode: run purely with laptop Ollama models, bypassing paid cloud APIs"
                 >
@@ -1028,7 +1028,7 @@ export default function EvalLabPage() {
             {/* Local-Only Mode Quality Drop & Analysis Banner */}
             {localOnly && (
               <div className="space-y-4">
-                <div className="rounded-xl border border-emerald-500/40 bg-emerald-950/20 p-5 space-y-4">
+                <div className="rounded-xl border border-emerald-500/40 bg-emerald-50 p-5 space-y-4">
                   <div className="flex items-center justify-between border-b border-emerald-500/30 pb-3">
                     <div className="flex items-center gap-2 text-emerald-300">
                       <ShieldAlert className="h-5 w-5 text-emerald-400" />
@@ -1043,27 +1043,27 @@ export default function EvalLabPage() {
 
                   {/* High Level Quality Drop KPI Cards */}
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs font-mono">
-                    <div className="p-3 rounded-lg bg-gray-950/60 border border-emerald-500/20">
+                    <div className="p-3 rounded-lg bg-[#F6F9FF] border border-emerald-500/20">
                       <span className="text-gray-400 text-[10px] uppercase block">Cloud Baseline (Sonnet 5.5)</span>
-                      <span className="text-xl font-bold text-white mt-1 block">98.8% Quality</span>
+                      <span className="text-xl font-bold text-[#0B1B3A] mt-1 block">98.8% Quality</span>
                     </div>
-                    <div className="p-3 rounded-lg bg-gray-950/60 border border-emerald-500/20">
+                    <div className="p-3 rounded-lg bg-[#F6F9FF] border border-emerald-500/20">
                       <span className="text-gray-400 text-[10px] uppercase block">Local-Only Quality</span>
                       <span className="text-xl font-bold text-emerald-400 mt-1 block">89.2% Quality</span>
                     </div>
-                    <div className="p-3 rounded-lg bg-gray-950/60 border border-emerald-500/20">
+                    <div className="p-3 rounded-lg bg-[#F6F9FF] border border-emerald-500/20">
                       <span className="text-gray-400 text-[10px] uppercase block">Net Quality Delta</span>
                       <span className="text-xl font-bold text-amber-400 mt-1 block">-9.6% Drop</span>
                     </div>
-                    <div className="p-3 rounded-lg bg-gray-950/60 border border-emerald-500/20">
+                    <div className="p-3 rounded-lg bg-[#F6F9FF] border border-emerald-500/20">
                       <span className="text-gray-400 text-[10px] uppercase block">Cloud API Spend</span>
                       <span className="text-xl font-bold text-emerald-400 mt-1 block">$0.00 (Zero Cost)</span>
                     </div>
                   </div>
 
                   {/* Step-by-Step Quality Drop Comparison Table */}
-                  <div className="rounded-lg border border-gray-800 bg-[#0A0E1A] overflow-hidden">
-                    <div className="p-3 border-b border-gray-800 flex items-center justify-between">
+                  <div className="rounded-lg border border-[#DCE6F5] bg-[#0A0E1A] overflow-hidden">
+                    <div className="p-3 border-b border-[#DCE6F5] flex items-center justify-between">
                       <h5 className="text-xs font-bold text-gray-200">
                         How Quality Drops Across the 6 Operational Steps
                       </h5>
@@ -1071,7 +1071,7 @@ export default function EvalLabPage() {
                     </div>
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-xs font-mono">
-                        <thead className="bg-gray-900/60 text-gray-400 text-[10px] uppercase border-b border-gray-800">
+                        <thead className="bg-[#EEF4FF] text-[#4A5B78] text-[10px] uppercase border-b border-[#DCE6F5] font-semibold">
                           <tr>
                             <th className="px-3 py-2">Step</th>
                             <th className="px-3 py-2">Cloud Champion</th>
@@ -1092,9 +1092,9 @@ export default function EvalLabPage() {
                             { stepTitle: "5. Improve Skills", cloudModel: "claude-opus-5.5", localModel: "gemma4:e4b", cloudQualityScore: 99.4, localQualityScore: 84.0, qualityDrop: -15.4, whereQualityHolds: "Simple single-rule append from human notes", whereQualityDrops: "Abstract SOP synthesis across disparate complaints" },
                             { stepTitle: "6. Master Judge", cloudModel: "claude-opus-5.5", localModel: "gemma4:e4b", cloudQualityScore: 99.4, localQualityScore: 85.0, qualityDrop: -14.4, whereQualityHolds: "Binary pass vs clear policy violation detection", whereQualityDrops: "Fine-grained calibration on borderline partial answers" },
                           ]).map((s: any, idx: number) => (
-                            <tr key={idx} className="hover:bg-gray-900/40">
+                            <tr key={idx} className="hover:bg-[#EEF4FF]">
                               <td className="px-3 py-2 text-white font-medium">{s.stepTitle}</td>
-                              <td className="px-3 py-2 text-indigo-300">{s.cloudModel}</td>
+                              <td className="px-3 py-2 text-[#2563EB]">{s.cloudModel}</td>
                               <td className="px-3 py-2 text-emerald-300">{s.localModel}</td>
                               <td className="px-3 py-2 text-right text-gray-300">{s.cloudQualityScore}%</td>
                               <td className="px-3 py-2 text-right text-emerald-400">{s.localQualityScore}%</td>
@@ -1110,7 +1110,7 @@ export default function EvalLabPage() {
 
                   {/* Summary of Trade-Offs */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans">
-                    <div className="rounded-lg bg-gray-950/80 border border-rose-500/30 p-3 space-y-1">
+                    <div className="rounded-lg bg-[#F6F9FF] border border-rose-500/30 p-3 space-y-1">
                       <span className="font-bold text-rose-300 uppercase tracking-wider text-[10px] flex items-center gap-1.5">
                         <AlertTriangle className="h-3.5 w-3.5 text-rose-400" />
                         Where Quality Drops
@@ -1120,7 +1120,7 @@ export default function EvalLabPage() {
                       </p>
                     </div>
 
-                    <div className="rounded-lg bg-gray-950/80 border border-emerald-500/30 p-3 space-y-1">
+                    <div className="rounded-lg bg-[#F6F9FF] border border-emerald-500/30 p-3 space-y-1">
                       <span className="font-bold text-emerald-300 uppercase tracking-wider text-[10px] flex items-center gap-1.5">
                         <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
                         Where Quality Holds &amp; Benefits
@@ -1136,22 +1136,22 @@ export default function EvalLabPage() {
 
             {/* VIEW 1: Overall 14 Models Table */}
             {matrixViewMode === "overall" && (
-              <div className="rounded-xl border border-gray-800 bg-[#0E1322] overflow-hidden">
-                <div className="p-4 border-b border-gray-800 flex items-center justify-between">
+              <div className="rounded-xl border border-[#DCE6F5] bg-white overflow-hidden">
+                <div className="p-4 border-b border-[#DCE6F5] flex items-center justify-between">
                   <div>
-                    <h3 className="text-sm font-semibold text-white">14-Model Performance &amp; Cost Matrix</h3>
+                    <h3 className="text-sm font-semibold text-[#0B1B3A]">14-Model Performance &amp; Cost Matrix</h3>
                     <p className="text-[11px] text-gray-400 mt-0.5">
                       Checked on 12 Nov 2026 rates &bull; Benchmarked over 100 runs &bull; Fallbacks defined for free tiers
                     </p>
                   </div>
-                  <span className="text-xs text-indigo-400 font-mono bg-indigo-950/60 px-2.5 py-1 rounded border border-indigo-500/30">
+                  <span className="text-xs text-[#2563EB] font-mono bg-indigo-50 px-2.5 py-1 rounded border border-[#BFDBFE]">
                     {localOnly ? "2 Local Models Filtered" : "14 Models Total"}
                   </span>
                 </div>
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-gray-900/60 border-b border-gray-800 text-gray-400 uppercase font-semibold text-[10px] tracking-wider font-mono">
+                    <thead className="bg-[#EEF4FF] border-b border-[#DCE6F5] text-[#4A5B78] uppercase font-semibold text-[10px] tracking-wider font-mono">
                       <tr>
                         <th className="px-4 py-3">Model Identifier</th>
                         <th className="px-4 py-3">Where It Runs</th>
@@ -1164,7 +1164,7 @@ export default function EvalLabPage() {
                     </thead>
                     <tbody className="divide-y divide-gray-800/60 font-mono">
                       {matrix.map((m) => (
-                        <tr key={m.modelId} className="hover:bg-gray-900/40 transition">
+                        <tr key={m.modelId} className="hover:bg-[#EEF4FF] transition">
                           <td className="px-4 py-3 text-white font-medium">
                             <div className="flex items-center gap-1.5">
                               <span>{m.displayName}</span>
@@ -1201,7 +1201,7 @@ export default function EvalLabPage() {
                           </td>
                           <td className="px-4 py-3 text-gray-300 text-[11px] max-w-xs">
                             {m.compareAgainst && m.compareAgainst.length > 0 && (
-                              <div className="text-[10px] text-indigo-300">
+                              <div className="text-[10px] text-[#2563EB]">
                                 <span className="text-gray-500">vs: </span>
                                 {m.compareAgainst.join(", ")}
                               </div>
@@ -1242,7 +1242,7 @@ export default function EvalLabPage() {
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition border ${
                         stepFilter === s.id
                           ? "bg-indigo-600 text-white border-indigo-500 shadow-sm"
-                          : "bg-gray-900/60 text-gray-400 border-gray-800 hover:text-white"
+                          : "bg-[#F6F9FF] text-gray-400 border-[#DCE6F5] hover:text-white"
                       }`}
                     >
                       {s.label}
@@ -1250,10 +1250,10 @@ export default function EvalLabPage() {
                   ))}
                 </div>
 
-                <div className="rounded-xl border border-gray-800 bg-[#0E1322] overflow-hidden">
-                  <div className="p-4 border-b border-gray-800 flex items-center justify-between">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white overflow-hidden">
+                  <div className="p-4 border-b border-[#DCE6F5] flex items-center justify-between">
                     <div>
-                      <h3 className="text-sm font-semibold text-white">Step-by-Step Model Performance Matrix</h3>
+                      <h3 className="text-sm font-semibold text-[#0B1B3A]">Step-by-Step Model Performance Matrix</h3>
                       <p className="text-[11px] text-gray-400 mt-0.5">
                         Granular Telemetry Matrix: Quality Score (from Master Judge), Cost per 100 invocations ($), and Latency (Avg &amp; P95 slowest 5%).
                       </p>
@@ -1262,7 +1262,7 @@ export default function EvalLabPage() {
 
                   <div className="overflow-x-auto max-h-[550px]">
                     <table className="w-full text-left text-xs font-mono">
-                      <thead className="bg-gray-900/60 border-b border-gray-800 text-gray-400 uppercase font-semibold text-[10px] tracking-wider sticky top-0">
+                      <thead className="bg-[#F6F9FF] border-b border-[#DCE6F5] text-gray-400 uppercase font-semibold text-[10px] tracking-wider sticky top-0">
                         <tr>
                           <th className="px-4 py-3">Model</th>
                           <th className="px-4 py-3">Step</th>
@@ -1290,7 +1290,7 @@ export default function EvalLabPage() {
                         })))
                           .filter((e) => stepFilter === "all" || e.stepId === stepFilter)
                           .map((entry, idx) => (
-                            <tr key={`${entry.modelId}_${entry.stepId}_${idx}`} className="hover:bg-gray-900/40 transition">
+                            <tr key={`${entry.modelId}_${entry.stepId}_${idx}`} className="hover:bg-[#EEF4FF] transition">
                               <td className="px-4 py-3 text-white font-medium">
                                 <div className="flex items-center gap-1.5">
                                   <span>{entry.displayName}</span>
@@ -1302,7 +1302,7 @@ export default function EvalLabPage() {
                                 </div>
                                 <div className="text-[10px] text-gray-500">{entry.modelId}</div>
                               </td>
-                              <td className="px-4 py-3 text-indigo-300">
+                              <td className="px-4 py-3 text-[#2563EB]">
                                 {entry.stepTitle}
                               </td>
                               <td className="px-4 py-3 text-right font-bold text-emerald-400">
@@ -1336,7 +1336,7 @@ export default function EvalLabPage() {
         {activeTab === "local" && (
           <div className="space-y-6">
             {/* Privacy Boundary Guarantee Banner */}
-            <div className="rounded-xl border border-emerald-500/40 bg-emerald-950/20 p-5 space-y-2">
+            <div className="rounded-xl border border-emerald-500/40 bg-emerald-50 p-5 space-y-2">
               <div className="flex items-center gap-2 text-emerald-300">
                 <ShieldAlert className="h-5 w-5 text-emerald-400" />
                 <h3 className="text-sm font-bold uppercase tracking-wider">
@@ -1351,11 +1351,11 @@ export default function EvalLabPage() {
             </div>
 
             {/* Ollama Daemon Status */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <HardDrive className="h-5 w-5 text-indigo-400" />
-                  <h3 className="text-sm font-semibold text-white">Local Ollama Runner</h3>
+                  <HardDrive className="h-5 w-5 text-[#2563EB]" />
+                  <h3 className="text-sm font-semibold text-[#0B1B3A]">Local Ollama Runner</h3>
                   <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                     {ollamaStatus?.isRunning ? "Online (localhost:11434)" : "Simulated Offline Mode"}
                   </span>
@@ -1367,7 +1367,7 @@ export default function EvalLabPage() {
 
               <button
                 onClick={fetchOllamaStatus}
-                className="flex items-center gap-2 rounded-lg bg-gray-800 hover:bg-gray-700 px-3.5 py-2 text-xs font-semibold text-white transition border border-gray-700"
+                className="flex items-center gap-2 rounded-lg bg-gray-800 hover:bg-gray-700 px-3.5 py-2 text-xs font-semibold text-white transition border border-[#C3D3EA]"
               >
                 <RotateCw className="h-3.5 w-3.5" />
                 <span>Check Status</span>
@@ -1377,12 +1377,12 @@ export default function EvalLabPage() {
             {/* The 2 Laptop Local Models Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Gemma 4 */}
-              <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-4">
-                <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+              <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 space-y-4">
+                <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-3">
                   <div>
-                    <h4 className="text-sm font-bold text-white font-mono flex items-center gap-2">
+                    <h4 className="text-sm font-bold text-[#0B1B3A] font-mono flex items-center gap-2">
                       <span>gemma4:e4b</span>
-                      <span className="rounded bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 text-[10px] px-2 py-0.5 font-sans">
+                      <span className="rounded bg-indigo-50 border border-[#BFDBFE] text-[#2563EB] text-[10px] px-2 py-0.5 font-sans">
                         Multimodal Vision
                       </span>
                     </h4>
@@ -1392,11 +1392,11 @@ export default function EvalLabPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 text-xs font-mono">
-                  <div className="p-2.5 rounded bg-gray-950 border border-gray-800">
+                  <div className="p-2.5 rounded bg-[#F1F6FF] border border-[#DCE6F5]">
                     <span className="text-gray-500 block text-[10px]">DOWNLOAD SIZE</span>
                     <span className="text-gray-200 font-bold">~7–10 GB</span>
                   </div>
-                  <div className="p-2.5 rounded bg-gray-950 border border-gray-800">
+                  <div className="p-2.5 rounded bg-[#F1F6FF] border border-[#DCE6F5]">
                     <span className="text-gray-500 block text-[10px]">SYSTEM RAM REQUIRED</span>
                     <span className="text-gray-200 font-bold">8–16 GB</span>
                   </div>
@@ -1404,11 +1404,11 @@ export default function EvalLabPage() {
 
                 <div className="space-y-1.5 text-xs font-mono">
                   <span className="text-[10px] uppercase font-semibold text-gray-500 tracking-wider">Terminal Commands:</span>
-                  <div className="p-2.5 rounded bg-gray-950 border border-gray-800 text-indigo-300 flex items-center justify-between">
+                  <div className="p-2.5 rounded bg-[#F1F6FF] border border-[#DCE6F5] text-[#2563EB] flex items-center justify-between">
                     <span>ollama pull gemma4:e4b</span>
                     <span className="text-gray-500 text-[10px]">Pull model</span>
                   </div>
-                  <div className="p-2.5 rounded bg-gray-950 border border-gray-800 text-rose-300/80 flex items-center justify-between">
+                  <div className="p-2.5 rounded bg-[#F1F6FF] border border-[#DCE6F5] text-rose-300/80 flex items-center justify-between">
                     <span>ollama rm gemma4:e4b</span>
                     <span className="text-gray-500 text-[10px]">Delete model</span>
                   </div>
@@ -1416,12 +1416,12 @@ export default function EvalLabPage() {
               </div>
 
               {/* Qwen 3.5 */}
-              <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-4">
-                <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+              <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 space-y-4">
+                <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-3">
                   <div>
-                    <h4 className="text-sm font-bold text-white font-mono flex items-center gap-2">
+                    <h4 className="text-sm font-bold text-[#0B1B3A] font-mono flex items-center gap-2">
                       <span>qwen3.5:4b</span>
-                      <span className="rounded bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 text-[10px] px-2 py-0.5 font-sans">
+                      <span className="rounded bg-indigo-50 border border-[#BFDBFE] text-[#2563EB] text-[10px] px-2 py-0.5 font-sans">
                         4-bit Quantized
                       </span>
                     </h4>
@@ -1431,11 +1431,11 @@ export default function EvalLabPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 text-xs font-mono">
-                  <div className="p-2.5 rounded bg-gray-950 border border-gray-800">
+                  <div className="p-2.5 rounded bg-[#F1F6FF] border border-[#DCE6F5]">
                     <span className="text-gray-500 block text-[10px]">DOWNLOAD SIZE</span>
                     <span className="text-gray-200 font-bold">~3–4 GB</span>
                   </div>
-                  <div className="p-2.5 rounded bg-gray-950 border border-gray-800">
+                  <div className="p-2.5 rounded bg-[#F1F6FF] border border-[#DCE6F5]">
                     <span className="text-gray-500 block text-[10px]">SYSTEM RAM REQUIRED</span>
                     <span className="text-gray-200 font-bold">4–8 GB</span>
                   </div>
@@ -1443,11 +1443,11 @@ export default function EvalLabPage() {
 
                 <div className="space-y-1.5 text-xs font-mono">
                   <span className="text-[10px] uppercase font-semibold text-gray-500 tracking-wider">Terminal Commands:</span>
-                  <div className="p-2.5 rounded bg-gray-950 border border-gray-800 text-indigo-300 flex items-center justify-between">
+                  <div className="p-2.5 rounded bg-[#F1F6FF] border border-[#DCE6F5] text-[#2563EB] flex items-center justify-between">
                     <span>ollama pull qwen3.5:4b</span>
                     <span className="text-gray-500 text-[10px]">Pull model</span>
                   </div>
-                  <div className="p-2.5 rounded bg-gray-950 border border-gray-800 text-rose-300/80 flex items-center justify-between">
+                  <div className="p-2.5 rounded bg-[#F1F6FF] border border-[#DCE6F5] text-rose-300/80 flex items-center justify-between">
                     <span>ollama rm qwen3.5:4b</span>
                     <span className="text-gray-500 text-[10px]">Delete model</span>
                   </div>
@@ -1456,32 +1456,32 @@ export default function EvalLabPage() {
             </div>
 
             {/* Terminal Command Quick Reference */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-3 font-mono text-xs">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 space-y-3 font-mono text-xs">
               <div className="flex items-center gap-2 text-white font-bold">
-                <Terminal className="h-4 w-4 text-indigo-400" />
+                <Terminal className="h-4 w-4 text-[#2563EB]" />
                 <span>Laptop Ollama CLI Management Guide</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="p-3 rounded bg-gray-950 border border-gray-800 space-y-1">
+                <div className="p-3 rounded bg-[#F1F6FF] border border-[#DCE6F5] space-y-1">
                   <span className="text-gray-400 text-[11px] block">List downloaded models</span>
-                  <code className="text-indigo-300 text-xs">ollama list</code>
+                  <code className="text-[#2563EB] text-xs">ollama list</code>
                 </div>
-                <div className="p-3 rounded bg-gray-950 border border-gray-800 space-y-1">
+                <div className="p-3 rounded bg-[#F1F6FF] border border-[#DCE6F5] space-y-1">
                   <span className="text-gray-400 text-[11px] block">Download 4-bit model</span>
-                  <code className="text-indigo-300 text-xs">ollama pull qwen3.5:4b</code>
+                  <code className="text-[#2563EB] text-xs">ollama pull qwen3.5:4b</code>
                 </div>
-                <div className="p-3 rounded bg-gray-950 border border-gray-800 space-y-1">
+                <div className="p-3 rounded bg-[#F1F6FF] border border-[#DCE6F5] space-y-1">
                   <span className="text-gray-400 text-[11px] block">Check daemon health</span>
-                  <code className="text-indigo-300 text-xs">curl http://localhost:11434/api/tags</code>
+                  <code className="text-[#2563EB] text-xs">curl http://localhost:11434/api/tags</code>
                 </div>
               </div>
             </div>
 
             {/* Interactive Local Inference Sandbox */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 space-y-4">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Live On-Device Inference Sandbox</h3>
+                  <h3 className="text-sm font-semibold text-[#0B1B3A]">Live On-Device Inference Sandbox</h3>
                   <p className="text-xs text-gray-400">Run queries locally on your laptop with zero tokens leaving your machine.</p>
                 </div>
                 <span className="rounded bg-emerald-500/10 text-emerald-400 text-xs px-2.5 py-1 font-mono border border-emerald-500/20">
@@ -1495,7 +1495,7 @@ export default function EvalLabPage() {
                   <select
                     value={localTestModel}
                     onChange={(e) => setLocalTestModel(e.target.value)}
-                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-white focus:outline-none"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none"
                   >
                     <option value="gemma4:e4b">gemma4:e4b (~7-10 GB, Vision)</option>
                     <option value="qwen3.5:4b">qwen3.5:4b (~3-4 GB, 4-bit)</option>
@@ -1509,7 +1509,7 @@ export default function EvalLabPage() {
                     value={localTestPrompt}
                     onChange={(e) => setLocalTestPrompt(e.target.value)}
                     placeholder="Enter private prompt for on-device execution..."
-                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                   />
                 </div>
               </div>
@@ -1524,7 +1524,7 @@ export default function EvalLabPage() {
               </button>
 
               {localTestResult && (
-                <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-4 text-xs font-mono space-y-3">
+                <div className="rounded-lg border border-emerald-500/30 bg-emerald-50 p-4 text-xs font-mono space-y-3">
                   <div className="flex items-center justify-between text-emerald-300 border-b border-emerald-500/20 pb-2">
                     <span className="font-bold">Model: {localTestResult.modelId}</span>
                     <span>Latency: {localTestResult.latencyMs} ms &bull; Cost: $0.000000</span>
@@ -1545,7 +1545,7 @@ export default function EvalLabPage() {
         {activeTab === "benchmark" && (
           <div className="space-y-6">
             {/* Action Bar */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex flex-wrap items-center gap-3">
                 <div>
                   <span className="text-xs font-semibold text-gray-400 block mb-1">Benchmark Version:</span>
@@ -1555,7 +1555,7 @@ export default function EvalLabPage() {
                       setBenchmarkVersion(e.target.value);
                       fetchBenchmarkCases(selectedCategory, e.target.value);
                     }}
-                    className="rounded-lg border border-gray-700 bg-gray-950 px-3 py-1.5 text-xs text-white focus:outline-none"
+                    className="rounded-lg border border-[#C3D3EA] bg-white px-3 py-1.5 text-xs text-white focus:outline-none"
                   >
                     <option value="2.0.0">v2.0.0 (Production 180 Suite)</option>
                     <option value="1.0.0">v1.0.0 (Step 4 Seed - 20 Cases)</option>
@@ -1567,7 +1567,7 @@ export default function EvalLabPage() {
                   <select
                     value={benchmarkModel}
                     onChange={(e) => setBenchmarkModel(e.target.value)}
-                    className="rounded-lg border border-gray-700 bg-gray-950 px-3 py-1.5 text-xs text-white focus:outline-none"
+                    className="rounded-lg border border-[#C3D3EA] bg-white px-3 py-1.5 text-xs text-white focus:outline-none"
                   >
                     <option value="claude-sonnet-5.5">Claude Sonnet 5.5</option>
                     <option value="claude-opus-5.5">Claude Opus 5.5 (Master Judge)</option>
@@ -1586,7 +1586,7 @@ export default function EvalLabPage() {
                       setSelectedCategory(e.target.value);
                       fetchBenchmarkCases(e.target.value, benchmarkVersion);
                     }}
-                    className="rounded-lg border border-gray-700 bg-gray-950 px-3 py-1.5 text-xs text-white focus:outline-none"
+                    className="rounded-lg border border-[#C3D3EA] bg-white px-3 py-1.5 text-xs text-white focus:outline-none"
                   >
                     <option value="all">All Available Cases</option>
                     <option value="knowledge">Knowledge Brain</option>
@@ -1601,7 +1601,7 @@ export default function EvalLabPage() {
                 <button
                   onClick={handleRunBatchBenchmark}
                   disabled={runningBenchmark || running14ModelsBenchmark}
-                  className="flex items-center gap-2 rounded-lg bg-gray-800 hover:bg-gray-700 px-4 py-2.5 text-xs font-semibold text-white transition disabled:opacity-40 border border-gray-700"
+                  className="flex items-center gap-2 rounded-lg bg-gray-800 hover:bg-gray-700 px-4 py-2.5 text-xs font-semibold text-white transition disabled:opacity-40 border border-[#C3D3EA]"
                 >
                   <Play className={`h-4 w-4 ${runningBenchmark ? "animate-spin" : ""}`} />
                   <span>{runningBenchmark ? "Evaluating..." : `Run Single Model (${benchmarkModel.split("-")[0]})`}</span>
@@ -1621,10 +1621,10 @@ export default function EvalLabPage() {
             {/* Task 4.2 Multi-Model Benchmark Scorecards Grid */}
             {multiModelBenchmarkData && (
               <div className="space-y-4">
-                <div className="rounded-xl border border-indigo-500/40 bg-indigo-950/20 p-5 space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-indigo-500/30 pb-3">
+                <div className="rounded-xl border border-[#BFDBFE] bg-indigo-50 p-5 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#BFDBFE] pb-3">
                     <div>
-                      <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                      <h3 className="text-sm font-bold text-[#0B1B3A] flex items-center gap-2">
                         <CheckCircle2 className="h-5 w-5 text-emerald-400" />
                         <span>Fleet Benchmark Results: All 14 Models Evaluated</span>
                       </h3>
@@ -1639,7 +1639,7 @@ export default function EvalLabPage() {
                         <select
                           value={selectedBenchmarkModelFilter}
                           onChange={(e) => setSelectedBenchmarkModelFilter(e.target.value)}
-                          className="rounded-lg border border-indigo-500/40 bg-gray-950 px-3 py-1 text-xs text-white focus:outline-none font-mono"
+                          className="rounded-lg border border-[#BFDBFE] bg-white px-3 py-1 text-xs text-white focus:outline-none font-mono"
                         >
                           <option value="all">All Models Combined</option>
                           {multiModelBenchmarkData.modelSummaries.map((m: any) => (
@@ -1663,12 +1663,12 @@ export default function EvalLabPage() {
                           className={`p-2.5 rounded-lg border text-left transition font-mono ${
                             isSelected
                               ? "bg-indigo-600/30 border-indigo-400 shadow-md ring-1 ring-indigo-400"
-                              : "bg-gray-950/70 border-gray-800 hover:border-gray-700 hover:bg-gray-900/60"
+                              : "bg-[#F1F6FF]/70 border-[#DCE6F5] hover:border-[#C3D3EA] hover:bg-[#F6F9FF]"
                           }`}
                         >
                           <div className="text-[11px] font-bold text-white truncate">{m.displayName}</div>
                           <div className="text-base font-bold text-emerald-400 mt-1">{m.qualityScore}%</div>
-                          <div className="text-[10px] text-gray-400 flex items-center justify-between mt-1 pt-1 border-t border-gray-800">
+                          <div className="text-[10px] text-gray-400 flex items-center justify-between mt-1 pt-1 border-t border-[#DCE6F5]">
                             <span>{m.avgLatencyMs}ms</span>
                             <span>{m.costPer100RunsUsd === 0 ? "$0" : `$${m.costPer100RunsUsd.toFixed(2)}`}</span>
                           </div>
@@ -1684,17 +1684,17 @@ export default function EvalLabPage() {
                 </div>
 
                 {/* Detailed Test Results with Human Reviewer Notes */}
-                <div className="rounded-xl border border-gray-800 bg-[#0E1322] overflow-hidden space-y-3 p-4">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white overflow-hidden space-y-3 p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-sm font-semibold text-white">
+                      <h4 className="text-sm font-semibold text-[#0B1B3A]">
                         Evaluated Cases &amp; Human Reviewer Notes
                       </h4>
                       <p className="text-[11px] text-gray-400">
                         Evaluator Notes: Add qualitative notes for any model response (highlighting strengths, edge-case failures, or formatting issues).
                       </p>
                     </div>
-                    <span className="text-xs text-indigo-400 font-mono bg-indigo-950/60 px-2.5 py-1 rounded border border-indigo-500/30">
+                    <span className="text-xs text-[#2563EB] font-mono bg-indigo-50 px-2.5 py-1 rounded border border-[#BFDBFE]">
                       Showing{" "}
                       {
                         multiModelBenchmarkData.detailedResults.filter(
@@ -1723,15 +1723,15 @@ export default function EvalLabPage() {
                         return (
                           <div
                             key={`${item.caseId}_${item.modelId}_${idx}`}
-                            className="p-4 rounded-xl border border-gray-800 bg-gray-950/80 space-y-3"
+                            className="p-4 rounded-xl border border-[#DCE6F5] bg-[#F6F9FF] space-y-3"
                           >
-                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-800/80 pb-2">
+                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#DCE6F5] pb-2">
                               <div className="flex items-center gap-2">
-                                <span className="font-mono text-xs font-bold text-indigo-400">{item.caseId}</span>
+                                <span className="font-mono text-xs font-bold text-[#2563EB]">{item.caseId}</span>
                                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-gray-800 text-gray-300">
                                   {item.category}
                                 </span>
-                                <span className="text-xs font-bold text-white font-mono px-2 py-0.5 rounded bg-indigo-950/80 border border-indigo-500/30">
+                                <span className="text-xs font-bold text-[#0B1B3A] font-mono px-2 py-0.5 rounded bg-indigo-950/80 border border-[#BFDBFE]">
                                   {item.modelDisplayName}
                                 </span>
                               </div>
@@ -1759,13 +1759,13 @@ export default function EvalLabPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                               <div className="space-y-1">
                                 <span className="text-[10px] uppercase font-semibold text-gray-500">Question:</span>
-                                <div className="p-2.5 rounded bg-[#0E1322] border border-gray-800 text-white font-sans leading-relaxed">
+                                <div className="p-2.5 rounded bg-white border border-[#DCE6F5] text-white font-sans leading-relaxed">
                                   {item.question}
                                 </div>
                               </div>
                               <div className="space-y-1">
                                 <span className="text-[10px] uppercase font-semibold text-gray-500">Expected Ground Truth:</span>
-                                <div className="p-2.5 rounded bg-[#0E1322] border border-gray-800 text-gray-300 font-sans leading-relaxed">
+                                <div className="p-2.5 rounded bg-white border border-[#DCE6F5] text-gray-300 font-sans leading-relaxed">
                                   {item.expectedAnswer}
                                 </div>
                               </div>
@@ -1773,18 +1773,18 @@ export default function EvalLabPage() {
 
                             {/* Actual Model Answer */}
                             <div className="space-y-1 text-xs">
-                              <span className="text-[10px] uppercase font-semibold text-indigo-400">
+                              <span className="text-[10px] uppercase font-semibold text-[#2563EB]">
                                 Model Answer ({item.modelDisplayName}):
                               </span>
-                              <div className="p-2.5 rounded bg-[#0A0E1A] border border-indigo-500/20 text-indigo-100 font-mono text-[11px] leading-relaxed">
+                              <div className="p-2.5 rounded bg-[#0A0E1A] border border-[#DCE6F5] text-indigo-100 font-mono text-[11px] leading-relaxed">
                                 {item.actualAnswer}
                               </div>
                             </div>
 
                             {/* Judge Reason */}
-                            <div className="p-2.5 rounded bg-gray-900/40 border border-gray-800 text-xs flex items-center justify-between gap-2">
+                            <div className="p-2.5 rounded bg-[#EEF4FF] border border-[#DCE6F5] text-xs flex items-center justify-between gap-2">
                               <span className="text-gray-400 text-[11px]">
-                                <strong className="text-indigo-300">Judge Reason:</strong> {item.judgeReason}
+                                <strong className="text-[#2563EB]">Judge Reason:</strong> {item.judgeReason}
                               </span>
                               <span className="text-[10px] text-gray-500 font-mono">
                                 Judge: {item.judgeModel || "Claude Opus 5.5"}
@@ -1794,7 +1794,7 @@ export default function EvalLabPage() {
                             {/* Human Reviewer Note Box */}
                             <div className="pt-1">
                               {existingNote ? (
-                                <div className="p-3 rounded-lg border border-emerald-500/40 bg-emerald-950/20 space-y-2 text-xs">
+                                <div className="p-3 rounded-lg border border-emerald-500/40 bg-emerald-50 space-y-2 text-xs">
                                   <div className="flex items-center justify-between">
                                     <span className="font-bold text-emerald-300 text-[11px] flex items-center gap-1.5">
                                       <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
@@ -1823,13 +1823,13 @@ export default function EvalLabPage() {
                                   </div>
 
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px]">
-                                    <div className="p-2 rounded bg-gray-950/80 border border-emerald-500/20">
+                                    <div className="p-2 rounded bg-[#F6F9FF] border border-emerald-500/20">
                                       <span className="text-emerald-400 font-bold block text-[10px] uppercase">
                                         What Was Good:
                                       </span>
                                       <p className="text-gray-200 mt-0.5">{existingNote.whatWasGood}</p>
                                     </div>
-                                    <div className="p-2 rounded bg-gray-950/80 border border-emerald-500/20">
+                                    <div className="p-2 rounded bg-[#F6F9FF] border border-emerald-500/20">
                                       <span className="text-amber-400 font-bold block text-[10px] uppercase">
                                         What Was Wrong:
                                       </span>
@@ -1850,9 +1850,9 @@ export default function EvalLabPage() {
                                       reviewer: "Human Reviewer",
                                     })
                                   }
-                                  className="w-full py-2 px-3 rounded-lg border border-dashed border-gray-700 hover:border-indigo-500 bg-gray-900/40 hover:bg-indigo-950/20 text-xs text-gray-400 hover:text-indigo-300 transition flex items-center justify-center gap-2"
+                                  className="w-full py-2 px-3 rounded-lg border border-dashed border-[#C3D3EA] hover:border-indigo-500 bg-[#EEF4FF] hover:bg-indigo-50 text-xs text-gray-400 hover:text-[#2563EB] transition flex items-center justify-center gap-2"
                                 >
-                                  <MessageSquarePlus className="h-3.5 w-3.5 text-indigo-400" />
+                                  <MessageSquarePlus className="h-3.5 w-3.5 text-[#2563EB]" />
                                   <span>+ Add Human Reviewer Note (What was good / What was wrong)</span>
                                 </button>
                               )}
@@ -1867,9 +1867,9 @@ export default function EvalLabPage() {
 
             {/* Run Results Card */}
             {benchmarkResult && !multiModelBenchmarkData && (
-              <div className="rounded-xl border border-indigo-500/40 bg-indigo-950/20 p-5 space-y-4">
-                <div className="flex items-center justify-between border-b border-indigo-500/30 pb-3">
-                  <div className="flex items-center gap-2 text-indigo-300">
+              <div className="rounded-xl border border-[#BFDBFE] bg-indigo-50 p-5 space-y-4">
+                <div className="flex items-center justify-between border-b border-[#BFDBFE] pb-3">
+                  <div className="flex items-center gap-2 text-[#2563EB]">
                     <CheckCircle2 className="h-5 w-5 text-emerald-400" />
                     <h3 className="text-sm font-bold">Benchmark Execution Results: {benchmarkModel}</h3>
                   </div>
@@ -1909,10 +1909,10 @@ export default function EvalLabPage() {
 
             {/* Benchmark Cases Table (Fallback view when 14-model run not executed) */}
             {!multiModelBenchmarkData && (
-              <div className="rounded-xl border border-gray-800 bg-[#0E1322] overflow-hidden">
-                <div className="p-4 border-b border-gray-800 flex items-center justify-between">
+              <div className="rounded-xl border border-[#DCE6F5] bg-white overflow-hidden">
+                <div className="p-4 border-b border-[#DCE6F5] flex items-center justify-between">
                   <div>
-                    <h3 className="text-sm font-semibold text-white">Curated Test Catalog ({cases.length} cases)</h3>
+                    <h3 className="text-sm font-semibold text-[#0B1B3A]">Curated Test Catalog ({cases.length} cases)</h3>
                     <p className="text-[11px] text-gray-400 mt-0.5">
                       Click &quot;Run Benchmark on All 14 Models (100 Cases)&quot; above to run the 14 models and add human reviewer notes.
                     </p>
@@ -1921,7 +1921,7 @@ export default function EvalLabPage() {
 
                 <div className="overflow-x-auto max-h-[460px]">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-gray-900/60 border-b border-gray-800 text-gray-400 uppercase font-semibold text-[10px] tracking-wider sticky top-0">
+                    <thead className="bg-[#F6F9FF] border-b border-[#DCE6F5] text-gray-400 uppercase font-semibold text-[10px] tracking-wider sticky top-0">
                       <tr>
                         <th className="px-4 py-3">Case ID</th>
                         <th className="px-4 py-3">Category</th>
@@ -1934,8 +1934,8 @@ export default function EvalLabPage() {
                       {cases.slice(0, 30).map((c) => {
                         const existingNote = reviewerNotes.find((n) => n.caseId === c.id);
                         return (
-                          <tr key={c.id} className="hover:bg-gray-900/40 transition">
-                            <td className="px-4 py-3 font-mono text-indigo-400 text-[11px] whitespace-nowrap">
+                          <tr key={c.id} className="hover:bg-[#EEF4FF] transition">
+                            <td className="px-4 py-3 font-mono text-[#2563EB] text-[11px] whitespace-nowrap">
                               {c.id}
                             </td>
                             <td className="px-4 py-3">
@@ -1983,10 +1983,10 @@ export default function EvalLabPage() {
         {activeTab === "judge" && (
           <div className="space-y-6">
             {/* Header & Judge Model Config */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="space-y-1">
-                <h3 className="text-base font-semibold text-white flex items-center gap-2">
-                  <ShieldCheck className="h-5 w-5 text-indigo-400" />
+                <h3 className="text-base font-semibold text-[#0B1B3A] flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5 text-[#2563EB]" />
                   <span>The AI Master Judge &amp; Human Calibration</span>
                 </h3>
                 <p className="text-xs text-gray-400">
@@ -2005,7 +2005,7 @@ export default function EvalLabPage() {
                       setSelectedJudgeModel(e.target.value);
                       handleRecalibrateJudge(e.target.value);
                     }}
-                    className="rounded-lg border border-gray-700 bg-gray-950 px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
+                    className="rounded-lg border border-[#C3D3EA] bg-white px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
                   >
                     <option value="claude-opus-5.5">Claude Opus 5.5 (Master Judge Default)</option>
                     <option value="nvidia/nemotron-3-ultra-550b-a55b:free">Nemotron 3 Ultra 550B (Second-Opinion Judge)</option>
@@ -2026,12 +2026,12 @@ export default function EvalLabPage() {
             {/* Prominent Calibration Agreement Headline Card */}
             {calibrationData && (
               <div className="rounded-xl border border-emerald-500/40 bg-gradient-to-r from-emerald-950/40 via-gray-950 to-indigo-950/30 p-5 shadow-lg space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800 pb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#DCE6F5] pb-3">
                   <div>
                     <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 block mb-1">
                       Human Calibration Agreement (Judge Verification)
                     </span>
-                    <h2 className="text-lg font-bold text-white font-sans">
+                    <h2 className="text-lg font-bold text-[#0B1B3A] font-sans">
                       &ldquo;{calibrationData.summaryText || `The judge agreed with me on ${calibrationData.agreedCases} of ${calibrationData.totalCases} cases (${calibrationData.agreementRatePercent}%).`}&rdquo;
                     </h2>
                   </div>
@@ -2041,21 +2041,21 @@ export default function EvalLabPage() {
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
-                  <div className="p-3 rounded bg-gray-950/80 border border-gray-800">
+                  <div className="p-3 rounded bg-[#F6F9FF] border border-[#DCE6F5]">
                     <span className="text-gray-500 block text-[10px]">HAND-GRADED CASES</span>
-                    <span className="text-lg font-bold text-white mt-1 block">{calibrationData.totalCases} cases</span>
+                    <span className="text-lg font-bold text-[#0B1B3A] mt-1 block">{calibrationData.totalCases} cases</span>
                   </div>
-                  <div className="p-3 rounded bg-gray-950/80 border border-gray-800">
+                  <div className="p-3 rounded bg-[#F6F9FF] border border-[#DCE6F5]">
                     <span className="text-gray-500 block text-[10px]">CONSENSUS MATCHES</span>
                     <span className="text-lg font-bold text-emerald-400 mt-1 block">{calibrationData.agreedCases} agreed</span>
                   </div>
-                  <div className="p-3 rounded bg-gray-950/80 border border-gray-800">
+                  <div className="p-3 rounded bg-[#F6F9FF] border border-[#DCE6F5]">
                     <span className="text-gray-500 block text-[10px]">AGREEMENT RATE</span>
                     <span className="text-lg font-bold text-emerald-300 mt-1 block">{calibrationData.agreementRatePercent}%</span>
                   </div>
-                  <div className="p-3 rounded bg-gray-950/80 border border-gray-800">
+                  <div className="p-3 rounded bg-[#F6F9FF] border border-[#DCE6F5]">
                     <span className="text-gray-500 block text-[10px]">SELF-JUDGE GUARD</span>
-                    <span className="text-xs font-bold text-indigo-300 mt-1.5 block">Enforced (No self-judge)</span>
+                    <span className="text-xs font-bold text-[#2563EB] mt-1.5 block">Enforced (No self-judge)</span>
                   </div>
                 </div>
               </div>
@@ -2063,22 +2063,22 @@ export default function EvalLabPage() {
 
             {/* 20 Hand-Graded Cases Table */}
             {calibrationData && (
-              <div className="rounded-xl border border-gray-800 bg-[#0E1322] overflow-hidden">
-                <div className="p-4 border-b border-gray-800 flex items-center justify-between">
+              <div className="rounded-xl border border-[#DCE6F5] bg-white overflow-hidden">
+                <div className="p-4 border-b border-[#DCE6F5] flex items-center justify-between">
                   <div>
-                    <h3 className="text-sm font-semibold text-white">20 Hand-Graded Calibration Cases (Blinded Review Check)</h3>
+                    <h3 className="text-sm font-semibold text-[#0B1B3A]">20 Hand-Graded Calibration Cases (Blinded Review Check)</h3>
                     <p className="text-[11px] text-gray-400 mt-0.5">
                       Graded by hand independently without looking at the AI judge&apos;s scores first. AI Judge then evaluated the same cases.
                     </p>
                   </div>
-                  <span className="text-xs font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
+                  <span className="text-xs font-mono text-emerald-400 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-500/30">
                     {calibrationData.agreedCases}/{calibrationData.totalCases} Matched
                   </span>
                 </div>
 
                 <div className="overflow-x-auto max-h-[380px]">
                   <table className="w-full text-left text-xs font-mono">
-                    <thead className="bg-gray-900/60 border-b border-gray-800 text-gray-400 uppercase font-semibold text-[10px] tracking-wider sticky top-0">
+                    <thead className="bg-[#F6F9FF] border-b border-[#DCE6F5] text-gray-400 uppercase font-semibold text-[10px] tracking-wider sticky top-0">
                       <tr>
                         <th className="px-4 py-3">Case ID</th>
                         <th className="px-4 py-3">Inquiry Category</th>
@@ -2091,8 +2091,8 @@ export default function EvalLabPage() {
                     </thead>
                     <tbody className="divide-y divide-gray-800/60">
                       {calibrationData.cases.map((c: any) => (
-                        <tr key={c.caseId} className="hover:bg-gray-900/40 transition">
-                          <td className="px-4 py-3 text-indigo-400 whitespace-nowrap">{c.caseId}</td>
+                        <tr key={c.caseId} className="hover:bg-[#EEF4FF] transition">
+                          <td className="px-4 py-3 text-[#2563EB] whitespace-nowrap">{c.caseId}</td>
                           <td className="px-4 py-3 text-gray-300 font-sans whitespace-nowrap">
                             <span className="rounded bg-gray-800 px-1.5 py-0.5 text-[10px]">
                               {c.inquiryCategory || "Support"}
@@ -2128,18 +2128,18 @@ export default function EvalLabPage() {
             )}
 
             {/* ================= SIDE-BY-SIDE MODEL COMPARATOR (Task 4.1) ================= */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-5">
-              <div className="border-b border-gray-800 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 shadow-sm space-y-5">
+              <div className="border-b border-[#DCE6F5] pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <GitCompare className="h-5 w-5 text-indigo-400" />
+                  <h3 className="text-base font-bold text-[#0B1B3A] flex items-center gap-2">
+                    <GitCompare className="h-5 w-5 text-[#2563EB]" />
                     <span>Side-by-Side Model Comparator</span>
                   </h3>
                   <p className="text-xs text-gray-400 mt-0.5">
                     Compare two model answers to the same test case with the judge&apos;s score and one-line reason for each.
                   </p>
                 </div>
-                <span className="text-[11px] font-mono text-indigo-300 bg-indigo-950/60 px-2.5 py-1 rounded border border-indigo-500/30">
+                <span className="text-[11px] font-mono text-[#2563EB] bg-indigo-50 px-2.5 py-1 rounded border border-[#BFDBFE]">
                   Judged by: {selectedJudgeModel}
                 </span>
               </div>
@@ -2154,7 +2154,7 @@ export default function EvalLabPage() {
                       setSideBySideCaseId(e.target.value);
                       fetchSideBySide(e.target.value, sideBySideModelA, sideBySideModelB);
                     }}
-                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                   >
                     <option value="step4-01">step4-01: Custom CNAME subdomains with SSL</option>
                     <option value="step4-02">step4-02: SSL Handshake Error 525 (Cloudflare)</option>
@@ -2178,7 +2178,7 @@ export default function EvalLabPage() {
                       setSideBySideModelA(e.target.value);
                       fetchSideBySide(sideBySideCaseId, e.target.value, sideBySideModelB);
                     }}
-                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                   >
                     <option value="claude-sonnet-5.5">Claude Sonnet 5.5 ($2 / $10)</option>
                     <option value="claude-opus-5.5">Claude Opus 5.5 ($4 / $20)</option>
@@ -2195,7 +2195,7 @@ export default function EvalLabPage() {
                       setSideBySideModelB(e.target.value);
                       fetchSideBySide(sideBySideCaseId, sideBySideModelA, e.target.value);
                     }}
-                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                   >
                     <option value="qwen/qwen3.8-max-0902">Qwen 3.8 Max ($2 / $6)</option>
                     <option value="nvidia/nemotron-3-ultra-550b-a55b:free">Nemotron 3 Ultra ($0 Free)</option>
@@ -2210,11 +2210,11 @@ export default function EvalLabPage() {
               {sideBySideResult && (
                 <div className="space-y-4">
                   {/* Delta & Recommendation Summary */}
-                  <div className="rounded-xl border border-indigo-500/40 bg-gradient-to-r from-indigo-950/30 via-gray-950 to-emerald-950/20 p-4 space-y-2">
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-800 pb-2">
+                  <div className="rounded-xl border border-[#BFDBFE] bg-gradient-to-r from-indigo-950/30 via-gray-950 to-emerald-950/20 p-4 space-y-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#DCE6F5] pb-2">
                       <div className="flex items-center gap-2">
-                        <Scale className="h-4 w-4 text-indigo-400" />
-                        <span className="text-xs font-bold text-white uppercase tracking-wider">
+                        <Scale className="h-4 w-4 text-[#2563EB]" />
+                        <span className="text-xs font-bold text-[#0B1B3A] uppercase tracking-wider">
                           Empirical Evaluation Comparison
                         </span>
                       </div>
@@ -2233,12 +2233,12 @@ export default function EvalLabPage() {
                   </div>
 
                   {/* Tested Question & Expected Protocol */}
-                  <div className="p-3.5 rounded-lg bg-gray-950 border border-gray-800 space-y-1 text-xs">
+                  <div className="p-3.5 rounded-lg bg-[#F1F6FF] border border-[#DCE6F5] space-y-1 text-xs">
                     <div className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">
                       Tested Question ({sideBySideResult.category}):
                     </div>
                     <div className="text-white font-medium">&ldquo;{sideBySideResult.question}&rdquo;</div>
-                    <div className="text-gray-400 text-[11px] pt-1 border-t border-gray-800/80">
+                    <div className="text-gray-400 text-[11px] pt-1 border-t border-[#DCE6F5]">
                       <strong>Expected Ground Truth:</strong> {sideBySideResult.expectedAnswer}
                     </div>
                   </div>
@@ -2246,11 +2246,11 @@ export default function EvalLabPage() {
                   {/* Two Model Answer Cards Side-by-Side */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* MODEL A CARD */}
-                    <div className="rounded-xl border border-gray-800 bg-gray-950/60 p-4 space-y-3 flex flex-col justify-between">
+                    <div className="rounded-xl border border-[#DCE6F5] bg-[#F6F9FF] p-4 space-y-3 flex flex-col justify-between">
                       <div className="space-y-2.5">
-                        <div className="flex items-center justify-between border-b border-gray-800 pb-2">
+                        <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-2">
                           <div>
-                            <h4 className="text-sm font-bold text-white font-mono flex items-center gap-2">
+                            <h4 className="text-sm font-bold text-[#0B1B3A] font-mono flex items-center gap-2">
                               <span>{sideBySideResult.modelA.displayName}</span>
                               <span className="text-[10px] text-gray-400 font-sans capitalize font-normal">
                                 ({sideBySideResult.modelA.provider})
@@ -2271,14 +2271,14 @@ export default function EvalLabPage() {
                           </span>
                         </div>
 
-                        <div className="p-3 rounded bg-gray-950 border border-gray-800 font-mono text-[11px] text-gray-300 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
+                        <div className="p-3 rounded bg-white border border-[#DCE6F5] font-mono text-[11px] text-gray-300 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
                           {sideBySideResult.modelA.answer}
                         </div>
                       </div>
 
                       {/* Judge Score & Reason for Model A */}
-                      <div className="p-3 rounded-lg bg-indigo-950/30 border border-indigo-500/30 space-y-1 text-xs">
-                        <div className="flex items-center justify-between text-[11px] font-bold text-indigo-300">
+                      <div className="p-3 rounded-lg bg-indigo-50 border border-[#BFDBFE] space-y-1 text-xs">
+                        <div className="flex items-center justify-between text-[11px] font-bold text-[#2563EB]">
                           <span>AI Master Judge Evaluation</span>
                           <span className="font-mono text-[10px] text-gray-400">Model: {sideBySideResult.modelA.judgeModel}</span>
                         </div>
@@ -2289,11 +2289,11 @@ export default function EvalLabPage() {
                     </div>
 
                     {/* MODEL B CARD */}
-                    <div className="rounded-xl border border-gray-800 bg-gray-950/60 p-4 space-y-3 flex flex-col justify-between">
+                    <div className="rounded-xl border border-[#DCE6F5] bg-[#F6F9FF] p-4 space-y-3 flex flex-col justify-between">
                       <div className="space-y-2.5">
-                        <div className="flex items-center justify-between border-b border-gray-800 pb-2">
+                        <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-2">
                           <div>
-                            <h4 className="text-sm font-bold text-white font-mono flex items-center gap-2">
+                            <h4 className="text-sm font-bold text-[#0B1B3A] font-mono flex items-center gap-2">
                               <span>{sideBySideResult.modelB.displayName}</span>
                               <span className="text-[10px] text-gray-400 font-sans capitalize font-normal">
                                 ({sideBySideResult.modelB.provider})
@@ -2314,14 +2314,14 @@ export default function EvalLabPage() {
                           </span>
                         </div>
 
-                        <div className="p-3 rounded bg-gray-950 border border-gray-800 font-mono text-[11px] text-gray-300 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
+                        <div className="p-3 rounded bg-white border border-[#DCE6F5] font-mono text-[11px] text-gray-300 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
                           {sideBySideResult.modelB.answer}
                         </div>
                       </div>
 
                       {/* Judge Score & Reason for Model B */}
-                      <div className="p-3 rounded-lg bg-indigo-950/30 border border-indigo-500/30 space-y-1 text-xs">
-                        <div className="flex items-center justify-between text-[11px] font-bold text-indigo-300">
+                      <div className="p-3 rounded-lg bg-indigo-50 border border-[#BFDBFE] space-y-1 text-xs">
+                        <div className="flex items-center justify-between text-[11px] font-bold text-[#2563EB]">
                           <span>AI Master Judge Evaluation</span>
                           <span className="font-mono text-[10px] text-gray-400">Model: {sideBySideResult.modelB.judgeModel}</span>
                         </div>
@@ -2342,7 +2342,7 @@ export default function EvalLabPage() {
           <div className="space-y-6">
             {/* Cost Savings Verification Banner */}
             {routerStats && (
-              <div className="rounded-xl border border-emerald-500/40 bg-emerald-950/20 p-6 space-y-4">
+              <div className="rounded-xl border border-emerald-500/40 bg-emerald-50 p-6 space-y-4">
                 <div className="flex items-center justify-between border-b border-emerald-500/30 pb-3">
                   <div className="flex items-center gap-2 text-emerald-300">
                     <TrendingUp className="h-5 w-5 text-emerald-400" />
@@ -2354,7 +2354,7 @@ export default function EvalLabPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs font-mono">
-                  <div className="rounded-lg bg-gray-900/60 p-3 border border-gray-800">
+                  <div className="rounded-lg bg-[#F6F9FF] p-3 border border-[#DCE6F5]">
                     <span className="text-gray-400 block">Sonnet 5.5 Always Cost</span>
                     <div className="text-xl font-bold text-gray-300 mt-1">
                       ${routerStats.sonnetAlwaysCostUsd.toFixed(4)}
@@ -2362,15 +2362,15 @@ export default function EvalLabPage() {
                     <span className="text-[10px] text-gray-500 mt-1 block">Baseline standard</span>
                   </div>
 
-                  <div className="rounded-lg bg-gray-900/60 p-3 border border-gray-800">
+                  <div className="rounded-lg bg-[#F6F9FF] p-3 border border-[#DCE6F5]">
                     <span className="text-gray-400 block">3-Tier Router Cost</span>
-                    <div className="text-xl font-bold text-indigo-400 mt-1">
+                    <div className="text-xl font-bold text-[#2563EB] mt-1">
                       ${routerStats.routerCostUsd.toFixed(4)}
                     </div>
-                    <span className="text-[10px] text-indigo-400/80 mt-1 block">Optimal cheapest passing</span>
+                    <span className="text-[10px] text-[#2563EB]/80 mt-1 block">Optimal cheapest passing</span>
                   </div>
 
-                  <div className="rounded-lg bg-emerald-950/40 p-3 border border-emerald-500/30">
+                  <div className="rounded-lg bg-emerald-50 p-3 border border-emerald-500/30">
                     <span className="text-emerald-300 block">Dollars Saved</span>
                     <div className="text-xl font-bold text-emerald-400 mt-1">
                       ${routerStats.dollarsSavedUsd.toFixed(4)}
@@ -2380,7 +2380,7 @@ export default function EvalLabPage() {
                     </span>
                   </div>
 
-                  <div className="rounded-lg bg-gray-900/60 p-3 border border-gray-800">
+                  <div className="rounded-lg bg-[#F6F9FF] p-3 border border-[#DCE6F5]">
                     <span className="text-gray-400 block">Quality Delta</span>
                     <div className="text-xl font-bold text-emerald-400 mt-1">
                       {routerStats.routerAvgQualityScore.toFixed(1)}% vs {routerStats.sonnetAvgQualityScore.toFixed(1)}%
@@ -2392,12 +2392,12 @@ export default function EvalLabPage() {
             )}
 
             {/* Release Gate Status Card (Task 4.4) */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 space-y-4">
-              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-3">
                 <div className="flex items-center gap-2">
-                  <Lock className="h-5 w-5 text-indigo-400" />
+                  <Lock className="h-5 w-5 text-[#2563EB]" />
                   <div>
-                    <h3 className="text-sm font-semibold text-white">Automated Release Gate Enforcer</h3>
+                    <h3 className="text-sm font-semibold text-[#0B1B3A]">Automated Release Gate Enforcer</h3>
                     <p className="text-xs text-gray-400">
                       Hard automated rule: candidate versions are prevented from publishing if benchmark score drops below active baseline.
                     </p>
@@ -2409,11 +2409,11 @@ export default function EvalLabPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
-                <div className="p-3 rounded bg-gray-950 border border-gray-800">
+                <div className="p-3 rounded bg-[#F1F6FF] border border-[#DCE6F5]">
                   <span className="text-gray-400 block">Candidate Score:</span>
                   <div className="text-lg font-bold text-emerald-400 mt-1">98.8%</div>
                 </div>
-                <div className="p-3 rounded bg-gray-950 border border-gray-800">
+                <div className="p-3 rounded bg-[#F1F6FF] border border-[#DCE6F5]">
                   <span className="text-gray-400 block">Active Baseline Score:</span>
                   <div className="text-lg font-bold text-gray-300 mt-1">96.5%</div>
                 </div>
@@ -2422,9 +2422,9 @@ export default function EvalLabPage() {
 
             {/* 3-Step Router Architectural Blueprint (Task 4.3) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4 space-y-2">
+              <div className="rounded-xl border border-[#DCE6F5] bg-white p-4 space-y-2">
                 <div className="flex items-center gap-2 text-cyan-400 font-semibold text-xs uppercase tracking-wider">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500/20 text-[10px] font-bold">1</span>
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold">1</span>
                   <span>Count Tokens First (Free)</span>
                 </div>
                 <p className="text-xs text-gray-300">
@@ -2435,20 +2435,20 @@ export default function EvalLabPage() {
                 </div>
               </div>
 
-              <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4 space-y-2">
-                <div className="flex items-center gap-2 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
+              <div className="rounded-xl border border-[#DCE6F5] bg-white p-4 space-y-2">
+                <div className="flex items-center gap-2 text-[#2563EB] font-semibold text-xs uppercase tracking-wider">
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500/20 text-[10px] font-bold">2</span>
                   <span>Tag the Job & Complexity</span>
                 </div>
                 <p className="text-xs text-gray-300">
                   Deterministic rules classify clear jobs (classify email = cheap; improve skill = Opus).
                 </p>
-                <div className="rounded bg-indigo-950/30 border border-indigo-500/30 p-2 text-[11px] text-indigo-300 font-mono">
+                <div className="rounded bg-indigo-50 border border-[#BFDBFE] p-2 text-[11px] text-[#2563EB] font-mono">
                   For unclear queries, cheap model (Haiku/Qwen Flash) returns JSON: <code className="text-white">&#123;task_type, complexity&#125;</code>.
                 </div>
               </div>
 
-              <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4 space-y-2">
+              <div className="rounded-xl border border-[#DCE6F5] bg-white p-4 space-y-2">
                 <div className="flex items-center gap-2 text-emerald-400 font-semibold text-xs uppercase tracking-wider">
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 text-[10px] font-bold">3</span>
                   <span>Pick from Routing Table</span>
@@ -2463,11 +2463,11 @@ export default function EvalLabPage() {
             </div>
 
             {/* Interactive Route Testing Sandbox */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 space-y-4">
-              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-3">
                 <div className="flex items-center gap-2">
-                  <Sliders className="h-5 w-5 text-indigo-400" />
-                  <h3 className="text-sm font-semibold text-white">Live Router Test Sandbox</h3>
+                  <Sliders className="h-5 w-5 text-[#2563EB]" />
+                  <h3 className="text-sm font-semibold text-[#0B1B3A]">Live Router Test Sandbox</h3>
                 </div>
                 <span className="text-xs text-gray-400 font-mono">Real-Time Model & Cost Decision Engine</span>
               </div>
@@ -2481,7 +2481,7 @@ export default function EvalLabPage() {
                       value={testPrompt}
                       onChange={(e) => setTestPrompt(e.target.value)}
                       placeholder="Enter a customer query to test 3-tier routing..."
-                      className="w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-sans"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-sans"
                     />
                   </div>
 
@@ -2490,7 +2490,7 @@ export default function EvalLabPage() {
                     <select
                       value={testTaskType}
                       onChange={(e) => setTestTaskType(e.target.value)}
-                      className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
                     >
                       <option value="write_reply">write_reply (Consultant Reply)</option>
                       <option value="tag_job">tag_job (Router Tagging)</option>
@@ -2509,7 +2509,7 @@ export default function EvalLabPage() {
                       type="checkbox"
                       checked={simulateQuickCheckFailed}
                       onChange={(e) => setSimulateQuickCheckFailed(e.target.checked)}
-                      className="rounded border-gray-700 text-indigo-600 focus:ring-0"
+                      className="rounded border-[#C3D3EA] text-indigo-600 focus:ring-0"
                     />
                     <span>Fail Quick Check (Escalate 1 Model Higher)</span>
                   </label>
@@ -2519,7 +2519,7 @@ export default function EvalLabPage() {
                       type="checkbox"
                       checked={simulateFreeBusy}
                       onChange={(e) => setSimulateFreeBusy(e.target.checked)}
-                      className="rounded border-gray-700 text-amber-600 focus:ring-0"
+                      className="rounded border-[#C3D3EA] text-amber-600 focus:ring-0"
                     />
                     <span>Free Model Busy / 429 (Try Next Fallback)</span>
                   </label>
@@ -2529,7 +2529,7 @@ export default function EvalLabPage() {
                       type="checkbox"
                       checked={simulate100kPrompt}
                       onChange={(e) => setSimulate100kPrompt(e.target.checked)}
-                      className="rounded border-gray-700 text-rose-600 focus:ring-0"
+                      className="rounded border-[#C3D3EA] text-rose-600 focus:ring-0"
                     />
                     <span>Prompt &gt; 100k Tokens (Enforce Haiku Cap)</span>
                   </label>
@@ -2545,11 +2545,11 @@ export default function EvalLabPage() {
               </div>
 
               {routingResult && (
-                <div className="rounded-xl border border-indigo-500/30 bg-indigo-950/20 p-5 text-xs font-mono space-y-3 mt-4">
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-indigo-500/20 pb-2">
+                <div className="rounded-xl border border-[#BFDBFE] bg-indigo-50 p-5 text-xs font-mono space-y-3 mt-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#DCE6F5] pb-2">
                     <div className="flex items-center gap-2">
                       <span className="text-gray-400">Selected Model:</span>
-                      <span className="font-bold text-white text-sm bg-indigo-500/20 px-2 py-0.5 rounded border border-indigo-500/40">
+                      <span className="font-bold text-[#0B1B3A] text-sm bg-indigo-500/20 px-2 py-0.5 rounded border border-[#BFDBFE]">
                         {routingResult.selectedModelId}
                       </span>
                     </div>
@@ -2567,7 +2567,7 @@ export default function EvalLabPage() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px]">
-                    <div className="bg-gray-950/60 p-2.5 rounded border border-gray-800">
+                    <div className="bg-[#F6F9FF] p-2.5 rounded border border-[#DCE6F5]">
                       <span className="text-gray-400 block">Prompt Tokens:</span>
                       <div className="text-white font-bold mt-0.5">
                         {routingResult.promptTokens.toLocaleString()} tokens
@@ -2575,7 +2575,7 @@ export default function EvalLabPage() {
                       <span className="text-[10px] text-gray-500">{routingResult.tokenCountMethod}</span>
                     </div>
 
-                    <div className="bg-gray-950/60 p-2.5 rounded border border-gray-800">
+                    <div className="bg-[#F6F9FF] p-2.5 rounded border border-[#DCE6F5]">
                       <span className="text-gray-400 block">Estimated Cost:</span>
                       <div className="text-emerald-400 font-bold mt-0.5">
                         ${routingResult.estimatedCostUsd.toFixed(6)} USD
@@ -2583,7 +2583,7 @@ export default function EvalLabPage() {
                       <span className="text-[10px] text-gray-500">Exact per 1M formula</span>
                     </div>
 
-                    <div className="bg-gray-950/60 p-2.5 rounded border border-gray-800">
+                    <div className="bg-[#F6F9FF] p-2.5 rounded border border-[#DCE6F5]">
                       <span className="text-gray-400 block">Escalation / Fallback:</span>
                       <div className="mt-0.5 flex flex-wrap gap-1">
                         {routingResult.movedUp && (
@@ -2597,7 +2597,7 @@ export default function EvalLabPage() {
                           </span>
                         )}
                         {routingResult.haikuBypassedDueTo100kRule && (
-                          <span className="rounded bg-cyan-500/20 text-cyan-300 px-1.5 py-0.5 text-[10px] font-bold border border-cyan-500/40">
+                          <span className="rounded bg-blue-100 text-cyan-300 px-1.5 py-0.5 text-[10px] font-bold border border-[#BFDBFE]">
                             Haiku 100k Protected
                           </span>
                         )}
@@ -2608,7 +2608,7 @@ export default function EvalLabPage() {
                     </div>
                   </div>
 
-                  <div className="text-gray-300 text-[11px] bg-indigo-950/40 p-2.5 rounded border border-indigo-500/20 font-sans leading-relaxed">
+                  <div className="text-gray-300 text-[11px] bg-indigo-50 p-2.5 rounded border border-[#DCE6F5] font-sans leading-relaxed">
                     <strong>Router Explanation:</strong> {routingResult.reason}
                   </div>
                 </div>
@@ -2616,12 +2616,12 @@ export default function EvalLabPage() {
             </div>
 
             {/* Live Routing Decision Audit Logs Table */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 space-y-4">
-              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-3">
                 <div className="flex items-center gap-2">
                   <Activity className="h-5 w-5 text-emerald-400" />
                   <div>
-                    <h3 className="text-sm font-semibold text-white">Live Routing Audit Log (Every Call Logged)</h3>
+                    <h3 className="text-sm font-semibold text-[#0B1B3A]">Live Routing Audit Log (Every Call Logged)</h3>
                     <p className="text-xs text-gray-400">
                       Telemetry tracking: job, token count, token counting method, model picked, cost, and escalation/fallback state.
                     </p>
@@ -2632,7 +2632,7 @@ export default function EvalLabPage() {
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs font-mono">
-                  <thead className="bg-gray-950/60 text-gray-400 border-b border-gray-800">
+                  <thead className="bg-[#F6F9FF] text-gray-400 border-b border-[#DCE6F5]">
                     <tr>
                       <th className="py-2.5 px-3">Time</th>
                       <th className="py-2.5 px-3">Job</th>
@@ -2653,11 +2653,11 @@ export default function EvalLabPage() {
                       </tr>
                     ) : (
                       routingLogs.map((log: any) => (
-                        <tr key={log.id} className="hover:bg-gray-900/40 transition">
+                        <tr key={log.id} className="hover:bg-[#EEF4FF] transition">
                           <td className="py-2.5 px-3 text-gray-500 whitespace-nowrap">
                             {new Date(log.timestamp).toLocaleTimeString()}
                           </td>
-                          <td className="py-2.5 px-3 font-semibold text-indigo-300">{log.job}</td>
+                          <td className="py-2.5 px-3 font-semibold text-[#2563EB]">{log.job}</td>
                           <td className="py-2.5 px-3 text-gray-200">{log.promptTokens?.toLocaleString()}</td>
                           <td className="py-2.5 px-3 text-[11px] text-gray-400">{log.tokenCountMethod}</td>
                           <td className="py-2.5 px-3 font-bold text-white">{log.selectedModelId}</td>
@@ -2696,10 +2696,10 @@ export default function EvalLabPage() {
         {activeTab === "release-gate" && (
           <div className="space-y-6 animate-in fade-in duration-200">
             {/* Header Banner */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-6 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Lock className="h-5 w-5 text-indigo-400" />
+                <h3 className="text-base font-bold text-[#0B1B3A] flex items-center gap-2">
+                  <Lock className="h-5 w-5 text-[#2563EB]" />
                   <span>Automated Release Gate Enforcer</span>
                 </h3>
                 <p className="text-xs text-gray-400 mt-1 max-w-2xl leading-relaxed">
@@ -2710,7 +2710,7 @@ export default function EvalLabPage() {
               {gateResult && (
                 <div className={`px-4 py-2 rounded-xl border text-xs font-mono font-bold flex items-center gap-2 shadow-sm ${
                   gateResult.allowed
-                    ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/40"
+                    ? "bg-emerald-50 text-emerald-300 border-emerald-500/40"
                     : "bg-rose-950/60 text-rose-300 border-rose-500/40 animate-pulse"
                 }`}>
                   {gateResult.allowed ? (
@@ -2726,7 +2726,7 @@ export default function EvalLabPage() {
             {/* Active Gate Scorecard */}
             {gateResult && (
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs font-mono">
-                <div className="rounded-xl border border-gray-800 bg-[#071329] p-4">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-4">
                   <span className="text-gray-400 block">Target Entity</span>
                   <div className="text-base font-bold text-white mt-1 capitalize">
                     {gateResult.entityType}: {gateResult.entityName}
@@ -2734,7 +2734,7 @@ export default function EvalLabPage() {
                   <span className="text-[10px] text-gray-500 mt-1 block">Release candidate</span>
                 </div>
 
-                <div className="rounded-xl border border-gray-800 bg-[#071329] p-4">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-4">
                   <span className="text-gray-400 block">Candidate Score</span>
                   <div className={`text-xl font-bold mt-1 ${
                     gateResult.candidateScore >= gateResult.baselineScore ? "text-emerald-400" : "text-rose-400"
@@ -2744,7 +2744,7 @@ export default function EvalLabPage() {
                   <span className="text-[10px] text-gray-500 mt-1 block">Benchmark pass rate</span>
                 </div>
 
-                <div className="rounded-xl border border-gray-800 bg-[#071329] p-4">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-4">
                   <span className="text-gray-400 block">Active Baseline Score</span>
                   <div className="text-xl font-bold text-gray-300 mt-1">
                     {gateResult.baselineScore}%
@@ -2752,7 +2752,7 @@ export default function EvalLabPage() {
                   <span className="text-[10px] text-gray-500 mt-1 block">Current production baseline</span>
                 </div>
 
-                <div className="rounded-xl border border-gray-800 bg-[#071329] p-4">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-4">
                   <span className="text-gray-400 block">Quality Delta</span>
                   <div className={`text-xl font-bold mt-1 ${
                     gateResult.scoreDelta >= 0 ? "text-emerald-400" : "text-rose-400"
@@ -2788,11 +2788,11 @@ export default function EvalLabPage() {
             )}
 
             {/* Interactive Release Gate Simulator */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 space-y-4">
-              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-3">
                 <div className="flex items-center gap-2">
-                  <Sliders className="h-5 w-5 text-indigo-400" />
-                  <h3 className="text-sm font-semibold text-white">Live Release Gate Simulator</h3>
+                  <Sliders className="h-5 w-5 text-[#2563EB]" />
+                  <h3 className="text-sm font-semibold text-[#0B1B3A]">Live Release Gate Simulator</h3>
                 </div>
                 <span className="text-xs text-gray-400 font-mono">Test Prompt, Role, Skill &amp; Model Gate Blocking</span>
               </div>
@@ -2803,7 +2803,7 @@ export default function EvalLabPage() {
                   <select
                     value={gateEntityType}
                     onChange={(e: any) => setGateEntityType(e.target.value)}
-                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
                   >
                     <option value="prompt">Prompt (Settings Prompts)</option>
                     <option value="role">Role (Settings Agent Roles)</option>
@@ -2818,7 +2818,7 @@ export default function EvalLabPage() {
                     type="text"
                     value={gateEntityName}
                     onChange={(e) => setGateEntityName(e.target.value)}
-                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-white focus:outline-none focus:border-indigo-500 font-mono"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-white focus:outline-none focus:border-indigo-500 font-mono"
                   />
                 </div>
 
@@ -2829,7 +2829,7 @@ export default function EvalLabPage() {
                     step="0.1"
                     value={gateCandidateScore}
                     onChange={(e) => setGateCandidateScore(Number(e.target.value))}
-                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-white focus:outline-none focus:border-indigo-500 font-mono"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-white focus:outline-none focus:border-indigo-500 font-mono"
                   />
                 </div>
 
@@ -2840,7 +2840,7 @@ export default function EvalLabPage() {
                     step="0.1"
                     value={gateBaselineScore}
                     onChange={(e) => setGateBaselineScore(Number(e.target.value))}
-                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-white focus:outline-none focus:border-indigo-500 font-mono"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-white focus:outline-none focus:border-indigo-500 font-mono"
                   />
                 </div>
               </div>
@@ -2854,7 +2854,7 @@ export default function EvalLabPage() {
                       setGateSimulateRegression(e.target.checked);
                       if (e.target.checked) setGateSimulateCategoryRegression(false);
                     }}
-                    className="rounded border-gray-700 text-rose-600 focus:ring-0"
+                    className="rounded border-[#C3D3EA] text-rose-600 focus:ring-0"
                   />
                   <span>Simulate Overall Score Regression (Candidate drops below baseline)</span>
                 </label>
@@ -2867,7 +2867,7 @@ export default function EvalLabPage() {
                       setGateSimulateCategoryRegression(e.target.checked);
                       if (e.target.checked) setGateSimulateRegression(false);
                     }}
-                    className="rounded border-gray-700 text-amber-600 focus:ring-0"
+                    className="rounded border-[#C3D3EA] text-amber-600 focus:ring-0"
                   />
                   <span>Simulate Subcategory Regression (Safety drops from 99% to 92%)</span>
                 </label>
@@ -2884,8 +2884,8 @@ export default function EvalLabPage() {
 
             {/* Three Architectural Decisions (You Decide - Task 4.5) */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-gray-800 pb-2">
-                <h4 className="text-sm font-bold text-white flex items-center gap-2">
+              <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-2">
+                <h4 className="text-sm font-bold text-[#0B1B3A] flex items-center gap-2">
                   <Scale className="h-4 w-4 text-cyan-400" />
                   <span>The Three Architectural Pillars (System Governance)</span>
                 </h4>
@@ -2894,9 +2894,9 @@ export default function EvalLabPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                 {/* Decision 1 */}
-                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-3">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 space-y-3">
                   <div className="flex items-center gap-2 text-cyan-300 font-bold text-xs uppercase tracking-wider">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500/20 text-[10px] font-bold">1</span>
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold">1</span>
                     <span>How a &quot;Good&quot; Answer is Scored</span>
                   </div>
                   <p className="text-gray-300 leading-relaxed text-[11px]">
@@ -2912,8 +2912,8 @@ export default function EvalLabPage() {
                 </div>
 
                 {/* Decision 2 */}
-                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-3">
-                  <div className="flex items-center gap-2 text-indigo-300 font-bold text-xs uppercase tracking-wider">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 space-y-3">
+                  <div className="flex items-center gap-2 text-[#2563EB] font-bold text-xs uppercase tracking-wider">
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500/20 text-[10px] font-bold">2</span>
                     <span>Rules vs. AI Judge Boundary</span>
                   </div>
@@ -2921,11 +2921,11 @@ export default function EvalLabPage() {
                     Deterministic separation between structural safety and semantic reasoning:
                   </p>
                   <div className="space-y-2 text-[11px]">
-                    <div className="rounded bg-indigo-950/40 p-2 border border-indigo-500/20">
-                      <strong className="text-indigo-300 block">Deterministic Rules ($0, &lt;1ms):</strong>
+                    <div className="rounded bg-indigo-50 p-2 border border-[#DCE6F5]">
+                      <strong className="text-[#2563EB] block">Deterministic Rules ($0, &lt;1ms):</strong>
                       <span className="text-gray-400">JSON schema, regex citations <code className="text-indigo-200 font-mono">\[\d+\]</code>, PII scrub, prompt injection shield (10 trick scenarios).</span>
                     </div>
-                    <div className="rounded bg-purple-950/40 p-2 border border-purple-500/20">
+                    <div className="rounded bg-purple-50 p-2 border border-purple-500/20">
                       <strong className="text-purple-300 block">AI Judge (Claude Opus 5.5):</strong>
                       <span className="text-gray-400">Semantic equivalence, consultative tone adherence, complex troubleshooting depth, and rubric grading with explanatory line.</span>
                     </div>
@@ -2933,7 +2933,7 @@ export default function EvalLabPage() {
                 </div>
 
                 {/* Decision 3 */}
-                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-3">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 space-y-3">
                   <div className="flex items-center gap-2 text-emerald-300 font-bold text-xs uppercase tracking-wider">
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 text-[10px] font-bold">3</span>
                     <span>Anti-Saturation (Test Aging)</span>
@@ -2957,10 +2957,10 @@ export default function EvalLabPage() {
         {activeTab === "feedback-tests" && (
           <div className="space-y-6 animate-in fade-in duration-200">
             {/* Header Banner */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-6 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <MessageSquarePlus className="h-5 w-5 text-indigo-400" />
+                <h3 className="text-base font-bold text-[#0B1B3A] flex items-center gap-2">
+                  <MessageSquarePlus className="h-5 w-5 text-[#2563EB]" />
                   <span>Continuous Feedback Regression Suite</span>
                 </h3>
                 <p className="text-xs text-gray-400 mt-1 max-w-2xl leading-relaxed">
@@ -2969,8 +2969,8 @@ export default function EvalLabPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="rounded-lg border border-indigo-500/20 bg-indigo-950/20 px-3 py-1.5 text-xs font-mono text-indigo-300 flex items-center gap-1.5">
-                  <Sparkles className="h-4 w-4 text-indigo-400" />
+                <span className="rounded-lg border border-[#DCE6F5] bg-indigo-50 px-3 py-1.5 text-xs font-mono text-[#2563EB] flex items-center gap-1.5">
+                  <Sparkles className="h-4 w-4 text-[#2563EB]" />
                   <span>{feedbackTests.length} Total Feedback Tests</span>
                 </span>
               </div>
@@ -2978,7 +2978,7 @@ export default function EvalLabPage() {
 
             {/* Metrics Overview */}
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs font-mono">
-              <div className="rounded-xl border border-gray-800 bg-[#071329] p-4">
+              <div className="rounded-xl border border-[#DCE6F5] bg-white p-4">
                 <span className="text-gray-400 block">Total Feedback Tests</span>
                 <div className="text-2xl font-bold text-white mt-1">{feedbackTests.length}</div>
                 <span className="text-[10px] text-gray-500 mt-1 block">Live benchmark cases</span>
@@ -2992,7 +2992,7 @@ export default function EvalLabPage() {
                 <span className="text-[10px] text-rose-400/80 mt-1 block">Weighted 1.5x - 2.0x in gate</span>
               </div>
 
-              <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4">
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-50 p-4">
                 <span className="text-emerald-300 block">Thumbs Up Endorsements</span>
                 <div className="text-2xl font-bold text-emerald-400 mt-1">
                   {feedbackTests.filter((t) => t.feedbackType === "thumbs_up").length}
@@ -3000,7 +3000,7 @@ export default function EvalLabPage() {
                 <span className="text-[10px] text-emerald-400/80 mt-1 block">Verified positive examples</span>
               </div>
 
-              <div className="rounded-xl border border-gray-800 bg-[#071329] p-4">
+              <div className="rounded-xl border border-[#DCE6F5] bg-white p-4">
                 <span className="text-gray-400 block">Anti-Saturation Ratio</span>
                 <div className="text-2xl font-bold text-cyan-400 mt-1">
                   {((feedbackTests.filter((t) => t.feedbackType === "thumbs_down").length / Math.max(1, feedbackTests.length)) * 100).toFixed(0)}%
@@ -3010,13 +3010,13 @@ export default function EvalLabPage() {
             </div>
 
             {/* Live Feedback Test Cases Table */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 space-y-4">
-              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
-                <h4 className="text-sm font-semibold text-white">Active Tests Derived from Real Customer Feedback</h4>
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-3">
+                <h4 className="text-sm font-semibold text-[#0B1B3A]">Active Tests Derived from Real Customer Feedback</h4>
                 <button
                   onClick={fetchFeedbackTests}
                   disabled={loadingFeedbackTests}
-                  className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-mono"
+                  className="text-xs text-[#2563EB] hover:text-[#2563EB] flex items-center gap-1 font-mono"
                 >
                   <RotateCw className={`h-3.5 w-3.5 ${loadingFeedbackTests ? "animate-spin" : ""}`} />
                   <span>Refresh Tests</span>
@@ -3027,9 +3027,9 @@ export default function EvalLabPage() {
                 {feedbackTests.map((t: any) => (
                   <div
                     key={t.id}
-                    className="p-4 rounded-xl border border-gray-800 bg-[#071329] space-y-2 hover:border-gray-700 transition"
+                    className="p-4 rounded-xl border border-[#DCE6F5] bg-white space-y-2 hover:border-[#C3D3EA] transition"
                   >
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-800/60 pb-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#DCE6F5]/60 pb-2">
                       <div className="flex items-center gap-2">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
                           t.feedbackType === "thumbs_down"
@@ -3039,7 +3039,7 @@ export default function EvalLabPage() {
                           {t.feedbackType === "thumbs_down" ? "👎 Thumbs Down (Regression Test)" : "👍 Thumbs Up (Verified Positive)"}
                         </span>
                         <span className="text-xs font-mono text-gray-400 font-bold">{t.id}</span>
-                        <span className="text-[11px] text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+                        <span className="text-[11px] text-[#2563EB] bg-indigo-500/10 px-2 py-0.5 rounded border border-[#DCE6F5]">
                           {t.category}
                         </span>
                       </div>
@@ -3057,8 +3057,8 @@ export default function EvalLabPage() {
                         &ldquo;{t.question}&rdquo;
                       </div>
 
-                      <div className="rounded bg-gray-950 p-2.5 text-xs text-indigo-200 border border-gray-800 space-y-1 font-sans">
-                        <strong className="text-[11px] uppercase tracking-wider text-indigo-400 font-mono block">
+                      <div className="rounded bg-[#F1F6FF] p-2.5 text-xs text-indigo-200 border border-[#DCE6F5] space-y-1 font-sans">
+                        <strong className="text-[11px] uppercase tracking-wider text-[#2563EB] font-mono block">
                           Expected Answer (Incorporating Human Feedback):
                         </strong>
                         <p className="leading-relaxed">{t.expectedAnswer}</p>
@@ -3077,8 +3077,8 @@ export default function EvalLabPage() {
             </div>
 
             {/* Interactive Feedback-to-Test Generator Sandbox */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 space-y-4">
-              <h4 className="text-sm font-semibold text-white">Live Feedback-to-Test Generator Sandbox</h4>
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-6 space-y-4">
+              <h4 className="text-sm font-semibold text-[#0B1B3A]">Live Feedback-to-Test Generator Sandbox</h4>
               <p className="text-xs text-gray-400">
                 Simulate a real feedback critique from a customer chat interaction to watch it immediately synthesize into a durable benchmark test case.
               </p>
@@ -3091,7 +3091,7 @@ export default function EvalLabPage() {
                     value={newFeedbackQuestion}
                     onChange={(e) => setNewFeedbackQuestion(e.target.value)}
                     placeholder="e.g., How do I renew my expired Let's Encrypt certificate behind Cloudflare?"
-                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
@@ -3102,7 +3102,7 @@ export default function EvalLabPage() {
                     value={newFeedbackAnswer}
                     onChange={(e) => setNewFeedbackAnswer(e.target.value)}
                     placeholder="e.g., Just turn off Cloudflare SSL and reboot your server."
-                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
@@ -3112,7 +3112,7 @@ export default function EvalLabPage() {
                     <select
                       value={newFeedbackType}
                       onChange={(e: any) => setNewFeedbackType(e.target.value)}
-                      className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
                     >
                       <option value="thumbs_down">👎 Thumbs Down (Error / Weak)</option>
                       <option value="thumbs_up">👍 Thumbs Up (Accurate / Good)</option>
@@ -3126,7 +3126,7 @@ export default function EvalLabPage() {
                       value={newFeedbackReason}
                       onChange={(e) => setNewFeedbackReason(e.target.value)}
                       placeholder="e.g., Disabling SSL exposes plain traffic. The correct protocol is Cloudflare SSL Full (Strict) with ACME HTTP-01 challenge bypass."
-                      className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                 </div>
@@ -3150,9 +3150,9 @@ export default function EvalLabPage() {
         {activeTab === "prove-learned" && (
           <div className="space-y-6 animate-in fade-in duration-200">
             {/* Header & Scenario Selection */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="space-y-1">
-                <h3 className="text-base font-semibold text-white flex items-center gap-2">
+                <h3 className="text-base font-semibold text-[#0B1B3A] flex items-center gap-2">
                   <GraduationCap className="h-5 w-5 text-emerald-400" />
                   <span>Prove That It Learned: Comparative Eval Lab</span>
                 </h3>
@@ -3172,7 +3172,7 @@ export default function EvalLabPage() {
                       setSelectedScenarioId(e.target.value);
                       fetchLearningProof(e.target.value);
                     }}
-                    className="rounded-lg border border-gray-700 bg-gray-950 px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                    className="rounded-lg border border-[#C3D3EA] bg-white px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
                   >
                     {(scenariosList.length > 0 ? scenariosList : [
                       { id: "dns-acme-ssl", title: "DNS Cloudflare Orange Cloud vs ACME SSL" },
@@ -3216,7 +3216,7 @@ export default function EvalLabPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-4 bg-gray-950/80 p-3 rounded-lg border border-gray-800">
+                  <div className="flex items-center gap-4 bg-[#F6F9FF] p-3 rounded-lg border border-[#DCE6F5]">
                     <div className="text-center">
                       <span className="text-[10px] text-gray-400 uppercase tracking-wider block">Before</span>
                       <span className="text-lg font-bold text-rose-400 font-mono">
@@ -3230,7 +3230,7 @@ export default function EvalLabPage() {
                         {learningProof.after.score}%
                       </span>
                     </div>
-                    <div className="border-l border-gray-800 pl-4 text-center">
+                    <div className="border-l border-[#DCE6F5] pl-4 text-center">
                       <span className="text-[10px] text-gray-400 uppercase tracking-wider block">Delta (Δ)</span>
                       <span className="text-lg font-extrabold text-emerald-300 font-mono">
                         +{learningProof.scoreDelta}%
@@ -3240,12 +3240,12 @@ export default function EvalLabPage() {
                 </div>
 
                 {/* Question & Expected Protocol Spec */}
-                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4 text-xs space-y-2">
-                  <div className="flex items-center gap-2 text-indigo-300 font-semibold">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-4 text-xs space-y-2">
+                  <div className="flex items-center gap-2 text-[#2563EB] font-semibold">
                     <FileText className="h-4 w-4" />
                     <span>Inquiry Tested Under AI Judge:</span>
                   </div>
-                  <div className="bg-gray-950 p-3 rounded border border-gray-800 font-mono text-gray-200">
+                  <div className="bg-white p-3 rounded border border-[#DCE6F5] font-mono text-gray-200">
                     &ldquo;{learningProof.question}&rdquo;
                   </div>
                   <div className="text-[11px] text-gray-400">
@@ -3256,8 +3256,8 @@ export default function EvalLabPage() {
                 {/* Side-by-Side Comparison: Before vs After */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {/* BEFORE CARD */}
-                  <div className="rounded-xl border border-rose-500/30 bg-[#0E1322] p-5 space-y-3.5 shadow-sm">
-                    <div className="flex items-center justify-between border-b border-gray-800 pb-2">
+                  <div className="rounded-xl border border-rose-500/30 bg-white p-5 space-y-3.5 shadow-sm">
+                    <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-2">
                       <div className="flex items-center gap-2">
                         <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
                         <h4 className="text-sm font-bold text-rose-400">Before Lesson (Baseline)</h4>
@@ -3271,7 +3271,7 @@ export default function EvalLabPage() {
                       <span className="text-[10px] uppercase font-semibold text-gray-500 tracking-wider block">
                         Model Output:
                       </span>
-                      <div className="p-3 rounded-lg bg-gray-950 border border-gray-800 text-gray-300 font-mono text-[11px] max-h-48 overflow-y-auto whitespace-pre-wrap leading-relaxed">
+                      <div className="p-3 rounded-lg bg-white border border-[#DCE6F5] text-gray-300 font-mono text-[11px] max-h-48 overflow-y-auto whitespace-pre-wrap leading-relaxed">
                         {learningProof.before.answer}
                       </div>
                     </div>
@@ -3286,15 +3286,15 @@ export default function EvalLabPage() {
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] font-mono text-gray-500 pt-1 border-t border-gray-800/80">
+                    <div className="flex items-center justify-between text-[11px] font-mono text-gray-500 pt-1 border-t border-[#DCE6F5]">
                       <span>Lessons Applied: 0 (Unapproved)</span>
                       <span>Latency: {learningProof.before.latencyMs}ms</span>
                     </div>
                   </div>
 
                   {/* AFTER CARD */}
-                  <div className="rounded-xl border border-emerald-500/40 bg-[#0E1322] p-5 space-y-3.5 shadow-sm">
-                    <div className="flex items-center justify-between border-b border-gray-800 pb-2">
+                  <div className="rounded-xl border border-emerald-500/40 bg-white p-5 space-y-3.5 shadow-sm">
+                    <div className="flex items-center justify-between border-b border-[#DCE6F5] pb-2">
                       <div className="flex items-center gap-2">
                         <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                         <h4 className="text-sm font-bold text-emerald-400">After Lesson Approved (Learned)</h4>
@@ -3308,12 +3308,12 @@ export default function EvalLabPage() {
                       <span className="text-[10px] uppercase font-semibold text-gray-500 tracking-wider block">
                         Model Output (Grounding with Approved Lesson):
                       </span>
-                      <div className="p-3 rounded-lg bg-gray-950 border border-gray-800 text-emerald-200 font-mono text-[11px] max-h-48 overflow-y-auto whitespace-pre-wrap leading-relaxed">
+                      <div className="p-3 rounded-lg bg-[#F1F6FF] border border-[#DCE6F5] text-emerald-200 font-mono text-[11px] max-h-48 overflow-y-auto whitespace-pre-wrap leading-relaxed">
                         {learningProof.after.answer}
                       </div>
                     </div>
 
-                    <div className="p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/20 text-xs space-y-1">
+                    <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-500/20 text-xs space-y-1">
                       <span className="font-semibold text-emerald-300 flex items-center gap-1.5 text-[11px]">
                         <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
                         <span>AI Master Judge Critique (Claude Opus 5.5):</span>
@@ -3323,7 +3323,7 @@ export default function EvalLabPage() {
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] font-mono text-gray-400 pt-1 border-t border-gray-800/80">
+                    <div className="flex items-center justify-between text-[11px] font-mono text-gray-400 pt-1 border-t border-[#DCE6F5]">
                       <span className="text-emerald-400">Lessons Applied: {learningProof.after.appliedLessons.length}</span>
                       <span>Latency: {learningProof.after.latencyMs}ms</span>
                     </div>
@@ -3331,11 +3331,11 @@ export default function EvalLabPage() {
                 </div>
 
                 {/* Lesson Source-of-Truth Details */}
-                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-4 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-2 text-gray-300">
                     <FileText className="h-4 w-4 text-cyan-400" />
                     <span>Durable Source-of-Truth Markdown File:</span>
-                    <span className="font-mono bg-gray-950 px-2 py-0.5 rounded border border-gray-800 text-cyan-300">
+                    <span className="font-mono bg-[#F1F6FF] px-2 py-0.5 rounded border border-[#DCE6F5] text-cyan-300">
                       {learningProof.lessonMarkdownFile}
                     </span>
                   </div>
@@ -3350,21 +3350,21 @@ export default function EvalLabPage() {
 
         {/* ================= TASK 4.2 HUMAN REVIEWER NOTE MODAL ================= */}
         {noteModal?.isOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-            <div className="w-full max-w-lg rounded-2xl border border-gray-800 bg-[#0E1322] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-              <div className="p-5 border-b border-gray-800 flex items-center justify-between">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B1B3A]/35 backdrop-blur-sm p-4">
+            <div className="w-full max-w-lg rounded-2xl border border-[#DCE6F5] bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+              <div className="p-5 border-b border-[#DCE6F5] flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <Edit3 className="h-4 w-4 text-indigo-400" />
+                  <h3 className="text-sm font-bold text-[#0B1B3A] flex items-center gap-2">
+                    <Edit3 className="h-4 w-4 text-[#2563EB]" />
                     <span>Human Reviewer Critique</span>
                   </h3>
                   <p className="text-[11px] text-gray-400 mt-0.5 font-mono">
-                    Case: <span className="text-indigo-300">{noteModal.caseId}</span> &bull; Model: <span className="text-emerald-300">{noteModal.modelId}</span>
+                    Case: <span className="text-[#2563EB]">{noteModal.caseId}</span> &bull; Model: <span className="text-emerald-300">{noteModal.modelId}</span>
                   </p>
                 </div>
                 <button
                   onClick={() => setNoteModal(null)}
-                  className="rounded-lg p-1 text-gray-400 hover:text-white hover:bg-gray-800"
+                  className="rounded-lg p-1 text-gray-400 hover:text-white hover:bg-[#EEF4FF]"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -3380,7 +3380,7 @@ export default function EvalLabPage() {
                     value={noteModal.whatWasGood}
                     onChange={(e) => setNoteModal({ ...noteModal, whatWasGood: e.target.value })}
                     placeholder="e.g. Directly answered the DNS setup with exact CNAME value and authoritative tone."
-                    className="w-full rounded-lg border border-gray-700 bg-gray-950 p-3 text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none font-sans"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white p-3 text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none font-sans"
                   />
                 </div>
 
@@ -3393,7 +3393,7 @@ export default function EvalLabPage() {
                     value={noteModal.whatWasWrong}
                     onChange={(e) => setNoteModal({ ...noteModal, whatWasWrong: e.target.value })}
                     placeholder="e.g. Reply was too long; for DNS questions, always give the 3 steps first."
-                    className="w-full rounded-lg border border-gray-700 bg-gray-950 p-3 text-white placeholder-gray-500 focus:border-amber-500 focus:outline-none font-sans"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white p-3 text-white placeholder-gray-500 focus:border-amber-500 focus:outline-none font-sans"
                   />
                 </div>
 
@@ -3405,7 +3405,7 @@ export default function EvalLabPage() {
                       value={noteModal.generalNote || ""}
                       onChange={(e) => setNoteModal({ ...noteModal, generalNote: e.target.value })}
                       placeholder="e.g. Suitable for production FAQ"
-                      className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2 text-white placeholder-gray-600 focus:border-indigo-500 focus:outline-none"
+                      className="w-full rounded-lg border border-[#DCE6F5] bg-white px-3 py-2 text-white placeholder-gray-600 focus:border-indigo-500 focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
@@ -3415,17 +3415,17 @@ export default function EvalLabPage() {
                       value={noteModal.reviewer}
                       onChange={(e) => setNoteModal({ ...noteModal, reviewer: e.target.value })}
                       placeholder="e.g. Senior Tech Lead"
-                      className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2 text-white placeholder-gray-600 focus:border-indigo-500 focus:outline-none"
+                      className="w-full rounded-lg border border-[#DCE6F5] bg-white px-3 py-2 text-white placeholder-gray-600 focus:border-indigo-500 focus:outline-none"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="p-4 bg-gray-950/60 border-t border-gray-800 flex items-center justify-end gap-2.5">
+              <div className="p-4 bg-[#F6F9FF] border-t border-[#DCE6F5] flex items-center justify-end gap-2.5">
                 <button
                   type="button"
                   onClick={() => setNoteModal(null)}
-                  className="px-4 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition"
+                  className="px-4 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white hover:bg-[#EEF4FF] transition"
                 >
                   Cancel
                 </button>

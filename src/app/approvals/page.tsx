@@ -314,13 +314,13 @@ export default function ApprovalsPage() {
     <AppShell breadcrumbs={[{ label: "Approvals Inbox", href: "/approvals" }]}>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-800 pb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#DCE6F5] pb-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono font-medium mb-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-[#BFDBFE] text-cyan-400 text-xs font-mono font-medium mb-2">
               <ShieldAlert className="h-3.5 w-3.5" />
               <span>Human Expert Governance</span>
             </div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-3xl font-extrabold text-[#0B1B3A] tracking-tight">
               Approvals &amp; Escalations Inbox
             </h1>
             <p className="text-sm text-gray-400 mt-1">
@@ -331,7 +331,7 @@ export default function ApprovalsPage() {
           <button
             onClick={fetchApprovals}
             disabled={loading}
-            className="p-2.5 rounded-xl border border-gray-700 bg-gray-900 text-gray-300 hover:text-white hover:border-cyan-400 transition flex items-center gap-2 self-start md:self-auto"
+            className="p-2.5 rounded-xl border border-[#C3D3EA] bg-white text-gray-300 hover:text-white hover:border-cyan-400 transition flex items-center gap-2 self-start md:self-auto"
           >
             <RotateCw className={`h-4 w-4 ${loading ? "animate-spin text-cyan-400" : ""}`} />
             <span className="text-xs font-medium">Refresh</span>
@@ -340,7 +340,7 @@ export default function ApprovalsPage() {
 
         {/* Toast */}
         {toastMsg && (
-          <div className="p-4 rounded-xl bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 text-xs flex items-center gap-2 shadow-lg">
+          <div className="p-4 rounded-xl bg-blue-50 border border-[#BFDBFE] text-cyan-300 text-xs flex items-center gap-2 shadow-lg">
             <CheckCircle2 className="h-4 w-4 shrink-0 text-cyan-400" />
             <span>{toastMsg}</span>
           </div>
@@ -358,13 +358,13 @@ export default function ApprovalsPage() {
         )}
 
         {/* Tab Selection */}
-        <div className="flex flex-wrap gap-2 border-b border-gray-800 pb-2">
+        <div className="flex flex-wrap gap-2 border-b border-[#DCE6F5] pb-2">
           <button
             onClick={() => setActiveTab("escalations")}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition ${
               activeTab === "escalations"
-                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm"
-                : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"
+                ? "bg-blue-100 text-cyan-300 border border-[#BFDBFE] shadow-sm"
+                : "text-gray-400 hover:text-gray-200 hover:bg-[#EEF4FF]/50"
             }`}
           >
             <HelpCircle className="h-4 w-4 text-amber-400" />
@@ -380,14 +380,14 @@ export default function ApprovalsPage() {
             onClick={() => setActiveTab("lessons")}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition ${
               activeTab === "lessons"
-                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm"
-                : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"
+                ? "bg-blue-100 text-cyan-300 border border-[#BFDBFE] shadow-sm"
+                : "text-gray-400 hover:text-gray-200 hover:bg-[#EEF4FF]/50"
             }`}
           >
             <Sparkles className="h-4 w-4 text-cyan-400" />
             <span>Learned Lessons &amp; Skills</span>
             {pendingLessonsCount > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-blue-100 text-cyan-300 border border-[#BFDBFE]">
                 {pendingLessonsCount}
               </span>
             )}
@@ -397,8 +397,8 @@ export default function ApprovalsPage() {
             onClick={() => setActiveTab("prs")}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition ${
               activeTab === "prs"
-                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm"
-                : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"
+                ? "bg-blue-100 text-cyan-300 border border-[#BFDBFE] shadow-sm"
+                : "text-gray-400 hover:text-gray-200 hover:bg-[#EEF4FF]/50"
             }`}
           >
             <GitPullRequest className="h-4 w-4 text-purple-400" />
@@ -415,7 +415,7 @@ export default function ApprovalsPage() {
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition ${
               activeTab === "skills"
                 ? "bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm"
-                : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"
+                : "text-gray-400 hover:text-gray-200 hover:bg-[#EEF4FF]/50"
             }`}
           >
             <BookOpen className="h-4 w-4 text-purple-400" />
@@ -432,7 +432,7 @@ export default function ApprovalsPage() {
         {activeTab === "escalations" && (
           <div className="space-y-4">
             {escalations.length === 0 && !loading && (
-              <div className="p-8 text-center rounded-2xl border border-gray-800 bg-[#071329] text-gray-400">
+              <div className="p-8 text-center rounded-2xl border border-[#DCE6F5] bg-white text-gray-400">
                 <CheckCircle2 className="h-8 w-8 text-emerald-400 mx-auto mb-2" />
                 <div className="font-semibold text-white">No Pending Escalations</div>
                 <p className="text-xs text-gray-500 mt-1">
@@ -448,8 +448,8 @@ export default function ApprovalsPage() {
                   key={item.id}
                   className={`p-6 rounded-2xl border transition ${
                     item.isResolved
-                      ? "border-gray-800/80 bg-[#050e20]/60 opacity-80"
-                      : "border-amber-500/30 bg-[#071329] shadow-lg shadow-amber-500/5"
+                      ? "border-[#DCE6F5] bg-[#050e20]/60 opacity-80"
+                      : "border-amber-500/30 bg-white shadow-lg shadow-amber-500/5"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-4">
@@ -488,7 +488,7 @@ export default function ApprovalsPage() {
                           setResolvingId(item.id);
                           setExpertReplyInput("");
                         }}
-                        className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition flex items-center gap-2 shrink-0 shadow-md shadow-cyan-500/20"
+                        className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition flex items-center gap-2 shrink-0 shadow-md shadow-blue-500/20"
                       >
                         <Send className="h-3.5 w-3.5" />
                         <span>Answer &amp; Resolve</span>
@@ -497,7 +497,7 @@ export default function ApprovalsPage() {
                   </div>
 
                   {item.expertReply && (
-                    <div className="mt-4 p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/20 text-emerald-200 text-xs">
+                    <div className="mt-4 p-4 rounded-xl border border-emerald-500/30 bg-emerald-50 text-emerald-200 text-xs">
                       <div className="font-semibold text-emerald-300 mb-1 flex items-center gap-1.5">
                         <CheckCircle2 className="h-3.5 w-3.5" />
                         <span>Expert Answer (Injected into Knowledge Memory):</span>
@@ -507,7 +507,7 @@ export default function ApprovalsPage() {
                   )}
 
                   {isReplying && (
-                    <div className="mt-4 p-4 rounded-xl border border-cyan-500/40 bg-[#040f26] space-y-3">
+                    <div className="mt-4 p-4 rounded-xl border border-[#BFDBFE] bg-white space-y-3">
                       <label className="block text-xs font-semibold text-cyan-300">
                         Type authoritative answer for this customer inquiry:
                       </label>
@@ -515,12 +515,12 @@ export default function ApprovalsPage() {
                         value={expertReplyInput}
                         onChange={(e) => setExpertReplyInput(e.target.value)}
                         placeholder="Provide the exact verified solution, procedure, or policy details..."
-                        className="w-full h-24 rounded-lg border border-gray-700 bg-gray-900 p-3 text-xs text-white focus:outline-none focus:border-cyan-400 font-sans"
+                        className="w-full h-24 rounded-lg border border-[#C3D3EA] bg-white p-3 text-xs text-white focus:outline-none focus:border-cyan-400 font-sans"
                       />
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => setResolvingId(null)}
-                          className="px-3 py-1.5 rounded-lg border border-gray-700 text-xs text-gray-400 hover:text-white"
+                          className="px-3 py-1.5 rounded-lg border border-[#C3D3EA] text-xs text-gray-400 hover:text-white"
                         >
                           Cancel
                         </button>
@@ -545,7 +545,7 @@ export default function ApprovalsPage() {
         {activeTab === "lessons" && (
           <div className="space-y-4">
             {lessons.length === 0 && !loading && (
-              <div className="p-8 text-center rounded-2xl border border-gray-800 bg-[#071329] text-gray-400">
+              <div className="p-8 text-center rounded-2xl border border-[#DCE6F5] bg-white text-gray-400">
                 <Sparkles className="h-8 w-8 text-cyan-400 mx-auto mb-2" />
                 <div className="font-semibold text-white">No Pending Lessons</div>
                 <p className="text-xs text-gray-500 mt-1">
@@ -564,10 +564,10 @@ export default function ApprovalsPage() {
                   key={lesson.id}
                   className={`p-6 rounded-2xl border transition space-y-4 shadow-sm ${
                     !isActive
-                      ? "border-gray-800 bg-[#050e20]/60 opacity-60"
+                      ? "border-[#DCE6F5] bg-[#050e20]/60 opacity-60"
                       : isPending
-                      ? "border-amber-500/30 bg-[#071329] shadow-amber-500/5"
-                      : "border-gray-800 bg-[#071329]"
+                      ? "border-amber-500/30 bg-white shadow-amber-500/5"
+                      : "border-[#DCE6F5] bg-white"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-4">
@@ -583,14 +583,14 @@ export default function ApprovalsPage() {
                         <span
                           className={`px-2 py-0.2 rounded text-[10px] font-mono ${
                             isActive
-                              ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
+                              ? "bg-blue-50 text-cyan-400 border border-[#DCE6F5]"
                               : "bg-gray-800 text-gray-400"
                           }`}
                         >
                           {isActive ? "ACTIVE" : "SWITCHED OFF"}
                         </span>
                       </div>
-                      <h3 className="text-base font-bold text-white mt-1">{lesson.title}</h3>
+                      <h3 className="text-base font-bold text-[#0B1B3A] mt-1">{lesson.title}</h3>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -600,7 +600,7 @@ export default function ApprovalsPage() {
                             ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                             : lesson.status === "rejected"
                             ? "bg-red-500/10 text-red-400 border border-red-500/20"
-                            : "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
+                            : "bg-blue-50 text-cyan-400 border border-[#DCE6F5]"
                         }`}
                       >
                         {lesson.status.toUpperCase()}
@@ -610,7 +610,7 @@ export default function ApprovalsPage() {
                       <button
                         type="button"
                         onClick={() => handleToggleLessonActive(lesson.id, isActive)}
-                        className="px-2 py-1 rounded bg-gray-900 border border-gray-800 hover:border-gray-700 text-[11px] text-gray-300 flex items-center gap-1 transition"
+                        className="px-2 py-1 rounded bg-[#EEF4FF] border border-[#DCE6F5] hover:border-[#C3D3EA] text-[11px] text-gray-300 flex items-center gap-1 transition"
                         title={isActive ? "Switch off lesson" : "Switch on lesson"}
                       >
                         {isActive ? (
@@ -639,7 +639,7 @@ export default function ApprovalsPage() {
                             setEditMarkdown(lesson.lessonMarkdown);
                           }
                         }}
-                        className="p-1 rounded bg-gray-900 border border-gray-800 hover:text-white text-gray-400 transition"
+                        className="p-1 rounded bg-[#EEF4FF] border border-[#DCE6F5] hover:text-white text-gray-400 transition"
                         title="Edit lesson markdown and metadata"
                       >
                         <Edit2 className="h-3.5 w-3.5" />
@@ -649,7 +649,7 @@ export default function ApprovalsPage() {
                       <button
                         type="button"
                         onClick={() => handleDeleteLesson(lesson.id)}
-                        className="p-1 rounded bg-gray-900 border border-gray-800 hover:text-red-400 text-gray-400 transition"
+                        className="p-1 rounded bg-[#EEF4FF] border border-[#DCE6F5] hover:text-red-400 text-gray-400 transition"
                         title="Delete lesson record and Markdown file"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -658,14 +658,14 @@ export default function ApprovalsPage() {
                   </div>
 
                   {/* Metadata: Author, When, Which example */}
-                  <div className="p-3 rounded-xl bg-[#040f26] border border-gray-800/80 text-[11px] space-y-1 font-mono text-gray-300">
+                  <div className="p-3 rounded-xl bg-white border border-[#DCE6F5] text-[11px] space-y-1 font-mono text-gray-300">
                     <div className="flex items-center justify-between text-gray-400 flex-wrap gap-2">
                       <span><strong>Author:</strong> {lesson.author || "Support Team Member"}</span>
                       <span><strong>Created:</strong> {new Date(lesson.createdAt).toLocaleString()}</span>
                       {lesson.fileName && <span><strong>File:</strong> <code className="text-cyan-400">{lesson.fileName}</code></span>}
                     </div>
                     {lesson.originalQuestion && (
-                      <div className="text-gray-300 pt-1 border-t border-gray-800">
+                      <div className="text-gray-300 pt-1 border-t border-[#DCE6F5]">
                         <span className="text-gray-500 font-sans">Which example:</span> &quot;{lesson.originalQuestion}&quot;
                       </div>
                     )}
@@ -678,14 +678,14 @@ export default function ApprovalsPage() {
 
                   {/* Edit Form or Markdown View */}
                   {isEditing ? (
-                    <div className="space-y-3 p-4 rounded-xl bg-[#030919] border border-cyan-500/40">
+                    <div className="space-y-3 p-4 rounded-xl bg-[#030919] border border-[#BFDBFE]">
                       <div>
                         <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1">Title</label>
                         <input
                           type="text"
                           value={editTitle}
                           onChange={(e) => setEditTitle(e.target.value)}
-                          className="w-full rounded bg-gray-900 border border-gray-700 p-2 text-xs text-white"
+                          className="w-full rounded bg-[#EEF4FF] border border-[#C3D3EA] p-2 text-xs text-white"
                         />
                       </div>
                       <div>
@@ -694,7 +694,7 @@ export default function ApprovalsPage() {
                           type="text"
                           value={editCategory}
                           onChange={(e) => setEditCategory(e.target.value)}
-                          className="w-full rounded bg-gray-900 border border-gray-700 p-2 text-xs text-white"
+                          className="w-full rounded bg-[#EEF4FF] border border-[#C3D3EA] p-2 text-xs text-white"
                         />
                       </div>
                       <div>
@@ -703,14 +703,14 @@ export default function ApprovalsPage() {
                           rows={6}
                           value={editMarkdown}
                           onChange={(e) => setEditMarkdown(e.target.value)}
-                          className="w-full rounded bg-gray-900 border border-gray-700 p-2.5 text-xs font-mono text-white"
+                          className="w-full rounded bg-[#EEF4FF] border border-[#C3D3EA] p-2.5 text-xs font-mono text-white"
                         />
                       </div>
                       <div className="flex justify-end gap-2">
                         <button
                           type="button"
                           onClick={() => setEditingLessonId(null)}
-                          className="px-3 py-1.5 rounded border border-gray-700 text-xs text-gray-400 hover:text-white"
+                          className="px-3 py-1.5 rounded border border-[#C3D3EA] text-xs text-gray-400 hover:text-white"
                         >
                           Cancel
                         </button>
@@ -724,7 +724,7 @@ export default function ApprovalsPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="p-4 rounded-xl border border-gray-800 bg-[#040f26] text-xs text-gray-300 font-mono whitespace-pre-wrap max-h-48 overflow-y-auto">
+                    <div className="p-4 rounded-xl border border-[#DCE6F5] bg-white text-xs text-gray-300 font-mono whitespace-pre-wrap max-h-48 overflow-y-auto">
                       {lesson.lessonMarkdown}
                     </div>
                   )}
@@ -765,7 +765,7 @@ export default function ApprovalsPage() {
         {activeTab === "prs" && (
           <div className="space-y-4">
             {prs.length === 0 && !loading && (
-              <div className="p-8 text-center rounded-2xl border border-gray-800 bg-[#071329] text-gray-400">
+              <div className="p-8 text-center rounded-2xl border border-[#DCE6F5] bg-white text-gray-400">
                 <GitPullRequest className="h-8 w-8 text-purple-400 mx-auto mb-2" />
                 <div className="font-semibold text-white">No Self-Improvement Runs</div>
                 <p className="text-xs text-gray-500 mt-1">
@@ -777,7 +777,7 @@ export default function ApprovalsPage() {
             {prs.map((pr) => (
               <div
                 key={pr.id}
-                className="p-6 rounded-2xl border border-gray-800 bg-[#071329] space-y-4 shadow-sm"
+                className="p-6 rounded-2xl border border-[#DCE6F5] bg-white space-y-4 shadow-sm"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -829,7 +829,7 @@ export default function ApprovalsPage() {
         {activeTab === "skills" && (
           <div className="space-y-4">
             {skillProposals.length === 0 && !loading && (
-              <div className="p-8 text-center rounded-2xl border border-gray-800 bg-[#071329] text-gray-400">
+              <div className="p-8 text-center rounded-2xl border border-[#DCE6F5] bg-white text-gray-400">
                 <CheckCircle2 className="h-8 w-8 text-purple-400 mx-auto mb-2" />
                 <div className="font-semibold text-white">No Pending Skill Improvements</div>
                 <p className="text-xs text-gray-500 mt-1">
@@ -841,12 +841,12 @@ export default function ApprovalsPage() {
             {skillProposals.map((prop) => (
               <div
                 key={prop.id}
-                className="p-5 rounded-2xl border border-gray-800 bg-[#071329] hover:border-gray-700 transition space-y-4"
+                className="p-5 rounded-2xl border border-[#DCE6F5] bg-white hover:border-[#C3D3EA] transition space-y-4"
               >
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-gray-800/80 pb-3">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#DCE6F5] pb-3">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-bold text-white text-sm">{prop.targetSkillName}</span>
+                      <span className="font-bold text-[#0B1B3A] text-sm">{prop.targetSkillName}</span>
                       <span className="text-[10px] font-mono bg-purple-500/10 text-purple-300 border border-purple-500/20 px-2 py-0.5 rounded">
                         Model: {prop.modelUsed}
                       </span>
@@ -868,7 +868,7 @@ export default function ApprovalsPage() {
                 </div>
 
                 {/* Originating notes used */}
-                <div className="p-3 bg-gray-900/60 rounded-xl border border-gray-800/60 text-xs space-y-1">
+                <div className="p-3 bg-[#F6F9FF] rounded-xl border border-[#DCE6F5]/60 text-xs space-y-1">
                   <span className="text-[10px] uppercase font-mono text-amber-400 font-semibold block">
                     Teaching Notes Used by Model:
                   </span>
@@ -887,7 +887,7 @@ export default function ApprovalsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
                   <div className="space-y-1">
                     <span className="text-[10px] text-gray-500 uppercase">Previous SOP Steps (v1):</span>
-                    <pre className="rounded-xl bg-gray-950 p-3 text-gray-400 whitespace-pre-wrap max-h-44 overflow-y-auto border border-gray-800/80 leading-relaxed text-[11px]">
+                    <pre className="rounded-xl bg-[#F1F6FF] text-[#1E3A8A] border border-[#DCE6F5] p-3 text-gray-400 whitespace-pre-wrap max-h-44 overflow-y-auto border border-[#DCE6F5] leading-relaxed text-[11px]">
                       {prop.previousStepsMarkdown}
                     </pre>
                   </div>
@@ -895,7 +895,7 @@ export default function ApprovalsPage() {
                     <span className="text-[10px] text-emerald-400 uppercase">
                       Proposed SOP Steps (3 Steps Prioritized First):
                     </span>
-                    <pre className="rounded-xl bg-emerald-950/20 p-3 text-emerald-200 whitespace-pre-wrap max-h-44 overflow-y-auto border border-emerald-500/20 leading-relaxed text-[11px]">
+                    <pre className="rounded-xl bg-emerald-50 p-3 text-emerald-200 whitespace-pre-wrap max-h-44 overflow-y-auto border border-emerald-500/20 leading-relaxed text-[11px]">
                       {prop.proposedStepsMarkdown}
                     </pre>
                   </div>

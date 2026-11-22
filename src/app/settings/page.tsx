@@ -354,7 +354,7 @@ export default function SettingsPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white">Workspace Settings & Telemetry</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-[#0B1B3A]">Workspace Settings & Telemetry</h1>
             <p className="text-sm text-gray-400 mt-1">
               Manage encrypted model connection keys, inspect per-business telemetry spend, and supervise queue jobs.
             </p>
@@ -362,7 +362,7 @@ export default function SettingsPage() {
 
           <div className="flex items-center gap-3">
             {/* View Mode Switcher: Day One vs Advanced (Task 1.5) */}
-            <div className="flex items-center gap-2.5 rounded-xl border border-gray-800 bg-[#0E1322] p-2.5 px-3.5 shadow-sm">
+            <div className="flex items-center gap-2.5 rounded-xl border border-[#DCE6F5] bg-white p-2.5 px-3.5 shadow-sm">
               <Sliders className="h-4 w-4 text-cyan-400" />
               <div>
                 <div className="text-xs font-semibold text-white">View Mode</div>
@@ -384,7 +384,7 @@ export default function SettingsPage() {
             </div>
 
             {/* Local-Only Mode Master Switch (Task 1.2 & 4.3) */}
-            <div className="flex items-center gap-3 rounded-xl border border-gray-800 bg-[#0E1322] p-2.5 px-4 shadow-sm">
+            <div className="flex items-center gap-3 rounded-xl border border-[#DCE6F5] bg-white p-2.5 px-4 shadow-sm">
               <Server className="h-4 w-4 text-indigo-400" />
               <div>
                 <div className="text-xs font-semibold text-white">Local-Only Mode</div>
@@ -405,7 +405,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-gray-800 space-x-1 items-center">
+        <div className="flex border-b border-[#DCE6F5] space-x-1 items-center">
           {/* Day One Tabs */}
           <button
             onClick={() => setActiveTab("connections")}
@@ -492,7 +492,7 @@ export default function SettingsPage() {
           ) : (
             <button
               onClick={() => setShowAdvanced(true)}
-              className="text-xs font-mono text-gray-500 hover:text-cyan-400 px-3 py-1 rounded border border-dashed border-gray-800 ml-auto transition"
+              className="text-xs font-mono text-gray-500 hover:text-cyan-400 px-3 py-1 rounded border border-dashed border-[#DCE6F5] ml-auto transition"
               title="Unlock Advanced Settings: Failed Jobs and Danger Zone"
             >
               + Unlock Advanced Tabs (Jobs &amp; Danger Zone)
@@ -503,7 +503,7 @@ export default function SettingsPage() {
         {/* ================= TAB 1: THE 5 CONNECTIONS (Task 1.2) ================= */}
         {activeTab === "connections" && (
           <div className="space-y-6">
-            <div className="rounded-xl border border-indigo-500/20 bg-indigo-950/20 p-4 text-xs text-indigo-300 flex items-start gap-3">
+            <div className="rounded-xl border border-[#DCE6F5] bg-indigo-50 p-4 text-xs text-indigo-300 flex items-start gap-3">
               <Key className="h-4 w-4 text-indigo-400 mt-0.5 flex-shrink-0" />
               <div>
                 <strong>AES-256 Encrypted Credential Vault:</strong> All secrets are encrypted at rest using AES-256-GCM. Unencrypted keys are never transmitted to the browser or stored in logs. Tested with zero plaintext leakage.
@@ -511,7 +511,7 @@ export default function SettingsPage() {
             </div>
 
             {testResult && (
-              <div className="rounded-xl border border-gray-700 bg-gray-900/90 p-4 text-xs flex items-center justify-between">
+              <div className="rounded-xl border border-[#C3D3EA] bg-white/90 p-4 text-xs flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                   <span className="text-white font-medium">{testResult.message}</span>
@@ -535,7 +535,7 @@ export default function SettingsPage() {
                 return (
                   <div
                     key={c.provider}
-                    className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-4"
+                    className="rounded-xl border border-[#DCE6F5] bg-white p-5 shadow-sm space-y-4"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                       <div className="flex items-center gap-3">
@@ -573,7 +573,7 @@ export default function SettingsPage() {
                         <button
                           onClick={() => testConnection(c.provider, c.endpointUrl)}
                           disabled={isTesting}
-                          className="flex items-center gap-1.5 rounded-lg border border-gray-700 bg-gray-800/60 hover:bg-gray-700 px-3 py-1.5 text-xs font-medium text-gray-200 transition disabled:opacity-50"
+                          className="flex items-center gap-1.5 rounded-lg border border-[#C3D3EA] bg-gray-800/60 hover:bg-gray-700 px-3 py-1.5 text-xs font-medium text-gray-200 transition disabled:opacity-50"
                         >
                           <RotateCw className={`h-3.5 w-3.5 ${isTesting ? "animate-spin text-indigo-400" : ""}`} />
                           <span>{isTesting ? "Testing..." : "Test Connection"}</span>
@@ -589,7 +589,7 @@ export default function SettingsPage() {
                               setEndpointInput(c.endpointUrl || "");
                             }
                           }}
-                          className="rounded-lg border border-gray-700 bg-gray-800/60 hover:bg-gray-700 px-3 py-1.5 text-xs font-medium text-gray-200 transition"
+                          className="rounded-lg border border-[#C3D3EA] bg-gray-800/60 hover:bg-gray-700 px-3 py-1.5 text-xs font-medium text-gray-200 transition"
                         >
                           {isEditing ? "Cancel" : "Edit Key"}
                         </button>
@@ -598,7 +598,7 @@ export default function SettingsPage() {
 
                     {/* Masked Key Display or Edit Form */}
                     {!isEditing ? (
-                      <div className="rounded-lg border border-gray-800/80 bg-gray-950 p-3 flex items-center justify-between font-mono text-xs text-gray-400">
+                      <div className="rounded-lg border border-[#DCE6F5] bg-[#F1F6FF] p-3 flex items-center justify-between font-mono text-xs text-gray-400">
                         <div className="flex items-center gap-2 truncate">
                           <Key className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />
                           <span>{c.maskedApiKey || c.endpointUrl || "No key configured"}</span>
@@ -610,7 +610,7 @@ export default function SettingsPage() {
                         )}
                       </div>
                     ) : (
-                      <div className="space-y-3 pt-2 border-t border-gray-800">
+                      <div className="space-y-3 pt-2 border-t border-[#DCE6F5]">
                         {c.provider === "ollama" ? (
                           <div>
                             <label className="block text-xs font-medium text-gray-300 mb-1">Ollama Server URL</label>
@@ -619,7 +619,7 @@ export default function SettingsPage() {
                               value={endpointInput}
                               onChange={(e) => setEndpointInput(e.target.value)}
                               placeholder="http://localhost:11434"
-                              className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs font-mono text-white focus:border-indigo-500 focus:outline-none"
+                              className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs font-mono text-white focus:border-indigo-500 focus:outline-none"
                             />
                           </div>
                         ) : (
@@ -630,7 +630,7 @@ export default function SettingsPage() {
                               value={keyInput}
                               onChange={(e) => setKeyInput(e.target.value)}
                               placeholder={info.placeholder}
-                              className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs font-mono text-white focus:border-indigo-500 focus:outline-none"
+                              className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs font-mono text-white focus:border-indigo-500 focus:outline-none"
                             />
                           </div>
                         )}
@@ -657,7 +657,7 @@ export default function SettingsPage() {
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <h2 className="text-lg font-bold text-[#0B1B3A] flex items-center gap-2">
                   <Zap className="h-5 w-5 text-cyan-400" />
                   <span>Model per Step Configuration (14 Supported Models)</span>
                 </h2>
@@ -669,7 +669,7 @@ export default function SettingsPage() {
               <button
                 onClick={handleSaveStepModels}
                 disabled={savingStepModels}
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold text-xs transition flex items-center gap-2 shadow-lg shadow-cyan-500/20 disabled:opacity-50 self-start sm:self-auto"
+                className="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold text-xs transition flex items-center gap-2 shadow-lg shadow-blue-500/20 disabled:opacity-50 self-start sm:self-auto"
               >
                 <CheckCircle2 className="h-4 w-4" />
                 <span>{savingStepModels ? "Saving Routing..." : "Save Step Models"}</span>
@@ -677,7 +677,7 @@ export default function SettingsPage() {
             </div>
 
             {stepModelsToast && (
-              <div className="p-3.5 rounded-xl bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 text-xs flex items-center gap-2 shadow-md">
+              <div className="p-3.5 rounded-xl bg-blue-50 border border-[#BFDBFE] text-cyan-300 text-xs flex items-center gap-2 shadow-md">
                 <CheckCircle2 className="h-4 w-4 shrink-0 text-cyan-400" />
                 <span>{stepModelsToast}</span>
               </div>
@@ -691,13 +691,13 @@ export default function SettingsPage() {
                 return (
                   <div
                     key={step.key}
-                    className="rounded-2xl border border-gray-800 bg-[#071329] p-5 space-y-4 hover:border-gray-700 transition"
+                    className="rounded-2xl border border-[#DCE6F5] bg-white p-5 space-y-4 hover:border-[#C3D3EA] transition"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold text-white">{step.label}</span>
-                          <span className="text-[10px] font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                          <span className="text-sm font-bold text-[#0B1B3A]">{step.label}</span>
+                          <span className="text-[10px] font-mono text-cyan-400 bg-blue-50 px-2 py-0.5 rounded border border-[#DCE6F5]">
                             STEP: {step.key}
                           </span>
                         </div>
@@ -709,7 +709,7 @@ export default function SettingsPage() {
                           <span className="px-2 py-0.5 rounded bg-gray-800 text-gray-300">
                             {currentModel.provider.toUpperCase()}
                           </span>
-                          <span className={`px-2 py-0.5 rounded ${currentModel.isFree || currentModel.isLocal ? "bg-emerald-500/10 text-emerald-400" : "bg-cyan-500/10 text-cyan-300"}`}>
+                          <span className={`px-2 py-0.5 rounded ${currentModel.isFree || currentModel.isLocal ? "bg-emerald-500/10 text-emerald-400" : "bg-blue-50 text-cyan-300"}`}>
                             {currentModel.isFree || currentModel.isLocal
                               ? "FREE ($0.00)"
                               : `$${currentModel.inputPer1M}/$${currentModel.outputPer1M} per 1M`}
@@ -730,7 +730,7 @@ export default function SettingsPage() {
                             prev.map((s) => (s.key === step.key ? { ...s, selectedModel: val } : s))
                           );
                         }}
-                        className="w-full rounded-xl border border-gray-700 bg-[#040f26] px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-400 font-sans"
+                        className="w-full rounded-xl border border-[#C3D3EA] bg-white px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-400 font-sans"
                       >
                         {availableModels.map((m) => {
                           const disabled = isVisionStep && !m.supportsVision;
@@ -748,12 +748,12 @@ export default function SettingsPage() {
             </div>
 
             {/* Autonomous Cost Routing Table (Task 4.3) */}
-            <div className="rounded-2xl border border-gray-800 bg-[#071329] p-6 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-gray-800 pb-3">
+            <div className="rounded-2xl border border-[#DCE6F5] bg-white p-6 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[#DCE6F5] pb-3">
                 <div className="flex items-center gap-2">
                   <Sliders className="h-5 w-5 text-indigo-400" />
                   <div>
-                    <h3 className="text-sm font-bold text-white">Autonomous 3-Tier Intelligent Model Router</h3>
+                    <h3 className="text-sm font-bold text-[#0B1B3A]">Autonomous 3-Tier Intelligent Model Router</h3>
                     <p className="text-xs text-gray-400">
                       Settings routing table: for each job and complexity, the cheapest model that passed the bar in the Eval Lab.
                     </p>
@@ -775,7 +775,7 @@ export default function SettingsPage() {
               {/* Routing Table Matrix */}
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs font-mono">
-                  <thead className="bg-gray-950/80 text-gray-400 border-b border-gray-800">
+                  <thead className="bg-[#F6F9FF] text-gray-400 border-b border-[#DCE6F5]">
                     <tr>
                       <th className="py-2.5 px-3">Job Type</th>
                       <th className="py-2.5 px-3">Low Complexity ($ / 1M)</th>
@@ -785,42 +785,42 @@ export default function SettingsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-800/60 text-gray-300">
-                    <tr className="hover:bg-gray-900/30">
+                    <tr className="hover:bg-[#EEF4FF]">
                       <td className="py-2.5 px-3 font-semibold text-white">tag_job (Router Triage)</td>
                       <td className="py-2.5 px-3 text-emerald-400">Nemotron Lightning ($0.00)</td>
                       <td className="py-2.5 px-3 text-cyan-300">Qwen 3.7 Flash ($0.03)</td>
                       <td className="py-2.5 px-3 text-indigo-300">Claude Haiku 5.5 ($0.10)</td>
                       <td className="py-2.5 px-3 text-gray-400">&rarr; Gemini 3.8 Flash</td>
                     </tr>
-                    <tr className="hover:bg-gray-900/30">
+                    <tr className="hover:bg-[#EEF4FF]">
                       <td className="py-2.5 px-3 font-semibold text-white">find_facts (Knowledge Search)</td>
                       <td className="py-2.5 px-3 text-indigo-300">Claude Haiku 5.5 ($0.10)</td>
                       <td className="py-2.5 px-3 text-cyan-300">Gemini 2.5 Flash-Lite ($0.10)</td>
                       <td className="py-2.5 px-3 text-blue-300">Gemini 3.8 Flash ($0.75)</td>
                       <td className="py-2.5 px-3 text-gray-400">&rarr; Gemini 3.8 Flash</td>
                     </tr>
-                    <tr className="hover:bg-gray-900/30">
+                    <tr className="hover:bg-[#EEF4FF]">
                       <td className="py-2.5 px-3 font-semibold text-white">write_reply (Consultant Reply)</td>
                       <td className="py-2.5 px-3 text-indigo-300">Claude Haiku 5.5 ($0.10)</td>
                       <td className="py-2.5 px-3 text-blue-300">Gemini 3.8 Flash ($0.75)</td>
                       <td className="py-2.5 px-3 text-indigo-300 font-bold">Claude Sonnet 5.5 ($2.00)</td>
                       <td className="py-2.5 px-3 text-gray-400">&rarr; Claude Opus 5.5</td>
                     </tr>
-                    <tr className="hover:bg-gray-900/30">
+                    <tr className="hover:bg-[#EEF4FF]">
                       <td className="py-2.5 px-3 font-semibold text-white">read_screenshot (Vision OCR)</td>
                       <td className="py-2.5 px-3 text-emerald-400">Nemotron Super VL ($0.00)</td>
                       <td className="py-2.5 px-3 text-blue-300">Gemini 3.8 Flash ($0.75)</td>
                       <td className="py-2.5 px-3 text-blue-300">Gemini 3.8 Flash ($0.75)</td>
                       <td className="py-2.5 px-3 text-gray-400">&rarr; Gemini 3.8 Flash</td>
                     </tr>
-                    <tr className="hover:bg-gray-900/30">
+                    <tr className="hover:bg-[#EEF4FF]">
                       <td className="py-2.5 px-3 font-semibold text-white">improve_skill (Lesson Synthesis)</td>
                       <td className="py-2.5 px-3 text-indigo-300">Claude Sonnet 5.5 ($2.00)</td>
                       <td className="py-2.5 px-3 text-indigo-300">Claude Sonnet 5.5 ($2.00)</td>
                       <td className="py-2.5 px-3 text-purple-300 font-bold">Claude Opus 5.5 ($4.00)</td>
                       <td className="py-2.5 px-3 text-gray-400">Top Tier (Opus)</td>
                     </tr>
-                    <tr className="hover:bg-gray-900/30">
+                    <tr className="hover:bg-[#EEF4FF]">
                       <td className="py-2.5 px-3 font-semibold text-white">judge_eval (Master Judge)</td>
                       <td className="py-2.5 px-3 text-indigo-300">Claude Sonnet 5.5 ($2.00)</td>
                       <td className="py-2.5 px-3 text-indigo-300">Claude Sonnet 5.5 ($2.00)</td>
@@ -832,18 +832,18 @@ export default function SettingsPage() {
               </div>
 
               {/* Busy Free Model Fallbacks */}
-              <div className="pt-2 border-t border-gray-800">
+              <div className="pt-2 border-t border-[#DCE6F5]">
                 <span className="text-xs font-semibold text-white block mb-2">
                   Busy Free Model Fallback Protocols (Triggered on 429 / Throttling):
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
-                  <div className="p-3 rounded-xl bg-gray-950/80 border border-gray-800">
+                  <div className="p-3 rounded-xl bg-[#F6F9FF] border border-[#DCE6F5]">
                     <span className="text-amber-400 font-bold">Nemotron 3.5 Lightning (Free) Fallbacks:</span>
                     <p className="text-gray-400 text-[11px] mt-1">
                       1. Qwen 3.7 Flash ($0.03) &rarr; 2. Gemini 2.5 Flash-Lite ($0.10) &rarr; 3. Claude Haiku 5.5 ($0.10)
                     </p>
                   </div>
-                  <div className="p-3 rounded-xl bg-gray-950/80 border border-gray-800">
+                  <div className="p-3 rounded-xl bg-[#F6F9FF] border border-[#DCE6F5]">
                     <span className="text-amber-400 font-bold">Nemotron 3 Ultra 550B (Free) Fallbacks:</span>
                     <p className="text-gray-400 text-[11px] mt-1">
                       1. Gemma 4 31B ($0.00) &rarr; 2. Qwen 3.8 Max ($2.00) &rarr; 3. Claude Sonnet 5.5 ($2.00)
@@ -861,7 +861,7 @@ export default function SettingsPage() {
             {/* Telemetry Summary Cards */}
             {telemetrySummary && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-4">
                   <div className="flex items-center justify-between text-xs text-gray-400">
                     <span>Total Model Spend</span>
                     <DollarSign className="h-4 w-4 text-emerald-400" />
@@ -872,7 +872,7 @@ export default function SettingsPage() {
                   <span className="text-[11px] text-emerald-400 mt-1 inline-block">Exact per 1M rates</span>
                 </div>
 
-                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-4">
                   <div className="flex items-center justify-between text-xs text-gray-400">
                     <span>Total Invocations</span>
                     <Zap className="h-4 w-4 text-indigo-400" />
@@ -883,7 +883,7 @@ export default function SettingsPage() {
                   <span className="text-[11px] text-gray-400 mt-1 inline-block">Logged with tokens & latency</span>
                 </div>
 
-                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-4">
                   <div className="flex items-center justify-between text-xs text-gray-400">
                     <span>Average Latency</span>
                     <Clock className="h-4 w-4 text-amber-400" />
@@ -894,7 +894,7 @@ export default function SettingsPage() {
                   <span className="text-[11px] text-gray-400 mt-1 inline-block">End-to-end roundtrip</span>
                 </div>
 
-                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4">
+                <div className="rounded-xl border border-[#DCE6F5] bg-white p-4">
                   <div className="flex items-center justify-between text-xs text-gray-400">
                     <span>Prompt Cache Hit Rate</span>
                     <Activity className="h-4 w-4 text-purple-400" />
@@ -920,7 +920,7 @@ export default function SettingsPage() {
                     }}
                     className={`rounded-lg px-3 py-1 font-mono transition ${
                       telemetryFilter === t
-                        ? "bg-indigo-600/20 text-indigo-300 border border-indigo-500/30"
+                        ? "bg-indigo-600/20 text-indigo-300 border border-[#BFDBFE]"
                         : "bg-gray-800 text-gray-400 hover:bg-gray-700"
                     }`}
                   >
@@ -931,7 +931,7 @@ export default function SettingsPage() {
 
               <button
                 onClick={() => fetchTelemetry(telemetryFilter)}
-                className="flex items-center gap-1.5 rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:text-white"
+                className="flex items-center gap-1.5 rounded-lg border border-[#C3D3EA] bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:text-white"
               >
                 <RotateCw className="h-3 w-3" />
                 <span>Refresh Logs</span>
@@ -939,10 +939,10 @@ export default function SettingsPage() {
             </div>
 
             {/* Telemetry Logs Table */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] overflow-hidden">
+            <div className="rounded-xl border border-[#DCE6F5] bg-white overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-gray-900/60 border-b border-gray-800 text-gray-400 uppercase font-semibold text-[10px] tracking-wider">
+                  <thead className="bg-[#F6F9FF] border-b border-[#DCE6F5] text-gray-400 uppercase font-semibold text-[10px] tracking-wider">
                     <tr>
                       <th className="px-4 py-3">Timestamp</th>
                       <th className="px-4 py-3">Task Type</th>
@@ -957,12 +957,12 @@ export default function SettingsPage() {
                   </thead>
                   <tbody className="divide-y divide-gray-800/60">
                     {telemetryLogs.map((log) => (
-                      <tr key={log.id} className="hover:bg-gray-900/40 transition">
+                      <tr key={log.id} className="hover:bg-[#EEF4FF] transition">
                         <td className="px-4 py-3 text-gray-400 font-mono text-[11px]">
                           {new Date(log.createdAt).toLocaleTimeString()}
                         </td>
                         <td className="px-4 py-3">
-                          <span className="rounded bg-indigo-500/10 text-indigo-400 px-2 py-0.5 font-mono text-[11px] border border-indigo-500/20">
+                          <span className="rounded bg-indigo-500/10 text-indigo-400 px-2 py-0.5 font-mono text-[11px] border border-[#DCE6F5]">
                             {log.taskType}
                           </span>
                         </td>
@@ -1009,7 +1009,7 @@ export default function SettingsPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-white">PostgreSQL pg-boss Queue Failure Drawer</h3>
+                <h3 className="text-sm font-semibold text-[#0B1B3A]">PostgreSQL pg-boss Queue Failure Drawer</h3>
                 <p className="text-xs text-gray-400 mt-0.5">
                   Any background worker encountering unhandled exceptions logs payloads here for safe inspection and manual re-enqueuing.
                 </p>
@@ -1017,7 +1017,7 @@ export default function SettingsPage() {
 
               <button
                 onClick={fetchFailedJobs}
-                className="flex items-center gap-1.5 rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:text-white"
+                className="flex items-center gap-1.5 rounded-lg border border-[#C3D3EA] bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:text-white"
               >
                 <RotateCw className="h-3 w-3" />
                 <span>Refresh</span>
@@ -1025,9 +1025,9 @@ export default function SettingsPage() {
             </div>
 
             {failedJobs.length === 0 ? (
-              <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-12 text-center space-y-3">
+              <div className="rounded-xl border border-[#DCE6F5] bg-white p-12 text-center space-y-3">
                 <CheckCircle2 className="h-8 w-8 text-emerald-400 mx-auto" />
-                <h4 className="text-sm font-semibold text-white">All Queue Tasks Healthy</h4>
+                <h4 className="text-sm font-semibold text-[#0B1B3A]">All Queue Tasks Healthy</h4>
                 <p className="text-xs text-gray-400 max-w-sm mx-auto">
                   Zero active failures in the pg-boss queue. Background crawl workers and evaluation runners are healthy.
                 </p>
@@ -1037,7 +1037,7 @@ export default function SettingsPage() {
                 {failedJobs.map((job) => (
                   <div
                     key={job.id}
-                    className="rounded-xl border border-red-500/30 bg-[#0E1322] p-5 shadow-sm space-y-3"
+                    className="rounded-xl border border-red-500/30 bg-white p-5 shadow-sm space-y-3"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2">
@@ -1059,14 +1059,14 @@ export default function SettingsPage() {
                         </button>
                         <button
                           onClick={() => handleJobAction(job.id, "dismiss")}
-                          className="rounded-lg border border-gray-700 bg-gray-800 hover:bg-gray-700 px-3 py-1.5 text-xs font-medium text-gray-300 transition"
+                          className="rounded-lg border border-[#C3D3EA] bg-gray-800 hover:bg-gray-700 px-3 py-1.5 text-xs font-medium text-gray-300 transition"
                         >
                           Dismiss
                         </button>
                       </div>
                     </div>
 
-                    <p className="text-xs text-red-300 font-mono bg-red-950/30 p-2.5 rounded border border-red-500/20 truncate">
+                    <p className="text-xs text-red-300 font-mono bg-red-50 p-2.5 rounded border border-red-500/20 truncate">
                       {job.errorStack || "Task threw an unhandled runtime error."}
                     </p>
 
@@ -1084,8 +1084,8 @@ export default function SettingsPage() {
         {activeTab === "workspace" && (
           <div className="space-y-6">
             {/* Workspace Profile Card */}
-            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 space-y-4">
-              <h3 className="text-sm font-semibold text-white">Active Tenant Profile</h3>
+            <div className="rounded-xl border border-[#DCE6F5] bg-white p-6 space-y-4">
+              <h3 className="text-sm font-semibold text-[#0B1B3A]">Active Tenant Profile</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
                   <span className="text-gray-400">Workspace Identifier (Slug):</span>
@@ -1121,8 +1121,8 @@ export default function SettingsPage() {
 
             {/* Modal Confirmation */}
             {deleteModalOpen && (
-              <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                <div className="max-w-md w-full rounded-2xl border border-red-500/40 bg-[#0E1322] p-6 shadow-2xl space-y-4">
+              <div className="fixed inset-0 bg-[#0B1B3A]/35 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                <div className="max-w-md w-full rounded-2xl border border-red-500/40 bg-white p-6 shadow-2xl space-y-4">
                   <div className="flex items-center gap-3 text-red-400">
                     <ShieldAlert className="h-6 w-6" />
                     <h3 className="text-lg font-bold">Confirm Account Deletion</h3>
@@ -1137,7 +1137,7 @@ export default function SettingsPage() {
                     value={confirmSlugInput}
                     onChange={(e) => setConfirmSlugInput(e.target.value)}
                     placeholder={currentTenantSlug}
-                    className="w-full rounded-lg border border-red-500/40 bg-gray-950 px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-red-500"
+                    className="w-full rounded-lg border border-red-500/40 bg-white px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-red-500"
                   />
 
                   <div className="flex justify-end gap-2 pt-2">
@@ -1146,7 +1146,7 @@ export default function SettingsPage() {
                         setDeleteModalOpen(false);
                         setConfirmSlugInput("");
                       }}
-                      className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-xs text-gray-300 hover:text-white"
+                      className="rounded-lg border border-[#C3D3EA] bg-gray-800 px-4 py-2 text-xs text-gray-300 hover:text-white"
                     >
                       Cancel
                     </button>
