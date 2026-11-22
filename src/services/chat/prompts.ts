@@ -24,9 +24,15 @@ Rules:
   },
   {
     key: "qa_answer",
-    description: "Question answering prompt combining user query, role instructions, and retrieved context.",
+    description: "Question answering prompt combining customer query, role instructions, and retrieved context.",
     templateText: `Context from Knowledge Brain:
 {knowledge_results}
+
+Customer Name:
+{customer_name}
+
+Customer Query:
+{customer_query}
 
 Active Skill:
 {active_skill}
@@ -34,11 +40,8 @@ Active Skill:
 Active Instructions:
 {active_instructions}
 
-Customer Query:
-{customer_query}
-
 Provide a direct, complete, and cited response adhering to your active role persona.`,
-    requiredVariables: ["knowledge_results", "customer_query"],
+    requiredVariables: ["knowledge_results", "customer_name", "customer_query"],
   },
   {
     key: "write_lesson",
@@ -62,6 +65,28 @@ Synthesize this correction into a clear, durable Markdown lesson formatted with:
 - Correct Protocol / Rule
 - Few-Shot Example`,
     requiredVariables: ["customer_query", "original_answer", "human_critique"],
+  },
+  {
+    key: "improve_skill",
+    description: "Synthesizes improved skill instructions and few-shot rules based on past critiques and eval failures.",
+    templateText: `You are the Skill Optimization Agent for {business_name}.
+Your objective is to upgrade the following skill instructions so the AI consultant avoids past mistakes.
+
+Skill Name:
+{skill_name}
+
+Current Skill Instructions:
+{skill_instructions}
+
+Recent Expert Critiques & Lessons:
+{critiques_and_lessons}
+
+Synthesize a refined, durable version of the skill instructions.
+Rules:
+1. Preserve existing domain rules and valid procedures.
+2. Incorporate explicit constraints addressing the critiques.
+3. Include 2 concise few-shot examples demonstrating the corrected behavior.`,
+    requiredVariables: ["business_name", "skill_name", "skill_instructions", "critiques_and_lessons"],
   },
   {
     key: "judge_eval",

@@ -40,6 +40,7 @@ interface PromptItem {
   description: string;
   currentVersionId: string | null;
   requiredVariables: string[];
+  defaultTemplateText?: string;
   currentVersion: PromptVersion | null;
   versions: PromptVersion[];
 }
@@ -270,6 +271,20 @@ export default function RolesAndPromptsPage() {
     }
   };
 
+  const handleRestoreDefault = () => {
+    if (!activePrompt) return;
+    const defaultText =
+      activePrompt.defaultTemplateText ||
+      activePrompt.versions[activePrompt.versions.length - 1]?.templateText ||
+      "";
+    setEditorText(defaultText);
+    setChangeSummary("Restored to built-in default baseline template");
+    setSaveSuccessMsg(
+      `Restored built-in default template for ${activePrompt.key}. You can edit or click "Save New Version" to commit it.`
+    );
+    setTimeout(() => setSaveSuccessMsg(""), 5000);
+  };
+
   const handleSaveRole = async () => {
     setSavingRole(true);
     setRoleSuccessMsg("");
@@ -428,6 +443,22 @@ export default function RolesAndPromptsPage() {
               </div>
             )}
 
+            {/* Self-Improve Loop Notice (Task 1.3 requirement) */}
+            <div className="rounded-xl border border-indigo-500/20 bg-indigo-950/20 p-3 text-xs text-indigo-300 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-indigo-400 flex-shrink-0" />
+                <span>
+                  <strong>Self-Improve Loop Integration:</strong> Proposed prompt patches from automated runs (Feature 5) are tested on isolated branches and only publish as new versions here after human approval.
+                </span>
+              </div>
+              <a
+                href="/approvals"
+                className="text-[11px] font-semibold text-cyan-400 hover:text-cyan-300 underline shrink-0"
+              >
+                Approvals Inbox →
+              </a>
+            </div>
+
             {/* Validation Warning Alert (Task 1.3 requirement) */}
             {!validation.isValid && (
               <div className="rounded-xl border border-amber-500/40 bg-amber-950/20 p-4 text-xs text-amber-300 flex items-start gap-3">
@@ -458,11 +489,11 @@ export default function RolesAndPromptsPage() {
                   <select
                     value={selectedCompareVersionId}
                     onChange={(e) => setSelectedCompareVersionId(e.target.value)}
-                    className="rounded-lg border border-gray-700 bg-gray-900 px-2 py-1 text-xs text-gray-200 focus:outline-none"
+                    className="rounded-lg border border-gray-700 bg-gray-950 px-2 py-1 text-xs text-gray-200 focus:outline-none max-w-[200px] truncate"
                   >
                     {activePrompt?.versions.map((v) => (
                       <option key={v.id} value={v.id}>
-                        v{v.versionNumber} ({new Date(v.createdAt).toLocaleDateString()})
+                        v{v.versionNumber} {v.changeSummary ? `— ${v.changeSummary}` : `(${new Date(v.createdAt).toLocaleDateString()})`}
                       </option>
                     ))}
                   </select>
@@ -485,6 +516,14 @@ export default function RolesAndPromptsPage() {
                         <span>Rollback to v{comparedVersion?.versionNumber}</span>
                       </button>
                     )}
+                  <button
+                    onClick={handleRestoreDefault}
+                    className="flex items-center gap-1 rounded-lg border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/20 px-2.5 py-1 text-xs font-medium text-cyan-300 transition"
+                    title="Load built-in default template into editor"
+                  >
+                    <RotateCcw className="h-3 w-3" />
+                    <span>Restore Default</span>
+                  </button>
                 </div>
               </div>
 

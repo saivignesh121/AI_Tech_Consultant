@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import AppShell from "@/components/layout/AppShell";
 import {
   Key,
@@ -18,6 +19,7 @@ import {
   Clock,
   DollarSign,
   ShieldAlert,
+  Sparkles,
 } from "lucide-react";
 
 interface ConnectionItem {
@@ -402,6 +404,14 @@ export default function SettingsPage() {
             <Zap className="h-4 w-4" />
             <span>Model per Step Routing</span>
           </button>
+
+          <Link
+            href="/settings/roles-prompts"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-gray-400 hover:text-cyan-400 transition"
+          >
+            <Sparkles className="h-4 w-4" />
+            <span>Prompts & Roles Studio</span>
+          </Link>
 
           <button
             onClick={() => {

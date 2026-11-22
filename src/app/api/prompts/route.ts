@@ -15,9 +15,10 @@ export async function GET() {
       .from(prompts)
       .where(eq(prompts.businessId, tenant.businessId));
 
-    // If tenant has no prompts yet, initialize from defaults
-    if (promptList.length === 0) {
-      for (const dp of DEFAULT_PROMPTS) {
+    // Ensure all DEFAULT_PROMPTS exist for this business
+    for (const dp of DEFAULT_PROMPTS) {
+      const existing = promptList.find((p) => p.key === dp.key);
+      if (!existing) {
         const [insertedPrompt] = await db
           .insert(prompts)
           .values({
@@ -45,12 +46,13 @@ export async function GET() {
           .set({ currentVersionId: initialVersion.id })
           .where(eq(prompts.id, insertedPrompt.id));
       }
-
-      promptList = await db
-        .select()
-        .from(prompts)
-        .where(eq(prompts.businessId, tenant.businessId));
     }
+
+    // Refresh list if any were inserted
+    promptList = await db
+      .select()
+      .from(prompts)
+      .where(eq(prompts.businessId, tenant.businessId));
 
     // Now gather versions for each prompt
     const fullPrompts = await Promise.all(
@@ -70,6 +72,7 @@ export async function GET() {
           description: p.description,
           currentVersionId: p.currentVersionId,
           requiredVariables: defaultDef?.requiredVariables || [],
+          defaultTemplateText: defaultDef?.templateText || "",
           currentVersion: currentVersion
             ? {
                 id: currentVersion.id,

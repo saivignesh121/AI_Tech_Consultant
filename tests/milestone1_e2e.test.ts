@@ -111,12 +111,13 @@ describe("Milestone 1 (Feature 1: Workspace and Settings) End-to-End Suite", () 
   // Task 1.3: Prompt Studio, Validation & Caching Simulator
   // =========================================================================
   describe("Task 1.3: Prompt Studio, Variable Validation & Rollback", () => {
-    it("should validate all 5 built-in system prompt templates", () => {
-      expect(DEFAULT_PROMPTS).toHaveLength(5);
+    it("should validate all built-in system prompt templates", () => {
+      expect(DEFAULT_PROMPTS).toHaveLength(6);
       const keys = DEFAULT_PROMPTS.map((p) => p.key);
       expect(keys).toContain("master_system");
       expect(keys).toContain("qa_answer");
       expect(keys).toContain("write_lesson");
+      expect(keys).toContain("improve_skill");
       expect(keys).toContain("judge_eval");
       expect(keys).toContain("job_tagger");
 
