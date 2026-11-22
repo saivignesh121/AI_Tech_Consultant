@@ -183,3 +183,43 @@ In strict accordance with the Capstone Rules (*"use exactly one of Claude Code, 
   6. **Final System Verification:**
      - All 12 test suites passing (111 tests in vitest).
      - Next.js production build (`npm run build`) compiling all 49 pages and API routes with zero diagnostic errors.
+
+---
+
+## 10. Feature 2 - Task 2.4: Stay Fresh & URL Health Lifecycle Implementation Record
+
+- **Implemented Date:** 22 Nov 2026
+- **Architecture Standard:** Recheck Schedule | Zero-Waste Content Hashing | 4-Level URL Health State Machine | Archived Knowledge Base Recovery
+- **Key Modules Delivered:**
+  1. **Freshness & Health State Engine (`src/services/brain/freshnessChecker.ts`, `src/services/brain/healthTracker.ts`):**
+     - Computes deterministic SHA-256 `contentHash` on raw page content.
+     - Zero-Waste Re-Embedding: unchanged pages skip re-chunking and re-embedding, consuming 0 AI model tokens and zero wasted DB writes.
+     - Changed pages: detects modified hash, triggers re-chunking, updates embeddings, and records full audit trail in `knowledge_page_changes`.
+     - URL Health Lifecycle State Machine:
+       - HTTP 404 / missing from sitemap: failure count increments by 1 and moves to `Watch`.
+       - HTTP 301 Permanent Redirect: follows redirect to target URL, quarantines old URL, and indexes target URL.
+       - User settings: X consecutive failure threshold (`1` [right away], `2`, `15`, `30`) and Action Rule (`quarantine_then_archive`, `quarantine`, `archive`).
+       - HTTP 200 Recovery: failure count resets to 0 and transitions back to `Active`.
+       - Strict Filtering Guarantee: `quarantined` and `archived` URLs NEVER appear in answers or search retrieval.
+  2. **Database Schema Enhancements (`src/db/schema/knowledge.ts`):**
+     - `knowledgeRefreshRuns`: logs each refresh run with `startedAt`, `finishedAt`, `totalUrlsFetched` at the bottom, and full URL list with status and change type.
+     - `knowledgePageChanges`: audit log tracking every creation, modification (with old/new content hashes and diff summaries), status transition, and recovery.
+     - `knowledgeHealthPolicies`: user-controlled threshold X, action rule, and schedule (`daily`, `weekly`, `15_days`, `30_days`).
+  3. **REST API Endpoints:**
+     - `GET /api/brain/refresh`: returns dashboard metrics, active policy, past refresh runs, and pending URLs.
+     - `POST /api/brain/refresh`: triggers recheck runs, updates health policy settings, and recovers quarantined pages.
+     - `GET /api/brain/archived`: returns the Archived Knowledge Base for compliance audits and recovery.
+     - `POST /api/brain/archived`: 1-click recovery restoring quarantined/archived pages back to Active.
+  4. **Interactive Dashboard UI (`src/app/knowledge/page.tsx`):**
+     - Tab 7: "Stay Fresh & URL Health":
+       - Freshness & Ingestion Dashboard KPI cards (Pages processed, embedded, failed, pending, duplicates skipped, last sync time).
+       - Recheck schedule selector (Daily, Weekly, 15 days, 30 days).
+       - URL Health Settings Controls (Threshold X and Action Rule selector with save action).
+       - Pending URLs Review Panel: shows all pending URLs and consecutive failure counts before action is taken.
+       - Refresh Run View: shows first and last fetch date/time, total URLs fetched at the bottom, and expandable clean scrollable full URL list with status filters.
+       - Archived Knowledge Base: displays quarantined and archived pages with 1-click "Recover to Active" button.
+  5. **Automated Verification:**
+     - `tests/task2_4_stay_fresh.test.ts` (15/15 tests passing covering all Task 2.4 requirements).
+     - Full test suite: 21 test files, **213/213 tests passing (100% pass rate)**.
+     - Clean TypeScript verification (`tsc --noEmit`) and Next.js production build (`npm run build` compiling 69 routes).
+

@@ -164,3 +164,81 @@ export const emailMessages = pgTable("email_messages", {
   notes: text("notes"),
   sentAt: timestamp("sent_at", { withTimezone: true }).notNull(),
 });
+
+/**
+ * Task 2.4: Stay Fresh - Refresh Runs, Changes Audit History & Health Policies
+ */
+export const knowledgeRefreshRuns = pgTable(
+  "knowledge_refresh_runs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    businessId: uuid("business_id")
+      .references(() => businesses.id, { onDelete: "cascade" })
+      .notNull(),
+    sourceId: uuid("source_id").references(() => knowledgeSources.id, { onDelete: "cascade" }),
+    schedule: varchar("schedule", { length: 50 }).default("daily").notNull(), // 'daily' | 'weekly' | '15_days' | '30_days'
+    status: varchar("status", { length: 50 }).default("completed").notNull(), // 'in_progress' | 'completed' | 'failed'
+    startedAt: timestamp("started_at", { withTimezone: true }).defaultNow().notNull(),
+    finishedAt: timestamp("finished_at", { withTimezone: true }),
+    totalUrlsFetched: integer("total_urls_fetched").default(0).notNull(),
+    pagesProcessed: integer("pages_processed").default(0).notNull(),
+    pagesEmbedded: integer("pages_embedded").default(0).notNull(),
+    pagesFailed: integer("pages_failed").default(0).notNull(),
+    pagesPending: integer("pages_pending").default(0).notNull(),
+    duplicateUrlsSkipped: integer("duplicate_urls_skipped").default(0).notNull(),
+    urlsList: jsonb("urls_list").$type<
+      Array<{
+        url: string;
+        httpStatus: number;
+        healthStatus: "active" | "watch" | "quarantined" | "archived";
+        consecutiveFailures: number;
+        changeType: "new" | "unchanged" | "updated" | "redirected" | "missing" | "recovered";
+        contentHash?: string;
+        redirectUrl?: string;
+        timestamp: string;
+      }>
+    >().default([]).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_krr_business").on(table.businessId, table.startedAt),
+  ]
+);
+
+export const knowledgePageChanges = pgTable(
+  "knowledge_page_changes",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    businessId: uuid("business_id")
+      .references(() => businesses.id, { onDelete: "cascade" })
+      .notNull(),
+    pageId: uuid("page_id").references(() => knowledgePages.id, { onDelete: "cascade" }),
+    url: text("url").notNull(),
+    changeType: varchar("change_type", { length: 50 }).notNull(), // 'created' | 'updated' | 'removed' | 'recovered' | 'quarantined' | 'archived'
+    oldContentHash: char("old_content_hash", { length: 64 }),
+    newContentHash: char("new_content_hash", { length: 64 }),
+    diffSummary: text("diff_summary"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_kpc_business_page").on(table.businessId, table.pageId),
+    index("idx_kpc_business_created").on(table.businessId, table.createdAt),
+  ]
+);
+
+export const knowledgeHealthPolicies = pgTable(
+  "knowledge_health_policies",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    businessId: uuid("business_id")
+      .references(() => businesses.id, { onDelete: "cascade" })
+      .notNull(),
+    failureThresholdX: integer("failure_threshold_x").default(2).notNull(), // 1 ("right away"), 2, 15, 30
+    actionRule: varchar("action_rule", { length: 50 }).default("quarantine_then_archive").notNull(), // 'quarantine' | 'archive' | 'quarantine_then_archive'
+    recheckSchedule: varchar("recheck_schedule", { length: 50 }).default("daily").notNull(), // 'daily' | 'weekly' | '15_days' | '30_days'
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("uq_khp_business").on(table.businessId),
+  ]
+);

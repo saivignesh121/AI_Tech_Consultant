@@ -33,6 +33,13 @@ import {
   Pause,
   Play,
   RefreshCw,
+  RotateCcw,
+  Archive,
+  Sliders,
+  ChevronDown,
+  ChevronUp,
+  Calendar,
+  Check,
 } from "lucide-react";
 
 interface LiveCrawlProgress {
@@ -173,7 +180,7 @@ interface SitemapPlanSummary {
 
 export default function KnowledgeBrainPage() {
   const [activeTab, setActiveTab] = useState<
-    "sitemaps" | "pages" | "instructions" | "skills" | "emails" | "search" | "health"
+    "sitemaps" | "pages" | "instructions" | "skills" | "emails" | "search" | "freshness"
   >("sitemaps");
 
   // --- Sitemaps Tab State (Knowledge Type 1 & Task 2.2) ---
@@ -243,6 +250,52 @@ export default function KnowledgeBrainPage() {
     healthyPercent: number;
   } | null>(null);
 
+  // --- Task 2.4: Stay Fresh & URL Health State ---
+  const [freshnessMetrics, setFreshnessMetrics] = useState<{
+    pagesProcessed: number;
+    pagesEmbedded: number;
+    pagesFailed: number;
+    pagesPending: number;
+    duplicateUrlsSkipped: number;
+    lastSyncTime: string | null;
+    totalRuns: number;
+    activeCount: number;
+    watchCount: number;
+    quarantinedCount: number;
+    archivedCount: number;
+  }>({
+    pagesProcessed: 5,
+    pagesEmbedded: 5,
+    pagesFailed: 1,
+    pagesPending: 1,
+    duplicateUrlsSkipped: 0,
+    lastSyncTime: new Date().toISOString(),
+    totalRuns: 1,
+    activeCount: 3,
+    watchCount: 1,
+    quarantinedCount: 1,
+    archivedCount: 0,
+  });
+
+  const [healthPolicy, setHealthPolicyState] = useState<{
+    failureThresholdX: number;
+    actionRule: "quarantine" | "archive" | "quarantine_then_archive";
+    recheckSchedule: "daily" | "weekly" | "15_days" | "30_days";
+  }>({
+    failureThresholdX: 2,
+    actionRule: "quarantine_then_archive",
+    recheckSchedule: "daily",
+  });
+
+  const [refreshRuns, setRefreshRuns] = useState<any[]>([]);
+  const [pendingUrlsList, setPendingUrlsList] = useState<any[]>([]);
+  const [archivedPagesList, setArchivedPagesList] = useState<any[]>([]);
+  const [expandedRunId, setExpandedRunId] = useState<string | null>(null);
+  const [urlListFilter, setUrlListFilter] = useState<string>("all");
+  const [refreshLoading, setRefreshLoading] = useState(false);
+  const [savingPolicy, setSavingPolicy] = useState(false);
+  const [refreshStatusMsg, setRefreshStatusMsg] = useState("");
+
   useEffect(() => {
     fetchSitemaps();
     fetchPages();
@@ -250,6 +303,7 @@ export default function KnowledgeBrainPage() {
     fetchSkills();
     fetchEmailThreads();
     fetchHealth();
+    fetchFreshnessData();
     fetchCrawlProgress();
     executeSearch("How do I configure custom CNAME subdomains?");
 
@@ -666,6 +720,92 @@ export default function KnowledgeBrainPage() {
     }
   };
 
+  const fetchFreshnessData = async () => {
+    try {
+      const [refreshRes, archivedRes] = await Promise.all([
+        fetch("/api/brain/refresh"),
+        fetch("/api/brain/archived"),
+      ]);
+      const refreshData = await refreshRes.json();
+      const archivedData = await archivedRes.json();
+
+      if (refreshData.dashboard) setFreshnessMetrics(refreshData.dashboard);
+      if (refreshData.policy) setHealthPolicyState(refreshData.policy);
+      if (refreshData.runs && refreshData.runs.length > 0) {
+        setRefreshRuns(refreshData.runs);
+        if (!expandedRunId) {
+          setExpandedRunId(refreshData.runs[0].runId);
+        }
+      }
+      if (refreshData.pendingUrls) setPendingUrlsList(refreshData.pendingUrls);
+      if (archivedData.archivedPages) setArchivedPagesList(archivedData.archivedPages);
+    } catch (e) {
+      console.error("Error fetching freshness data:", e);
+    }
+  };
+
+  const handleTriggerRefresh = async () => {
+    setRefreshLoading(true);
+    setRefreshStatusMsg("");
+    try {
+      const res = await fetch("/api/brain/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "trigger", schedule: healthPolicy.recheckSchedule }),
+      });
+      const data = await res.json();
+      if (data.message) setRefreshStatusMsg(data.message);
+      await fetchFreshnessData();
+      await fetchHealth();
+      await fetchPages();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setRefreshLoading(false);
+    }
+  };
+
+  const handleSaveHealthPolicy = async () => {
+    setSavingPolicy(true);
+    try {
+      const res = await fetch("/api/brain/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update_policy",
+          policy: healthPolicy,
+        }),
+      });
+      const data = await res.json();
+      if (data.message) setRefreshStatusMsg(data.message);
+      await fetchFreshnessData();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSavingPolicy(false);
+    }
+  };
+
+  const handleRecoverPage = async (pageId: string) => {
+    try {
+      const res = await fetch("/api/brain/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "recover",
+          pageId,
+        }),
+      });
+      const data = await res.json();
+      if (data.message) setRefreshStatusMsg(data.message);
+      await fetchFreshnessData();
+      await fetchHealth();
+      await fetchPages();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const filteredPages = pages.filter(
     (p) =>
       p.title?.toLowerCase().includes(pageSearchFilter.toLowerCase()) ||
@@ -786,7 +926,23 @@ export default function KnowledgeBrainPage() {
             }`}
           >
             <Search className="h-4 w-4" />
-            <span>Search &amp; Health Sandbox</span>
+            <span>Search &amp; Sandbox</span>
+          </button>
+
+          {/* Tab 7: Stay Fresh & URL Health (Task 2.4) */}
+          <button
+            onClick={() => setActiveTab("freshness")}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+              activeTab === "freshness"
+                ? "border-indigo-500 text-indigo-400"
+                : "border-transparent text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            <RotateCw className="h-4 w-4" />
+            <span>Stay Fresh &amp; Health</span>
+            <span className="text-[10px] bg-emerald-950/60 text-emerald-300 px-1.5 py-0.2 rounded border border-emerald-500/20 font-mono">
+              Task 2.4
+            </span>
           </button>
         </div>
 
@@ -2040,6 +2196,582 @@ export default function KnowledgeBrainPage() {
                       {healthSummary.archived}
                     </div>
                   </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ================= TAB 7: STAY FRESH & URL HEALTH (Task 2.4) ================= */}
+        {activeTab === "freshness" && (
+          <div className="space-y-6">
+            {/* Header & Recheck Trigger */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                    <RotateCw className="h-4 w-4 text-emerald-400" />
+                    <span>Stay Fresh &amp; Health Lifecycle (Task 2.4)</span>
+                  </h3>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Recheck sitemaps regularly to detect new and changed pages. Unchanged pages skip re-embedding via SHA-256 content hashes. Quarantined &amp; archived pages never appear in search answers.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleTriggerRefresh}
+                    disabled={refreshLoading}
+                    className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-medium text-white hover:bg-emerald-500 disabled:opacity-50 transition shadow-sm"
+                  >
+                    <RefreshCw className={`h-3.5 w-3.5 ${refreshLoading ? "animate-spin" : ""}`} />
+                    <span>{refreshLoading ? "Checking Freshness..." : "Trigger Recheck Now"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {refreshStatusMsg && (
+                <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3 text-xs text-emerald-300 flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+                  <span>{refreshStatusMsg}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Dashboard: pages processed, embedded, failed, pending, duplicate skipped, last sync */}
+            <div className="space-y-2">
+              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider font-mono">
+                Freshness &amp; Ingestion Dashboard
+              </span>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4">
+                  <div className="text-xs text-gray-400">Pages Processed</div>
+                  <div className="text-2xl font-bold text-white mt-1 font-mono">
+                    {freshnessMetrics.pagesProcessed}
+                  </div>
+                  <div className="text-[10px] text-gray-500 mt-0.5">Verified URLs</div>
+                </div>
+
+                <div className="rounded-xl border border-indigo-500/30 bg-[#0E1322] p-4">
+                  <div className="text-xs text-indigo-400">Pages Embedded</div>
+                  <div className="text-2xl font-bold text-indigo-400 mt-1 font-mono">
+                    {freshnessMetrics.pagesEmbedded}
+                  </div>
+                  <div className="text-[10px] text-indigo-300/70 mt-0.5">Content hash checked</div>
+                </div>
+
+                <div className="rounded-xl border border-red-500/30 bg-[#0E1322] p-4">
+                  <div className="text-xs text-red-400">Pages Failed</div>
+                  <div className="text-2xl font-bold text-red-400 mt-1 font-mono">
+                    {freshnessMetrics.pagesFailed}
+                  </div>
+                  <div className="text-[10px] text-red-300/70 mt-0.5">404 / HTTP errors</div>
+                </div>
+
+                <div className="rounded-xl border border-amber-500/30 bg-[#0E1322] p-4">
+                  <div className="text-xs text-amber-400">Pages Pending</div>
+                  <div className="text-2xl font-bold text-amber-400 mt-1 font-mono">
+                    {freshnessMetrics.pagesPending}
+                  </div>
+                  <div className="text-[10px] text-amber-300/70 mt-0.5">On Watch (1 fail)</div>
+                </div>
+
+                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4">
+                  <div className="text-xs text-gray-400">Duplicates Skipped</div>
+                  <div className="text-2xl font-bold text-purple-400 mt-1 font-mono">
+                    {freshnessMetrics.duplicateUrlsSkipped}
+                  </div>
+                  <div className="text-[10px] text-gray-500 mt-0.5">Single URL row kept</div>
+                </div>
+
+                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4">
+                  <div className="text-xs text-gray-400">Last Sync Time</div>
+                  <div className="text-xs font-bold text-emerald-400 mt-2 font-mono truncate">
+                    {freshnessMetrics.lastSyncTime
+                      ? new Date(freshnessMetrics.lastSyncTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+                      : "Pending"}
+                  </div>
+                  <div className="text-[10px] text-gray-500 mt-0.5 truncate">
+                    {freshnessMetrics.lastSyncTime ? new Date(freshnessMetrics.lastSyncTime).toLocaleDateString() : "Never"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recheck Schedule & URL Health Settings (User Controls) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Setting 1: Recheck Schedule */}
+              <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                    <Calendar className="h-4 w-4 text-indigo-400" />
+                    <span>Recheck Schedule</span>
+                  </div>
+                  <span className="rounded bg-indigo-500/10 text-indigo-300 px-2 py-0.5 text-xs font-mono border border-indigo-500/20">
+                    Active: {healthPolicy.recheckSchedule.replace("_", " ")}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-400">
+                  Pick how often the sitemaps are checked again. New pages are added; changed pages update their embeddings; removed pages stop appearing in answers.
+                </p>
+
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  {[
+                    { id: "daily", label: "Daily (24 hrs)", desc: "Best for fast-moving docs" },
+                    { id: "weekly", label: "Weekly (7 days)", desc: "Recommended balance" },
+                    { id: "15_days", label: "Every 15 Days", desc: "Bi-weekly sync" },
+                    { id: "30_days", label: "Every 30 Days", desc: "Monthly cadence" },
+                  ].map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setHealthPolicyState((prev) => ({ ...prev, recheckSchedule: s.id as any }))}
+                      className={`p-3 rounded-lg border text-left transition ${
+                        healthPolicy.recheckSchedule === s.id
+                          ? "border-indigo-500 bg-indigo-950/40 text-white"
+                          : "border-gray-800 bg-gray-950/50 text-gray-400 hover:border-gray-700"
+                      }`}
+                    >
+                      <div className="font-semibold text-white flex items-center justify-between">
+                        <span>{s.label}</span>
+                        {healthPolicy.recheckSchedule === s.id && (
+                          <Check className="h-3.5 w-3.5 text-indigo-400" />
+                        )}
+                      </div>
+                      <div className="text-[10px] text-gray-400 mt-1">{s.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Setting 2: URL Health Action Policy (Threshold X & Action Rule) */}
+              <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                    <Sliders className="h-4 w-4 text-emerald-400" />
+                    <span>URL Health Action Rules</span>
+                  </div>
+                  <span className="text-xs text-gray-400 font-mono">User Controlled</span>
+                </div>
+                <p className="text-xs text-gray-400">
+                  Configure X (number of consecutive refresh failures before action) and the automated quarantine/archive rule.
+                </p>
+
+                <div className="space-y-3 text-xs">
+                  <div>
+                    <label className="text-gray-300 font-medium block mb-1">
+                      Consecutive Failures Threshold (X):
+                    </label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {[
+                        { val: 1, label: "1 (Right away)" },
+                        { val: 2, label: "2 (Standard)" },
+                        { val: 15, label: "15 (Extended)" },
+                        { val: 30, label: "30 (Lax)" },
+                      ].map((item) => (
+                        <button
+                          key={item.val}
+                          type="button"
+                          onClick={() => setHealthPolicyState((prev) => ({ ...prev, failureThresholdX: item.val }))}
+                          className={`px-2.5 py-1.5 rounded border text-center font-mono text-xs transition ${
+                            healthPolicy.failureThresholdX === item.val
+                              ? "border-emerald-500 bg-emerald-950/40 text-emerald-300 font-bold"
+                              : "border-gray-800 bg-gray-950 text-gray-400 hover:border-gray-700"
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-gray-300 font-medium block mb-1">
+                      Action Rule After X Refreshes:
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { id: "quarantine_then_archive", label: "Quarantine then Archive" },
+                        { id: "quarantine", label: "Quarantine Only" },
+                        { id: "archive", label: "Archive Directly" },
+                      ].map((rule) => (
+                        <button
+                          key={rule.id}
+                          type="button"
+                          onClick={() => setHealthPolicyState((prev) => ({ ...prev, actionRule: rule.id as any }))}
+                          className={`px-2.5 py-1.5 rounded border text-center text-xs transition ${
+                            healthPolicy.actionRule === rule.id
+                              ? "border-emerald-500 bg-emerald-950/40 text-emerald-300 font-bold"
+                              : "border-gray-800 bg-gray-950 text-gray-400 hover:border-gray-700"
+                          }`}
+                        >
+                          {rule.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-2 flex justify-end">
+                    <button
+                      onClick={handleSaveHealthPolicy}
+                      disabled={savingPolicy}
+                      className="rounded bg-emerald-600 px-3.5 py-1.5 text-xs text-white hover:bg-emerald-500 transition font-medium"
+                    >
+                      {savingPolicy ? "Saving Policy..." : "Save Policy Settings"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Pending URLs Review Panel (Task 2.4 requirement: Before any action, show user pending URLs and counts) */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-400" />
+                    <span>Pending URLs Review ({pendingUrlsList.length} Pending Actions)</span>
+                  </h4>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Before any quarantine or archival action is taken, pending URLs with consecutive failure counts are displayed for human review.
+                  </p>
+                </div>
+                <span className="text-xs font-mono text-gray-400">
+                  Threshold X = {healthPolicy.failureThresholdX}
+                </span>
+              </div>
+
+              {pendingUrlsList.length === 0 ? (
+                <div className="rounded-lg border border-gray-800 bg-gray-950/60 p-4 text-center text-xs text-gray-400">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-400 mx-auto mb-1" />
+                  <span>All knowledge URLs are healthy! No pending failures or quarantined items.</span>
+                </div>
+              ) : (
+                <div className="rounded-lg border border-gray-800 overflow-hidden bg-gray-950">
+                  <table className="w-full text-left text-xs font-mono">
+                    <thead className="bg-gray-900 border-b border-gray-800 text-gray-400 uppercase text-[10px]">
+                      <tr>
+                        <th className="px-3.5 py-2.5">URL / Title</th>
+                        <th className="px-3.5 py-2.5 text-center">Consecutive Failures</th>
+                        <th className="px-3.5 py-2.5">Current Status</th>
+                        <th className="px-3.5 py-2.5">Last Checked</th>
+                        <th className="px-3.5 py-2.5">Pending Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-800 text-gray-300">
+                      {pendingUrlsList.map((item, idx) => (
+                        <tr key={idx} className="hover:bg-gray-900/40">
+                          <td className="px-3.5 py-2.5 font-sans">
+                            <div className="font-medium text-white truncate max-w-sm">{item.title || "Help Page"}</div>
+                            <div className="text-xs text-indigo-400 font-mono truncate max-w-md">{item.url}</div>
+                          </td>
+                          <td className="px-3.5 py-2.5 text-center font-bold text-amber-400">
+                            {item.consecutiveFailures} / {healthPolicy.failureThresholdX}
+                          </td>
+                          <td className="px-3.5 py-2.5">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
+                              item.healthStatus === "watch"
+                                ? "bg-amber-950/60 text-amber-300 border border-amber-500/30"
+                                : item.healthStatus === "quarantined"
+                                ? "bg-red-950/60 text-red-300 border border-red-500/30"
+                                : "bg-gray-800 text-gray-400"
+                            }`}>
+                              {item.healthStatus}
+                            </span>
+                          </td>
+                          <td className="px-3.5 py-2.5 text-gray-400 text-[11px]">
+                            {new Date(item.lastCheckedAt).toLocaleTimeString()}
+                          </td>
+                          <td className="px-3.5 py-2.5">
+                            <span className="text-[11px] font-mono text-purple-300">
+                              {item.pendingAction === "watch" ? "Keep on Watch" : `Apply ${item.pendingAction}`}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Refresh Run View (Task 2.4 requirement: First/Last fetch date & time, Total fetched at bottom, Full URL list) */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-indigo-400" />
+                    <span>Refresh Run View ({refreshRuns.length} Runs Logged)</span>
+                  </h4>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    For each refresh, inspect first and last fetch timestamps, total URLs fetched, and toggle the full scrollable URL list.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-400 font-mono">
+                    Filter:
+                  </span>
+                  <select
+                    value={urlListFilter}
+                    onChange={(e) => setUrlListFilter(e.target.value)}
+                    className="rounded border border-gray-700 bg-gray-900 px-2 py-1 text-xs text-gray-300 font-mono"
+                  >
+                    <option value="all">All Statuses</option>
+                    <option value="200">200 OK (Clean)</option>
+                    <option value="301">301 Redirected</option>
+                    <option value="404">404 Missing / Failed</option>
+                  </select>
+                </div>
+              </div>
+
+              {refreshRuns.length === 0 ? (
+                <div className="rounded-lg border border-gray-800 bg-gray-950/60 p-6 text-center text-xs text-gray-400 space-y-2">
+                  <Clock className="h-6 w-6 text-indigo-400 mx-auto" />
+                  <p>No refresh runs recorded yet. Click "Trigger Recheck Now" to perform the first scheduled sync.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {refreshRuns.map((run) => {
+                    const isExpanded = expandedRunId === run.runId;
+                    const filteredUrls = (run.urlsList || []).filter((u: any) => {
+                      if (urlListFilter === "200") return u.httpStatus >= 200 && u.httpStatus < 300;
+                      if (urlListFilter === "301") return u.httpStatus === 301 || u.httpStatus === 308;
+                      if (urlListFilter === "404") return u.httpStatus === 404 || u.changeType === "missing";
+                      return true;
+                    });
+
+                    return (
+                      <div
+                        key={run.runId}
+                        className="rounded-lg border border-gray-800 bg-gray-950/70 overflow-hidden"
+                      >
+                        {/* Run Header Card */}
+                        <div className="p-4 bg-gray-900/60 border-b border-gray-800 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-xs">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 font-mono">
+                              <span className="font-bold text-white">{run.runId}</span>
+                              <span className="rounded bg-indigo-500/10 text-indigo-300 px-2 py-0.5 border border-indigo-500/20 text-[10px]">
+                                {run.schedule}
+                              </span>
+                              <span className="rounded bg-emerald-500/10 text-emerald-300 px-2 py-0.5 border border-emerald-500/20 text-[10px]">
+                                {run.status}
+                              </span>
+                            </div>
+                            <div className="text-gray-400 text-[11px] flex items-center gap-3">
+                              <span>
+                                <strong>First fetch:</strong> {new Date(run.startedAt).toLocaleString()}
+                              </span>
+                              <span>&bull;</span>
+                              <span>
+                                <strong>Last fetch:</strong> {new Date(run.finishedAt).toLocaleString()}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-4">
+                            <div className="text-right text-[11px] font-mono">
+                              <span className="text-gray-400">Processed: </span>
+                              <span className="text-white font-bold">{run.pagesProcessed}</span>
+                              <span className="text-gray-600 mx-1">|</span>
+                              <span className="text-gray-400">Embedded: </span>
+                              <span className="text-indigo-400 font-bold">{run.pagesEmbedded}</span>
+                              <span className="text-gray-600 mx-1">|</span>
+                              <span className="text-gray-400">Failed: </span>
+                              <span className="text-red-400 font-bold">{run.pagesFailed}</span>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => setExpandedRunId(isExpanded ? null : run.runId)}
+                              className="flex items-center gap-1 rounded bg-gray-800 hover:bg-gray-700 px-2.5 py-1 text-xs text-gray-200 transition font-mono"
+                            >
+                              {isExpanded ? (
+                                <>
+                                  <ChevronUp className="h-3.5 w-3.5" />
+                                  <span>Hide URL List</span>
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown className="h-3.5 w-3.5" />
+                                  <span>View Full URL List ({run.urlsList?.length || 0})</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Collapsible Section: Full URL List (Clean and Scrollable) */}
+                        {isExpanded && (
+                          <div className="p-4 space-y-3">
+                            <div className="flex items-center justify-between text-xs text-gray-400 font-mono">
+                              <span>Showing {filteredUrls.length} of {run.urlsList?.length || 0} URLs in this refresh run:</span>
+                              <span className="text-[11px] text-emerald-400">
+                                SHA-256 Content Hash Checked (Unchanged pages skip re-embedding)
+                              </span>
+                            </div>
+
+                            <div className="max-h-72 overflow-y-auto rounded border border-gray-800 bg-gray-950">
+                              <table className="w-full text-left text-xs font-mono">
+                                <thead className="bg-gray-900 border-b border-gray-800 text-gray-400 uppercase text-[10px] sticky top-0">
+                                  <tr>
+                                    <th className="px-3.5 py-2">URL</th>
+                                    <th className="px-3.5 py-2 text-center">HTTP Status</th>
+                                    <th className="px-3.5 py-2">Health Level</th>
+                                    <th className="px-3.5 py-2">Change Type</th>
+                                    <th className="px-3.5 py-2">Content Hash</th>
+                                    <th className="px-3.5 py-2">Timestamp</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-800/80 text-gray-300">
+                                  {filteredUrls.map((u: any, idx: number) => (
+                                    <tr key={idx} className="hover:bg-gray-900/50">
+                                      <td className="px-3.5 py-2 text-indigo-400 truncate max-w-sm">
+                                        {u.url}
+                                        {u.redirectUrl && (
+                                          <div className="text-[10px] text-gray-500 font-sans">
+                                            &rarr; Redirects to {u.redirectUrl}
+                                          </div>
+                                        )}
+                                      </td>
+                                      <td className="px-3.5 py-2 text-center font-bold">
+                                        <span className={`px-1.5 py-0.5 rounded text-[10px] ${
+                                          u.httpStatus === 200
+                                            ? "bg-emerald-950 text-emerald-400"
+                                            : u.httpStatus === 301 || u.httpStatus === 308
+                                            ? "bg-purple-950 text-purple-400"
+                                            : "bg-red-950 text-red-400"
+                                        }`}>
+                                          {u.httpStatus}
+                                        </span>
+                                      </td>
+                                      <td className="px-3.5 py-2">
+                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                          u.healthStatus === "active"
+                                            ? "text-emerald-400 bg-emerald-950/40"
+                                            : u.healthStatus === "watch"
+                                            ? "text-amber-400 bg-amber-950/40"
+                                            : "text-red-400 bg-red-950/40"
+                                        }`}>
+                                          {u.healthStatus}
+                                        </span>
+                                      </td>
+                                      <td className="px-3.5 py-2">
+                                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono ${
+                                          u.changeType === "new"
+                                            ? "bg-indigo-950 text-indigo-300"
+                                            : u.changeType === "unchanged"
+                                            ? "bg-gray-800 text-gray-400"
+                                            : u.changeType === "updated"
+                                            ? "bg-emerald-950 text-emerald-300"
+                                            : u.changeType === "recovered"
+                                            ? "bg-cyan-950 text-cyan-300"
+                                            : "bg-red-950 text-red-300"
+                                        }`}>
+                                          {u.changeType === "unchanged" ? "Unchanged (0 tokens)" : u.changeType}
+                                        </span>
+                                      </td>
+                                      <td className="px-3.5 py-2 text-gray-500 text-[10px]">
+                                        {u.contentHash ? `${u.contentHash.substring(0, 10)}...` : "—"}
+                                      </td>
+                                      <td className="px-3.5 py-2 text-gray-400 text-[11px]">
+                                        {new Date(u.timestamp).toLocaleTimeString()}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Total URLs Fetched Bottom Footer (Task 2.4 requirement) */}
+                        <div className="px-4 py-2.5 bg-gray-900 border-t border-gray-800 flex items-center justify-between text-xs font-mono">
+                          <span className="text-gray-400">
+                            Total URLs Fetched: <strong className="text-white">{run.totalUrlsFetched} URLs</strong>
+                          </span>
+                          <span className="text-gray-500 text-[11px]">
+                            {run.pagesProcessed} Processed &bull; {run.pagesEmbedded} Embedded &bull; {run.pagesFailed} Failed &bull; {run.duplicateUrlsSkipped} Duplicates Skipped
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Archived Knowledge Base (Task 2.4 requirement: Nothing deleted for good, archived pages move here for audits and recovery) */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+                    <Archive className="h-4 w-4 text-purple-400" />
+                    <span>Archived Knowledge Base ({archivedPagesList.length} Quarantined &amp; Archived Pages)</span>
+                  </h4>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Quarantined and archived URLs never appear in search answers. Nothing is deleted for good: records remain here for compliance audits and can be recovered to Active in one click.
+                  </p>
+                </div>
+                <span className="rounded bg-purple-500/10 text-purple-300 px-2.5 py-0.5 text-xs font-mono border border-purple-500/20">
+                  Zero Hallucination Shield
+                </span>
+              </div>
+
+              {archivedPagesList.length === 0 ? (
+                <div className="rounded-lg border border-gray-800 bg-gray-950/60 p-6 text-center text-xs text-gray-400">
+                  <Archive className="h-6 w-6 text-gray-500 mx-auto mb-1" />
+                  <span>No pages in Quarantine or Archive. Knowledge Brain is fully healthy!</span>
+                </div>
+              ) : (
+                <div className="rounded-lg border border-gray-800 overflow-hidden bg-gray-950">
+                  <table className="w-full text-left text-xs font-mono">
+                    <thead className="bg-gray-900 border-b border-gray-800 text-gray-400 uppercase text-[10px]">
+                      <tr>
+                        <th className="px-3.5 py-2.5">Title &amp; URL</th>
+                        <th className="px-3.5 py-2.5">Status</th>
+                        <th className="px-3.5 py-2.5 text-center">Failures</th>
+                        <th className="px-3.5 py-2.5">Redirect Target</th>
+                        <th className="px-3.5 py-2.5">Last Checked</th>
+                        <th className="px-3.5 py-2.5 text-right">Recovery Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-800 text-gray-300">
+                      {archivedPagesList.map((page) => (
+                        <tr key={page.id} className="hover:bg-gray-900/50">
+                          <td className="px-3.5 py-2.5 font-sans">
+                            <div className="font-semibold text-white truncate max-w-sm">{page.title}</div>
+                            <div className="text-xs text-indigo-400 font-mono truncate max-w-md">{page.url}</div>
+                          </td>
+                          <td className="px-3.5 py-2.5">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                              page.healthStatus === "quarantined"
+                                ? "bg-red-950/80 text-red-300 border border-red-500/30"
+                                : "bg-gray-800 text-gray-400 border border-gray-700"
+                            }`}>
+                              {page.healthStatus}
+                            </span>
+                          </td>
+                          <td className="px-3.5 py-2.5 text-center font-bold text-amber-400">
+                            {page.consecutiveFailures}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-gray-400 text-[11px] truncate max-w-xs">
+                            {page.redirectUrl || "None"}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-gray-400 text-[11px]">
+                            {new Date(page.lastCheckedAt).toLocaleTimeString()}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-right">
+                            <button
+                              onClick={() => handleRecoverPage(page.id)}
+                              className="inline-flex items-center gap-1 rounded bg-indigo-600 hover:bg-indigo-500 px-2.5 py-1 text-xs text-white transition font-mono"
+                            >
+                              <RotateCcw className="h-3 w-3" />
+                              <span>Recover to Active</span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
