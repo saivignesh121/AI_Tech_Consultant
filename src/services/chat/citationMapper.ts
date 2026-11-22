@@ -3,6 +3,9 @@
  * Task 2.1 & Task 3.2: Exact paragraph, screenshot, instruction, skill, or email attribution.
  * Attribution Rule: Every answer shows which type of knowledge it used:
  * [sitemap], [page_url], [instruction], [skill], [past_email]
+ * 
+ * One-Click Citation: "every answer shows its sources, and one click opens the exact
+ * paragraph, screenshot, instruction, skill or past email it used."
  */
 
 export type KnowledgeSourceType =
@@ -35,24 +38,46 @@ export function getAttributionBadge(type: string): string {
 
 export interface Citation {
   citationIndex: number;
+  citationNumber?: number; // alias
   id: string;
   type: KnowledgeSourceType;
   attributionBadge: string;
   title: string;
+  sourceTitle?: string; // alias
   sourceUrl?: string;
+  url?: string; // alias
   snippet: string;
+  paragraphText?: string;
   imageUrl?: string;
+  imageCaption?: string;
+  instructionRule?: string;
+  skillSteps?: string;
+  emailDetails?: {
+    subject?: string;
+    from?: string;
+    note?: string;
+  };
+}
+
+export interface RetrievedContextItem {
+  id: string;
+  type: KnowledgeSourceType;
+  title: string;
+  sourceUrl?: string;
+  content: string;
+  imageUrl?: string;
+  imageCaption?: string;
+  instructionRule?: string;
+  skillSteps?: string;
+  emailDetails?: {
+    subject?: string;
+    from?: string;
+    note?: string;
+  };
 }
 
 export function buildCitations(
-  retrievedContexts: Array<{
-    id: string;
-    type: KnowledgeSourceType;
-    title: string;
-    sourceUrl?: string;
-    content: string;
-    imageUrl?: string;
-  }>
+  retrievedContexts: RetrievedContextItem[]
 ): { citations: Citation[]; formattedContext: string } {
   const citations: Citation[] = [];
   const formattedSections: string[] = [];
@@ -60,15 +85,24 @@ export function buildCitations(
   retrievedContexts.forEach((item, index) => {
     const citationIndex = index + 1;
     const badge = getAttributionBadge(item.type);
+
     const citation: Citation = {
       citationIndex,
+      citationNumber: citationIndex,
       id: item.id,
       type: item.type,
       attributionBadge: badge,
       title: item.title,
+      sourceTitle: item.title,
       sourceUrl: item.sourceUrl,
+      url: item.sourceUrl,
       snippet: item.content.slice(0, 200) + (item.content.length > 200 ? "..." : ""),
+      paragraphText: item.content,
       imageUrl: item.imageUrl,
+      imageCaption: item.imageCaption,
+      instructionRule: item.instructionRule || (item.type === "instruction" ? item.content : undefined),
+      skillSteps: item.skillSteps || (item.type === "skill" ? item.content : undefined),
+      emailDetails: item.emailDetails,
     };
 
     citations.push(citation);
@@ -88,15 +122,30 @@ export function buildCitations(
  */
 export function mapDynamicCitations(
   answer: string,
-  chunks: Array<{ title: string; url?: string; content?: string; type?: string }>
+  chunks: Array<{
+    id?: string;
+    title: string;
+    url?: string;
+    content?: string;
+    type?: string;
+    imageUrl?: string;
+  }>
 ): {
-  citations: Array<{ citationNumber: number; sourceTitle: string; url: string; attributionBadge: string }>;
+  citations: Citation[];
 } {
-  const citations = chunks.map((c, i) => ({
+  const citations: Citation[] = chunks.map((c, i) => ({
+    citationIndex: i + 1,
     citationNumber: i + 1,
-    sourceTitle: c.title,
-    url: c.url || "#",
+    id: c.id || `chunk-${i + 1}`,
+    type: (c.type as KnowledgeSourceType) || "sitemap",
     attributionBadge: getAttributionBadge(c.type || "sitemap"),
+    title: c.title,
+    sourceTitle: c.title,
+    sourceUrl: c.url || "#",
+    url: c.url || "#",
+    snippet: (c.content || "").slice(0, 200),
+    paragraphText: c.content,
+    imageUrl: c.imageUrl,
   }));
   return { citations };
 }

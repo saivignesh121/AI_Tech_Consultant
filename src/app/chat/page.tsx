@@ -25,11 +25,26 @@ import {
 } from "lucide-react";
 
 interface CitationItem {
-  citationNumber: number;
-  sourceTitle: string;
-  url: string;
+  citationNumber?: number;
+  citationIndex?: number;
+  id?: string;
+  type?: string;
+  sourceTitle?: string;
+  title?: string;
+  url?: string;
+  sourceUrl?: string;
   snippet?: string;
+  paragraphText?: string;
   attributionBadge?: string;
+  imageUrl?: string;
+  imageCaption?: string;
+  instructionRule?: string;
+  skillSteps?: string;
+  emailDetails?: {
+    subject?: string;
+    from?: string;
+    note?: string;
+  };
 }
 
 interface MessageItem {
@@ -39,10 +54,16 @@ interface MessageItem {
   citations?: CitationItem[];
   isEscalated?: boolean;
   escalationReason?: string | null;
+  isUnknown?: boolean;
+  expertTaskId?: string;
+  confidenceScore?: number;
   isPastedThread?: boolean;
   extractedCoreQuery?: string;
   isTeachingTurn?: boolean;
   teachingPhase?: "clarifying" | "confirmed";
+  clarifyingQuestions?: string[];
+  isResolved?: boolean;
+  expertReply?: string;
   telemetry?: {
     latencyMs: number;
     inputTokens: number;
@@ -87,6 +108,25 @@ export default function ChatPage() {
 
   // Multimodal Attachment State
   const [attachedImageName, setAttachedImageName] = useState<string | null>(null);
+
+  // Task 3.2: One-Click Citation Viewer Modal
+  const [selectedCitation, setSelectedCitation] = useState<CitationItem | null>(null);
+
+  // Task 3.2: Expert Task Handover & Resolution Modal
+  const [expertModalTask, setExpertModalTask] = useState<{
+    id: string;
+    question: string;
+    messageIdx: number;
+  } | null>(null);
+  const [expertAnswerText, setExpertAnswerText] = useState("");
+  const [expertResolving, setExpertResolving] = useState(false);
+  const [expertFlowIntoMemory, setExpertFlowIntoMemory] = useState(true);
+  const [expertSuccessBanner, setExpertSuccessBanner] = useState("");
+
+  // Task 3.2: "I Don't Know" Line Confidence Threshold Evaluation Modal
+  const [thresholdModalOpen, setThresholdModalOpen] = useState(false);
+  const [thresholdData, setThresholdData] = useState<any>(null);
+  const [loadingThreshold, setLoadingThreshold] = useState(false);
 
   useEffect(() => {
     fetchSessions();
@@ -179,15 +219,20 @@ export default function ChatPage() {
       if (data.response || data.reply) {
         const replyContent = data.reply || data.response?.reply;
         const consultantMsg: MessageItem = {
+          id: data.messageId,
           sender: "consultant",
           content: replyContent,
           citations: data.response?.citations,
           isEscalated: data.response?.isEscalated,
           escalationReason: data.response?.escalationReason,
+          isUnknown: data.response?.isUnknown,
+          expertTaskId: data.response?.expertTaskId,
+          confidenceScore: data.response?.confidenceScore,
           isPastedThread: data.isPastedThread,
           extractedCoreQuery: data.extractedCoreQuery,
           isTeachingTurn: data.teaching?.isTeachingTurn,
           teachingPhase: data.teaching?.phase,
+          clarifyingQuestions: data.teaching?.clarifyingQuestions,
           telemetry: data.response?.telemetry,
         };
 
@@ -249,6 +294,75 @@ export default function ChatPage() {
     }
   };
 
+  const handleResolveExpertTask = async () => {
+    if (!expertModalTask || !expertAnswerText.trim() || expertResolving) return;
+    setExpertResolving(true);
+    try {
+      const res = await fetch(`/api/chat/expert-tasks/${expertModalTask.id}/resolve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          expertAnswer: expertAnswerText,
+          flowIntoMemory: expertFlowIntoMemory,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setExpertSuccessBanner("Expert resolution saved! Guidance has flowed into Knowledge Brain memory as an active instruction.");
+        setMessages((prev) =>
+          prev.map((m, idx) =>
+            idx === expertModalTask.messageIdx
+              ? {
+                  ...m,
+                  content: `[Resolved by Human Expert]\n\n${expertAnswerText}`,
+                  isResolved: true,
+                  expertReply: expertAnswerText,
+                  citations: data.learnedInstruction
+                    ? [
+                        {
+                          citationNumber: 1,
+                          sourceTitle: data.learnedInstruction.title,
+                          attributionBadge: "[instruction]",
+                          paragraphText: expertAnswerText,
+                          snippet: expertAnswerText.slice(0, 150),
+                        },
+                      ]
+                    : m.citations,
+                }
+              : m
+          )
+        );
+        setTimeout(() => {
+          setExpertModalTask(null);
+          setExpertAnswerText("");
+          setExpertSuccessBanner("");
+        }, 1600);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setExpertResolving(false);
+    }
+  };
+
+  const handleOpenThresholdModal = async () => {
+    setThresholdModalOpen(true);
+    if (!thresholdData) {
+      setLoadingThreshold(true);
+      try {
+        const res = await fetch("/api/evals/confidence-threshold");
+        const data = await res.json();
+        if (data.evalResult) {
+          setThresholdData(data.evalResult);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingThreshold(false);
+      }
+    }
+  };
+
   // Find active role details
   const currentRole = roles.find((r) => r.slug === activeRoleSlug) || {
     name: "Support Engineer",
@@ -300,6 +414,14 @@ export default function ChatPage() {
             >
               <GraduationCap className="h-3.5 w-3.5" />
               <span>Teach &amp; Correct AI</span>
+            </button>
+            <button
+              onClick={handleOpenThresholdModal}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-800/80 border border-gray-700/60 transition"
+              title="Calibrated Confidence Threshold and Trade-Off Curve"
+            >
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+              <span>Line: 0.38</span>
             </button>
           </div>
         </div>
@@ -565,42 +687,88 @@ export default function ChatPage() {
                   >
                     {m.content}
 
-                    {/* Citations block */}
+                    {/* Citations block with One-Click Inspection */}
                     {m.citations && m.citations.length > 0 && (
-                      <div className="mt-3 pt-2.5 border-t border-gray-800/80 space-y-1">
-                        <span className="text-[10px] uppercase font-semibold text-gray-400 tracking-wider block">
-                          Verified Sources:
+                      <div className="mt-3 pt-2.5 border-t border-gray-800/80 space-y-1.5">
+                        <span className="text-[10px] uppercase font-semibold text-gray-400 tracking-wider flex items-center gap-1">
+                          <BookOpen className="h-3 w-3 text-indigo-400" />
+                          <span>Verified Sources (Click to inspect paragraph or screenshot):</span>
                         </span>
-                        {m.citations.map((c) => (
-                          <a
-                            key={c.citationNumber}
-                            href={c.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 text-[11px] text-indigo-400 hover:underline font-mono truncate"
-                          >
-                            <span className="font-bold">[{c.citationNumber}]</span>
-                            {c.attributionBadge && (
-                              <span
-                                className={`px-1.5 py-0.2 rounded text-[9px] uppercase font-mono ${
-                                  c.attributionBadge === "[instruction]"
-                                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                    : c.attributionBadge === "[skill]"
-                                    ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
-                                    : c.attributionBadge === "[past_email]"
-                                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                                    : c.attributionBadge === "[page_url]"
-                                    ? "bg-sky-500/10 text-sky-400 border border-sky-500/20"
-                                    : "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
-                                }`}
+                        <div className="flex flex-wrap gap-1.5">
+                          {m.citations.map((c, cIdx) => {
+                            const num = c.citationNumber || c.citationIndex || cIdx + 1;
+                            const badge = c.attributionBadge || "[sitemap]";
+                            return (
+                              <button
+                                key={c.id || cIdx}
+                                type="button"
+                                onClick={() => setSelectedCitation(c)}
+                                className="flex items-center gap-1.5 px-2 py-1 rounded bg-gray-950/80 border border-gray-700/60 hover:border-indigo-400 hover:bg-indigo-950/30 transition text-left group"
                               >
-                                {c.attributionBadge}
-                              </span>
-                            )}
-                            <span>{c.sourceTitle}</span>
-                            <ExternalLink className="h-2.5 w-2.5 flex-shrink-0" />
-                          </a>
-                        ))}
+                                <span className="font-bold text-indigo-300 font-mono text-[11px]">[{num}]</span>
+                                <span
+                                  className={`px-1.5 py-0.2 rounded text-[9px] uppercase font-mono ${
+                                    badge === "[instruction]"
+                                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                      : badge === "[skill]"
+                                      ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                                      : badge === "[past_email]"
+                                      ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                      : badge === "[screenshot]"
+                                      ? "bg-pink-500/10 text-pink-400 border border-pink-500/20"
+                                      : badge === "[page_url]"
+                                      ? "bg-sky-500/10 text-sky-400 border border-sky-500/20"
+                                      : "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
+                                  }`}
+                                >
+                                  {badge}
+                                </span>
+                                <span className="text-[11px] text-gray-300 group-hover:text-white truncate max-w-[170px]">
+                                  {c.sourceTitle || c.title || "Document Chunk"}
+                                </span>
+                                <ExternalLink className="h-2.5 w-2.5 text-gray-500 group-hover:text-indigo-400 flex-shrink-0" />
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Task 3.2: Honest Refusal & Expert Task Handover */}
+                    {m.isUnknown && (
+                      <div className="mt-3 p-3 rounded-lg bg-amber-950/30 border border-amber-500/40 text-amber-200 text-xs space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold flex items-center gap-1.5">
+                            <AlertTriangle className="h-4 w-4 text-amber-400 flex-shrink-0" />
+                            <span>Knowledge Gap &bull; Below Calibrated Confidence Line</span>
+                          </span>
+                          {m.confidenceScore !== undefined && (
+                            <span className="text-[10px] font-mono bg-amber-900/60 px-1.5 py-0.5 rounded border border-amber-700/50">
+                              Score: {m.confidenceScore.toFixed(2)} &lt; 0.38
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-amber-300/80 leading-relaxed">
+                          The agent honestly refused to hallucinate and opened an expert task for human specialist review.
+                        </p>
+                        {m.expertTaskId && (
+                          <div className="flex items-center justify-between pt-1 border-t border-amber-500/20">
+                            <span className="text-[10px] font-mono text-amber-400">Task #{m.expertTaskId.slice(0, 14)}</span>
+                            <button
+                              onClick={() =>
+                                setExpertModalTask({
+                                  id: m.expertTaskId!,
+                                  question: messages[idx - 1]?.content || m.extractedCoreQuery || "Customer inquiry",
+                                  messageIdx: idx,
+                                })
+                              }
+                              className="flex items-center gap-1 rounded bg-amber-600 hover:bg-amber-500 px-2.5 py-1 text-[11px] font-semibold text-white transition shadow-sm"
+                            >
+                              <CheckCircle2 className="h-3 w-3" />
+                              <span>Resolve as Expert &amp; Feed Memory</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -752,17 +920,22 @@ export default function ChatPage() {
                 ) : (
                   <div className="space-y-2">
                     {recentCitations.map((c, i) => (
-                      <div key={i} className="rounded-lg border border-gray-800 bg-gray-950 p-2.5 text-xs space-y-1">
+                      <div
+                        key={i}
+                        onClick={() => setSelectedCitation(c)}
+                        className="rounded-lg border border-gray-800 bg-gray-950 p-2.5 text-xs space-y-1 cursor-pointer hover:border-indigo-400 hover:bg-indigo-950/20 transition"
+                      >
                         <div className="text-indigo-300 font-semibold font-mono text-[11px] truncate flex items-center gap-1.5">
-                          <span>[{c.citationNumber}]</span>
+                          <span>[{c.citationNumber || c.citationIndex || i + 1}]</span>
                           {c.attributionBadge && (
                             <span className="text-[9px] text-gray-400 bg-gray-900 px-1 rounded border border-gray-800">
                               {c.attributionBadge}
                             </span>
                           )}
-                          <span>{c.sourceTitle}</span>
+                          <span>{c.sourceTitle || c.title}</span>
                         </div>
-                        <div className="text-[10px] text-gray-500 font-mono truncate">{c.url}</div>
+                        <div className="text-[10px] text-gray-500 font-mono truncate">{c.url || c.sourceUrl}</div>
+                        <div className="text-[9px] text-indigo-400 font-medium">Click to inspect exact paragraph &rarr;</div>
                       </div>
                     ))}
                   </div>
@@ -926,6 +1099,304 @@ export default function ChatPage() {
               <div className="rounded-lg bg-gray-950 border border-gray-800 p-3 text-[11px] text-gray-400 flex items-center justify-between">
                 <span>💡 You can also teach inline inside any Ask chat by replying &quot;This is wrong, the right answer is...&quot;</span>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* ================= TASK 3.2: ONE-CLICK CITATION & PARAGRAPH INSPECTOR MODAL ================= */}
+        {selectedCitation && (
+          <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="max-w-2xl w-full rounded-2xl border border-indigo-500/40 bg-[#0E1322] p-6 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
+              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-lg bg-indigo-600/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+                    <BookOpen className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-bold text-indigo-400">
+                        [{selectedCitation.citationNumber || selectedCitation.citationIndex || 1}]
+                      </span>
+                      <h3 className="text-sm font-bold text-white">
+                        {selectedCitation.sourceTitle || selectedCitation.title || "Document Source"}
+                      </h3>
+                      {selectedCitation.attributionBadge && (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold uppercase bg-indigo-500/10 text-indigo-300 border border-indigo-500/30">
+                          {selectedCitation.attributionBadge}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-gray-400 font-mono mt-0.5">
+                      {selectedCitation.url || selectedCitation.sourceUrl || "Knowledge Brain Verified Document"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedCitation(null)}
+                  className="rounded p-1 text-gray-400 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* Exact Paragraph Content */}
+              <div className="space-y-2">
+                <span className="text-xs font-semibold text-gray-300 uppercase tracking-wider block">
+                  Exact Paragraph Content (One-Click Inspection):
+                </span>
+                <div className="p-4 rounded-xl bg-gray-950 border border-gray-800 text-xs text-gray-200 leading-relaxed font-sans whitespace-pre-wrap">
+                  {selectedCitation.paragraphText || selectedCitation.snippet || "No additional paragraph text available."}
+                </div>
+              </div>
+
+              {/* Multimodal Screenshot Viewer (if available) */}
+              {selectedCitation.imageUrl && (
+                <div className="space-y-2 pt-2 border-t border-gray-800">
+                  <span className="text-xs font-semibold text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <ImageIcon className="h-3.5 w-3.5 text-pink-400" />
+                    <span>Associated Help Center Screenshot:</span>
+                  </span>
+                  <div className="rounded-xl border border-gray-800 overflow-hidden bg-gray-950 p-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={selectedCitation.imageUrl}
+                      alt={selectedCitation.imageCaption || "Source screenshot"}
+                      className="rounded max-h-64 w-full object-contain"
+                    />
+                    {selectedCitation.imageCaption && (
+                      <p className="text-[11px] text-gray-400 italic mt-2 px-1">
+                        Caption: {selectedCitation.imageCaption}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Instruction Policy Callout (if available) */}
+              {selectedCitation.instructionRule && (
+                <div className="p-3 rounded-lg bg-emerald-950/30 border border-emerald-500/30 text-emerald-300 text-xs space-y-1">
+                  <span className="text-[10px] uppercase font-bold tracking-wider block text-emerald-400">
+                    Policy Instruction Rule:
+                  </span>
+                  <p>{selectedCitation.instructionRule}</p>
+                </div>
+              )}
+
+              {/* Skill SOP Steps (if available) */}
+              {selectedCitation.skillSteps && (
+                <div className="p-3 rounded-lg bg-purple-950/30 border border-purple-500/30 text-purple-200 text-xs space-y-1 font-mono whitespace-pre-wrap">
+                  <span className="text-[10px] uppercase font-bold tracking-wider block text-purple-400">
+                    Standard Operating Procedure Steps:
+                  </span>
+                  {selectedCitation.skillSteps}
+                </div>
+              )}
+
+              {/* External Source Link Action */}
+              <div className="pt-2 flex items-center justify-between border-t border-gray-800 text-xs">
+                <span className="text-gray-400">Grounded Knowledge Type: {selectedCitation.type || "sitemap"}</span>
+                {selectedCitation.url && selectedCitation.url.startsWith("http") && (
+                  <a
+                    href={selectedCitation.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300 font-medium"
+                  >
+                    <span>Open Live Help Center Page</span>
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ================= TASK 3.2: EXPERT TASK HANDOVER & RESOLUTION MODAL ================= */}
+        {expertModalTask && (
+          <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="max-w-xl w-full rounded-2xl border border-amber-500/40 bg-[#0E1322] p-6 shadow-2xl space-y-4">
+              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-lg bg-amber-600/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
+                    <CheckCircle2 className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white">Resolve Human Expert Task</h3>
+                    <p className="text-[11px] text-gray-400 font-mono mt-0.5">
+                      Task ID: #{expertModalTask.id.slice(0, 16)} &bull; Knowledge Flowback
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setExpertModalTask(null)}
+                  className="rounded p-1 text-gray-400 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {expertSuccessBanner ? (
+                <div className="p-4 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-400 flex-shrink-0" />
+                  <span>{expertSuccessBanner}</span>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <span className="text-[11px] font-semibold text-gray-400 block mb-1">
+                      Customer Question (Unanswered by AI):
+                    </span>
+                    <div className="p-2.5 rounded bg-gray-950 border border-gray-800 text-xs text-amber-200">
+                      &quot;{expertModalTask.question}&quot;
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-gray-300 block mb-1">
+                      Authoritative Expert Answer:
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={expertAnswerText}
+                      onChange={(e) => setExpertAnswerText(e.target.value)}
+                      placeholder="Type the verified answer. This will be sent to the customer and permanently taught to the Knowledge Brain..."
+                      className="w-full rounded-xl border border-gray-800 bg-gray-950 p-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2 bg-gray-950 p-2.5 rounded-lg border border-gray-800">
+                    <input
+                      type="checkbox"
+                      id="flowIntoMemoryCheck"
+                      checked={expertFlowIntoMemory}
+                      onChange={(e) => setExpertFlowIntoMemory(e.target.checked)}
+                      className="rounded border-gray-700 text-amber-500 focus:ring-amber-500"
+                    />
+                    <label htmlFor="flowIntoMemoryCheck" className="text-xs text-gray-300 cursor-pointer">
+                      Flow this expert answer back into Knowledge Brain as an active instruction (Task 3.2)
+                    </label>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-800">
+                    <button
+                      onClick={() => setExpertModalTask(null)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-white"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleResolveExpertTask}
+                      disabled={!expertAnswerText.trim() || expertResolving}
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-amber-600 hover:bg-amber-500 text-white transition disabled:opacity-50 shadow-sm"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      <span>{expertResolving ? "Resolving..." : "Submit Expert Answer & Learn into Memory"}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ================= TASK 3.2: CONFIDENCE THRESHOLD & "I DON'T KNOW" LINE CALIBRATION MODAL ================= */}
+        {thresholdModalOpen && (
+          <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="max-w-2xl w-full rounded-2xl border border-emerald-500/40 bg-[#0E1322] p-6 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
+              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-lg bg-emerald-600/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+                    <ShieldCheck className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white">
+                      &quot;I Don&apos;t Know&quot; Line Calibration &amp; Trade-Off Inspector
+                    </h3>
+                    <p className="text-[11px] text-gray-400 mt-0.5">
+                      Task 3.2: Calibrated line set by empirical evals, proving wrong answers drop without over-refusal
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setThresholdModalOpen(false)}
+                  className="rounded p-1 text-gray-400 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {loadingThreshold ? (
+                <div className="p-8 text-center text-xs text-gray-400">Running threshold evaluation benchmark...</div>
+              ) : thresholdData ? (
+                <div className="space-y-4">
+                  {/* Calibrated Line Badge */}
+                  <div className="p-4 rounded-xl bg-emerald-950/30 border border-emerald-500/40 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider block">
+                        Optimal Calibrated Confidence Line:
+                      </span>
+                      <div className="text-2xl font-bold font-mono text-emerald-300 mt-0.5">
+                        &theta; = {thresholdData.calibratedThreshold}
+                      </div>
+                      <p className="text-xs text-gray-300 mt-1">
+                        Wrong answers dropped from{" "}
+                        <strong className="text-red-400">{thresholdData.improvementSummary.initialWrongAnswerRate}%</strong>{" "}
+                        to{" "}
+                        <strong className="text-emerald-400">{thresholdData.improvementSummary.finalWrongAnswerRate}%</strong>{" "}
+                        while preserving{" "}
+                        <strong className="text-emerald-300">{thresholdData.improvementSummary.optimalCoverageRate}%</strong>{" "}
+                        answer coverage.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Trade-Off Curve Table */}
+                  <div>
+                    <span className="text-xs font-semibold text-gray-300 uppercase tracking-wider block mb-2">
+                      Empirical Trade-Off Curve Across Candidate Cut-Offs:
+                    </span>
+                    <div className="rounded-xl border border-gray-800 overflow-hidden">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-gray-900/90 text-gray-400 uppercase text-[10px]">
+                          <tr>
+                            <th className="p-2.5">Threshold (&theta;)</th>
+                            <th className="p-2.5 text-red-400">Wrong Answers %</th>
+                            <th className="p-2.5 text-emerald-400">Correct Answers %</th>
+                            <th className="p-2.5 text-indigo-400">Refusal %</th>
+                            <th className="p-2.5">Verdict</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-800 font-mono text-[11px]">
+                          {thresholdData.tradeoffCurve?.map((step: any, sIdx: number) => {
+                            const isOptimal = step.threshold === thresholdData.calibratedThreshold;
+                            return (
+                              <tr
+                                key={sIdx}
+                                className={isOptimal ? "bg-emerald-950/30 font-bold text-emerald-200" : "hover:bg-gray-900/50"}
+                              >
+                                <td className="p-2.5 flex items-center gap-1.5">
+                                  <span>{step.threshold.toFixed(2)}</span>
+                                  {isOptimal && (
+                                    <span className="text-[9px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.2 rounded border border-emerald-500/40">
+                                      CALIBRATED
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="p-2.5 text-red-400">{step.wrongAnswerRate}%</td>
+                                <td className="p-2.5 text-emerald-400">{step.correctAnswerRate}%</td>
+                                <td className="p-2.5 text-indigo-300">{step.refusalRate}%</td>
+                                <td className="p-2.5 text-[10px] font-sans text-gray-400">{step.recommendation}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 text-center text-xs text-gray-400">No calibration data loaded.</div>
+              )}
             </div>
           </div>
         )}

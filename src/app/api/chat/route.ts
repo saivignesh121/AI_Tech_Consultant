@@ -230,6 +230,7 @@ export async function POST(req: NextRequest) {
 
     const response = await executeConsultantTurn({
       businessId: tenant.businessId,
+      businessName: tenant.businessName,
       sessionId: targetSessionId,
       userMessage: message,
       roleSlug,
@@ -239,6 +240,7 @@ export async function POST(req: NextRequest) {
       conversationHistory: history,
       roleDefinition: roleDef,
       availableContexts: activeContexts,
+      confidenceThreshold: body.confidenceThreshold,
     });
 
     // Record Messages & Telemetry with resilient database fallback

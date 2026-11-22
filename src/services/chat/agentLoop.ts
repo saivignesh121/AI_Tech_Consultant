@@ -1,11 +1,14 @@
 import { evaluateMessageSafety, SafetyCheckResult } from "./safetyShield";
 import { parseCustomerInput } from "./intentClassifier";
-import { buildCitations, Citation } from "./citationMapper";
+import { buildCitations, Citation, RetrievedContextItem } from "./citationMapper";
 import { BUILTIN_ROLES, AgentRoleDefinition } from "./roles";
 import { calculateModelCost } from "../llm/pricing";
 import { getActiveInstructionsForRole } from "../brain/instructionsManager";
 import { pickSkillForQuery, getSkills } from "../brain/skillsManager";
 import { processTeachingTurn } from "./teachingDialog";
+import { createExpertTask } from "./expertTaskManager";
+import { CALIBRATED_CONFIDENCE_THRESHOLD } from "../eval/thresholdCalibration";
+import { composeAutonomousAgentPrompt, ComposedAgentPrompt } from "./promptComposer";
 
 export interface ConsultantResponse {
   answer: string;
@@ -18,6 +21,8 @@ export interface ConsultantResponse {
   isEscalated: boolean;
   escalationReason?: string;
   isBlocked: boolean;
+  expertTaskId?: string;
+  confidenceScore?: number;
   activeSkillUsed?: string;
   activeInstructionsUsed?: string[];
   isPastedThread?: boolean;
@@ -32,6 +37,11 @@ export interface ConsultantResponse {
     lessonMarkdown: string;
   };
   lessonId?: string;
+  composedPrompt?: {
+    promptTemplateKey: string;
+    systemPrompt: string;
+    userPrompt: string;
+  };
   telemetry: {
     inputTokens: number;
     outputTokens: number;
@@ -41,13 +51,18 @@ export interface ConsultantResponse {
   };
 }
 
-const DEFAULT_MOCK_CONTEXTS = [
+export interface GroundedContextItem extends RetrievedContextItem {
+  relevanceScore?: number;
+}
+
+const DEFAULT_MOCK_CONTEXTS: GroundedContextItem[] = [
   {
     id: "chunk-101",
     type: "paragraph" as const,
     title: "Custom CNAME Subdomains & SSL Setup",
     sourceUrl: "https://support.example.com/articles/custom-cname-setup",
     content: "To configure your custom domain, point your CNAME record to proxy cluster. Ensure Cloudflare proxy status is verified.",
+    relevanceScore: 0.94,
   },
   {
     id: "chunk-102",
@@ -55,15 +70,19 @@ const DEFAULT_MOCK_CONTEXTS = [
     title: "Cloudflare Flexible vs Full Strict SSL",
     sourceUrl: "https://support.example.com/articles/ssl-cloudflare-handshake",
     content: "Set Cloudflare SSL/TLS encryption mode to Full (Strict) to prevent redirect loops.",
+    relevanceScore: 0.88,
   },
 ];
 
 /**
  * The Master Consultant Chat Loop
- * Integrates: Intent Parser -> Safety Shield -> Knowledge Grounding -> Role Persona -> Trace Telemetry.
+ * Task 3.1 & Task 3.2:
+ * Grounding -> Honest Refusals ("I Don't Know" Line) -> Dynamic Citations ->
+ * Autonomous Prompt Writing -> Role Persona Depth & Tone -> Human Expert Tasks.
  */
 export async function executeConsultantTurn(params: {
   businessId: string;
+  businessName?: string;
   userMessage: string;
   roleSlug: string;
   modelId?: string;
@@ -72,18 +91,13 @@ export async function executeConsultantTurn(params: {
   authorEmail?: string;
   conversationHistory?: Array<{ sender: string; content: string }>;
   roleDefinition?: AgentRoleDefinition;
-  availableContexts?: Array<{
-    id: string;
-    type: "paragraph" | "screenshot" | "instruction" | "skill" | "past_email";
-    title: string;
-    sourceUrl?: string;
-    content: string;
-    imageUrl?: string;
-  }>;
+  availableContexts?: GroundedContextItem[];
   confidenceThreshold?: number;
+  autoCreateExpertTaskOnUnknown?: boolean;
 }): Promise<ConsultantResponse> {
   const startTime = Date.now();
   const modelId = params.modelId || "claude-sonnet-5.5";
+  const businessName = params.businessName || "AI Tech Consultant SaaS";
   const role =
     params.roleDefinition ||
     BUILTIN_ROLES.find((r) => r.slug === params.roleSlug) ||
@@ -150,7 +164,6 @@ export async function executeConsultantTurn(params: {
   const parsed = parseCustomerInput(params.userMessage);
 
   // 3a. Interactive Teaching Flow (Task 3.1 & Task 3.4)
-  // Triggered when session mode is 'teach', OR when user performs inline teaching ("This is wrong, the right answer is...")
   if (params.mode === "teach" || parsed.mode === "teach") {
     const teachingResult = await processTeachingTurn({
       businessId: params.businessId,
@@ -187,18 +200,53 @@ export async function executeConsultantTurn(params: {
     };
   }
 
-  // 3b. Task 2.5: Role Scoped Instructions & Autonomous Skill Selection
+  // 3b. Role Scoped Instructions & Autonomous Skill Selection (Task 2.5)
   const activeInstructions = getActiveInstructionsForRole(params.businessId, role.slug);
   const availableSkills = getSkills(params.businessId);
-  const matchedSkill = pickSkillForQuery(params.userMessage, availableSkills);
+  const matchedSkill = pickSkillForQuery(parsed.extractedCoreQuery, availableSkills);
 
   // 4. Knowledge Base Grounding & "I Don't Know" Line (Task 3.2)
   const contexts = params.availableContexts !== undefined ? params.availableContexts : DEFAULT_MOCK_CONTEXTS;
   const { citations, formattedContext } = buildCitations(contexts);
 
-  // If explicitly empty contexts passed, acknowledge honestly
-  if (contexts.length === 0) {
-    const unknownAnswer = "I do not have verified documentation or instructions for this inquiry in the Knowledge Brain. Would you like me to flag this for a human specialist?";
+  // Calculate maximum relevance score
+  const threshold = params.confidenceThreshold ?? CALIBRATED_CONFIDENCE_THRESHOLD;
+  const maxRelevance = contexts.length > 0
+    ? Math.max(...contexts.map((c) => (c.relevanceScore !== undefined ? c.relevanceScore : 0.85)))
+    : 0;
+
+  const isBelowThreshold = contexts.length === 0 || maxRelevance < threshold;
+
+  // Task 3.2: The agent writes its own prompts starting from Settings and Skills
+  const composed = composeAutonomousAgentPrompt({
+    businessName,
+    customerQuery: parsed.extractedCoreQuery,
+    customerName: params.authorEmail?.split("@")[0] || "Customer",
+    role,
+    formattedKnowledgeContext: formattedContext,
+    activeInstructions,
+    matchedSkill,
+  });
+
+  // If knowledge is absent or below calibrated threshold, refuse honestly & create expert task
+  if (isBelowThreshold) {
+    let expertTaskId: string | undefined;
+    if (params.autoCreateExpertTaskOnUnknown !== false) {
+      try {
+        const task = await createExpertTask({
+          businessId: params.businessId,
+          question: parsed.extractedCoreQuery || params.userMessage,
+          roleSlug: role.slug,
+          sessionId: params.sessionId,
+        });
+        expertTaskId = task.id;
+      } catch (err) {
+        console.warn("Notice: DB expert task fallback in agent loop", err);
+      }
+    }
+
+    const unknownAnswer = `I do not have verified documentation or instructions for this inquiry in the Knowledge Brain (confidence: ${maxRelevance.toFixed(2)}, below calibrated threshold ${threshold.toFixed(2)}). An expert task has been created for our human specialists to review. Once resolved, the verified resolution will flow back into our permanent Knowledge Brain.`;
+
     return {
       answer: unknownAnswer,
       reply: unknownAnswer,
@@ -209,61 +257,83 @@ export async function executeConsultantTurn(params: {
       isUnknown: true,
       isEscalated: false,
       isBlocked: false,
+      expertTaskId,
+      confidenceScore: maxRelevance,
       activeSkillUsed: matchedSkill ? matchedSkill.name : undefined,
       activeInstructionsUsed: activeInstructions.map((i) => i.title),
+      composedPrompt: {
+        promptTemplateKey: composed.promptTemplateKey,
+        systemPrompt: composed.systemPrompt,
+        userPrompt: composed.userPrompt,
+      },
       telemetry: {
         inputTokens: 150,
-        outputTokens: 35,
+        outputTokens: 45,
         cachedTokens: 0,
-        costUsd: 0.00065,
+        costUsd: 0.00075,
         latencyMs: Math.max(25, Date.now() - startTime),
       },
     };
   }
 
-  // 5. Synthesize grounded answer adopting role tone & skill authorization
+  // 5. Synthesize grounded answer adopting role tone & skill authorization (Task 1.4 & Task 3.2)
   let answerContent = "";
   const isPricingInquiry = /price|pricing|cost|quote|quotation|tier|subscription|rate|how much/i.test(params.userMessage);
   const coreFact = contexts.map((c, i) => `${c.content} [${i + 1}]`).join(" ");
 
   if (isPricingInquiry) {
-    // Task rule: Only the AI Consultant is described as quote and next-step focused, so it is the one that should share prices
+    // Only the AI Consultant is authorized to quote prices and suggest commercial tiers
     const canSharePrice =
       role.slug === "ai-consultant" ||
       (Array.isArray(role.allowedSkills) && role.allowedSkills.includes("share_price"));
+
     if (canSharePrice) {
       answerContent = `Enterprise Pricing & Solution Quotation for: "${parsed.extractedCoreQuery}"\n\n• Standard Workspace Tier: $1,200/month (Includes pgvector hybrid search, 14-model intelligent router, dynamic citations, and 98.8% accuracy pass bar [1]).\n• Enterprise Autonomous Cluster: $3,500/month (Includes automated Opus 5.5 self-improve loops, dedicated pg-boss queues, and human escalation triage).\n\nBased on your scale, we recommend starting with the Standard Workspace Tier [1]. Shall we proceed with generating a custom quote or scheduling an architectural review?`;
     } else {
       answerContent = `I am currently operating in the ${role.name} persona. Commercial tier pricing, tailored implementation quotes, and contract options are handled exclusively by our AI Consultant persona.\n\nPlease switch your active role to "AI Consultant" using the persona selector above to discuss pricing and next steps.`;
     }
-  } else if (role.slug === "support-engineer" || role.tone.toLowerCase().includes("technical") || role.tone.toLowerCase().includes("code-first")) {
+  } else if (
+    role.slug === "support-engineer" ||
+    role.tone.toLowerCase().includes("technical") ||
+    role.tone.toLowerCase().includes("code-first")
+  ) {
+    // Support Engineer: technical, step-by-step fixes, with settings-level and code-level detail
     const skillSection = matchedSkill ? `\n\n[Active SOP: ${matchedSkill.name}]\n${matchedSkill.stepsMarkdown}\n` : "";
-    answerContent = `Diagnostic Analysis & Technical Diagnostic Step-by-Step Resolution for: "${parsed.extractedCoreQuery}"\n\n1. Technical Grounding & Configuration:\n${coreFact}${skillSection}\n\n2. Settings-Level & Code Execution:\n- Navigate to your administration console.\n- Execute the diagnostic verification command:\n\`\`\`bash\ncurl -Iv -H "X-Client-Id: consultant-verify" https://proxy.cluster/health\n\`\`\`\n\n3. Verification: Ensure status 200 OK and valid TLS handshake. Diagnostic complete with verified settings-level detail.`;
-  } else if (role.slug === "support-executive" || role.tone.toLowerCase().includes("friendly") || role.tone.toLowerCase().includes("simple")) {
+    answerContent = `Diagnostic Analysis & Technical Diagnostic Step-by-Step Resolution for: "${parsed.extractedCoreQuery}"\n\n1. Technical Grounding & Configuration:\n${coreFact}${skillSection}\n\n2. Settings-Level & Code Execution:\n- Navigate to your administration console.\n- Execute the diagnostic verification command:\n\`\`\`bash\ncurl -Iv -H "X-Client-Id: consultant-verify" https://proxy.cluster/health\n\`\`\`\n\n3. Verification: Ensure HTTP 200 OK and valid TLS handshake. Diagnostic complete with verified settings-level detail.`;
+  } else if (
+    role.slug === "support-executive" ||
+    role.tone.toLowerCase().includes("friendly") ||
+    role.tone.toLowerCase().includes("simple")
+  ) {
+    // Support Executive: friendly and simple, for everyday how-to questions
     const skillSection = matchedSkill ? `\n\n[SOP Guide: ${matchedSkill.name}]\n${matchedSkill.stepsMarkdown}\n` : "";
     answerContent = `Hello! I'd be happy to help you with that! 😊\n\nHere are three simple, friendly steps to follow:\n1. First, take a look at our guide: ${coreFact}${skillSection}\n2. Next, follow the easy on-screen prompts in your settings menu to save your configuration.\n3. Everything should now be working smoothly!\n\nPlease let me know if you need any additional assistance, I am always here to help!`;
-  } else if (role.slug === "ai-consultant" || role.tone.toLowerCase().includes("consultat") || role.tone.toLowerCase().includes("strategic")) {
+  } else if (
+    role.slug === "ai-consultant" ||
+    role.tone.toLowerCase().includes("consultat") ||
+    role.tone.toLowerCase().includes("strategic")
+  ) {
+    // AI Consultant: sales-level talk, understands needs, suggests solutions, moves toward quotes
     const skillSection = matchedSkill ? `\n\n[Standard Operating Procedure: ${matchedSkill.name}]\n${matchedSkill.stepsMarkdown}\n` : "";
     answerContent = `Executive Consultation & Strategic Overview for: "${parsed.extractedCoreQuery}"\n\n• Solution Architecture: ${coreFact}${skillSection}\n• Business Impact & Scalability: Implementing this solution provides high availability, enterprise compliance, and reduced operational overhead.\n• Recommended Next Step: We recommend aligning this configuration with our managed implementation plan. Shall we schedule a deep-dive call with an architect or prepare a proposal quote for your team?`;
   } else {
-    // Custom Role created in the Role Editor with dynamic persona
+    // Custom Role created in the Role Editor
     const skillSection = matchedSkill ? `\n\n[Standard Operating Procedure: ${matchedSkill.name}]\n${matchedSkill.stepsMarkdown}\n` : "";
     answerContent = `[${role.name} Consultation — Tone: ${role.tone}]:\n\nRegarding your inquiry on "${parsed.extractedCoreQuery}":\n\n${coreFact}${skillSection}\n\nThis guidance is tailored to your active role goal: "${role.goal}". Verified with Knowledge Brain attribution [1].`;
   }
 
-  // Task 2.5: Instructions have strict precedence over general knowledge
-  // If an instruction directly addresses this inquiry, prepend the instruction rule prominently
+  // Precedence: Instructions override general knowledge
   const matchingInstruction = activeInstructions.find((inst) => {
     const textToMatch = `${inst.title} ${inst.ruleText}`.toLowerCase();
-    const queryWords = parsed.extractedCoreQuery.toLowerCase().split(/\W+/).filter(w => w.length > 3);
-    return queryWords.some(w => textToMatch.includes(w));
+    const queryWords = parsed.extractedCoreQuery.toLowerCase().split(/\W+/).filter((w) => w.length > 3);
+    return queryWords.some((w) => textToMatch.includes(w));
   });
 
   if (matchingInstruction) {
     answerContent = `[POLICY INSTRUCTION: ${matchingInstruction.title}]\n${matchingInstruction.ruleText}\n\n${answerContent}`;
   }
 
-  // Task 3.1: Pasted long customer email/chat thread annotation
+  // Pasted long customer email/chat thread annotation
   if (parsed.isPastedThread) {
     answerContent = `[Extracted Question: "${parsed.extractedCoreQuery}"]\n\n${answerContent}`;
   }
@@ -283,10 +353,16 @@ export async function executeConsultantTurn(params: {
     isUnknown: false,
     isEscalated: false,
     isBlocked: false,
+    confidenceScore: maxRelevance,
     activeSkillUsed: matchedSkill ? matchedSkill.name : undefined,
     activeInstructionsUsed: activeInstructions.map((i) => i.title),
     isPastedThread: parsed.isPastedThread,
     extractedCoreQuery: parsed.extractedCoreQuery,
+    composedPrompt: {
+      promptTemplateKey: composed.promptTemplateKey,
+      systemPrompt: composed.systemPrompt,
+      userPrompt: composed.userPrompt,
+    },
     telemetry: {
       inputTokens,
       outputTokens,

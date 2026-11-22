@@ -69,3 +69,22 @@ export const lessons = pgTable("lessons", {
   approvedAt: timestamp("approved_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+export const expertTasks = pgTable("expert_tasks", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .references(() => businesses.id, { onDelete: "cascade" })
+    .notNull(),
+  sessionId: uuid("session_id")
+    .references(() => chatSessions.id, { onDelete: "cascade" }),
+  messageId: uuid("message_id")
+    .references(() => chatMessages.id, { onDelete: "cascade" }),
+  question: text("question").notNull(),
+  roleSlug: varchar("role_slug", { length: 100 }).default("support-engineer").notNull(),
+  status: varchar("status", { length: 50 }).default("pending").notNull(), // 'pending' | 'resolved'
+  assignedTo: varchar("assigned_to", { length: 255 }),
+  expertAnswer: text("expert_answer"),
+  learnedInstructionId: varchar("learned_instruction_id", { length: 255 }),
+  resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
