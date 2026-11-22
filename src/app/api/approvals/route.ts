@@ -4,6 +4,11 @@ import { db } from "@/db";
 import { chatMessages, chatSessions, lessons } from "@/db/schema/chat";
 import { selfImproveRuns } from "@/db/schema/evals";
 import { eq, and, desc } from "drizzle-orm";
+import {
+  getSkillImprovementProposals,
+  approveSkillImprovement,
+  rejectSkillImprovement,
+} from "@/services/brain/emailSkillsOptimizer";
 
 export async function GET() {
   try {
@@ -54,15 +59,19 @@ export async function GET() {
       .orderBy(desc(selfImproveRuns.createdAt))
       .limit(20);
 
+    const skillProposals = getSkillImprovementProposals(tenant.businessId);
+
     return NextResponse.json({
       success: true,
       escalatedTasks,
       pendingLessons,
       selfImproveRuns: prRuns,
+      skillProposals,
       summary: {
         pendingEscalations: escalatedTasks.filter((t) => !t.isResolved).length,
         pendingLessons: pendingLessons.filter((l) => l.status === "pending").length,
         pendingPrs: prRuns.filter((r) => r.status === "passed" || r.status === "running").length,
+        pendingSkillProposals: skillProposals.filter((p) => p.status === "pending_human_review").length,
       },
     });
   } catch (error) {
@@ -167,6 +176,31 @@ export async function POST(req: NextRequest) {
         status: newStatus,
         message: `Self-improvement patch ${newStatus === "merged" ? "approved and merged" : "reverted"}.`,
       });
+    }
+
+    // Action 4: Approve or Reject a Skill Improvement Proposal (from Past Email Teaching Notes)
+    if (action === "approve_skill_proposal" || action === "reject_skill_proposal") {
+      const { proposalId } = body;
+      if (!proposalId) {
+        return NextResponse.json({ error: "Missing proposalId" }, { status: 400 });
+      }
+      if (action === "approve_skill_proposal") {
+        const result = approveSkillImprovement(tenant.businessId, proposalId, tenant.userId);
+        return NextResponse.json({
+          success: true,
+          message: `Skill change approved! Created Version ${result.newVersionNumber} in Settings.`,
+          proposal: result.proposal,
+          newVersionNumber: result.newVersionNumber,
+          demonstration: result.demonstration,
+        });
+      } else {
+        const rejected = rejectSkillImprovement(tenant.businessId, proposalId);
+        return NextResponse.json({
+          success: true,
+          message: "Skill proposal rejected.",
+          proposal: rejected,
+        });
+      }
     }
 
     return NextResponse.json({ error: "Unsupported approval action" }, { status: 400 });

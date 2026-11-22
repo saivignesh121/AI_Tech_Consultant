@@ -231,12 +231,19 @@ export default function KnowledgeBrainPage() {
   const [draftingSkill, setDraftingSkill] = useState(false);
   const [skillSuccessMsg, setSkillSuccessMsg] = useState("");
 
-  // --- Past Emails Tab State (Knowledge Type 5) ---
+  // --- Past Emails Tab State (Knowledge Type 5 & Task 2.6) ---
   const [emailThreadsList, setEmailThreadsList] = useState<EmailThreadItem[]>([]);
   const [selectedThread, setSelectedThread] = useState<EmailThreadItem | null>(null);
   const [threadNotes, setThreadNotes] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
   const [notesSuccessMsg, setNotesSuccessMsg] = useState("");
+  const [messageNoteInputs, setMessageNoteInputs] = useState<Record<string, string>>({});
+  const [savingMessageId, setSavingMessageId] = useState<string | null>(null);
+  const [skillProposals, setSkillProposals] = useState<any[]>([]);
+  const [proposingImprovement, setProposingImprovement] = useState(false);
+  const [approvingProposalId, setApprovingProposalId] = useState<string | null>(null);
+  const [demonstration, setDemonstration] = useState<any | null>(null);
+  const [showDoneWhen, setShowDoneWhen] = useState(true);
 
   // --- Hybrid Search Sandbox State ---
   const [searchQuery, setSearchQuery] = useState("How do I configure custom CNAME subdomains?");
@@ -653,6 +660,12 @@ export default function KnowledgeBrainPage() {
           setThreadNotes(data.threads[0].notes || "");
         }
       }
+      if (data.proposals) {
+        setSkillProposals(data.proposals);
+      }
+      if (data.demonstration) {
+        setDemonstration(data.demonstration);
+      }
     } catch (e) {
       console.error(e);
     }
@@ -674,7 +687,7 @@ export default function KnowledgeBrainPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setNotesSuccessMsg("Teaching notes saved! Consultant agent will apply this guidance.");
+        setNotesSuccessMsg("Teaching note saved on thread! Model will apply this to improve skills.");
         fetchEmailThreads();
         setTimeout(() => setNotesSuccessMsg(""), 4000);
       }
@@ -682,6 +695,110 @@ export default function KnowledgeBrainPage() {
       console.error(err);
     } finally {
       setSavingNotes(false);
+    }
+  };
+
+  const handleSaveMessageNote = async (messageId: string, noteText: string) => {
+    if (!selectedThread || !noteText.trim()) return;
+    setSavingMessageId(messageId);
+    setNotesSuccessMsg("");
+    try {
+      const res = await fetch("/api/brain/emails", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          threadId: selectedThread.id,
+          messageId,
+          notes: noteText.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNotesSuccessMsg("Teaching note saved on specific email message!");
+        fetchEmailThreads();
+        setTimeout(() => setNotesSuccessMsg(""), 4000);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSavingMessageId(null);
+    }
+  };
+
+  const handleProposeSkillImprovement = async () => {
+    setProposingImprovement(true);
+    setNotesSuccessMsg("");
+    try {
+      const res = await fetch("/api/brain/emails", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "propose_improvement",
+          modelId: "claude-opus-5.5",
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.proposal) {
+        setNotesSuccessMsg(
+          "Claude Opus 5.5 analyzed human notes and proposed a skill improvement! Review & approve below."
+        );
+        fetchEmailThreads();
+        setTimeout(() => setNotesSuccessMsg(""), 5000);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setProposingImprovement(false);
+    }
+  };
+
+  const handleApproveProposal = async (proposalId: string) => {
+    setApprovingProposalId(proposalId);
+    setNotesSuccessMsg("");
+    try {
+      const res = await fetch("/api/brain/emails", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "approve_improvement",
+          proposalId,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNotesSuccessMsg(
+          `Skill change approved! Created Version ${data.newVersionNumber} in Settings. Review the better answer below.`
+        );
+        setShowDoneWhen(true);
+        fetchEmailThreads();
+        fetchSkills();
+        setTimeout(() => setNotesSuccessMsg(""), 5000);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setApprovingProposalId(null);
+    }
+  };
+
+  const handleRejectProposal = async (proposalId: string) => {
+    try {
+      const res = await fetch("/api/brain/emails", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "reject_improvement",
+          proposalId,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNotesSuccessMsg("Skill improvement proposal rejected.");
+        fetchEmailThreads();
+        setTimeout(() => setNotesSuccessMsg(""), 4000);
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -1949,31 +2066,57 @@ export default function KnowledgeBrainPage() {
         {/* ================= TAB 5: PAST EMAILS (Task 2.1 & 2.6) ================= */}
         {activeTab === "emails" && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
-                <h3 className="text-sm font-semibold text-white">Gmail Threads &amp; Human Teaching Notes</h3>
+                <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-amber-400" />
+                  <span>Gmail Threads &amp; Human Teaching Notes (Task 2.6)</span>
+                </h3>
                 <p className="text-xs text-gray-400 mt-0.5">
-                  Real email threads from connected Gmail with notes from staff that teach the consultant agent.
+                  Annotate notes on whole threads and individual messages. Claude Opus 5.5 continuously optimizes skills from these notes.
                 </p>
               </div>
-              <span className="text-[10px] bg-amber-950/60 text-amber-300 px-2 py-0.5 rounded border border-amber-500/20 font-mono">
-                Attribution: [past_email]
-              </span>
+
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] bg-amber-950/60 text-amber-300 px-2 py-0.5 rounded border border-amber-500/20 font-mono">
+                  Attribution: [past_email]
+                </span>
+                <button
+                  onClick={handleProposeSkillImprovement}
+                  disabled={proposingImprovement}
+                  className="flex items-center gap-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-xs font-semibold text-white transition shadow-sm disabled:opacity-50"
+                >
+                  <Sparkles className="h-4 w-4 text-indigo-200" />
+                  <span>
+                    {proposingImprovement
+                      ? "Claude Opus 5.5 Analyzing Notes..."
+                      : "Optimize Skills from Notes (Claude Opus 5.5)"}
+                  </span>
+                </button>
+              </div>
             </div>
 
             {notesSuccessMsg && (
-              <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-3.5 text-xs text-emerald-300 flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
-                <span>{notesSuccessMsg}</span>
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-3.5 text-xs text-emerald-300 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+                  <span>{notesSuccessMsg}</span>
+                </div>
+                <button onClick={() => setNotesSuccessMsg("")} className="text-gray-400 hover:text-white text-xs">
+                  &times;
+                </button>
               </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               {/* Left Column (5 Cols): Email Threads List */}
               <div className="lg:col-span-5 rounded-xl border border-gray-800 bg-[#0E1322] p-4 space-y-3">
-                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block">
-                  Synced Gmail Threads
-                </span>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block">
+                    Synced Gmail Threads
+                  </span>
+                  <span className="text-[10px] text-gray-500 font-mono">{emailThreadsList.length} threads</span>
+                </div>
 
                 <div className="space-y-2">
                   {emailThreadsList.map((t) => (
@@ -1989,11 +2132,16 @@ export default function KnowledgeBrainPage() {
                           : "border-gray-800 bg-gray-900/40 hover:border-gray-700"
                       }`}
                     >
-                      <div className="text-xs font-semibold text-white truncate">{t.subject}</div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs font-semibold text-white truncate max-w-[80%]">{t.subject}</div>
+                        <span className="text-[10px] text-gray-500 font-mono">
+                          {t.messages ? `${t.messages.length} msg` : "1 msg"}
+                        </span>
+                      </div>
                       <div className="text-[10px] text-gray-400 line-clamp-2 mt-1">{t.snippet}</div>
                       {t.notes && (
-                        <div className="mt-2 text-[10px] text-amber-400 font-mono bg-amber-950/30 border border-amber-500/20 p-1.5 rounded truncate">
-                          Staff Note: {t.notes}
+                        <div className="mt-2 text-[10px] text-amber-300 font-mono bg-amber-950/40 border border-amber-500/20 p-1.5 rounded truncate">
+                          Thread Note: &quot;{t.notes}&quot;
                         </div>
                       )}
                     </div>
@@ -2005,49 +2153,118 @@ export default function KnowledgeBrainPage() {
               <div className="lg:col-span-7 rounded-xl border border-gray-800 bg-[#0E1322] p-6 space-y-4">
                 {selectedThread ? (
                   <>
-                    <div className="border-b border-gray-800 pb-3">
-                      <span className="text-[10px] uppercase font-semibold text-amber-400 tracking-wider">
-                        Thread Detail &bull; {selectedThread.gmailThreadId}
-                      </span>
-                      <h3 className="text-base font-bold text-white mt-1">{selectedThread.subject}</h3>
-                      <p className="text-xs text-gray-400 mt-1">{selectedThread.snippet}</p>
+                    <div className="border-b border-gray-800 pb-3 flex items-start justify-between">
+                      <div>
+                        <span className="text-[10px] uppercase font-semibold text-amber-400 tracking-wider font-mono">
+                          Gmail Thread &bull; {selectedThread.gmailThreadId}
+                        </span>
+                        <h3 className="text-base font-bold text-white mt-1">{selectedThread.subject}</h3>
+                        <p className="text-xs text-gray-400 mt-1">{selectedThread.snippet}</p>
+                      </div>
                     </div>
 
-                    {/* Messages in thread */}
-                    <div className="space-y-2">
-                      <span className="text-xs font-semibold text-gray-400 block">Thread Excerpts:</span>
+                    {/* Messages in thread with Individual Message Note Editors */}
+                    <div className="space-y-3">
+                      <span className="text-xs font-semibold text-gray-400 block">
+                        Thread Messages (Annotate notes on any single message):
+                      </span>
                       {selectedThread.messages?.map((m) => (
-                        <div key={m.id} className="rounded-lg border border-gray-800 bg-gray-950 p-3 space-y-1">
-                          <div className="flex items-center justify-between text-[10px] text-gray-500 font-mono">
+                        <div key={m.id} className="rounded-lg border border-gray-800 bg-gray-950 p-3.5 space-y-2">
+                          <div className="flex items-center justify-between text-[10px] text-gray-500 font-mono border-b border-gray-800/60 pb-1.5">
                             <span>From: {m.fromAddress}</span>
-                            <span>{new Date(m.sentAt).toLocaleDateString()}</span>
+                            <span>{new Date(m.sentAt).toLocaleString()}</span>
                           </div>
-                          <p className="text-xs text-gray-200">{m.bodyText}</p>
+                          <p className="text-xs text-gray-200 leading-relaxed font-sans">{m.bodyText}</p>
+
+                          {m.notes && (
+                            <div className="text-[10px] text-amber-300 bg-amber-950/30 border border-amber-500/20 p-2 rounded font-mono">
+                              Message Note: &quot;{m.notes}&quot;
+                            </div>
+                          )}
+
+                          {/* Inline Single-Message Note Editor */}
+                          <div className="pt-1.5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                            <input
+                              type="text"
+                              value={
+                                messageNoteInputs[m.id] !== undefined
+                                  ? messageNoteInputs[m.id]
+                                  : m.notes || ""
+                              }
+                              onChange={(e) =>
+                                setMessageNoteInputs({ ...messageNoteInputs, [m.id]: e.target.value })
+                              }
+                              placeholder="Write note on this specific message (e.g. This reply was too long. For DNS questions, always give the 3 steps first)..."
+                              className="flex-1 rounded border border-gray-800 bg-gray-900 px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500"
+                            />
+                            <button
+                              type="button"
+                              disabled={savingMessageId === m.id}
+                              onClick={() =>
+                                handleSaveMessageNote(m.id, messageNoteInputs[m.id] || m.notes || "")
+                              }
+                              className="rounded bg-amber-700/80 hover:bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition disabled:opacity-50 flex-shrink-0"
+                            >
+                              {savingMessageId === m.id ? "Saving..." : "Save Message Note"}
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
 
-                    {/* Teach Agent Notes Editor */}
-                    <div className="pt-2 space-y-2">
-                      <label className="block text-xs font-semibold text-amber-300">
-                        Staff Teaching Notes (Teaches the Agent):
-                      </label>
+                    {/* Teach Agent Whole-Thread Notes Editor */}
+                    <div className="pt-3 border-t border-gray-800 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-semibold text-amber-300">
+                          Whole-Thread Teaching Note (Teaches the Agent):
+                        </label>
+                        <span className="text-[10px] text-gray-500">Preset quick-fill below</span>
+                      </div>
+
+                      {/* Quick Presets */}
+                      <div className="flex items-center gap-1.5 flex-wrap text-[11px]">
+                        <span className="text-gray-500 text-[10px]">Quick Preset:</span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setThreadNotes(
+                              "This reply was too long. For DNS questions, always give the 3 steps first."
+                            )
+                          }
+                          className="rounded bg-gray-800 hover:bg-gray-700 px-2 py-0.5 text-amber-300 font-mono text-[10px]"
+                        >
+                          &quot;For DNS questions, give 3 steps first&quot;
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setThreadNotes(
+                              "Customer forgot to set Full Strict SSL in Cloudflare. Always remind customers to switch from Flexible to Full (Strict)."
+                            )
+                          }
+                          className="rounded bg-gray-800 hover:bg-gray-700 px-2 py-0.5 text-amber-300 font-mono text-[10px]"
+                        >
+                          &quot;Cloudflare Full Strict SSL check&quot;
+                        </button>
+                      </div>
+
                       <textarea
                         rows={3}
                         value={threadNotes}
                         onChange={(e) => setThreadNotes(e.target.value)}
-                        placeholder="e.g. Customer forgot to set Full Strict SSL in Cloudflare. Always remind customers to switch from Flexible to Full (Strict)."
+                        placeholder="e.g. This reply was too long. For DNS questions, always give the 3 steps first."
                         className="w-full rounded-lg border border-gray-700 bg-gray-950 p-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 font-sans"
                       />
 
-                      <div className="flex justify-end">
+                      <div className="flex justify-end gap-2">
                         <button
+                          type="button"
                           onClick={handleSaveThreadNotes}
                           disabled={savingNotes}
                           className="flex items-center gap-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 px-4 py-2 text-xs font-semibold text-white transition disabled:opacity-50"
                         >
                           <Save className="h-3.5 w-3.5" />
-                          <span>{savingNotes ? "Saving Notes..." : "Save Teaching Notes"}</span>
+                          <span>{savingNotes ? "Saving..." : "Save Thread Note"}</span>
                         </button>
                       </div>
                     </div>
@@ -2059,6 +2276,216 @@ export default function KnowledgeBrainPage() {
                 )}
               </div>
             </div>
+
+            {/* ================= SKILL IMPROVEMENTS & HUMAN APPROVAL GATE ================= */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-gray-800 pb-3">
+                <div>
+                  <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-purple-400" />
+                    <span>Skill Improvements from Teaching Notes (Human Approval Gate)</span>
+                  </h4>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Claude Opus 5.5 continuously monitors human notes to suggest skill updates. No change is active until you approve it.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono bg-purple-950/60 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded">
+                    Approval Gate: Enforced
+                  </span>
+                </div>
+              </div>
+
+              {skillProposals.length === 0 ? (
+                <div className="p-8 text-center text-xs text-gray-400 bg-gray-950/40 rounded-xl border border-gray-800">
+                  <p>No pending skill improvement proposals. Click &quot;Optimize Skills from Notes&quot; above to run Claude Opus 5.5 evaluation.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {skillProposals.map((prop) => (
+                    <div
+                      key={prop.id}
+                      className="rounded-xl border border-gray-800 bg-gray-950 p-5 space-y-4"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-white">Target Skill: {prop.targetSkillName}</span>
+                            <span className="text-[10px] font-mono text-purple-300 bg-purple-950/50 border border-purple-500/30 px-2 py-0.5 rounded">
+                              {prop.modelUsed}
+                            </span>
+                            <span
+                              className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
+                                prop.status === "approved"
+                                  ? "bg-emerald-950 text-emerald-300 border border-emerald-500/30"
+                                  : prop.status === "rejected"
+                                  ? "bg-red-950 text-red-300 border border-red-500/30"
+                                  : "bg-amber-950 text-amber-300 border border-amber-500/30"
+                              }`}
+                            >
+                              {prop.status === "approved"
+                                ? "Approved & Live in Settings"
+                                : prop.status === "rejected"
+                                ? "Rejected"
+                                : "Pending Human Review"}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-300">{prop.diffSummary}</p>
+                        </div>
+
+                        {prop.status === "pending_human_review" && (
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <button
+                              onClick={() => handleApproveProposal(prop.id)}
+                              disabled={approvingProposalId === prop.id}
+                              className="flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-xs font-semibold text-white transition disabled:opacity-50 shadow-sm"
+                            >
+                              <Check className="h-3.5 w-3.5" />
+                              <span>{approvingProposalId === prop.id ? "Approving..." : "Approve & Update Skill"}</span>
+                            </button>
+                            <button
+                              onClick={() => handleRejectProposal(prop.id)}
+                              className="rounded-lg bg-gray-800 hover:bg-gray-700 px-3 py-2 text-xs font-medium text-gray-400 hover:text-white transition"
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        )}
+
+                        {prop.status === "approved" && (
+                          <Link
+                            href="/settings/roles-prompts?tab=skills"
+                            className="flex items-center gap-1.5 text-xs font-mono text-purple-300 hover:text-white bg-purple-950/50 border border-purple-500/30 px-3 py-1.5 rounded-lg transition"
+                          >
+                            <Wrench className="h-3.5 w-3.5" />
+                            <span>View &amp; Edit in Settings</span>
+                          </Link>
+                        )}
+                      </div>
+
+                      {/* Notes Used Attribution */}
+                      <div className="p-3 bg-gray-900/60 rounded-lg border border-gray-800 text-xs space-y-1">
+                        <span className="text-[10px] uppercase font-mono text-amber-400 font-semibold block">
+                          Teaching Notes Used by Model:
+                        </span>
+                        {prop.originatingNotes.map((n: any, idx: number) => (
+                          <div key={idx} className="text-gray-300 flex items-center gap-2">
+                            <span>&bull;</span>
+                            <span className="font-mono text-amber-300">&quot;{n.noteText}&quot;</span>
+                            <span className="text-gray-500 text-[10px]">(from {n.sourceSubject})</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Before vs Proposed Steps Comparison */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+                        <div className="space-y-1">
+                          <span className="text-[10px] text-gray-500 uppercase">Previous SOP Steps (v1):</span>
+                          <pre className="rounded bg-gray-900 p-3 text-gray-400 whitespace-pre-wrap max-h-48 overflow-y-auto border border-gray-800 leading-relaxed text-[11px]">
+                            {prop.previousStepsMarkdown}
+                          </pre>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[10px] text-emerald-400 uppercase">
+                            Proposed SOP Steps (3 Steps Prioritized First):
+                          </span>
+                          <pre className="rounded bg-emerald-950/20 p-3 text-emerald-200 whitespace-pre-wrap max-h-48 overflow-y-auto border border-emerald-500/20 leading-relaxed text-[11px]">
+                            {prop.proposedStepsMarkdown}
+                          </pre>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* ================= DONE-WHEN SHOWCASE: NOTE -> SKILL DIFF -> BETTER ANSWER ================= */}
+            {demonstration && (
+              <div className="rounded-xl border border-indigo-500/30 bg-indigo-950/10 p-5 shadow-sm space-y-4">
+                <div className="flex items-center justify-between border-b border-indigo-500/20 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-indigo-400" />
+                    <div>
+                      <h4 className="text-sm font-bold text-white">
+                        Done-When Criteria: Note &rarr; Skill Change &rarr; Better Answer
+                      </h4>
+                      <p className="text-xs text-gray-400">
+                        Demonstrating how a human teaching note updates a skill and delivers a measurably better customer answer.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/50 border border-emerald-500/30 px-2 py-0.5 rounded font-bold">
+                    PASSED VERIFICATION
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  {/* Column 1: The Human Note */}
+                  <div className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4 space-y-2">
+                    <span className="text-[10px] uppercase font-mono font-bold text-amber-400 block tracking-wider">
+                      1. The Human Note
+                    </span>
+                    <p className="text-xs font-semibold text-white">
+                      &quot;{demonstration.originatingNote}&quot;
+                    </p>
+                    <p className="text-[11px] text-gray-400">
+                      Annotated on thread: <span className="text-gray-300">{demonstration.sourceThread || "DNS CNAME Thread"}</span>
+                    </p>
+                  </div>
+
+                  {/* Column 2: The Skill Change */}
+                  <div className="rounded-xl border border-purple-500/30 bg-purple-950/20 p-4 space-y-2">
+                    <span className="text-[10px] uppercase font-mono font-bold text-purple-400 block tracking-wider">
+                      2. The Skill Change It Caused
+                    </span>
+                    <p className="text-xs font-semibold text-white">
+                      Updated: {demonstration.skillName || "DNS & Custom CNAME Setup"}
+                    </p>
+                    <p className="text-[11px] text-gray-300 leading-relaxed">
+                      {demonstration.skillChangeDiff}
+                    </p>
+                  </div>
+
+                  {/* Column 3: The Improvement Impact */}
+                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 space-y-2">
+                    <span className="text-[10px] uppercase font-mono font-bold text-emerald-400 block tracking-wider">
+                      3. Operational Impact
+                    </span>
+                    <p className="text-xs font-semibold text-white">
+                      Adherence to Human Preference
+                    </p>
+                    <p className="text-[11px] text-gray-300 leading-relaxed">
+                      {demonstration.improvementExplanation || demonstration.whyBetter}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Side-by-Side: Before Answer vs Better Answer */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs text-gray-400">
+                      <span className="font-semibold text-red-400">Before (Too Long / Preliminary Prose):</span>
+                    </div>
+                    <pre className="rounded-xl border border-gray-800 bg-gray-950 p-4 text-xs font-mono text-gray-400 whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto">
+                      {demonstration.beforeAnswer}
+                    </pre>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs text-emerald-400">
+                      <span className="font-semibold text-emerald-300">
+                        Better Answer (3 Steps Given First Directly):
+                      </span>
+                    </div>
+                    <pre className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 text-xs font-mono text-emerald-200 whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto">
+                      {demonstration.betterAnswer}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

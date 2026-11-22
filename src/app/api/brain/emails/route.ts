@@ -1,113 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/auth";
-import { db } from "@/db";
-import { emailThreads, emailMessages } from "@/db/schema/knowledge";
-import { eq, and, desc } from "drizzle-orm";
+import {
+  getEmailThreads,
+  updateThreadNote,
+  updateMessageNote,
+  analyzeNotesAndProposeSkillImprovement,
+  getSkillImprovementProposals,
+  approveSkillImprovement,
+  rejectSkillImprovement,
+  getDoneWhenDemonstration,
+} from "@/services/brain/emailSkillsOptimizer";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const tenant = await getTenantContext();
+    const { searchParams } = new URL(req.url);
+    const view = searchParams.get("view");
 
-    let threads = await db
-      .select()
-      .from(emailThreads)
-      .where(eq(emailThreads.businessId, tenant.businessId))
-      .orderBy(desc(emailThreads.syncedAt));
-
-    // Seed realistic past email threads if empty
-    if (threads.length === 0) {
-      const sampleThreads = [
-        {
-          gmailThreadId: `thread-gmail-${tenant.businessSlug}-001`,
-          subject: "Re: Need assistance with CNAME setup for staging subdomain",
-          snippet: "Hi team, we are having trouble verifying our staging subdomain. The DNS record points to proxy.example.com but SSL throws handshake error.",
-          notes: "Staff note (Teach agent): Customer forgot to select Full (Strict) SSL mode in Cloudflare. Always remind customers to switch from Flexible to Full (Strict).",
-          messages: [
-            {
-              fromAddress: "customer@cliententerprise.com",
-              toAddress: `support@${tenant.businessSlug}.com`,
-              bodyText: "Hi team, we are having trouble verifying our staging subdomain. The DNS record points to proxy.example.com but SSL throws handshake error. Can you help?",
-              sentAt: new Date(Date.now() - 86400000 * 3),
-            },
-            {
-              fromAddress: `support@${tenant.businessSlug}.com`,
-              toAddress: "customer@cliententerprise.com",
-              bodyText: "Hi there! This occurs when Cloudflare SSL mode is set to Flexible instead of Full (Strict). Please change your encryption mode in the Cloudflare SSL/TLS tab to Full (Strict), and the handshake loop will clear immediately.",
-              notes: "Verified standard resolution procedure.",
-              sentAt: new Date(Date.now() - 86400000 * 2),
-            },
-          ],
-        },
-        {
-          gmailThreadId: `thread-gmail-${tenant.businessSlug}-002`,
-          subject: "Re: Inquiring about enterprise SLA and database max pool",
-          snippet: "We are scaling to 10,000 concurrent requests and want to know your PostgreSQL connection limits and pooling setup.",
-          notes: "Staff note (Teach agent): Quote our Enterprise Autonomous Cluster ($3,500/mo) which includes dedicated PgBouncer poolers and 99.95% SLA.",
-          messages: [
-            {
-              fromAddress: "cto@fintechpartner.io",
-              toAddress: `consultant@${tenant.businessSlug}.com`,
-              bodyText: "We are scaling to 10,000 concurrent requests and want to know your PostgreSQL connection limits and pooling setup.",
-              sentAt: new Date(Date.now() - 86400000 * 5),
-            },
-          ],
-        },
-      ];
-
-      for (const t of sampleThreads) {
-        const [insertedThread] = await db
-          .insert(emailThreads)
-          .values({
-            businessId: tenant.businessId,
-            gmailThreadId: t.gmailThreadId,
-            subject: t.subject,
-            snippet: t.snippet,
-            notes: t.notes,
-          })
-          .returning();
-
-        for (const m of t.messages) {
-          await db.insert(emailMessages).values({
-            businessId: tenant.businessId,
-            threadId: insertedThread.id,
-            fromAddress: m.fromAddress,
-            toAddress: m.toAddress,
-            bodyText: m.bodyText,
-            notes: m.notes || null,
-            sentAt: m.sentAt,
-          });
-        }
-      }
-
-      threads = await db
-        .select()
-        .from(emailThreads)
-        .where(eq(emailThreads.businessId, tenant.businessId))
-        .orderBy(desc(emailThreads.syncedAt));
+    if (view === "demonstration") {
+      const demo = getDoneWhenDemonstration(tenant.businessId);
+      return NextResponse.json({ success: true, demonstration: demo });
     }
 
-    const fullThreads = await Promise.all(
-      threads.map(async (t) => {
-        const msgs = await db
-          .select()
-          .from(emailMessages)
-          .where(eq(emailMessages.threadId, t.id))
-          .orderBy(emailMessages.sentAt);
+    const threads = getEmailThreads(tenant.businessId);
+    const proposals = getSkillImprovementProposals(tenant.businessId);
+    const demonstration = getDoneWhenDemonstration(tenant.businessId);
 
-        return {
-          id: t.id,
-          gmailThreadId: t.gmailThreadId,
-          subject: t.subject,
-          snippet: t.snippet,
-          notes: t.notes,
-          syncedAt: t.syncedAt,
-          messageCount: msgs.length,
-          messages: msgs,
-        };
-      })
-    );
-
-    return NextResponse.json({ threads: fullThreads });
+    return NextResponse.json({
+      success: true,
+      threads,
+      proposals,
+      demonstration,
+    });
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to fetch past email threads", details: String(error) },
@@ -120,26 +44,83 @@ export async function POST(req: NextRequest) {
   try {
     const tenant = await getTenantContext();
     const body = await req.json();
-    const { threadId, notes } = body;
+    const { action, threadId, messageId, notes, proposalId, modelId } = body;
 
-    if (!threadId || notes === undefined) {
-      return NextResponse.json({ error: "threadId and notes are required." }, { status: 400 });
+    // Action 1: Propose Skill Improvement using Strong Model (e.g. Claude Opus 5.5)
+    if (action === "propose_improvement") {
+      const proposal = analyzeNotesAndProposeSkillImprovement(tenant.businessId, {
+        modelId: modelId || "claude-opus-5.5",
+      });
+      return NextResponse.json({
+        success: true,
+        proposal,
+        message: `Claude Opus 5.5 analyzed human notes and proposed improvements for skill '${proposal.targetSkillName}'.`,
+      });
     }
 
-    const [updated] = await db
-      .update(emailThreads)
-      .set({ notes })
-      .where(and(eq(emailThreads.id, threadId), eq(emailThreads.businessId, tenant.businessId)))
-      .returning();
+    // Action 2: Human Approves Skill Improvement -> Creates new version in Settings
+    if (action === "approve_improvement") {
+      if (!proposalId) {
+        return NextResponse.json({ error: "proposalId is required for approval" }, { status: 400 });
+      }
+      const result = approveSkillImprovement(tenant.businessId, proposalId, tenant.userId);
+      return NextResponse.json({
+        success: true,
+        message: `Skill change approved by human reviewer! Updated to Version ${result.newVersionNumber} in Settings.`,
+        proposal: result.proposal,
+        updatedSkill: result.updatedSkill,
+        newVersionNumber: result.newVersionNumber,
+        demonstration: result.demonstration,
+      });
+    }
 
-    return NextResponse.json({
-      success: true,
-      thread: updated,
-      message: "Human teaching notes updated on past email thread.",
-    });
+    // Action 3: Human Rejects Skill Improvement
+    if (action === "reject_improvement") {
+      if (!proposalId) {
+        return NextResponse.json({ error: "proposalId is required for rejection" }, { status: 400 });
+      }
+      const rejected = rejectSkillImprovement(tenant.businessId, proposalId);
+      return NextResponse.json({
+        success: true,
+        message: "Skill improvement proposal rejected.",
+        proposal: rejected,
+      });
+    }
+
+    // Action 4: Get Done-When Demonstration (Note -> Skill Change -> Better Answer)
+    if (action === "get_demonstration") {
+      const demo = getDoneWhenDemonstration(tenant.businessId);
+      return NextResponse.json({ success: true, demonstration: demo });
+    }
+
+    // Action 5: Save note on an individual message
+    if (messageId && notes !== undefined) {
+      if (!threadId) {
+        return NextResponse.json({ error: "threadId is required when annotating a message" }, { status: 400 });
+      }
+      const res = updateMessageNote(tenant.businessId, threadId, messageId, notes);
+      return NextResponse.json({
+        success: true,
+        message: "Human teaching note saved on email message.",
+        thread: res.thread,
+        messageItem: res.message,
+      });
+    }
+
+    // Action 6: Save note on whole thread
+    if (threadId && notes !== undefined) {
+      const updated = updateThreadNote(tenant.businessId, threadId, notes);
+      return NextResponse.json({
+        success: true,
+        thread: updated,
+        message: "Human teaching note updated on entire email thread.",
+      });
+    }
+
+    return NextResponse.json({ error: "Invalid action or missing parameters" }, { status: 400 });
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to update email notes", details: String(error) },
+      { error: "Failed to process email action", details: String(error) },
       { status: 500 }
     );
   }

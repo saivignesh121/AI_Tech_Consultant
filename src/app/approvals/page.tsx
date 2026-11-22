@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import AppShell from "@/components/layout/AppShell";
 import {
   CheckCircle2,
@@ -16,6 +17,8 @@ import {
   ShieldAlert,
   ChevronRight,
   BookOpen,
+  Check,
+  Wrench,
 } from "lucide-react";
 
 interface EscalatedTask {
@@ -49,11 +52,28 @@ interface SelfImproveItem {
   createdAt: string;
 }
 
+interface SkillProposalItem {
+  id: string;
+  targetSkillName: string;
+  targetSkillSlug: string;
+  modelUsed: string;
+  diffSummary: string;
+  previousStepsMarkdown: string;
+  proposedStepsMarkdown: string;
+  status: string;
+  originatingNotes: Array<{
+    noteText: string;
+    sourceSubject?: string;
+  }>;
+  createdAt: string;
+}
+
 export default function ApprovalsPage() {
-  const [activeTab, setActiveTab] = useState<"escalations" | "lessons" | "prs">("escalations");
+  const [activeTab, setActiveTab] = useState<"escalations" | "lessons" | "prs" | "skills">("escalations");
   const [escalations, setEscalations] = useState<EscalatedTask[]>([]);
   const [lessons, setLessons] = useState<PendingLesson[]>([]);
   const [prs, setPrs] = useState<SelfImproveItem[]>([]);
+  const [skillProposals, setSkillProposals] = useState<SkillProposalItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [toastMsg, setToastMsg] = useState("");
@@ -79,6 +99,7 @@ export default function ApprovalsPage() {
       setEscalations(data.escalatedTasks || []);
       setLessons(data.pendingLessons || []);
       setPrs(data.selfImproveRuns || []);
+      setSkillProposals(data.skillProposals || []);
     } catch (e) {
       console.error(e);
       setErrorMsg("Failed to communicate with approvals service.");
@@ -167,9 +188,34 @@ export default function ApprovalsPage() {
     }
   };
 
+  const handleSkillProposalAction = async (proposalId: string, approve: boolean) => {
+    setSubmittingAction(true);
+    try {
+      const res = await fetch("/api/approvals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: approve ? "approve_skill_proposal" : "reject_skill_proposal",
+          proposalId,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setToastMsg(data.message);
+        setTimeout(() => setToastMsg(""), 4000);
+        await fetchApprovals();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSubmittingAction(false);
+    }
+  };
+
   const pendingEscalationsCount = escalations.filter((e) => !e.isResolved).length;
   const pendingLessonsCount = lessons.filter((l) => l.status === "pending").length;
   const pendingPrsCount = prs.filter((p) => p.status === "passed" || p.status === "running").length;
+  const pendingSkillsCount = skillProposals.filter((p) => p.status === "pending_human_review").length;
 
   return (
     <AppShell breadcrumbs={[{ label: "Approvals Inbox", href: "/approvals" }]}>
@@ -267,6 +313,23 @@ export default function ApprovalsPage() {
             {pendingPrsCount > 0 && (
               <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30">
                 {pendingPrsCount}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab("skills")}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition ${
+              activeTab === "skills"
+                ? "bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm"
+                : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"
+            }`}
+          >
+            <BookOpen className="h-4 w-4 text-purple-400" />
+            <span>Skill Improvements (Email Notes)</span>
+            {pendingSkillsCount > 0 && (
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                {pendingSkillsCount}
               </span>
             )}
           </button>
@@ -518,6 +581,118 @@ export default function ApprovalsPage() {
                     >
                       Approve &amp; Merge PR
                     </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        {/* Tab 4: Skill Improvements from Email Teaching Notes (Task 2.6) */}
+        {activeTab === "skills" && (
+          <div className="space-y-4">
+            {skillProposals.length === 0 && !loading && (
+              <div className="p-8 text-center rounded-2xl border border-gray-800 bg-[#071329] text-gray-400">
+                <CheckCircle2 className="h-8 w-8 text-purple-400 mx-auto mb-2" />
+                <div className="font-semibold text-white">No Pending Skill Improvements</div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Human teaching notes added on past email threads will be analyzed by Claude Opus 5.5 to propose SOP improvements here.
+                </p>
+              </div>
+            )}
+
+            {skillProposals.map((prop) => (
+              <div
+                key={prop.id}
+                className="p-5 rounded-2xl border border-gray-800 bg-[#071329] hover:border-gray-700 transition space-y-4"
+              >
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-gray-800/80 pb-3">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-bold text-white text-sm">{prop.targetSkillName}</span>
+                      <span className="text-[10px] font-mono bg-purple-500/10 text-purple-300 border border-purple-500/20 px-2 py-0.5 rounded">
+                        Model: {prop.modelUsed}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-300 font-sans">{prop.diffSummary}</p>
+                  </div>
+
+                  <span
+                    className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold self-start md:self-auto ${
+                      prop.status === "approved"
+                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                        : prop.status === "rejected"
+                        ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                        : "bg-amber-500/10 text-amber-300 border border-amber-500/20"
+                    }`}
+                  >
+                    {prop.status.toUpperCase()}
+                  </span>
+                </div>
+
+                {/* Originating notes used */}
+                <div className="p-3 bg-gray-900/60 rounded-xl border border-gray-800/60 text-xs space-y-1">
+                  <span className="text-[10px] uppercase font-mono text-amber-400 font-semibold block">
+                    Teaching Notes Used by Model:
+                  </span>
+                  {prop.originatingNotes?.map((n: any, idx: number) => (
+                    <div key={idx} className="text-gray-300 flex items-center gap-2">
+                      <span>&bull;</span>
+                      <span className="font-mono text-amber-300">&quot;{n.noteText}&quot;</span>
+                      {n.sourceSubject && (
+                        <span className="text-gray-500 text-[10px]">(from {n.sourceSubject})</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Before vs Proposed SOP Steps */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-gray-500 uppercase">Previous SOP Steps (v1):</span>
+                    <pre className="rounded-xl bg-gray-950 p-3 text-gray-400 whitespace-pre-wrap max-h-44 overflow-y-auto border border-gray-800/80 leading-relaxed text-[11px]">
+                      {prop.previousStepsMarkdown}
+                    </pre>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-emerald-400 uppercase">
+                      Proposed SOP Steps (3 Steps Prioritized First):
+                    </span>
+                    <pre className="rounded-xl bg-emerald-950/20 p-3 text-emerald-200 whitespace-pre-wrap max-h-44 overflow-y-auto border border-emerald-500/20 leading-relaxed text-[11px]">
+                      {prop.proposedStepsMarkdown}
+                    </pre>
+                  </div>
+                </div>
+
+                {prop.status === "pending_human_review" && (
+                  <div className="flex items-center justify-end gap-3 pt-2">
+                    <button
+                      onClick={() => handleSkillProposalAction(prop.id, false)}
+                      disabled={submittingAction}
+                      className="px-4 py-2 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-950/20 text-xs font-semibold transition"
+                    >
+                      Reject
+                    </button>
+
+                    <button
+                      onClick={() => handleSkillProposalAction(prop.id, true)}
+                      disabled={submittingAction}
+                      className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-xs transition shadow-md shadow-emerald-500/20 flex items-center gap-1.5"
+                    >
+                      <Check className="h-3.5 w-3.5" />
+                      <span>Approve &amp; Update Skill</span>
+                    </button>
+                  </div>
+                )}
+
+                {prop.status === "approved" && (
+                  <div className="flex justify-end pt-1">
+                    <Link
+                      href="/settings/roles-prompts?tab=skills"
+                      className="flex items-center gap-1.5 text-xs font-mono text-purple-300 hover:text-white bg-purple-950/50 border border-purple-500/30 px-3 py-1.5 rounded-lg transition"
+                    >
+                      <Wrench className="h-3.5 w-3.5" />
+                      <span>View &amp; Edit in Settings</span>
+                    </Link>
                   </div>
                 )}
               </div>
