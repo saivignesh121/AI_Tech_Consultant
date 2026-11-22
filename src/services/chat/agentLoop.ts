@@ -1,4 +1,4 @@
-import { evaluateMessageSafety, SafetyCheckResult } from "./safetyShield";
+import { evaluateMessageSafety, formatHumanEscalationNote, SafetyCheckResult } from "./safetyShield";
 import { parseCustomerInput } from "./intentClassifier";
 import { buildCitations, Citation, RetrievedContextItem } from "./citationMapper";
 import { BUILTIN_ROLES, AgentRoleDefinition } from "./roles";
@@ -156,21 +156,32 @@ export async function executeConsultantTurn(params: {
     };
   }
 
-  // 2. Human Escalation (Angry, Legal, Refund)
+  // 2. Human Escalation (Angry, Legal, Refund) - Task 3.6
   if (safety.isEscalated) {
-    let escalationMessage = "Your inquiry has been flagged for human support specialist review.";
-    if (safety.escalationReason === "legal_threat") {
-      escalationMessage = "A ticket has been opened for our Legal & Compliance Executive. An expert will reach out directly.";
-    } else if (safety.escalationReason === "refund_demand") {
-      escalationMessage = "A ticket has been dispatched to our Billing & Finance Team for immediate human review.";
-    } else if (safety.escalationReason === "angry_sentiment") {
-      escalationMessage = "I apologize for the frustration. A senior human support specialist has been notified and will assist you.";
+    let expertTaskId: string | undefined;
+    if (params.autoCreateExpertTaskOnUnknown !== false) {
+      try {
+        const task = await createExpertTask({
+          businessId: params.businessId,
+          question: params.userMessage,
+          roleSlug: role.slug,
+          sessionId: params.sessionId,
+        });
+        expertTaskId = task.id;
+      } catch (err) {
+        console.warn("Notice: DB expert task fallback for escalation", err);
+      }
     }
+
+    const { fullFormattedMessage } = formatHumanEscalationNote(
+      safety.escalationReason || "support",
+      expertTaskId
+    );
 
     const latencyMs = Math.max(20, Date.now() - startTime);
     return {
-      answer: escalationMessage,
-      reply: escalationMessage,
+      answer: fullFormattedMessage,
+      reply: fullFormattedMessage,
       roleUsed: role.name,
       modelUsed: modelId,
       citations: [],
@@ -179,6 +190,7 @@ export async function executeConsultantTurn(params: {
       isEscalated: true,
       escalationReason: safety.escalationReason,
       isBlocked: false,
+      expertTaskId,
       activeLessonsUsed: [],
       trace: {
         modelId,

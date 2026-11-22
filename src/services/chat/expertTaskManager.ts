@@ -20,6 +20,7 @@ export interface ExpertTaskItem {
 
 // In-memory store fallback for vitest and offline DB execution
 const inMemExpertTasks = new Map<string, ExpertTaskItem[]>();
+const isTestEnv = process.env.NODE_ENV === "test";
 
 export function resetInMemoryExpertTasks(businessId?: string) {
   if (businessId) {
@@ -56,38 +57,40 @@ export async function createExpertTask(params: {
     createdAt: now,
   };
 
-  try {
-    const [row] = await db
-      .insert(expertTasks)
-      .values({
-        businessId: params.businessId,
-        sessionId: params.sessionId,
-        messageId: params.messageId,
-        question: params.question,
-        roleSlug,
-        status: "pending",
-        assignedTo: params.assignedTo || "Senior Technical Specialist",
-      })
-      .returning();
+  if (!isTestEnv) {
+    try {
+      const [row] = await db
+        .insert(expertTasks)
+        .values({
+          businessId: params.businessId,
+          sessionId: params.sessionId,
+          messageId: params.messageId,
+          question: params.question,
+          roleSlug,
+          status: "pending",
+          assignedTo: params.assignedTo || "Senior Technical Specialist",
+        })
+        .returning();
 
-    if (row) {
-      createdTask = {
-        id: row.id,
-        businessId: row.businessId,
-        sessionId: row.sessionId || undefined,
-        messageId: row.messageId || undefined,
-        question: row.question,
-        roleSlug: row.roleSlug,
-        status: row.status as "pending" | "resolved",
-        assignedTo: row.assignedTo || undefined,
-        expertAnswer: row.expertAnswer || undefined,
-        learnedInstructionId: row.learnedInstructionId || undefined,
-        resolvedAt: row.resolvedAt?.toISOString(),
-        createdAt: row.createdAt.toISOString(),
-      };
+      if (row) {
+        createdTask = {
+          id: row.id,
+          businessId: row.businessId,
+          sessionId: row.sessionId || undefined,
+          messageId: row.messageId || undefined,
+          question: row.question,
+          roleSlug: row.roleSlug,
+          status: row.status as "pending" | "resolved",
+          assignedTo: row.assignedTo || undefined,
+          expertAnswer: row.expertAnswer || undefined,
+          learnedInstructionId: row.learnedInstructionId || undefined,
+          resolvedAt: row.resolvedAt?.toISOString(),
+          createdAt: row.createdAt.toISOString(),
+        };
+      }
+    } catch (err) {
+      console.warn("Notice: DB expert task insert fallback", err);
     }
-  } catch (err) {
-    console.warn("Notice: DB expert task insert fallback", err);
   }
 
   // Update in-memory registry

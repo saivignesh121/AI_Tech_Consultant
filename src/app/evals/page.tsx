@@ -19,6 +19,8 @@ import {
   ArrowRight,
   Filter,
   Lock,
+  GraduationCap,
+  FileText,
 } from "lucide-react";
 
 interface BenchmarkCaseItem {
@@ -52,7 +54,13 @@ interface RouterComparisonData {
 }
 
 export default function EvalLabPage() {
-  const [activeTab, setActiveTab] = useState<"benchmark" | "models" | "judge" | "router">("models");
+  const [activeTab, setActiveTab] = useState<"benchmark" | "models" | "judge" | "router" | "prove-learned">("models");
+
+  // --- Prove That It Learned State (Task 3.5) ---
+  const [learningProof, setLearningProof] = useState<any | null>(null);
+  const [selectedScenarioId, setSelectedScenarioId] = useState("dns-acme-ssl");
+  const [evaluatingLearning, setEvaluatingLearning] = useState(false);
+  const [scenariosList, setScenariosList] = useState<any[]>([]);
 
   // --- Benchmark Tab State ---
   const [cases, setCases] = useState<BenchmarkCaseItem[]>([]);
@@ -94,6 +102,7 @@ export default function EvalLabPage() {
     fetchModelsMatrix();
     fetchJudgeCalibration();
     fetchRouterComparison();
+    fetchLearningProof();
   }, []);
 
   const fetchBenchmarkCases = async (cat = "all") => {
@@ -135,6 +144,24 @@ export default function EvalLabPage() {
       if (data.comparison) setRouterStats(data.comparison);
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const fetchLearningProof = async (scId = selectedScenarioId) => {
+    setEvaluatingLearning(true);
+    try {
+      const res = await fetch(`/api/evals/prove-learned?scenarioId=${scId}`);
+      const data = await res.json();
+      if (data.proof) {
+        setLearningProof(data.proof);
+      }
+      if (data.availableScenarios) {
+        setScenariosList(data.availableScenarios);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setEvaluatingLearning(false);
     }
   };
 
@@ -252,6 +279,18 @@ export default function EvalLabPage() {
           >
             <Zap className="h-4 w-4" />
             <span>3-Tier Router &amp; Release Gate</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("prove-learned")}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+              activeTab === "prove-learned"
+                ? "border-emerald-500 text-emerald-400"
+                : "border-transparent text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            <GraduationCap className="h-4 w-4" />
+            <span>Prove That It Learned (Task 3.5)</span>
           </button>
         </div>
 
@@ -648,6 +687,208 @@ export default function EvalLabPage() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {/* ================= TAB 5: PROVE THAT IT LEARNED (Task 3.5) ================= */}
+        {activeTab === "prove-learned" && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            {/* Header & Scenario Selection */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="space-y-1">
+                <h3 className="text-base font-semibold text-white flex items-center gap-2">
+                  <GraduationCap className="h-5 w-5 text-emerald-400" />
+                  <span>Prove That It Learned: Comparative Eval Lab</span>
+                </h3>
+                <p className="text-xs text-gray-400">
+                  Task 3.5: Run the exact same customer question before and after a human lesson approval to demonstrate empirical score gains.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <div>
+                  <span className="text-[10px] uppercase font-semibold text-gray-400 tracking-wider block mb-1">
+                    Evaluation Scenario:
+                  </span>
+                  <select
+                    value={selectedScenarioId}
+                    onChange={(e) => {
+                      setSelectedScenarioId(e.target.value);
+                      fetchLearningProof(e.target.value);
+                    }}
+                    className="rounded-lg border border-gray-700 bg-gray-950 px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                  >
+                    {(scenariosList.length > 0 ? scenariosList : [
+                      { id: "dns-acme-ssl", title: "DNS Cloudflare Orange Cloud vs ACME SSL" },
+                      { id: "strict-refund-policy", title: "Strict Refund Escalation Policy" },
+                      { id: "webhook-timing-safe", title: "Webhook HMAC Timing-Safe Protocol" },
+                    ]).map((sc: any) => (
+                      <option key={sc.id} value={sc.id}>
+                        {sc.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  onClick={() => fetchLearningProof(selectedScenarioId)}
+                  disabled={evaluatingLearning}
+                  className="mt-4 sm:mt-0 flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-xs font-semibold text-white transition disabled:opacity-40 shadow-sm"
+                >
+                  <RotateCw className={`h-3.5 w-3.5 ${evaluatingLearning ? "animate-spin" : ""}`} />
+                  <span>{evaluatingLearning ? "Evaluating Model..." : "Run Comparative Eval"}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Proof Card & Results */}
+            {learningProof && (
+              <div className="space-y-5">
+                {/* Improvement Delta Banner */}
+                <div className="rounded-xl border border-emerald-500/40 bg-gradient-to-r from-emerald-950/40 via-gray-950 to-indigo-950/30 p-5 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        {learningProof.learnedStatus === "verified_learned" ? "✓ Learning Verified" : "Evaluated"}
+                      </span>
+                      <span className="text-xs text-gray-400 font-mono">
+                        Target Lesson: <strong className="text-white">{learningProof.lessonTitle}</strong>
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-200 font-medium">
+                      {learningProof.summaryText}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-4 bg-gray-950/80 p-3 rounded-lg border border-gray-800">
+                    <div className="text-center">
+                      <span className="text-[10px] text-gray-400 uppercase tracking-wider block">Before</span>
+                      <span className="text-lg font-bold text-rose-400 font-mono">
+                        {learningProof.before.score}%
+                      </span>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-emerald-400" />
+                    <div className="text-center">
+                      <span className="text-[10px] text-gray-400 uppercase tracking-wider block">After</span>
+                      <span className="text-lg font-bold text-emerald-400 font-mono">
+                        {learningProof.after.score}%
+                      </span>
+                    </div>
+                    <div className="border-l border-gray-800 pl-4 text-center">
+                      <span className="text-[10px] text-gray-400 uppercase tracking-wider block">Delta (Δ)</span>
+                      <span className="text-lg font-extrabold text-emerald-300 font-mono">
+                        +{learningProof.scoreDelta}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Question & Expected Protocol Spec */}
+                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4 text-xs space-y-2">
+                  <div className="flex items-center gap-2 text-indigo-300 font-semibold">
+                    <FileText className="h-4 w-4" />
+                    <span>Inquiry Tested Under AI Judge:</span>
+                  </div>
+                  <div className="bg-gray-950 p-3 rounded border border-gray-800 font-mono text-gray-200">
+                    &ldquo;{learningProof.question}&rdquo;
+                  </div>
+                  <div className="text-[11px] text-gray-400">
+                    <strong className="text-gray-300">Expected Standard Protocol:</strong> {learningProof.expectedProtocol}
+                  </div>
+                </div>
+
+                {/* Side-by-Side Comparison: Before vs After */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {/* BEFORE CARD */}
+                  <div className="rounded-xl border border-rose-500/30 bg-[#0E1322] p-5 space-y-3.5 shadow-sm">
+                    <div className="flex items-center justify-between border-b border-gray-800 pb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                        <h4 className="text-sm font-bold text-rose-400">Before Lesson (Baseline)</h4>
+                      </div>
+                      <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-rose-950/80 border border-rose-500/40 text-rose-300">
+                        Score: {learningProof.before.score}% &bull; FAIL
+                      </span>
+                    </div>
+
+                    <div className="space-y-1 text-xs">
+                      <span className="text-[10px] uppercase font-semibold text-gray-500 tracking-wider block">
+                        Model Output:
+                      </span>
+                      <div className="p-3 rounded-lg bg-gray-950 border border-gray-800 text-gray-300 font-mono text-[11px] max-h-48 overflow-y-auto whitespace-pre-wrap leading-relaxed">
+                        {learningProof.before.answer}
+                      </div>
+                    </div>
+
+                    <div className="p-3 rounded-lg bg-rose-950/20 border border-rose-500/20 text-xs space-y-1">
+                      <span className="font-semibold text-rose-300 flex items-center gap-1.5 text-[11px]">
+                        <AlertTriangle className="h-3.5 w-3.5 text-rose-400" />
+                        <span>AI Master Judge Critique (Claude Opus 5.5):</span>
+                      </span>
+                      <p className="text-[11px] text-rose-200/90 leading-relaxed font-sans">
+                        {learningProof.before.reason}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] font-mono text-gray-500 pt-1 border-t border-gray-800/80">
+                      <span>Lessons Applied: 0 (Unapproved)</span>
+                      <span>Latency: {learningProof.before.latencyMs}ms</span>
+                    </div>
+                  </div>
+
+                  {/* AFTER CARD */}
+                  <div className="rounded-xl border border-emerald-500/40 bg-[#0E1322] p-5 space-y-3.5 shadow-sm">
+                    <div className="flex items-center justify-between border-b border-gray-800 pb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                        <h4 className="text-sm font-bold text-emerald-400">After Lesson Approved (Learned)</h4>
+                      </div>
+                      <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-950/80 border border-emerald-500/40 text-emerald-300">
+                        Score: {learningProof.after.score}% &bull; PASS
+                      </span>
+                    </div>
+
+                    <div className="space-y-1 text-xs">
+                      <span className="text-[10px] uppercase font-semibold text-gray-500 tracking-wider block">
+                        Model Output (Grounding with Approved Lesson):
+                      </span>
+                      <div className="p-3 rounded-lg bg-gray-950 border border-gray-800 text-emerald-200 font-mono text-[11px] max-h-48 overflow-y-auto whitespace-pre-wrap leading-relaxed">
+                        {learningProof.after.answer}
+                      </div>
+                    </div>
+
+                    <div className="p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/20 text-xs space-y-1">
+                      <span className="font-semibold text-emerald-300 flex items-center gap-1.5 text-[11px]">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                        <span>AI Master Judge Critique (Claude Opus 5.5):</span>
+                      </span>
+                      <p className="text-[11px] text-emerald-200/90 leading-relaxed font-sans">
+                        {learningProof.after.reason}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] font-mono text-gray-400 pt-1 border-t border-gray-800/80">
+                      <span className="text-emerald-400">Lessons Applied: {learningProof.after.appliedLessons.length}</span>
+                      <span>Latency: {learningProof.after.latencyMs}ms</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Lesson Source-of-Truth Details */}
+                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-gray-300">
+                    <FileText className="h-4 w-4 text-cyan-400" />
+                    <span>Durable Source-of-Truth Markdown File:</span>
+                    <span className="font-mono bg-gray-950 px-2 py-0.5 rounded border border-gray-800 text-cyan-300">
+                      {learningProof.lessonMarkdownFile}
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-gray-400 font-mono">
+                    Category: {learningProof.lessonCategory}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

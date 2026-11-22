@@ -3,6 +3,8 @@
  * Task 2.3: Polite scraping, heading-aware extraction, multimodal image understanding.
  */
 
+import { scanScrapedDocumentSafety } from "../chat/safetyShield";
+
 export interface ExtractedImage {
   src: string;
   alt: string;
@@ -23,12 +25,16 @@ export interface ExtractedPageContent {
  */
 export function extractPageContent(html: string, pageUrl: string): ExtractedPageContent {
   // Strip non-content chrome (nav, header, footer, scripts, styles)
-  const bodyHtml = html
+  let bodyHtml = html
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, " ")
     .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, " ")
     .replace(/<nav\b[^<]*(?:(?!<\/nav>)<[^<]*)*<\/nav>/gi, " ")
     .replace(/<header\b[^<]*(?:(?!<\/header>)<[^<]*)*<\/header>/gi, " ")
     .replace(/<footer\b[^<]*(?:(?!<\/footer>)<[^<]*)*<\/footer>/gi, " ");
+
+  // Task 3.6: Scan and sanitize scraped web pages against indirect prompt injection
+  const safetyScan = scanScrapedDocumentSafety(bodyHtml, pageUrl);
+  bodyHtml = safetyScan.sanitizedContent;
 
   // Extract Headings (h1, h2, h3) from main content
   const headings: string[] = [];

@@ -498,6 +498,23 @@ GROUP BY health_status;
 - When an inquiry cannot be answered with confidence (below the calibrated 0.38 threshold), an entry is logged in `expert_tasks`. When resolved, the expert's answer is synthesized into `instructions` and linked via `expert_tasks.learned_instruction_id`, allowing knowledge to flow back permanently into memory.
 - The user can click any lesson, instruction, or skill version and trace back to the exact chat session and message that triggered it.
 
+#### Architectural Decisions for Lessons & SOP Skills:
+1. **Lessons as Markdown Files vs. RAG Chunks ("Both"):**
+   - **Decision: BOTH.**
+   - *Markdown Files on Disk (`lessons/<slug>.md`):* Act as durable, human-readable, git-auditable single sources of truth. Support leads and developers can view diffs, review git blame, and edit SOP rules directly in repository settings.
+   - *Chunked & Embedded in RAG (`knowledge_chunks` with `source_type='lesson'`):* Chunked into pgvector embeddings to allow sub-millisecond semantic similarity search alongside crawled documentation, while receiving priority retrieval weight over generic web chunks.
+2. **Criteria for When a Lesson Becomes a Skill:**
+   - A lesson is autonomously flagged for promotion to an SOP Skill (`suggested_skill_upgrade: true`) when:
+     - **Procedural Sequence:** Contains $\ge 3$ sequential steps with action verbs or code/CLI commands (e.g., `curl`, `dig`, DNS configuration, API signature verification).
+     - **Broad Workflow Scope:** Length exceeds 120 characters or recurred across $\ge 3$ customer critiques.
+     - **Tool or Role Execution:** Requires specific tool invocation or role permissions (e.g., restricted to `support-engineer` or `ai-consultant`).
+3. **Deterministic Conflict Resolution When Two Lessons Disagree:**
+   - In the event two approved lessons provide contradictory guidance for the same inquiry, the conflict is resolved deterministically using a 4-tier precedence hierarchy:
+     - **Tier 1 — Approval Status:** `status = 'approved'` strictly supersedes `status = 'pending'` or `status = 'rejected'`.
+     - **Tier 2 — Recency Timestamp:** If two lessons are approved, the **newer approved lesson** (most recent `updated_at` / `approved_at`) takes precedence.
+     - **Tier 3 — Role Specificity:** A lesson explicitly tagged for a specific role takes precedence over a generic workspace-wide lesson.
+     - **Tier 4 — Administrative Override & Telemetry Flag:** The trace logs a `lesson_conflict_detected` warning in `chat_traces`, alerting admins in Settings to deactivate or consolidate conflicting rules.
+
 ### D11. Chat Session Context & Knowledge Tracking
 - `chat_sessions` records `role_id` and `mode` (`ask` or `teach`).
 - `chat_traces` records JSON arrays of chunk IDs (`knowledge_used`), skill IDs (`skills_used`), and instruction IDs utilized during that exact turn.

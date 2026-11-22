@@ -9,6 +9,7 @@ import {
   Plus,
   Paperclip,
   ShieldCheck,
+  ShieldAlert,
   AlertTriangle,
   Clock,
   DollarSign,
@@ -61,6 +62,13 @@ interface MessageItem {
   citations?: CitationItem[];
   isEscalated?: boolean;
   escalationReason?: string | null;
+  isBlocked?: boolean;
+  safety?: {
+    isSafe?: boolean;
+    isInjected?: boolean;
+    isEscalated?: boolean;
+    escalationReason?: string;
+  };
   isUnknown?: boolean;
   expertTaskId?: string;
   confidenceScore?: number;
@@ -988,6 +996,49 @@ export default function ChatPage() {
                             </button>
                           </div>
                         )}
+                      </div>
+                    )}
+
+                    {/* Task 3.6: Human Safety Escalation Note (Angry, Refund, Legal) */}
+                    {(m.isEscalated || m.safety?.isEscalated) && (
+                      <div className="mt-3 p-3.5 rounded-lg bg-rose-950/40 border border-rose-500/50 text-rose-200 text-xs space-y-2 shadow-lg animate-in fade-in duration-200">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold flex items-center gap-2 text-rose-300">
+                            <ShieldAlert className="h-4 w-4 text-rose-400 flex-shrink-0" />
+                            <span>
+                              Send to a Human &bull;{" "}
+                              {(m.escalationReason || m.safety?.escalationReason || "SAFETY ESCALATION")
+                                .replace("_", " ")
+                                .toUpperCase()}
+                            </span>
+                          </span>
+                          <span className="text-[10px] font-mono bg-rose-900/60 px-2 py-0.5 rounded border border-rose-700/50 text-rose-200">
+                            Human Triage Assigned
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-rose-200/90 leading-relaxed">
+                          This customer inquiry involves sensitive legal, financial refund, or high-frustration content.
+                          Autonomous generative answering has been bypassed in strict compliance with safety policy.
+                        </p>
+                        {m.expertTaskId && (
+                          <div className="flex items-center justify-between pt-1 border-t border-rose-500/20">
+                            <span className="text-[10px] font-mono text-rose-400">Escalation Ticket #{m.expertTaskId.slice(0, 14)}</span>
+                            <span className="text-[10px] text-rose-300 italic">Dispatched to specialist queue</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Task 3.6: Prompt Injection Neutralization Notice */}
+                    {(m.isBlocked || m.safety?.isInjected) && (
+                      <div className="mt-3 p-3 rounded-lg bg-red-950/50 border border-red-500/50 text-red-200 text-xs space-y-1.5 shadow-lg animate-in fade-in duration-200">
+                        <div className="flex items-center gap-2 font-bold text-red-300">
+                          <ShieldAlert className="h-4 w-4 text-red-400 flex-shrink-0" />
+                          <span>Prompt Injection Shield Activated (Task 3.6)</span>
+                        </div>
+                        <p className="text-[11px] text-red-300/80 leading-relaxed">
+                          A prompt injection attempt was detected and neutralized. Security guardrails prevented unauthorized instruction overrides or system prompt exfiltration.
+                        </p>
                       </div>
                     )}
 

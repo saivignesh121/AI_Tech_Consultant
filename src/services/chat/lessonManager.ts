@@ -210,6 +210,12 @@ export async function getLessons(
   return items;
 }
 
+const QUERY_STOP_WORDS = new Set([
+  "why", "how", "what", "when", "where", "which", "who", "whom", "this", "that",
+  "these", "those", "with", "from", "your", "have", "been", "does", "will", "would",
+  "should", "could", "tell", "show", "help", "please", "more", "about", "into"
+]);
+
 /**
  * Task 3.4 & Strict Gate:
  * "Nothing the agent learns is used until a human approves it."
@@ -226,16 +232,17 @@ export async function getApprovedLessonsForQuery(
     .toLowerCase()
     .replace(/[^\w\s]/g, "")
     .split(/\s+/)
-    .filter((w) => w.length > 2);
+    .filter((w) => w.length > 2 && !QUERY_STOP_WORDS.has(w));
 
-  if (queryWords.length === 0) return allApproved.slice(0, 2);
+  if (queryWords.length === 0) return [];
 
   // Score relevance of approved lessons
   const scored = allApproved.map((lesson) => {
     const text = `${lesson.title} ${lesson.category} ${lesson.originalQuestion} ${lesson.lessonMarkdown}`.toLowerCase();
     let matchCount = 0;
     for (const word of queryWords) {
-      if (text.includes(word)) matchCount += 1;
+      const wordRegex = new RegExp(`\\b${word}\\b`, "i");
+      if (wordRegex.test(text)) matchCount += 1;
     }
     return { lesson, matchCount };
   });
@@ -452,6 +459,7 @@ export async function approveLesson(
 
   return updateLesson(businessId, lessonId, {
     status: "approved",
+    isActive: true,
     approvedBy: approvedBy || "Human Approver",
     approvedAt: new Date().toISOString(),
   });
