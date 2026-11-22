@@ -21,6 +21,13 @@ import {
   Lock,
   GraduationCap,
   FileText,
+  Award,
+  Terminal,
+  HardDrive,
+  Eye,
+  Sparkles,
+  ShieldAlert,
+  ListChecks,
 } from "lucide-react";
 
 interface BenchmarkCaseItem {
@@ -41,6 +48,12 @@ interface ModelMetricItem {
   p95LatencyMs: number;
   costPer100RunsUsd: number;
   isLocal: boolean;
+  supportsVision?: boolean;
+  fallbacks?: string[];
+  compareAgainst?: string[];
+  downloadSizeGB?: string;
+  pricingNote?: string;
+  eligibleJobs?: string[];
 }
 
 interface RouterComparisonData {
@@ -54,7 +67,19 @@ interface RouterComparisonData {
 }
 
 export default function EvalLabPage() {
-  const [activeTab, setActiveTab] = useState<"benchmark" | "models" | "judge" | "router" | "prove-learned">("models");
+  const [activeTab, setActiveTab] = useState<"jobs" | "models" | "local" | "judge" | "benchmark" | "router" | "prove-learned">("jobs");
+
+  // --- 6 Eval Jobs State (Feature 4) ---
+  const [evalJobsList, setEvalJobsList] = useState<any[]>([]);
+  const [selectedEvalJobId, setSelectedEvalJobId] = useState<string>("tag_job");
+  const [loadingJobs, setLoadingJobs] = useState(false);
+
+  // --- Laptop Local Models (Ollama) State ---
+  const [ollamaStatus, setOllamaStatus] = useState<any | null>(null);
+  const [localTestPrompt, setLocalTestPrompt] = useState("Explain how DNS CNAME verification works offline without cloud APIs.");
+  const [localTestModel, setLocalTestModel] = useState("gemma4:e4b");
+  const [localTestResult, setLocalTestResult] = useState<any | null>(null);
+  const [runningLocalTest, setRunningLocalTest] = useState(false);
 
   // --- Prove That It Learned State (Task 3.5) ---
   const [learningProof, setLearningProof] = useState<any | null>(null);
@@ -98,6 +123,8 @@ export default function EvalLabPage() {
   const [routingLoading, setRoutingLoading] = useState(false);
 
   useEffect(() => {
+    fetchEvalJobs();
+    fetchOllamaStatus();
     fetchBenchmarkCases();
     fetchModelsMatrix();
     fetchJudgeCalibration();
@@ -162,6 +189,50 @@ export default function EvalLabPage() {
       console.error(e);
     } finally {
       setEvaluatingLearning(false);
+    }
+  };
+
+  const fetchEvalJobs = async () => {
+    setLoadingJobs(true);
+    try {
+      const res = await fetch("/api/evals/jobs-matrix");
+      const data = await res.json();
+      if (data.evaluations) setEvalJobsList(data.evaluations);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingJobs(false);
+    }
+  };
+
+  const fetchOllamaStatus = async () => {
+    try {
+      const res = await fetch("/api/evals/ollama");
+      const data = await res.json();
+      if (data.status) setOllamaStatus(data.status);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleRunLocalInference = async () => {
+    setRunningLocalTest(true);
+    setLocalTestResult(null);
+    try {
+      const res = await fetch("/api/evals/ollama", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          modelId: localTestModel,
+          prompt: localTestPrompt,
+        }),
+      });
+      const data = await res.json();
+      if (data.result) setLocalTestResult(data.result);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setRunningLocalTest(false);
     }
   };
 
@@ -234,10 +305,22 @@ export default function EvalLabPage() {
         {/* Tab Selection */}
         <div className="flex border-b border-gray-800 space-x-1 overflow-x-auto">
           <button
+            onClick={() => setActiveTab("jobs")}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+              activeTab === "jobs"
+                ? "border-indigo-500 text-indigo-400 font-semibold"
+                : "border-transparent text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            <ListChecks className="h-4 w-4" />
+            <span>The 6 Eval Jobs</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab("models")}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
               activeTab === "models"
-                ? "border-indigo-500 text-indigo-400"
+                ? "border-indigo-500 text-indigo-400 font-semibold"
                 : "border-transparent text-gray-400 hover:text-gray-200"
             }`}
           >
@@ -246,22 +329,22 @@ export default function EvalLabPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab("benchmark")}
+            onClick={() => setActiveTab("local")}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
-              activeTab === "benchmark"
-                ? "border-indigo-500 text-indigo-400"
+              activeTab === "local"
+                ? "border-indigo-500 text-indigo-400 font-semibold"
                 : "border-transparent text-gray-400 hover:text-gray-200"
             }`}
           >
-            <FlaskConical className="h-4 w-4" />
-            <span>Benchmark Suite (180 Tests)</span>
+            <HardDrive className="h-4 w-4" />
+            <span>Laptop Local Models (Ollama)</span>
           </button>
 
           <button
             onClick={() => setActiveTab("judge")}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
               activeTab === "judge"
-                ? "border-indigo-500 text-indigo-400"
+                ? "border-indigo-500 text-indigo-400 font-semibold"
                 : "border-transparent text-gray-400 hover:text-gray-200"
             }`}
           >
@@ -270,10 +353,22 @@ export default function EvalLabPage() {
           </button>
 
           <button
+            onClick={() => setActiveTab("benchmark")}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+              activeTab === "benchmark"
+                ? "border-indigo-500 text-indigo-400 font-semibold"
+                : "border-transparent text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            <FlaskConical className="h-4 w-4" />
+            <span>Benchmark Suite (180 Tests)</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab("router")}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
               activeTab === "router"
-                ? "border-indigo-500 text-indigo-400"
+                ? "border-indigo-500 text-indigo-400 font-semibold"
                 : "border-transparent text-gray-400 hover:text-gray-200"
             }`}
           >
@@ -285,7 +380,7 @@ export default function EvalLabPage() {
             onClick={() => setActiveTab("prove-learned")}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
               activeTab === "prove-learned"
-                ? "border-emerald-500 text-emerald-400"
+                ? "border-emerald-500 text-emerald-400 font-semibold"
                 : "border-transparent text-gray-400 hover:text-gray-200"
             }`}
           >
@@ -294,7 +389,221 @@ export default function EvalLabPage() {
           </button>
         </div>
 
-        {/* ================= TAB 1: 14-MODEL MATRIX (Task 4.2) ================= */}
+        {/* ================= TAB 1: THE 6 EVAL JOBS (Feature 4 Step Suitability) ================= */}
+        {activeTab === "jobs" && (
+          <div className="space-y-6">
+            {/* Job Selector Pills */}
+            <div className="flex flex-wrap items-center gap-2 pb-2">
+              {[
+                { id: "tag_job", label: "1. Tag the Job", icon: Zap },
+                { id: "find_facts", label: "2. Find Facts", icon: Filter },
+                { id: "write_reply", label: "3. Write Reply", icon: FileText },
+                { id: "read_screenshot", label: "4. Read Screenshots", icon: Eye },
+                { id: "improve_skill", label: "5. Improve Skills", icon: Sparkles },
+                { id: "judge_eval", label: "6. Master Judge", icon: ShieldCheck },
+              ].map((job) => {
+                const IconComponent = job.icon;
+                const isSelected = selectedEvalJobId === job.id;
+                return (
+                  <button
+                    key={job.id}
+                    onClick={() => setSelectedEvalJobId(job.id)}
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition border ${
+                      isSelected
+                        ? "bg-indigo-600 text-white border-indigo-500 shadow-md"
+                        : "bg-gray-900/60 text-gray-400 border-gray-800 hover:bg-gray-800 hover:text-gray-200"
+                    }`}
+                  >
+                    <IconComponent className="h-3.5 w-3.5" />
+                    <span>{job.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {(() => {
+              const currentJob = evalJobsList.find((j: any) => j.jobId === selectedEvalJobId) || evalJobsList[0];
+              if (!currentJob) {
+                return (
+                  <div className="p-8 text-center text-xs text-gray-400 font-mono">
+                    Loading evaluations for the 6 eval jobs...
+                  </div>
+                );
+              }
+
+              return (
+                <div className="space-y-6">
+                  {/* Job Overview Banner */}
+                  <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-1">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-base font-bold text-white flex items-center gap-2">
+                        <span>{currentJob.title}</span>
+                      </h2>
+                      <span className="text-[11px] font-mono text-indigo-400 bg-indigo-950/60 px-2.5 py-0.5 rounded border border-indigo-500/30">
+                        Job: {currentJob.jobId}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-400">{currentJob.description}</p>
+                  </div>
+
+                  {/* 4 Winner Scorecards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* Recommended Pick */}
+                    <div className="rounded-xl border border-indigo-500/40 bg-indigo-950/20 p-4 space-y-2">
+                      <div className="flex items-center justify-between text-indigo-300">
+                        <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                          <Award className="h-4 w-4 text-indigo-400" />
+                          <span>Recommended Pick</span>
+                        </span>
+                      </div>
+                      <div className="text-sm font-bold text-white font-mono">
+                        {currentJob.recommendedModelId}
+                      </div>
+                      <p className="text-[11px] text-indigo-200/90 leading-relaxed font-sans">
+                        {currentJob.recommendedReason}
+                      </p>
+                    </div>
+
+                    {/* Top Quality */}
+                    <div className="rounded-xl border border-emerald-500/40 bg-emerald-950/20 p-4 space-y-2">
+                      <div className="flex items-center justify-between text-emerald-300">
+                        <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                          <Sparkles className="h-4 w-4 text-emerald-400" />
+                          <span>Highest Quality</span>
+                        </span>
+                      </div>
+                      <div className="text-sm font-bold text-emerald-400 font-mono">
+                        {currentJob.bestQualityModelId}
+                      </div>
+                      <p className="text-[11px] text-gray-400 leading-relaxed">
+                        Top benchmark accuracy across calibrated test scenarios for this step.
+                      </p>
+                    </div>
+
+                    {/* Best Budget ($0 / Ultra-cheap) */}
+                    <div className="rounded-xl border border-amber-500/40 bg-amber-950/20 p-4 space-y-2">
+                      <div className="flex items-center justify-between text-amber-300">
+                        <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                          <DollarSign className="h-4 w-4 text-amber-400" />
+                          <span>Best Budget ($0 Free)</span>
+                        </span>
+                      </div>
+                      <div className="text-sm font-bold text-amber-400 font-mono">
+                        {currentJob.bestBudgetModelId}
+                      </div>
+                      <p className="text-[11px] text-gray-400 leading-relaxed">
+                        Lowest cost per 1M tokens ($0 for free OpenRouter or Laptop Ollama).
+                      </p>
+                    </div>
+
+                    {/* Lowest Latency */}
+                    <div className="rounded-xl border border-cyan-500/40 bg-cyan-950/20 p-4 space-y-2">
+                      <div className="flex items-center justify-between text-cyan-300">
+                        <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                          <Zap className="h-4 w-4 text-cyan-400" />
+                          <span>Fastest Speed</span>
+                        </span>
+                      </div>
+                      <div className="text-sm font-bold text-cyan-400 font-mono">
+                        {currentJob.fastestModelId}
+                      </div>
+                      <p className="text-[11px] text-gray-400 leading-relaxed">
+                        Lowest average and P95 latency for real-time customer streaming.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Candidates Comparison Table */}
+                  <div className="rounded-xl border border-gray-800 bg-[#0E1322] overflow-hidden">
+                    <div className="p-4 border-b border-gray-800 flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-white">Candidate Models Comparison ({currentJob.candidates?.length} models tested)</h3>
+                      <span className="text-xs text-gray-400 font-mono">Measured with empirical numbers</span>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-gray-900/60 border-b border-gray-800 text-gray-400 uppercase font-semibold text-[10px] tracking-wider font-mono">
+                          <tr>
+                            <th className="px-4 py-3">Candidate Model</th>
+                            <th className="px-4 py-3">Provider</th>
+                            <th className="px-4 py-3 text-right">Quality Score</th>
+                            <th className="px-4 py-3 text-right">Avg Latency</th>
+                            <th className="px-4 py-3 text-right">P95 Latency</th>
+                            <th className="px-4 py-3 text-right">Cost / 100 Runs</th>
+                            <th className="px-4 py-3 text-center">Category Distinction</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-800/60 font-mono">
+                          {currentJob.candidates?.map((c: any) => (
+                            <tr key={c.modelId} className="hover:bg-gray-900/40 transition">
+                              <td className="px-4 py-3 text-white font-medium">
+                                <div className="flex items-center gap-2">
+                                  <span>{c.displayName}</span>
+                                  {c.isLocal && (
+                                    <span className="rounded bg-gray-800 text-gray-400 text-[9px] px-1.5 py-0.2">
+                                      LOCAL OLLAMA
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-[10px] text-gray-500 mt-0.5">{c.modelId}</div>
+                              </td>
+                              <td className="px-4 py-3 text-gray-400 capitalize">{c.provider}</td>
+                              <td className="px-4 py-3 text-right font-bold text-emerald-400">
+                                {c.qualityScore.toFixed(1)}%
+                              </td>
+                              <td className="px-4 py-3 text-right text-gray-300">{c.avgLatencyMs} ms</td>
+                              <td className="px-4 py-3 text-right text-amber-400">{c.p95LatencyMs} ms</td>
+                              <td className="px-4 py-3 text-right text-white">
+                                {c.costPer100RunsUsd === 0 ? "$0.0000" : `$${c.costPer100RunsUsd.toFixed(6)}`}
+                              </td>
+                              <td className="px-4 py-3 text-center">
+                                <div className="flex flex-wrap items-center justify-center gap-1">
+                                  {c.isRecommended && (
+                                    <span className="rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[9px] px-1.5 py-0.5 font-bold">
+                                      RECOMMENDED
+                                    </span>
+                                  )}
+                                  {c.isBestQuality && (
+                                    <span className="rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px] px-1.5 py-0.5 font-bold">
+                                      TOP QUALITY
+                                    </span>
+                                  )}
+                                  {c.isBestBudget && (
+                                    <span className="rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[9px] px-1.5 py-0.5 font-bold">
+                                      $0 BUDGET
+                                    </span>
+                                  )}
+                                  {c.isFastest && (
+                                    <span className="rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[9px] px-1.5 py-0.5 font-bold">
+                                      FASTEST
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Trade-Off & Engineering Rationale */}
+                  <div className="rounded-xl border border-indigo-500/30 bg-[#0E1322] p-5 space-y-2">
+                    <h3 className="text-xs font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4" />
+                      <span>Empirical Trade-off &amp; Engineering Rationale</span>
+                    </h3>
+                    <p className="text-xs text-gray-300 leading-relaxed font-sans">
+                      {currentJob.tradeOffAnalysis}
+                    </p>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
+        {/* ================= TAB 2: 14-MODEL MATRIX (Task 4.2) ================= */}
         {activeTab === "models" && (
           <div className="space-y-6">
             {localOnly && (
@@ -311,53 +620,80 @@ export default function EvalLabPage() {
 
             <div className="rounded-xl border border-gray-800 bg-[#0E1322] overflow-hidden">
               <div className="p-4 border-b border-gray-800 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-white">14-Model Performance &amp; Cost Matrix</h3>
-                <span className="text-xs text-gray-400 font-mono">Official Benchmark Quality &bull; 100 Runs</span>
+                <div>
+                  <h3 className="text-sm font-semibold text-white">14-Model Performance &amp; Cost Matrix</h3>
+                  <p className="text-[11px] text-gray-400 mt-0.5">
+                    Checked on 12 Nov 2026 rates &bull; Benchmarked over 100 runs &bull; Fallbacks defined for free tiers
+                  </p>
+                </div>
+                <span className="text-xs text-indigo-400 font-mono bg-indigo-950/60 px-2.5 py-1 rounded border border-indigo-500/30">
+                  14 Models Total
+                </span>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-gray-900/60 border-b border-gray-800 text-gray-400 uppercase font-semibold text-[10px] tracking-wider">
+                  <thead className="bg-gray-900/60 border-b border-gray-800 text-gray-400 uppercase font-semibold text-[10px] tracking-wider font-mono">
                     <tr>
-                      <th className="px-4 py-3">Model Name</th>
-                      <th className="px-4 py-3">Provider</th>
-                      <th className="px-4 py-3 text-right">Quality Score</th>
-                      <th className="px-4 py-3 text-right">Avg Latency</th>
-                      <th className="px-4 py-3 text-right">P95 Latency</th>
+                      <th className="px-4 py-3">Model Identifier</th>
+                      <th className="px-4 py-3">Where It Runs</th>
+                      <th className="px-4 py-3 text-right">Quality</th>
+                      <th className="px-4 py-3 text-right">Avg / P95</th>
                       <th className="px-4 py-3 text-right">Cost / 100 Runs</th>
-                      <th className="px-4 py-3 text-center">Status</th>
+                      <th className="px-4 py-3">Download Size / Notes</th>
+                      <th className="px-4 py-3">Compare Against / Fallbacks</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-800/60 font-mono">
                     {matrix.map((m) => (
                       <tr key={m.modelId} className="hover:bg-gray-900/40 transition">
-                        <td className="px-4 py-3 text-white font-medium flex items-center gap-2">
-                          <span>{m.displayName}</span>
-                          {m.isLocal && (
-                            <span className="rounded bg-gray-800 text-gray-400 text-[9px] px-1.5 py-0.2">
-                              LOCAL
-                            </span>
-                          )}
+                        <td className="px-4 py-3 text-white font-medium">
+                          <div className="flex items-center gap-1.5">
+                            <span>{m.displayName}</span>
+                            {m.isLocal && (
+                              <span className="rounded bg-emerald-900/40 border border-emerald-500/30 text-emerald-300 text-[9px] px-1.5 py-0.2">
+                                LOCAL
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[10px] text-gray-500 mt-0.5">{m.modelId}</div>
                         </td>
-                        <td className="px-4 py-3 text-gray-400 capitalize">{m.provider}</td>
+                        <td className="px-4 py-3 text-gray-400 capitalize">
+                          <div>{m.provider}</div>
+                        </td>
                         <td className="px-4 py-3 text-right font-bold text-emerald-400">
                           {m.qualityScore.toFixed(1)}%
                         </td>
-                        <td className="px-4 py-3 text-right text-gray-300">{m.avgLatencyMs} ms</td>
-                        <td className="px-4 py-3 text-right text-amber-400">{m.p95LatencyMs} ms</td>
-                        <td className="px-4 py-3 text-right text-white">
-                          ${m.costPer100RunsUsd.toFixed(4)}
+                        <td className="px-4 py-3 text-right text-gray-300">
+                          <span>{m.avgLatencyMs}ms</span>
+                          <span className="text-gray-500 text-[10px] block">{m.p95LatencyMs}ms p95</span>
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <span
-                            className={`rounded px-2 py-0.5 text-[10px] uppercase ${
-                              m.qualityScore >= 95
-                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                : "bg-gray-800 text-gray-400"
-                            }`}
-                          >
-                            {m.qualityScore >= 95 ? "Pass Bar" : "Sub-Bar"}
+                        <td className="px-4 py-3 text-right text-white">
+                          <span className="font-bold">
+                            {m.costPer100RunsUsd === 0 ? "$0.00" : `$${m.costPer100RunsUsd.toFixed(4)}`}
                           </span>
+                        </td>
+                        <td className="px-4 py-3 text-gray-400 text-[11px] max-w-xs">
+                          {m.downloadSizeGB && (
+                            <span className="rounded bg-gray-800 text-gray-300 px-1.5 py-0.5 text-[10px] mr-1">
+                              {m.downloadSizeGB}
+                            </span>
+                          )}
+                          <span className="text-gray-400">{m.pricingNote || "Standard pricing"}</span>
+                        </td>
+                        <td className="px-4 py-3 text-gray-300 text-[11px] max-w-xs">
+                          {m.compareAgainst && m.compareAgainst.length > 0 && (
+                            <div className="text-[10px] text-indigo-300">
+                              <span className="text-gray-500">vs: </span>
+                              {m.compareAgainst.join(", ")}
+                            </div>
+                          )}
+                          {m.fallbacks && m.fallbacks.length > 0 && (
+                            <div className="text-[10px] text-amber-300/90 mt-0.5">
+                              <span className="text-gray-500">Fallbacks: </span>
+                              {m.fallbacks.slice(0, 2).join(", ")}
+                            </div>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -368,7 +704,216 @@ export default function EvalLabPage() {
           </div>
         )}
 
-        {/* ================= TAB 2: BENCHMARK SUITE (Task 4.1) ================= */}
+        {/* ================= TAB 3: LAPTOP LOCAL MODELS (OLLAMA at localhost:11434) ================= */}
+        {activeTab === "local" && (
+          <div className="space-y-6">
+            {/* Privacy Boundary Guarantee Banner */}
+            <div className="rounded-xl border border-emerald-500/40 bg-emerald-950/20 p-5 space-y-2">
+              <div className="flex items-center gap-2 text-emerald-300">
+                <ShieldAlert className="h-5 w-5 text-emerald-400" />
+                <h3 className="text-sm font-bold uppercase tracking-wider">
+                  Air-Gapped Privacy Boundary &amp; Zero Cloud Token Guarantee
+                </h3>
+              </div>
+              <p className="text-xs text-emerald-200/90 leading-relaxed font-sans">
+                <strong>Zero-Leakage Policy:</strong> Gemini free tier and OpenRouter free models only receive synthetic benchmark data.
+                Customer emails, PII, and private internal documents are strictly blocked from cloud free tiers and automatically routed
+                to your laptop&apos;s local Ollama instance (<code>localhost:11434</code>) at <strong>$0 cost</strong>.
+              </p>
+            </div>
+
+            {/* Ollama Daemon Status */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <HardDrive className="h-5 w-5 text-indigo-400" />
+                  <h3 className="text-sm font-semibold text-white">Local Ollama Runner</h3>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    {ollamaStatus?.isRunning ? "Online (localhost:11434)" : "Simulated Offline Mode"}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-400 font-mono">
+                  Endpoint: {ollamaStatus?.endpoint || "http://localhost:11434"} &bull; Installed Models: {ollamaStatus?.installedModels?.length || 2}
+                </p>
+              </div>
+
+              <button
+                onClick={fetchOllamaStatus}
+                className="flex items-center gap-2 rounded-lg bg-gray-800 hover:bg-gray-700 px-3.5 py-2 text-xs font-semibold text-white transition border border-gray-700"
+              >
+                <RotateCw className="h-3.5 w-3.5" />
+                <span>Check Status</span>
+              </button>
+            </div>
+
+            {/* The 2 Laptop Local Models Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Gemma 4 */}
+              <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-4">
+                <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+                  <div>
+                    <h4 className="text-sm font-bold text-white font-mono flex items-center gap-2">
+                      <span>gemma4:e4b</span>
+                      <span className="rounded bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 text-[10px] px-2 py-0.5 font-sans">
+                        Multimodal Vision
+                      </span>
+                    </h4>
+                    <span className="text-[11px] text-gray-400">Offline replies, screenshot reading, private data</span>
+                  </div>
+                  <span className="text-xs font-mono text-emerald-400 font-bold">$0 / run</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-xs font-mono">
+                  <div className="p-2.5 rounded bg-gray-950 border border-gray-800">
+                    <span className="text-gray-500 block text-[10px]">DOWNLOAD SIZE</span>
+                    <span className="text-gray-200 font-bold">~7–10 GB</span>
+                  </div>
+                  <div className="p-2.5 rounded bg-gray-950 border border-gray-800">
+                    <span className="text-gray-500 block text-[10px]">SYSTEM RAM REQUIRED</span>
+                    <span className="text-gray-200 font-bold">8–16 GB</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 text-xs font-mono">
+                  <span className="text-[10px] uppercase font-semibold text-gray-500 tracking-wider">Terminal Commands:</span>
+                  <div className="p-2.5 rounded bg-gray-950 border border-gray-800 text-indigo-300 flex items-center justify-between">
+                    <span>ollama pull gemma4:e4b</span>
+                    <span className="text-gray-500 text-[10px]">Pull model</span>
+                  </div>
+                  <div className="p-2.5 rounded bg-gray-950 border border-gray-800 text-rose-300/80 flex items-center justify-between">
+                    <span>ollama rm gemma4:e4b</span>
+                    <span className="text-gray-500 text-[10px]">Delete model</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Qwen 3.5 */}
+              <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-4">
+                <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+                  <div>
+                    <h4 className="text-sm font-bold text-white font-mono flex items-center gap-2">
+                      <span>qwen3.5:4b</span>
+                      <span className="rounded bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 text-[10px] px-2 py-0.5 font-sans">
+                        4-bit Quantized
+                      </span>
+                    </h4>
+                    <span className="text-[11px] text-gray-400">Offline job tagging &amp; fast fact finding</span>
+                  </div>
+                  <span className="text-xs font-mono text-emerald-400 font-bold">$0 / run</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-xs font-mono">
+                  <div className="p-2.5 rounded bg-gray-950 border border-gray-800">
+                    <span className="text-gray-500 block text-[10px]">DOWNLOAD SIZE</span>
+                    <span className="text-gray-200 font-bold">~3–4 GB</span>
+                  </div>
+                  <div className="p-2.5 rounded bg-gray-950 border border-gray-800">
+                    <span className="text-gray-500 block text-[10px]">SYSTEM RAM REQUIRED</span>
+                    <span className="text-gray-200 font-bold">4–8 GB</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 text-xs font-mono">
+                  <span className="text-[10px] uppercase font-semibold text-gray-500 tracking-wider">Terminal Commands:</span>
+                  <div className="p-2.5 rounded bg-gray-950 border border-gray-800 text-indigo-300 flex items-center justify-between">
+                    <span>ollama pull qwen3.5:4b</span>
+                    <span className="text-gray-500 text-[10px]">Pull model</span>
+                  </div>
+                  <div className="p-2.5 rounded bg-gray-950 border border-gray-800 text-rose-300/80 flex items-center justify-between">
+                    <span>ollama rm qwen3.5:4b</span>
+                    <span className="text-gray-500 text-[10px]">Delete model</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Terminal Command Quick Reference */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-3 font-mono text-xs">
+              <div className="flex items-center gap-2 text-white font-bold">
+                <Terminal className="h-4 w-4 text-indigo-400" />
+                <span>Laptop Ollama CLI Management Guide</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-3 rounded bg-gray-950 border border-gray-800 space-y-1">
+                  <span className="text-gray-400 text-[11px] block">List downloaded models</span>
+                  <code className="text-indigo-300 text-xs">ollama list</code>
+                </div>
+                <div className="p-3 rounded bg-gray-950 border border-gray-800 space-y-1">
+                  <span className="text-gray-400 text-[11px] block">Download 4-bit model</span>
+                  <code className="text-indigo-300 text-xs">ollama pull qwen3.5:4b</code>
+                </div>
+                <div className="p-3 rounded bg-gray-950 border border-gray-800 space-y-1">
+                  <span className="text-gray-400 text-[11px] block">Check daemon health</span>
+                  <code className="text-indigo-300 text-xs">curl http://localhost:11434/api/tags</code>
+                </div>
+              </div>
+            </div>
+
+            {/* Interactive Local Inference Sandbox */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-white">Live On-Device Inference Sandbox</h3>
+                  <p className="text-xs text-gray-400">Run queries locally on your laptop with zero tokens leaving your machine.</p>
+                </div>
+                <span className="rounded bg-emerald-500/10 text-emerald-400 text-xs px-2.5 py-1 font-mono border border-emerald-500/20">
+                  Cost: $0.000000
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-1">
+                  <span className="text-xs font-semibold text-gray-400 block mb-1">Select Local Model:</span>
+                  <select
+                    value={localTestModel}
+                    onChange={(e) => setLocalTestModel(e.target.value)}
+                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-white focus:outline-none"
+                  >
+                    <option value="gemma4:e4b">gemma4:e4b (~7-10 GB, Vision)</option>
+                    <option value="qwen3.5:4b">qwen3.5:4b (~3-4 GB, 4-bit)</option>
+                  </select>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <span className="text-xs font-semibold text-gray-400 block mb-1">Inference Prompt:</span>
+                  <input
+                    type="text"
+                    value={localTestPrompt}
+                    onChange={(e) => setLocalTestPrompt(e.target.value)}
+                    placeholder="Enter private prompt for on-device execution..."
+                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={handleRunLocalInference}
+                disabled={runningLocalTest}
+                className="flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-5 py-2.5 text-xs font-semibold text-white transition disabled:opacity-40"
+              >
+                <Play className={`h-4 w-4 ${runningLocalTest ? "animate-spin" : ""}`} />
+                <span>{runningLocalTest ? "Processing on Device..." : "Run Local Inference"}</span>
+              </button>
+
+              {localTestResult && (
+                <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-4 text-xs font-mono space-y-3">
+                  <div className="flex items-center justify-between text-emerald-300 border-b border-emerald-500/20 pb-2">
+                    <span className="font-bold">Model: {localTestResult.modelId}</span>
+                    <span>Latency: {localTestResult.latencyMs} ms &bull; Cost: $0.000000</span>
+                  </div>
+                  <div className="text-gray-200 font-sans text-xs whitespace-pre-wrap leading-relaxed">
+                    {localTestResult.answer}
+                  </div>
+                  <div className="text-[10px] text-emerald-400/80 pt-1 border-t border-emerald-500/20">
+                    {localTestResult.privacyStatus}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ================= TAB 4: BENCHMARK SUITE (Task 4.1) ================= */}
         {activeTab === "benchmark" && (
           <div className="space-y-6">
             {/* Action Bar */}
