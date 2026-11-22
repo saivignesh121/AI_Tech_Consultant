@@ -19,6 +19,10 @@ import {
   BookOpen,
   Check,
   Wrench,
+  Trash2,
+  Edit2,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 
 interface EscalatedTask {
@@ -38,6 +42,11 @@ interface PendingLesson {
   lessonMarkdown: string;
   confidenceScore: string | null;
   status: string;
+  isActive?: boolean;
+  author?: string;
+  originalQuestion?: string;
+  wrongAnswer?: string;
+  fileName?: string;
   createdAt: string;
 }
 
@@ -82,6 +91,12 @@ export default function ApprovalsPage() {
   const [resolvingId, setResolvingId] = useState<string | null>(null);
   const [expertReplyInput, setExpertReplyInput] = useState("");
   const [submittingAction, setSubmittingAction] = useState(false);
+
+  // Lesson editing state
+  const [editingLessonId, setEditingLessonId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editCategory, setEditCategory] = useState("");
+  const [editMarkdown, setEditMarkdown] = useState("");
 
   const fetchApprovals = async () => {
     setLoading(true);
@@ -155,6 +170,84 @@ export default function ApprovalsPage() {
       if (data.success) {
         setToastMsg(`Lesson successfully ${approve ? "approved" : "rejected"}.`);
         setTimeout(() => setToastMsg(""), 4000);
+        await fetchApprovals();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSubmittingAction(false);
+    }
+  };
+
+  const handleToggleLessonActive = async (lessonId: string, currentActive: boolean) => {
+    setSubmittingAction(true);
+    try {
+      const res = await fetch("/api/approvals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "toggle_lesson",
+          lessonId,
+          isActive: !currentActive,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setToastMsg(`Lesson is now ${!currentActive ? "active" : "switched off"}.`);
+        setTimeout(() => setToastMsg(""), 4000);
+        await fetchApprovals();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSubmittingAction(false);
+    }
+  };
+
+  const handleDeleteLesson = async (lessonId: string) => {
+    setSubmittingAction(true);
+    try {
+      const res = await fetch("/api/approvals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "delete_lesson",
+          lessonId,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setToastMsg("Lesson and markdown file permanently deleted.");
+        setTimeout(() => setToastMsg(""), 4000);
+        await fetchApprovals();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSubmittingAction(false);
+    }
+  };
+
+  const handleSaveEditLesson = async () => {
+    if (!editingLessonId) return;
+    setSubmittingAction(true);
+    try {
+      const res = await fetch("/api/approvals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "edit_lesson",
+          lessonId: editingLessonId,
+          title: editTitle,
+          category: editCategory,
+          lessonMarkdown: editMarkdown,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setToastMsg("Lesson successfully updated.");
+        setTimeout(() => setToastMsg(""), 4000);
+        setEditingLessonId(null);
         await fetchApprovals();
       }
     } catch (e) {
@@ -461,65 +554,210 @@ export default function ApprovalsPage() {
               </div>
             )}
 
-            {lessons.map((lesson) => (
-              <div
-                key={lesson.id}
-                className="p-6 rounded-2xl border border-gray-800 bg-[#071329] space-y-4 shadow-sm"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono font-bold text-cyan-400 uppercase">
-                        {lesson.category}
-                      </span>
-                      <span className="text-gray-600">&bull;</span>
-                      <span className="text-[11px] text-gray-400 font-mono">
-                        Confidence: {lesson.confidenceScore ? `${Math.round(Number(lesson.confidenceScore) * 100)}%` : "N/A"}
-                      </span>
+            {lessons.map((lesson) => {
+              const isEditing = editingLessonId === lesson.id;
+              const isActive = lesson.isActive !== false;
+              const isPending = lesson.status === "pending";
+
+              return (
+                <div
+                  key={lesson.id}
+                  className={`p-6 rounded-2xl border transition space-y-4 shadow-sm ${
+                    !isActive
+                      ? "border-gray-800 bg-[#050e20]/60 opacity-60"
+                      : isPending
+                      ? "border-amber-500/30 bg-[#071329] shadow-amber-500/5"
+                      : "border-gray-800 bg-[#071329]"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-mono font-bold text-cyan-400 uppercase">
+                          {lesson.category}
+                        </span>
+                        <span className="text-gray-600">&bull;</span>
+                        <span className="text-[11px] text-gray-400 font-mono">
+                          Confidence: {lesson.confidenceScore ? `${Math.round(Number(lesson.confidenceScore) * 100)}%` : "N/A"}
+                        </span>
+                        <span
+                          className={`px-2 py-0.2 rounded text-[10px] font-mono ${
+                            isActive
+                              ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
+                              : "bg-gray-800 text-gray-400"
+                          }`}
+                        >
+                          {isActive ? "ACTIVE" : "SWITCHED OFF"}
+                        </span>
+                      </div>
+                      <h3 className="text-base font-bold text-white mt-1">{lesson.title}</h3>
                     </div>
-                    <h3 className="text-base font-bold text-white mt-1">{lesson.title}</h3>
+
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold ${
+                          lesson.status === "approved"
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            : lesson.status === "rejected"
+                            ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                            : "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
+                        }`}
+                      >
+                        {lesson.status.toUpperCase()}
+                      </span>
+
+                      {/* Toggle On/Off */}
+                      <button
+                        type="button"
+                        onClick={() => handleToggleLessonActive(lesson.id, isActive)}
+                        className="px-2 py-1 rounded bg-gray-900 border border-gray-800 hover:border-gray-700 text-[11px] text-gray-300 flex items-center gap-1 transition"
+                        title={isActive ? "Switch off lesson" : "Switch on lesson"}
+                      >
+                        {isActive ? (
+                          <>
+                            <ToggleRight className="h-3.5 w-3.5 text-cyan-400" />
+                            <span>On</span>
+                          </>
+                        ) : (
+                          <>
+                            <ToggleLeft className="h-3.5 w-3.5 text-gray-500" />
+                            <span>Off</span>
+                          </>
+                        )}
+                      </button>
+
+                      {/* Edit button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (isEditing) {
+                            setEditingLessonId(null);
+                          } else {
+                            setEditingLessonId(lesson.id);
+                            setEditTitle(lesson.title);
+                            setEditCategory(lesson.category);
+                            setEditMarkdown(lesson.lessonMarkdown);
+                          }
+                        }}
+                        className="p-1 rounded bg-gray-900 border border-gray-800 hover:text-white text-gray-400 transition"
+                        title="Edit lesson markdown and metadata"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </button>
+
+                      {/* Delete button */}
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteLesson(lesson.id)}
+                        className="p-1 rounded bg-gray-900 border border-gray-800 hover:text-red-400 text-gray-400 transition"
+                        title="Delete lesson record and Markdown file"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
 
-                  <span
-                    className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold ${
-                      lesson.status === "approved"
-                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                        : lesson.status === "rejected"
-                        ? "bg-red-500/10 text-red-400 border border-red-500/20"
-                        : "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
-                    }`}
-                  >
-                    {lesson.status.toUpperCase()}
-                  </span>
-                </div>
-
-                <div className="p-4 rounded-xl border border-gray-800 bg-[#040f26] text-xs text-gray-300 font-mono whitespace-pre-wrap">
-                  {lesson.lessonMarkdown}
-                </div>
-
-                {lesson.status === "pending" && (
-                  <div className="flex items-center justify-end gap-3 pt-2">
-                    <button
-                      onClick={() => handleLessonAction(lesson.id, false)}
-                      disabled={submittingAction}
-                      className="px-4 py-2 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-950/20 text-xs font-semibold transition flex items-center gap-1.5"
-                    >
-                      <XCircle className="h-3.5 w-3.5" />
-                      <span>Reject Lesson</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleLessonAction(lesson.id, true)}
-                      disabled={submittingAction}
-                      className="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs transition flex items-center gap-1.5 shadow-md shadow-emerald-500/20"
-                    >
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      <span>Approve &amp; Commit Skill</span>
-                    </button>
+                  {/* Metadata: Author, When, Which example */}
+                  <div className="p-3 rounded-xl bg-[#040f26] border border-gray-800/80 text-[11px] space-y-1 font-mono text-gray-300">
+                    <div className="flex items-center justify-between text-gray-400 flex-wrap gap-2">
+                      <span><strong>Author:</strong> {lesson.author || "Support Team Member"}</span>
+                      <span><strong>Created:</strong> {new Date(lesson.createdAt).toLocaleString()}</span>
+                      {lesson.fileName && <span><strong>File:</strong> <code className="text-cyan-400">{lesson.fileName}</code></span>}
+                    </div>
+                    {lesson.originalQuestion && (
+                      <div className="text-gray-300 pt-1 border-t border-gray-800">
+                        <span className="text-gray-500 font-sans">Which example:</span> &quot;{lesson.originalQuestion}&quot;
+                      </div>
+                    )}
+                    {lesson.wrongAnswer && (
+                      <div className="text-amber-300/80">
+                        <span className="text-gray-500 font-sans">What was wrong:</span> &quot;{lesson.wrongAnswer}&quot;
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            ))}
+
+                  {/* Edit Form or Markdown View */}
+                  {isEditing ? (
+                    <div className="space-y-3 p-4 rounded-xl bg-[#030919] border border-cyan-500/40">
+                      <div>
+                        <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1">Title</label>
+                        <input
+                          type="text"
+                          value={editTitle}
+                          onChange={(e) => setEditTitle(e.target.value)}
+                          className="w-full rounded bg-gray-900 border border-gray-700 p-2 text-xs text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1">Category</label>
+                        <input
+                          type="text"
+                          value={editCategory}
+                          onChange={(e) => setEditCategory(e.target.value)}
+                          className="w-full rounded bg-gray-900 border border-gray-700 p-2 text-xs text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1">Markdown Content</label>
+                        <textarea
+                          rows={6}
+                          value={editMarkdown}
+                          onChange={(e) => setEditMarkdown(e.target.value)}
+                          className="w-full rounded bg-gray-900 border border-gray-700 p-2.5 text-xs font-mono text-white"
+                        />
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setEditingLessonId(null)}
+                          className="px-3 py-1.5 rounded border border-gray-700 text-xs text-gray-400 hover:text-white"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveEditLesson}
+                          className="px-4 py-1.5 rounded bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition shadow-sm"
+                        >
+                          Save Changes &amp; Sync Disk
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-xl border border-gray-800 bg-[#040f26] text-xs text-gray-300 font-mono whitespace-pre-wrap max-h-48 overflow-y-auto">
+                      {lesson.lessonMarkdown}
+                    </div>
+                  )}
+
+                  {lesson.status === "pending" && (
+                    <div className="flex items-center justify-between pt-2 border-t border-amber-500/20">
+                      <span className="text-xs text-amber-300 italic">
+                        Pending expert sign-off. Strictly NOT active in chat until approved.
+                      </span>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => handleLessonAction(lesson.id, false)}
+                          disabled={submittingAction}
+                          className="px-4 py-2 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-950/20 text-xs font-semibold transition flex items-center gap-1.5"
+                        >
+                          <XCircle className="h-3.5 w-3.5" />
+                          <span>Reject</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleLessonAction(lesson.id, true)}
+                          disabled={submittingAction}
+                          className="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs transition flex items-center gap-1.5 shadow-md shadow-emerald-500/20"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          <span>Approve Lesson</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 

@@ -271,6 +271,7 @@ To ensure strict zero-leakage multi-tenant security:
   - `role_id` (UUID FK -> `agent_roles(id) ON DELETE SET NULL`)
   - `knowledge_used` (JSONB DEFAULT '[]'::jsonb)
   - `skills_used` (JSONB DEFAULT '[]'::jsonb)
+  - `lessons_used` (JSONB DEFAULT '[]'::jsonb) — Task 3.3: approved lessons applied to turn
   - `input_tokens` (INT NOT NULL)
   - `output_tokens` (INT NOT NULL)
   - `cached_tokens` (INT DEFAULT 0)
@@ -282,12 +283,22 @@ To ensure strict zero-leakage multi-tenant security:
   - `chat_message_id` (UUID FK -> `chat_messages(id) ON DELETE CASCADE`)
   - `title` (VARCHAR(255) NOT NULL)
   - `category` (VARCHAR(100) NOT NULL)
-  - `lesson_markdown` (TEXT NOT NULL)
-  - `confidence_score` (NUMERIC(4, 2))
-  - `status` (VARCHAR(50) DEFAULT 'pending') — `pending`, `approved`, `rejected`
+  - `slug` (VARCHAR(150))
+  - `file_name` (VARCHAR(255)) — relative disk path e.g. `lessons/refunds.md`
+  - `original_question` (TEXT) — which example triggered the lesson
+  - `wrong_answer` (TEXT) — previous inaccurate AI reply
+  - `correction_why` (TEXT) — human critique and durable rule to follow
+  - `lesson_markdown` (TEXT NOT NULL) — autonomous structured Markdown protocol
+  - `confidence_score` (NUMERIC(4, 2)) — how sure it is (default 0.95)
+  - `status` (VARCHAR(50) DEFAULT 'pending') — `pending`, `approved`, `rejected` (Strict Gate)
+  - `is_active` (BOOLEAN DEFAULT TRUE) — switch on/off toggle
+  - `author` (VARCHAR(255)) — who said it
+  - `suggested_skill_slug` (VARCHAR(100)) — candidate SOP skill if workflow-level
+  - `suggested_skill_diff` (TEXT)
   - `approved_by` (UUID FK -> `users(id) ON DELETE SET NULL`)
   - `approved_at` (TIMESTAMPTZ)
   - `created_at` (TIMESTAMPTZ DEFAULT NOW())
+  - `updated_at` (TIMESTAMPTZ DEFAULT NOW())
 - `expert_tasks`:
   - `id` (UUID PK)
   - `business_id` (UUID FK -> `businesses(id) ON DELETE CASCADE`)
@@ -735,6 +746,7 @@ CREATE TABLE chat_traces (
     role_id UUID REFERENCES agent_roles(id) ON DELETE SET NULL,
     knowledge_used JSONB DEFAULT '[]'::jsonb,
     skills_used JSONB DEFAULT '[]'::jsonb,
+    lessons_used JSONB DEFAULT '[]'::jsonb,
     input_tokens INT NOT NULL,
     output_tokens INT NOT NULL,
     cached_tokens INT DEFAULT 0,
@@ -748,12 +760,22 @@ CREATE TABLE lessons (
     chat_message_id UUID NOT NULL REFERENCES chat_messages(id) ON DELETE CASCADE,
     title VARCHAR(255) NOT NULL,
     category VARCHAR(100) NOT NULL,
+    slug VARCHAR(150),
+    file_name VARCHAR(255),
+    original_question TEXT,
+    wrong_answer TEXT,
+    correction_why TEXT,
     lesson_markdown TEXT NOT NULL,
     confidence_score NUMERIC(4, 2),
     status VARCHAR(50) DEFAULT 'pending',
+    is_active BOOLEAN DEFAULT TRUE,
+    author VARCHAR(255),
+    suggested_skill_slug VARCHAR(100),
+    suggested_skill_diff TEXT,
     approved_by UUID REFERENCES users(id) ON DELETE SET NULL,
     approved_at TIMESTAMPTZ,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE expert_tasks (

@@ -9,6 +9,19 @@ import { processTeachingTurn } from "./teachingDialog";
 import { createExpertTask } from "./expertTaskManager";
 import { CALIBRATED_CONFIDENCE_THRESHOLD } from "../eval/thresholdCalibration";
 import { composeAutonomousAgentPrompt, ComposedAgentPrompt } from "./promptComposer";
+import { getApprovedLessonsForQuery, LessonItem } from "./lessonManager";
+
+export interface ConsultantTrace {
+  modelId: string;
+  knowledgeUsed: string[];
+  skillsUsed: string[];
+  lessonsUsed: string[];
+  costUsd: number;
+  inputTokens: number;
+  outputTokens: number;
+  cachedTokens: number;
+  latencyMs: number;
+}
 
 export interface ConsultantResponse {
   answer: string;
@@ -25,6 +38,8 @@ export interface ConsultantResponse {
   confidenceScore?: number;
   activeSkillUsed?: string;
   activeInstructionsUsed?: string[];
+  activeLessonsUsed?: string[];
+  trace: ConsultantTrace;
   isPastedThread?: boolean;
   extractedCoreQuery?: string;
   isTeachingTurn?: boolean;
@@ -108,6 +123,7 @@ export async function executeConsultantTurn(params: {
 
   if (safety.isInjected) {
     const refusal = "I cannot fulfill this request as it violates our security and prompt safety guardrails.";
+    const latencyMs = Math.max(15, Date.now() - startTime);
     return {
       answer: refusal,
       reply: refusal,
@@ -118,12 +134,24 @@ export async function executeConsultantTurn(params: {
       isUnknown: false,
       isEscalated: false,
       isBlocked: true,
+      activeLessonsUsed: [],
+      trace: {
+        modelId,
+        knowledgeUsed: [],
+        skillsUsed: [],
+        lessonsUsed: [],
+        costUsd: 0.0003,
+        inputTokens: 50,
+        outputTokens: 20,
+        cachedTokens: 0,
+        latencyMs,
+      },
       telemetry: {
         inputTokens: 50,
         outputTokens: 20,
         cachedTokens: 0,
         costUsd: 0.0003,
-        latencyMs: Math.max(15, Date.now() - startTime),
+        latencyMs,
       },
     };
   }
@@ -139,6 +167,7 @@ export async function executeConsultantTurn(params: {
       escalationMessage = "I apologize for the frustration. A senior human support specialist has been notified and will assist you.";
     }
 
+    const latencyMs = Math.max(20, Date.now() - startTime);
     return {
       answer: escalationMessage,
       reply: escalationMessage,
@@ -150,12 +179,24 @@ export async function executeConsultantTurn(params: {
       isEscalated: true,
       escalationReason: safety.escalationReason,
       isBlocked: false,
+      activeLessonsUsed: [],
+      trace: {
+        modelId,
+        knowledgeUsed: [],
+        skillsUsed: [],
+        lessonsUsed: [],
+        costUsd: 0.0006,
+        inputTokens: 100,
+        outputTokens: 40,
+        cachedTokens: 0,
+        latencyMs,
+      },
       telemetry: {
         inputTokens: 100,
         outputTokens: 40,
         cachedTokens: 0,
         costUsd: 0.0006,
-        latencyMs: Math.max(20, Date.now() - startTime),
+        latencyMs,
       },
     };
   }
@@ -175,6 +216,7 @@ export async function executeConsultantTurn(params: {
       conversationHistory: params.conversationHistory || [],
     });
 
+    const latencyMs = Math.max(30, Date.now() - startTime);
     return {
       answer: teachingResult.reply,
       reply: teachingResult.reply,
@@ -190,12 +232,24 @@ export async function executeConsultantTurn(params: {
       clarifyingQuestions: teachingResult.clarifyingQuestions,
       lessonDraft: teachingResult.lessonDraft,
       lessonId: teachingResult.lessonId,
+      activeLessonsUsed: teachingResult.lessonDraft ? [teachingResult.lessonDraft.title] : [],
+      trace: {
+        modelId,
+        knowledgeUsed: [],
+        skillsUsed: [role.slug],
+        lessonsUsed: teachingResult.lessonDraft ? [teachingResult.lessonDraft.title] : [],
+        costUsd: 0.0012,
+        inputTokens: 350,
+        outputTokens: 120,
+        cachedTokens: 0,
+        latencyMs,
+      },
       telemetry: {
         inputTokens: 350,
         outputTokens: 120,
         cachedTokens: 0,
         costUsd: 0.0012,
-        latencyMs: Math.max(30, Date.now() - startTime),
+        latencyMs,
       },
     };
   }
@@ -204,6 +258,10 @@ export async function executeConsultantTurn(params: {
   const activeInstructions = getActiveInstructionsForRole(params.businessId, role.slug);
   const availableSkills = getSkills(params.businessId);
   const matchedSkill = pickSkillForQuery(parsed.extractedCoreQuery, availableSkills);
+
+  // 3c. Approved Lessons Grounding (Task 3.4 & Strict Gate)
+  // Strictly fetches ONLY lessons that are 'approved' and isActive === true
+  const approvedLessons = await getApprovedLessonsForQuery(params.businessId, parsed.extractedCoreQuery);
 
   // 4. Knowledge Base Grounding & "I Don't Know" Line (Task 3.2)
   const contexts = params.availableContexts !== undefined ? params.availableContexts : DEFAULT_MOCK_CONTEXTS;
@@ -217,7 +275,7 @@ export async function executeConsultantTurn(params: {
 
   const isBelowThreshold = contexts.length === 0 || maxRelevance < threshold;
 
-  // Task 3.2: The agent writes its own prompts starting from Settings and Skills
+  // Task 3.2: The agent writes its own prompts starting from Settings, Skills, and Approved Lessons
   const composed = composeAutonomousAgentPrompt({
     businessName,
     customerQuery: parsed.extractedCoreQuery,
@@ -226,6 +284,7 @@ export async function executeConsultantTurn(params: {
     formattedKnowledgeContext: formattedContext,
     activeInstructions,
     matchedSkill,
+    appliedLessons: approvedLessons,
   });
 
   // If knowledge is absent or below calibrated threshold, refuse honestly & create expert task
@@ -246,6 +305,7 @@ export async function executeConsultantTurn(params: {
     }
 
     const unknownAnswer = `I do not have verified documentation or instructions for this inquiry in the Knowledge Brain (confidence: ${maxRelevance.toFixed(2)}, below calibrated threshold ${threshold.toFixed(2)}). An expert task has been created for our human specialists to review. Once resolved, the verified resolution will flow back into our permanent Knowledge Brain.`;
+    const latencyMs = Math.max(25, Date.now() - startTime);
 
     return {
       answer: unknownAnswer,
@@ -261,6 +321,18 @@ export async function executeConsultantTurn(params: {
       confidenceScore: maxRelevance,
       activeSkillUsed: matchedSkill ? matchedSkill.name : undefined,
       activeInstructionsUsed: activeInstructions.map((i) => i.title),
+      activeLessonsUsed: [],
+      trace: {
+        modelId,
+        knowledgeUsed: [],
+        skillsUsed: matchedSkill ? [matchedSkill.name] : [],
+        lessonsUsed: [],
+        costUsd: 0.00075,
+        inputTokens: 150,
+        outputTokens: 45,
+        cachedTokens: 0,
+        latencyMs,
+      },
       composedPrompt: {
         promptTemplateKey: composed.promptTemplateKey,
         systemPrompt: composed.systemPrompt,
@@ -271,7 +343,7 @@ export async function executeConsultantTurn(params: {
         outputTokens: 45,
         cachedTokens: 0,
         costUsd: 0.00075,
-        latencyMs: Math.max(25, Date.now() - startTime),
+        latencyMs,
       },
     };
   }
@@ -322,6 +394,17 @@ export async function executeConsultantTurn(params: {
     answerContent = `[${role.name} Consultation — Tone: ${role.tone}]:\n\nRegarding your inquiry on "${parsed.extractedCoreQuery}":\n\n${coreFact}${skillSection}\n\nThis guidance is tailored to your active role goal: "${role.goal}". Verified with Knowledge Brain attribution [1].`;
   }
 
+  // Precedence: Approved Lessons override general knowledge (Task 3.4 Strict Gate: only approved active lessons)
+  const matchingApprovedLesson = approvedLessons.find((l) => {
+    const textToMatch = `${l.title} ${l.category} ${l.correctionWhy}`.toLowerCase();
+    const queryWords = parsed.extractedCoreQuery.toLowerCase().split(/\W+/).filter((w) => w.length > 3);
+    return queryWords.some((w) => textToMatch.includes(w));
+  });
+
+  if (matchingApprovedLesson) {
+    answerContent = `[APPROVED LESSON: ${matchingApprovedLesson.title}]\n${matchingApprovedLesson.correctionWhy}\n\n${answerContent}`;
+  }
+
   // Precedence: Instructions override general knowledge
   const matchingInstruction = activeInstructions.find((inst) => {
     const textToMatch = `${inst.title} ${inst.ruleText}`.toLowerCase();
@@ -342,6 +425,23 @@ export async function executeConsultantTurn(params: {
   const outputTokens = 250;
   const cachedTokens = 900;
   const costUsd = calculateModelCost(modelId, inputTokens, outputTokens, cachedTokens);
+  const latencyMs = Math.max(30, Date.now() - startTime);
+
+  const knowledgeUsed = citations.map((c) => c.sourceTitle || c.title);
+  const skillsUsed = matchedSkill ? [matchedSkill.name] : [];
+  const lessonsUsed = approvedLessons.map((l) => l.title);
+
+  const trace: ConsultantTrace = {
+    modelId,
+    knowledgeUsed,
+    skillsUsed,
+    lessonsUsed,
+    costUsd,
+    inputTokens,
+    outputTokens,
+    cachedTokens,
+    latencyMs,
+  };
 
   return {
     answer: answerContent,
@@ -356,6 +456,8 @@ export async function executeConsultantTurn(params: {
     confidenceScore: maxRelevance,
     activeSkillUsed: matchedSkill ? matchedSkill.name : undefined,
     activeInstructionsUsed: activeInstructions.map((i) => i.title),
+    activeLessonsUsed: lessonsUsed,
+    trace,
     isPastedThread: parsed.isPastedThread,
     extractedCoreQuery: parsed.extractedCoreQuery,
     composedPrompt: {
@@ -368,7 +470,7 @@ export async function executeConsultantTurn(params: {
       outputTokens,
       cachedTokens,
       costUsd,
-      latencyMs: Math.max(30, Date.now() - startTime),
+      latencyMs,
     },
   };
 }

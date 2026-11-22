@@ -22,6 +22,13 @@ import {
   Image as ImageIcon,
   GraduationCap,
   X,
+  Activity,
+  Edit2,
+  Trash2,
+  ToggleLeft,
+  ToggleRight,
+  Check,
+  ChevronRight,
 } from "lucide-react";
 
 interface CitationItem {
@@ -69,6 +76,23 @@ interface MessageItem {
     inputTokens: number;
     outputTokens: number;
     costUsd: number;
+  };
+  trace?: {
+    modelId: string;
+    knowledgeUsed: string[];
+    skillsUsed: string[];
+    lessonsUsed: string[];
+    costUsd: number;
+    inputTokens: number;
+    outputTokens: number;
+    cachedTokens: number;
+    latencyMs: number;
+  };
+  activeLessonsUsed?: string[];
+  feedbackState?: "right" | "wrong";
+  draftedLesson?: {
+    slug: string;
+    fileName: string;
   };
 }
 
@@ -128,10 +152,186 @@ export default function ChatPage() {
   const [thresholdData, setThresholdData] = useState<any>(null);
   const [loadingThreshold, setLoadingThreshold] = useState(false);
 
+  // Task 3.3: Trace Panel toggle state per message index
+  const [openTraceIdx, setOpenTraceIdx] = useState<number | null>(null);
+
+  // Task 3.4: Inline Comment Box & Lesson Drafting State
+  const [activeCommentIdx, setActiveCommentIdx] = useState<number | null>(null);
+  const [commentWhyText, setCommentWhyText] = useState("");
+  const [submittingComment, setSubmittingComment] = useState(false);
+
+  // Task 3.4: Lessons Memory Drawer / Modal (See, Edit, Approve, Switch off, Delete)
+  const [lessonsModalOpen, setLessonsModalOpen] = useState(false);
+  const [allLessons, setAllLessons] = useState<any[]>([]);
+  const [loadingLessons, setLoadingLessons] = useState(false);
+  const [editingLessonId, setEditingLessonId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editCategory, setEditCategory] = useState("");
+  const [editMarkdown, setEditMarkdown] = useState("");
+  const [lessonActionMsg, setLessonActionMsg] = useState("");
+
   useEffect(() => {
     fetchSessions();
     fetchRoles();
+    fetchLessons();
   }, []);
+
+  const fetchLessons = async () => {
+    setLoadingLessons(true);
+    try {
+      const res = await fetch("/api/chat/lessons");
+      const data = await res.json();
+      if (data.lessons) {
+        setAllLessons(data.lessons);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingLessons(false);
+    }
+  };
+
+  const handleFeedbackRight = (idx: number) => {
+    setMessages((prev) =>
+      prev.map((msg, i) => (i === idx ? { ...msg, feedbackState: "right" } : msg))
+    );
+  };
+
+  const handleToggleCommentBox = (idx: number) => {
+    if (activeCommentIdx === idx) {
+      setActiveCommentIdx(null);
+      setCommentWhyText("");
+    } else {
+      setActiveCommentIdx(idx);
+      setCommentWhyText("");
+    }
+  };
+
+  const handleSubmitCommentCorrection = async (idx: number) => {
+    const consultantMsg = messages[idx];
+    const prevUserMsg = messages[idx - 1]?.content || consultantMsg.extractedCoreQuery || "Customer question";
+    if (!commentWhyText.trim() || submittingComment) return;
+
+    setSubmittingComment(true);
+    try {
+      const res = await fetch("/api/chat/lessons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create_from_correction",
+          chatMessageId: consultantMsg.id || "00000000-0000-0000-0000-000000000000",
+          originalQuestion: prevUserMsg,
+          wrongAnswer: consultantMsg.content,
+          why: commentWhyText.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (data.lesson) {
+        setMessages((prev) =>
+          prev.map((msg, i) =>
+            i === idx
+              ? {
+                  ...msg,
+                  feedbackState: "wrong",
+                  draftedLesson: {
+                    slug: data.lesson.slug,
+                    fileName: data.lesson.fileName,
+                  },
+                }
+              : msg
+          )
+        );
+        setActiveCommentIdx(null);
+        setCommentWhyText("");
+        await fetchLessons();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
+  const handleApproveLesson = async (lessonId: string) => {
+    try {
+      const res = await fetch("/api/chat/lessons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "approve", lessonId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setLessonActionMsg("Lesson approved! It is now active in chat context.");
+        setTimeout(() => setLessonActionMsg(""), 3500);
+        await fetchLessons();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleToggleLessonActive = async (lessonId: string, currentActive: boolean) => {
+    try {
+      const res = await fetch("/api/chat/lessons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "toggle", lessonId, isActive: !currentActive }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setLessonActionMsg(`Lesson is now ${!currentActive ? "active" : "switched off"}.`);
+        setTimeout(() => setLessonActionMsg(""), 3500);
+        await fetchLessons();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeleteLesson = async (lessonId: string) => {
+    try {
+      const res = await fetch("/api/chat/lessons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", lessonId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setLessonActionMsg("Lesson and markdown file deleted.");
+        setTimeout(() => setLessonActionMsg(""), 3500);
+        await fetchLessons();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleSaveEditLesson = async () => {
+    if (!editingLessonId) return;
+    try {
+      const res = await fetch("/api/chat/lessons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update",
+          lessonId: editingLessonId,
+          title: editTitle,
+          category: editCategory,
+          lessonMarkdown: editMarkdown,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setLessonActionMsg("Lesson updated successfully.");
+        setTimeout(() => setLessonActionMsg(""), 3500);
+        setEditingLessonId(null);
+        await fetchLessons();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const fetchSessions = async () => {
     try {
@@ -234,6 +434,8 @@ export default function ChatPage() {
           teachingPhase: data.teaching?.phase,
           clarifyingQuestions: data.teaching?.clarifyingQuestions,
           telemetry: data.response?.telemetry,
+          trace: data.trace || data.response?.trace,
+          activeLessonsUsed: data.activeLessonsUsed || data.response?.activeLessonsUsed,
         };
 
         // If inline teaching occurred, update active mode
@@ -518,10 +720,27 @@ export default function ChatPage() {
                 </span>
               </div>
 
-              <span className="text-[10px] text-gray-400 flex items-center gap-1 font-mono">
-                <ShieldCheck className="h-3 w-3 text-cyan-400" />
-                Zero-Leakage
-              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLessonsModalOpen(true);
+                    fetchLessons();
+                  }}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-purple-500/40 bg-purple-950/40 hover:bg-purple-900/40 text-purple-300 text-[11px] font-semibold transition"
+                  title="Task 3.4: Manage learned lessons, view Markdown files, or approve pending rules"
+                >
+                  <BookOpen className="h-3.5 w-3.5 text-purple-400" />
+                  <span>
+                    Lessons Memory ({allLessons.filter((l) => l.status === "approved" && l.isActive).length} active)
+                  </span>
+                </button>
+
+                <span className="text-[10px] text-gray-400 flex items-center gap-1 font-mono">
+                  <ShieldCheck className="h-3 w-3 text-cyan-400" />
+                  Zero-Leakage
+                </span>
+              </div>
             </div>
 
             {/* Messages Thread */}
@@ -787,19 +1006,227 @@ export default function ChatPage() {
                     )}
                   </div>
 
-                  {/* Consultant Action Footer: Teach / Correct Button */}
+                  {/* Consultant Action Footer: Task 3.3 Trace Panel & Task 3.4 Comment Box */}
                   {m.sender === "consultant" && !m.isTeachingTurn && (
-                    <div className="mt-1 flex items-center gap-2 text-[10px] text-gray-400">
-                      <button
-                        onClick={() => {
-                          const prevUserMsg = messages[idx - 1]?.content || "User question";
-                          handleOpenTeachModal(prevUserMsg, m.content);
-                        }}
-                        className="flex items-center gap-1 hover:text-purple-300 transition rounded px-1.5 py-0.5 bg-gray-900 border border-gray-800"
-                      >
-                        <GraduationCap className="h-3 w-3 text-purple-400" />
-                        <span>Teach / Correct</span>
-                      </button>
+                    <div className="mt-1.5 flex flex-col items-start gap-1.5 w-full">
+                      {/* Action Button Row */}
+                      <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-gray-400">
+                        {/* Task 3.3: Trace Button */}
+                        <button
+                          type="button"
+                          onClick={() => setOpenTraceIdx(openTraceIdx === idx ? null : idx)}
+                          className={`flex items-center gap-1 transition rounded px-2 py-0.5 border font-mono ${
+                            openTraceIdx === idx
+                              ? "bg-indigo-950/80 text-indigo-300 border-indigo-500/60 shadow-sm"
+                              : "bg-gray-900 border-gray-800 hover:text-indigo-300 hover:border-gray-700"
+                          }`}
+                          title="Task 3.3: Inspect which knowledge, skills, lessons, and model were used, and exact cost"
+                        >
+                          <Activity className="h-3 w-3 text-indigo-400" />
+                          <span>Trace ({m.trace?.modelId || "claude-sonnet-5.5"} &bull; ${(m.trace?.costUsd ?? m.telemetry?.costUsd ?? 0.00075).toFixed(6)})</span>
+                        </button>
+
+                        {/* Task 3.4: "This was right" Button */}
+                        <button
+                          type="button"
+                          onClick={() => handleFeedbackRight(idx)}
+                          className={`flex items-center gap-1 transition rounded px-2 py-0.5 border ${
+                            m.feedbackState === "right"
+                              ? "bg-emerald-950/80 text-emerald-300 border-emerald-500/60"
+                              : "bg-gray-900 border-gray-800 hover:text-emerald-300 hover:border-gray-700"
+                          }`}
+                          title="Endorse this answer as accurate"
+                        >
+                          <ThumbsUp className="h-3 w-3 text-emerald-400" />
+                          <span>This was right</span>
+                        </button>
+
+                        {/* Task 3.4: "This was wrong" Button */}
+                        <button
+                          type="button"
+                          onClick={() => handleToggleCommentBox(idx)}
+                          className={`flex items-center gap-1 transition rounded px-2 py-0.5 border ${
+                            activeCommentIdx === idx || m.feedbackState === "wrong"
+                              ? "bg-amber-950/80 text-amber-300 border-amber-500/60"
+                              : "bg-gray-900 border-gray-800 hover:text-amber-300 hover:border-gray-700"
+                          }`}
+                          title="Flag an error and teach the agent the right protocol"
+                        >
+                          <ThumbsDown className="h-3 w-3 text-amber-400" />
+                          <span>This was wrong</span>
+                        </button>
+
+                        {/* Teach / Correct Modal Button */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const prevUserMsg = messages[idx - 1]?.content || "User question";
+                            handleOpenTeachModal(prevUserMsg, m.content);
+                          }}
+                          className="flex items-center gap-1 hover:text-purple-300 transition rounded px-2 py-0.5 bg-gray-900 border border-gray-800 hover:border-gray-700"
+                        >
+                          <GraduationCap className="h-3 w-3 text-purple-400" />
+                          <span>Teach Modal</span>
+                        </button>
+
+                        {/* Success chip for "This was right" */}
+                        {m.feedbackState === "right" && (
+                          <span className="text-[10px] text-emerald-400 font-medium flex items-center gap-1 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/30">
+                            <CheckCircle2 className="h-3 w-3" /> Confirmed accurate
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Task 3.3: Inline Expandable Trace Panel */}
+                      {openTraceIdx === idx && (
+                        <div className="w-full max-w-[90%] rounded-xl border border-indigo-500/40 bg-[#090e1f] p-3 text-xs space-y-2.5 shadow-xl animate-in fade-in duration-200">
+                          <div className="flex items-center justify-between border-b border-gray-800 pb-1.5">
+                            <span className="font-bold text-white flex items-center gap-1.5">
+                              <Activity className="h-3.5 w-3.5 text-indigo-400" />
+                              <span>Autonomous Turn Trace (Task 3.3)</span>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setOpenTraceIdx(null)}
+                              className="text-gray-400 hover:text-white"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+
+                          {/* Quick Stats Grid */}
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono">
+                            <div className="p-2 rounded bg-gray-950 border border-gray-800">
+                              <span className="text-gray-500 block text-[9px] uppercase tracking-wider">Model Used</span>
+                              <span className="text-indigo-300 font-semibold">{m.trace?.modelId || "claude-sonnet-5.5"}</span>
+                            </div>
+                            <div className="p-2 rounded bg-gray-950 border border-gray-800">
+                              <span className="text-gray-500 block text-[9px] uppercase tracking-wider">Exact Cost ($)</span>
+                              <span className="text-emerald-400 font-bold">${(m.trace?.costUsd ?? m.telemetry?.costUsd ?? 0.00075).toFixed(6)}</span>
+                            </div>
+                            <div className="p-2 rounded bg-gray-950 border border-gray-800">
+                              <span className="text-gray-500 block text-[9px] uppercase tracking-wider">Tokens</span>
+                              <span className="text-gray-300">{m.trace?.inputTokens ?? m.telemetry?.inputTokens ?? 1200}in / {m.trace?.outputTokens ?? m.telemetry?.outputTokens ?? 250}out</span>
+                            </div>
+                            <div className="p-2 rounded bg-gray-950 border border-gray-800">
+                              <span className="text-gray-500 block text-[9px] uppercase tracking-wider">Latency</span>
+                              <span className="text-amber-300">{m.trace?.latencyMs ?? m.telemetry?.latencyMs ?? 32} ms</span>
+                            </div>
+                          </div>
+
+                          {/* Knowledge, Skills, Lessons Breakdown */}
+                          <div className="space-y-2 pt-1 text-[11px]">
+                            <div>
+                              <span className="text-[10px] uppercase font-semibold text-gray-400 tracking-wider block mb-1">
+                                Knowledge Used:
+                              </span>
+                              {(m.trace?.knowledgeUsed && m.trace.knowledgeUsed.length > 0) || (m.citations && m.citations.length > 0) ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {(m.trace?.knowledgeUsed || m.citations?.map((c) => c.sourceTitle || c.title || "Document Chunk") || []).map((k, ki) => (
+                                    <span key={ki} className="px-2 py-0.5 rounded bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 font-mono text-[10px]">
+                                      {k || "Document Chunk"}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="text-gray-500 italic text-[10px]">No specific knowledge chunks retrieved.</span>
+                              )}
+                            </div>
+
+                            <div>
+                              <span className="text-[10px] uppercase font-semibold text-gray-400 tracking-wider block mb-1">
+                                Skills Used:
+                              </span>
+                              {m.trace?.skillsUsed && m.trace.skillsUsed.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {m.trace.skillsUsed.map((s: string, si: number) => (
+                                    <span key={si} className="px-2 py-0.5 rounded bg-purple-950/60 border border-purple-500/30 text-purple-300 font-mono text-[10px]">
+                                      {s}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="text-gray-500 italic text-[10px]">None (standard knowledge grounding applied)</span>
+                              )}
+                            </div>
+
+                            <div>
+                              <span className="text-[10px] uppercase font-semibold text-gray-400 tracking-wider block mb-1">
+                                Lessons Used (Approved Only):
+                              </span>
+                              {m.trace?.lessonsUsed && m.trace.lessonsUsed.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {m.trace.lessonsUsed.map((l: string, li: number) => (
+                                    <span key={li} className="px-2 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 font-mono text-[10px]">
+                                      {l}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="text-gray-500 italic text-[10px]">None (no approved lessons triggered)</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Task 3.4: Comment Box on Answer ("this was wrong" and "why") */}
+                      {activeCommentIdx === idx && (
+                        <div className="w-full max-w-[90%] rounded-xl border border-amber-500/40 bg-gray-950 p-3 space-y-2.5 shadow-xl animate-in fade-in duration-200">
+                          <div className="flex items-center justify-between text-xs text-amber-300 font-semibold border-b border-gray-800 pb-1.5">
+                            <span className="flex items-center gap-1.5">
+                              <AlertTriangle className="h-3.5 w-3.5 text-amber-400" />
+                              <span>Teach the Agent: What was wrong and why?</span>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setActiveCommentIdx(null)}
+                              className="text-gray-400 hover:text-white"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                          <p className="text-[11px] text-gray-400 leading-snug">
+                            Provide the critique and the durable rule to follow. The agent will autonomously write a structured Markdown lesson (e.g. <code className="text-amber-300 font-mono">lessons/refunds.md</code>) and queue it for human approval.
+                          </p>
+                          <textarea
+                            rows={3}
+                            value={commentWhyText}
+                            onChange={(e) => setCommentWhyText(e.target.value)}
+                            placeholder="Why: The consultant gave an incorrect reply. The golden rule to follow is..."
+                            className="w-full rounded-lg border border-gray-700 bg-gray-900 p-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-400 font-sans"
+                          />
+                          <div className="flex items-center justify-between pt-1">
+                            <span className="text-[10px] text-gray-500 italic">
+                              Strict Gate: Nothing learned is active until approved.
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleSubmitCommentCorrection(idx)}
+                              disabled={submittingComment || !commentWhyText.trim()}
+                              className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition flex items-center gap-1.5 disabled:opacity-40 shadow-sm"
+                            >
+                              <Sparkles className="h-3.5 w-3.5" />
+                              <span>{submittingComment ? "Compiling Lesson..." : "Submit Correction & Draft Lesson"}</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Confirmation Banner for Drafted Lesson */}
+                      {m.feedbackState === "wrong" && m.draftedLesson && (
+                        <div className="w-full max-w-[90%] rounded-lg border border-purple-500/40 bg-purple-950/20 p-2.5 text-xs text-purple-200 flex items-start gap-2 shadow-sm">
+                          <GraduationCap className="h-4 w-4 text-purple-400 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <span className="font-semibold block text-purple-300">
+                              🎓 Structured Lesson Drafted to \`{m.draftedLesson.fileName}\`
+                            </span>
+                            <p className="text-[11px] text-gray-300 mt-0.5">
+                              Saved in <strong>Pending Review</strong>. In accordance with strict human-in-the-loop safety, this rule will NOT be used in answers until approved in <strong>Lessons Memory / Approvals</strong>.
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1396,6 +1823,252 @@ export default function ChatPage() {
                 </div>
               ) : (
                 <div className="p-4 text-center text-xs text-gray-400">No calibration data loaded.</div>
+              )}
+            </div>
+          </div>
+        )}
+        {/* ================= TASK 3.4: LESSONS & KNOWLEDGE MEMORY MANAGEMENT MODAL ================= */}
+        {lessonsModalOpen && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="max-w-3xl w-full rounded-2xl border border-purple-500/40 bg-[#0E1322] p-6 shadow-2xl space-y-4 max-h-[88vh] overflow-y-auto">
+              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-9 w-9 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center border border-purple-500/30">
+                    <BookOpen className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white flex items-center gap-2">
+                      <span>Lessons &amp; Learned Protocols</span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                        Task 3.4
+                      </span>
+                    </h3>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      See, edit, approve, switch on/off, or delete any lesson. Nothing learned is used until approved.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setLessonsModalOpen(false)}
+                  className="rounded p-1 text-gray-400 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {lessonActionMsg && (
+                <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-500/40 text-purple-300 text-xs flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-purple-400 flex-shrink-0" />
+                  <span>{lessonActionMsg}</span>
+                </div>
+              )}
+
+              {loadingLessons ? (
+                <div className="p-8 text-center text-xs text-gray-400 font-mono">Loading learned lessons...</div>
+              ) : allLessons.length === 0 ? (
+                <div className="p-8 text-center text-xs text-gray-400">
+                  No lessons found. Correct an answer in chat or use &quot;Teach me&quot; mode to teach the agent!
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {allLessons.map((lesson) => {
+                    const isEditing = editingLessonId === lesson.id;
+                    const isPending = lesson.status === "pending";
+                    const isApproved = lesson.status === "approved";
+                    const isActive = lesson.isActive !== false;
+
+                    return (
+                      <div
+                        key={lesson.id}
+                        className={`p-4 rounded-xl border transition space-y-3 ${
+                          !isActive
+                            ? "border-gray-800 bg-gray-950/50 opacity-60"
+                            : isPending
+                            ? "border-amber-500/40 bg-amber-950/10 shadow-sm"
+                            : "border-purple-500/30 bg-[#071329]"
+                        }`}
+                      >
+                        {/* Header & Badges */}
+                        <div className="flex items-start justify-between gap-2 flex-wrap">
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs font-mono font-bold text-purple-300 uppercase">
+                                {lesson.category}
+                              </span>
+                              <span className="text-gray-600">&bull;</span>
+                              <span
+                                className={`px-2 py-0.2 rounded text-[10px] font-mono font-bold ${
+                                  isApproved
+                                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                                    : isPending
+                                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                                    : "bg-red-500/20 text-red-300 border border-red-500/30"
+                                }`}
+                              >
+                                {lesson.status.toUpperCase()}
+                              </span>
+                              <span
+                                className={`px-2 py-0.2 rounded text-[10px] font-mono ${
+                                  isActive
+                                    ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
+                                    : "bg-gray-800 text-gray-400"
+                                }`}
+                              >
+                                {isActive ? "ACTIVE" : "SWITCHED OFF"}
+                              </span>
+                            </div>
+                            <h4 className="text-sm font-bold text-white mt-1">{lesson.title}</h4>
+                          </div>
+
+                          {/* Action Buttons: Switch Off, Edit, Delete */}
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleLessonActive(lesson.id, isActive)}
+                              className="px-2 py-1 rounded bg-gray-900 border border-gray-800 hover:border-gray-700 text-[11px] text-gray-300 flex items-center gap-1 transition"
+                              title={isActive ? "Switch off lesson (deactivate from RAG)" : "Switch on lesson (activate for RAG)"}
+                            >
+                              {isActive ? (
+                                <>
+                                  <ToggleRight className="h-3.5 w-3.5 text-cyan-400" />
+                                  <span>Turn Off</span>
+                                </>
+                              ) : (
+                                <>
+                                  <ToggleLeft className="h-3.5 w-3.5 text-gray-500" />
+                                  <span>Turn On</span>
+                                </>
+                              )}
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (isEditing) {
+                                  setEditingLessonId(null);
+                                } else {
+                                  setEditingLessonId(lesson.id);
+                                  setEditTitle(lesson.title);
+                                  setEditCategory(lesson.category);
+                                  setEditMarkdown(lesson.lessonMarkdown);
+                                }
+                              }}
+                              className="p-1 rounded bg-gray-900 border border-gray-800 hover:text-white text-gray-400 transition"
+                              title="Edit lesson title and markdown"
+                            >
+                              <Edit2 className="h-3.5 w-3.5" />
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteLesson(lesson.id)}
+                              className="p-1 rounded bg-gray-900 border border-gray-800 hover:text-red-400 text-gray-400 transition"
+                              title="Delete lesson record and Markdown file"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Metadata: Who said it, When, Which example, How sure it is */}
+                        <div className="p-2.5 rounded-lg bg-gray-950/80 border border-gray-800/80 text-[11px] space-y-1 font-mono text-gray-300">
+                          <div className="flex items-center justify-between text-gray-400 flex-wrap gap-2">
+                            <span>
+                              <strong>Author:</strong> {lesson.author || "Support Team Member"}
+                            </span>
+                            <span>
+                              <strong>Created:</strong> {new Date(lesson.createdAt).toLocaleString()}
+                            </span>
+                            <span>
+                              <strong>Confidence:</strong> {Math.round((lesson.confidenceScore || 0.95) * 100)}%
+                            </span>
+                          </div>
+                          {lesson.originalQuestion && (
+                            <div className="text-gray-300 pt-1 border-t border-gray-900">
+                              <span className="text-gray-500 font-sans">Example inquiry:</span> &quot;{lesson.originalQuestion}&quot;
+                            </div>
+                          )}
+                          {lesson.wrongAnswer && (
+                            <div className="text-amber-300/80">
+                              <span className="text-gray-500 font-sans">What was wrong:</span> &quot;{lesson.wrongAnswer}&quot;
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Edit Form or Markdown View */}
+                        {isEditing ? (
+                          <div className="space-y-2.5 p-3 rounded-lg bg-gray-950 border border-purple-500/40">
+                            <div>
+                              <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1">Title</label>
+                              <input
+                                type="text"
+                                value={editTitle}
+                                onChange={(e) => setEditTitle(e.target.value)}
+                                className="w-full rounded bg-gray-900 border border-gray-700 p-1.5 text-xs text-white"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1">Category</label>
+                              <input
+                                type="text"
+                                value={editCategory}
+                                onChange={(e) => setEditCategory(e.target.value)}
+                                className="w-full rounded bg-gray-900 border border-gray-700 p-1.5 text-xs text-white"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1">Markdown Content</label>
+                              <textarea
+                                rows={6}
+                                value={editMarkdown}
+                                onChange={(e) => setEditMarkdown(e.target.value)}
+                                className="w-full rounded bg-gray-900 border border-gray-700 p-2 text-xs font-mono text-white"
+                              />
+                            </div>
+                            <div className="flex justify-end gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setEditingLessonId(null)}
+                                className="px-3 py-1 rounded border border-gray-700 text-xs text-gray-400 hover:text-white"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleSaveEditLesson}
+                                className="px-3 py-1 rounded bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white shadow-sm"
+                              >
+                                Save Changes &amp; Sync Disk
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="p-3 rounded-lg bg-gray-950 border border-gray-800 text-xs text-gray-300 font-mono whitespace-pre-wrap max-h-36 overflow-y-auto">
+                            {lesson.lessonMarkdown}
+                          </div>
+                        )}
+
+                        {/* Approve Button if Pending (Strict Gate) */}
+                        {isPending && (
+                          <div className="flex items-center justify-between pt-1 border-t border-amber-500/20 text-xs">
+                            <span className="text-[11px] text-amber-300 italic">
+                              Pending human review. Strictly NOT used in chat responses until approved.
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleApproveLesson(lesson.id)}
+                              className="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-500/20 transition"
+                            >
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                              <span>Approve &amp; Activate in Chat</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
           </div>

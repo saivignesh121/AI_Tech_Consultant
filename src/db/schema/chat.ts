@@ -45,6 +45,7 @@ export const chatTraces = pgTable("chat_traces", {
   roleId: uuid("role_id").references(() => agentRoles.id, { onDelete: "set null" }),
   knowledgeUsed: jsonb("knowledge_used").$type<string[]>().default([]).notNull(),
   skillsUsed: jsonb("skills_used").$type<string[]>().default([]).notNull(),
+  lessonsUsed: jsonb("lessons_used").$type<string[]>().default([]).notNull(),
   inputTokens: integer("input_tokens").notNull(),
   outputTokens: integer("output_tokens").notNull(),
   cachedTokens: integer("cached_tokens").default(0).notNull(),
@@ -62,12 +63,22 @@ export const lessons = pgTable("lessons", {
     .notNull(),
   title: varchar("title", { length: 255 }).notNull(),
   category: varchar("category", { length: 100 }).notNull(),
+  slug: varchar("slug", { length: 150 }),
+  fileName: varchar("file_name", { length: 255 }),
+  originalQuestion: text("original_question"),
+  wrongAnswer: text("wrong_answer"),
+  correctionWhy: text("correction_why"),
   lessonMarkdown: text("lesson_markdown").notNull(),
   confidenceScore: numeric("confidence_score", { precision: 4, scale: 2 }),
   status: varchar("status", { length: 50 }).default("pending").notNull(), // 'pending' | 'approved' | 'rejected'
+  isActive: boolean("is_active").default(true).notNull(),
+  author: varchar("author", { length: 255 }),
+  suggestedSkillSlug: varchar("suggested_skill_slug", { length: 100 }),
+  suggestedSkillDiff: text("suggested_skill_diff"),
   approvedBy: uuid("approved_by").references(() => users.id, { onDelete: "set null" }),
   approvedAt: timestamp("approved_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const expertTasks = pgTable("expert_tasks", {

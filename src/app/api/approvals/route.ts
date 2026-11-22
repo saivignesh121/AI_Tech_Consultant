@@ -9,6 +9,13 @@ import {
   approveSkillImprovement,
   rejectSkillImprovement,
 } from "@/services/brain/emailSkillsOptimizer";
+import {
+  approveLesson,
+  rejectLesson,
+  toggleLesson,
+  deleteLesson,
+  updateLesson,
+} from "@/services/chat/lessonManager";
 
 export async function GET() {
   try {
@@ -131,25 +138,52 @@ export async function POST(req: NextRequest) {
       const { lessonId } = body;
       const newStatus = action === "approve_lesson" ? "approved" : "rejected";
 
-      await db
-        .update(lessons)
-        .set({
-          status: newStatus,
-          approvedAt: new Date(),
-          approvedBy: tenant.userId || undefined,
-        })
-        .where(
-          and(
-            eq(lessons.id, lessonId),
-            eq(lessons.businessId, tenant.businessId)
-          )
-        );
+      if (action === "approve_lesson") {
+        await approveLesson(tenant.businessId, lessonId, tenant.userId);
+      } else {
+        await rejectLesson(tenant.businessId, lessonId);
+      }
 
       return NextResponse.json({
         success: true,
         lessonId,
         status: newStatus,
         message: `Lesson successfully ${newStatus}.`,
+      });
+    }
+
+    // Action 2b: Toggle, Edit, or Delete a Lesson (Task 3.4)
+    if (action === "toggle_lesson") {
+      const { lessonId, isActive } = body;
+      const toggled = await toggleLesson(tenant.businessId, lessonId, isActive);
+      return NextResponse.json({
+        success: true,
+        lessonId,
+        isActive: toggled.isActive,
+        message: `Lesson is now ${toggled.isActive ? "active" : "inactive"}.`,
+      });
+    }
+
+    if (action === "edit_lesson") {
+      const { lessonId, title, category, lessonMarkdown } = body;
+      const updated = await updateLesson(tenant.businessId, lessonId, {
+        ...(title ? { title } : {}),
+        ...(category ? { category } : {}),
+        ...(lessonMarkdown ? { lessonMarkdown } : {}),
+      });
+      return NextResponse.json({
+        success: true,
+        lesson: updated,
+        message: "Lesson updated successfully.",
+      });
+    }
+
+    if (action === "delete_lesson") {
+      const { lessonId } = body;
+      await deleteLesson(tenant.businessId, lessonId);
+      return NextResponse.json({
+        success: true,
+        message: "Lesson and markdown file deleted.",
       });
     }
 

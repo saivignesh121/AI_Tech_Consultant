@@ -277,8 +277,9 @@ export async function POST(req: NextRequest) {
         messageId: savedMsgId,
         businessId: tenant.businessId,
         modelId,
-        knowledgeUsed: response.citations.map((c) => c.title),
-        skillsUsed: [roleSlug],
+        knowledgeUsed: response.trace?.knowledgeUsed || response.citations.map((c) => c.title),
+        skillsUsed: response.trace?.skillsUsed || [roleSlug],
+        lessonsUsed: response.trace?.lessonsUsed || [],
         inputTokens: response.telemetry.inputTokens,
         outputTokens: response.telemetry.outputTokens,
         cachedTokens: response.telemetry.cachedTokens,
@@ -310,6 +311,8 @@ export async function POST(req: NextRequest) {
       reply: response.reply,
       isPastedThread: response.isPastedThread,
       extractedCoreQuery: response.extractedCoreQuery,
+      trace: response.trace,
+      activeLessonsUsed: response.activeLessonsUsed,
       teaching: response.isTeachingTurn
         ? {
             isTeachingTurn: true,

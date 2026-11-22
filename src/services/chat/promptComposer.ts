@@ -2,6 +2,7 @@ import { DEFAULT_PROMPTS, SystemPromptTemplate } from "./prompts";
 import { AgentRoleDefinition } from "./roles";
 import { InstructionItem } from "../brain/instructionsManager";
 import { SkillItem } from "../brain/skillsManager";
+import { LessonItem } from "./lessonManager";
 
 export interface ComposedAgentPrompt {
   promptTemplateKey: string;
@@ -10,6 +11,7 @@ export interface ComposedAgentPrompt {
   composedVariables: Record<string, string>;
   selectedSkill?: SkillItem | null;
   appliedInstructions: string[];
+  appliedLessons?: string[];
 }
 
 /**
@@ -25,6 +27,7 @@ export function composeAutonomousAgentPrompt(params: {
   formattedKnowledgeContext: string;
   activeInstructions: InstructionItem[];
   matchedSkill?: SkillItem | null;
+  appliedLessons?: LessonItem[];
   customTemplate?: SystemPromptTemplate;
 }): ComposedAgentPrompt {
   const {
@@ -35,6 +38,7 @@ export function composeAutonomousAgentPrompt(params: {
     formattedKnowledgeContext,
     activeInstructions,
     matchedSkill,
+    appliedLessons = [],
     customTemplate,
   } = params;
 
@@ -62,18 +66,35 @@ export function composeAutonomousAgentPrompt(params: {
     ? `Active SOP: ${matchedSkill.name}\nTrigger: ${matchedSkill.triggerConditions}\nSteps:\n${matchedSkill.stepsMarkdown}`
     : "No specialized SOP skill triggered. Apply standard knowledge grounding.";
 
-  // 4. Resolve QA template
+  // 4. Format applied approved lessons (Task 3.4 & Strict Gate)
+  const lessonSection =
+    appliedLessons.length > 0
+      ? appliedLessons
+          .map(
+            (l, i) =>
+              `${i + 1}. [APPROVED LESSON: ${l.title}]\nCategory: ${l.category}\nRule: ${
+                l.correctionWhy || l.lessonMarkdown.slice(0, 300)
+              }`
+          )
+          .join("\n\n")
+      : "No specific approved lessons applied.";
+
+  // 5. Resolve QA template
   const qaTemplate =
     customTemplate ||
     DEFAULT_PROMPTS.find((p) => p.key === "qa_answer") ||
     DEFAULT_PROMPTS[1];
 
-  const userPrompt = qaTemplate.templateText
+  let userPrompt = qaTemplate.templateText
     .replace(/{knowledge_results}/g, formattedKnowledgeContext || "No verified documentation chunks found.")
     .replace(/{customer_name}/g, customerName)
     .replace(/{customer_query}/g, customerQuery)
     .replace(/{active_skill}/g, skillSection)
     .replace(/{active_instructions}/g, instructionLines);
+
+  if (appliedLessons.length > 0) {
+    userPrompt += `\n\nApproved Learned Lessons to Strictly Follow:\n${lessonSection}`;
+  }
 
   return {
     promptTemplateKey: qaTemplate.key,
@@ -87,8 +108,10 @@ export function composeAutonomousAgentPrompt(params: {
       customer_query: customerQuery,
       active_skill: matchedSkill ? matchedSkill.name : "none",
       active_instructions: activeInstructions.map((i) => i.title).join(", ") || "none",
+      active_lessons: appliedLessons.map((l) => l.title).join(", ") || "none",
     },
     selectedSkill: matchedSkill,
     appliedInstructions: activeInstructions.map((i) => i.title),
+    appliedLessons: appliedLessons.map((l) => l.title),
   };
 }
