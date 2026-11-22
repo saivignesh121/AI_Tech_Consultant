@@ -98,6 +98,8 @@ interface MessageItem {
   };
   activeLessonsUsed?: string[];
   feedbackState?: "right" | "wrong";
+  feedbackReason?: string;
+  feedbackTestCaseId?: string;
   draftedLesson?: {
     slug: string;
     fileName: string;
@@ -168,6 +170,11 @@ export default function ChatPage() {
   const [commentWhyText, setCommentWhyText] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
 
+  // Task 4.4: Thumbs Up Praise / Endorsement State
+  const [activePraiseIdx, setActivePraiseIdx] = useState<number | null>(null);
+  const [praiseReasonText, setPraiseReasonText] = useState("");
+  const [submittingPraise, setSubmittingPraise] = useState(false);
+
   // Task 3.4: Lessons Memory Drawer / Modal (See, Edit, Approve, Switch off, Delete)
   const [lessonsModalOpen, setLessonsModalOpen] = useState(false);
   const [allLessons, setAllLessons] = useState<any[]>([]);
@@ -199,10 +206,58 @@ export default function ChatPage() {
     }
   };
 
-  const handleFeedbackRight = (idx: number) => {
-    setMessages((prev) =>
-      prev.map((msg, i) => (i === idx ? { ...msg, feedbackState: "right" } : msg))
-    );
+  // Task 4.4: Toggle Praise Box for Thumbs Up
+  const handleTogglePraiseBox = (idx: number) => {
+    if (activePraiseIdx === idx) {
+      setActivePraiseIdx(null);
+      setPraiseReasonText("");
+    } else {
+      setActivePraiseIdx(idx);
+      setActiveCommentIdx(null);
+      setPraiseReasonText("Accurate technical guidance grounded in documentation.");
+    }
+  };
+
+  // Task 4.4: Submit Praise & Generate Endorsement Test Case
+  const handleSubmitPraise = async (idx: number) => {
+    const consultantMsg = messages[idx];
+    const prevUserMsg = messages[idx - 1]?.content || consultantMsg.extractedCoreQuery || "Customer question";
+    const reason = praiseReasonText.trim() || "Accurate technical guidance grounded in documentation.";
+
+    setSubmittingPraise(true);
+    try {
+      const res = await fetch("/api/chat/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chatMessageId: consultantMsg.id || "00000000-0000-0000-0000-000000000000",
+          question: prevUserMsg,
+          aiAnswer: consultantMsg.content,
+          feedbackType: "thumbs_up",
+          reason,
+        }),
+      });
+
+      const data = await res.json();
+      setMessages((prev) =>
+        prev.map((msg, i) =>
+          i === idx
+            ? {
+                ...msg,
+                feedbackState: "right",
+                feedbackReason: reason,
+                feedbackTestCaseId: data.testCase?.id,
+              }
+            : msg
+        )
+      );
+      setActivePraiseIdx(null);
+      setPraiseReasonText("");
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSubmittingPraise(false);
+    }
   };
 
   const handleToggleCommentBox = (idx: number) => {
@@ -211,6 +266,7 @@ export default function ChatPage() {
       setCommentWhyText("");
     } else {
       setActiveCommentIdx(idx);
+      setActivePraiseIdx(null);
       setCommentWhyText("");
     }
   };
@@ -222,6 +278,7 @@ export default function ChatPage() {
 
     setSubmittingComment(true);
     try {
+      // 1. Create Lesson (Task 3.4)
       const res = await fetch("/api/chat/lessons", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -235,25 +292,49 @@ export default function ChatPage() {
       });
 
       const data = await res.json();
-      if (data.lesson) {
-        setMessages((prev) =>
-          prev.map((msg, i) =>
-            i === idx
-              ? {
-                  ...msg,
-                  feedbackState: "wrong",
-                  draftedLesson: {
-                    slug: data.lesson.slug,
-                    fileName: data.lesson.fileName,
-                  },
-                }
-              : msg
-          )
-        );
-        setActiveCommentIdx(null);
-        setCommentWhyText("");
-        await fetchLessons();
+
+      // 2. Convert Feedback to New Test Case in Benchmark (Task 4.4)
+      let testCaseId: string | undefined;
+      try {
+        const fbRes = await fetch("/api/chat/feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chatMessageId: consultantMsg.id || "00000000-0000-0000-0000-000000000000",
+            question: prevUserMsg,
+            aiAnswer: consultantMsg.content,
+            feedbackType: "thumbs_down",
+            reason: commentWhyText.trim(),
+            correctedAnswer: data.lesson?.title || undefined,
+          }),
+        });
+        const fbData = await fbRes.json();
+        testCaseId = fbData.testCase?.id;
+      } catch (err) {
+        console.error("Failed to generate test case from feedback:", err);
       }
+
+      setMessages((prev) =>
+        prev.map((msg, i) =>
+          i === idx
+            ? {
+                ...msg,
+                feedbackState: "wrong",
+                feedbackReason: commentWhyText.trim(),
+                feedbackTestCaseId: testCaseId,
+                draftedLesson: data.lesson
+                  ? {
+                      slug: data.lesson.slug,
+                      fileName: data.lesson.fileName,
+                    }
+                  : undefined,
+              }
+            : msg
+        )
+      );
+      setActiveCommentIdx(null);
+      setCommentWhyText("");
+      await fetchLessons();
     } catch (e) {
       console.error(e);
     } finally {
@@ -1077,22 +1158,22 @@ export default function ChatPage() {
                           <span>Trace ({m.trace?.modelId || "claude-sonnet-5.5"} &bull; ${(m.trace?.costUsd ?? m.telemetry?.costUsd ?? 0.00075).toFixed(6)})</span>
                         </button>
 
-                        {/* Task 3.4: "This was right" Button */}
+                        {/* Task 3.4 & Task 4.4: "This was right" Button */}
                         <button
                           type="button"
-                          onClick={() => handleFeedbackRight(idx)}
+                          onClick={() => handleTogglePraiseBox(idx)}
                           className={`flex items-center gap-1 transition rounded px-2 py-0.5 border ${
-                            m.feedbackState === "right"
+                            activePraiseIdx === idx || m.feedbackState === "right"
                               ? "bg-emerald-950/80 text-emerald-300 border-emerald-500/60"
                               : "bg-gray-900 border-gray-800 hover:text-emerald-300 hover:border-gray-700"
                           }`}
-                          title="Endorse this answer as accurate"
+                          title="Endorse this answer as accurate with a reason (Task 4.4)"
                         >
                           <ThumbsUp className="h-3 w-3 text-emerald-400" />
                           <span>This was right</span>
                         </button>
 
-                        {/* Task 3.4: "This was wrong" Button */}
+                        {/* Task 3.4 & Task 4.4: "This was wrong" Button */}
                         <button
                           type="button"
                           onClick={() => handleToggleCommentBox(idx)}
@@ -1101,7 +1182,7 @@ export default function ChatPage() {
                               ? "bg-amber-950/80 text-amber-300 border-amber-500/60"
                               : "bg-gray-900 border-gray-800 hover:text-amber-300 hover:border-gray-700"
                           }`}
-                          title="Flag an error and teach the agent the right protocol"
+                          title="Flag an error, teach the agent, and generate a new regression test (Task 4.4)"
                         >
                           <ThumbsDown className="h-3 w-3 text-amber-400" />
                           <span>This was wrong</span>
@@ -1124,6 +1205,11 @@ export default function ChatPage() {
                         {m.feedbackState === "right" && (
                           <span className="text-[10px] text-emerald-400 font-medium flex items-center gap-1 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/30">
                             <CheckCircle2 className="h-3 w-3" /> Confirmed accurate
+                            {m.feedbackTestCaseId && (
+                              <span className="text-gray-300 font-mono text-[9px] bg-emerald-900/50 px-1 py-0.2 rounded border border-emerald-500/30">
+                                Test Case: {m.feedbackTestCaseId}
+                              </span>
+                            )}
                           </span>
                         )}
                       </div>
@@ -1264,16 +1350,66 @@ export default function ChatPage() {
                         </div>
                       )}
 
-                      {/* Confirmation Banner for Drafted Lesson */}
-                      {m.feedbackState === "wrong" && m.draftedLesson && (
+                      {/* Task 4.4: Inline Praise Box (Thumbs Up Reason & Test Generation) */}
+                      {activePraiseIdx === idx && (
+                        <div className="w-full max-w-[90%] rounded-xl border border-emerald-500/40 bg-[#09171b] p-3.5 space-y-2.5 shadow-xl animate-in fade-in duration-200">
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-emerald-400 flex items-center gap-1.5 text-xs">
+                              <ThumbsUp className="h-3.5 w-3.5 text-emerald-400" />
+                              <span>Endorse Accurate Answer (Task 4.4: Creates New Test Case)</span>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setActivePraiseIdx(null)}
+                              className="text-gray-400 hover:text-white"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                          <p className="text-[11px] text-gray-400 leading-snug">
+                            Specify why this answer is accurate or exemplary. It will automatically convert into a new verified test case in the Eval Lab benchmark suite.
+                          </p>
+                          <input
+                            type="text"
+                            value={praiseReasonText}
+                            onChange={(e) => setPraiseReasonText(e.target.value)}
+                            placeholder="Why: Accurate technical guidance grounded in documentation..."
+                            className="w-full rounded-lg border border-gray-700 bg-gray-900 p-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400 font-sans"
+                          />
+                          <div className="flex items-center justify-between pt-1">
+                            <span className="text-[10px] text-gray-500 italic">
+                              Task 4.4: Auto-generates verified benchmark test.
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleSubmitPraise(idx)}
+                              disabled={submittingPraise}
+                              className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold transition flex items-center gap-1.5 disabled:opacity-40 shadow-sm"
+                            >
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                              <span>{submittingPraise ? "Creating Test..." : "Confirm & Create Test Case"}</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Confirmation Banner for Drafted Lesson & New Test Case (Task 3.4 & Task 4.4) */}
+                      {m.feedbackState === "wrong" && (m.draftedLesson || m.feedbackTestCaseId) && (
                         <div className="w-full max-w-[90%] rounded-lg border border-purple-500/40 bg-purple-950/20 p-2.5 text-xs text-purple-200 flex items-start gap-2 shadow-sm">
                           <GraduationCap className="h-4 w-4 text-purple-400 mt-0.5 flex-shrink-0" />
-                          <div>
-                            <span className="font-semibold block text-purple-300">
-                              🎓 Structured Lesson Drafted to \`{m.draftedLesson.fileName}\`
-                            </span>
-                            <p className="text-[11px] text-gray-300 mt-0.5">
-                              Saved in <strong>Pending Review</strong>. In accordance with strict human-in-the-loop safety, this rule will NOT be used in answers until approved in <strong>Lessons Memory / Approvals</strong>.
+                          <div className="space-y-1">
+                            {m.draftedLesson && (
+                              <span className="font-semibold block text-purple-300">
+                                🎓 Structured Lesson Drafted to \`{m.draftedLesson.fileName}\`
+                              </span>
+                            )}
+                            {m.feedbackTestCaseId && (
+                              <span className="font-semibold block text-indigo-300 text-[11px]">
+                                🧪 New Regression Test Case Created: <code className="text-white font-mono bg-indigo-950 px-1 py-0.5 rounded border border-indigo-500/40">{m.feedbackTestCaseId}</code>
+                              </span>
+                            )}
+                            <p className="text-[11px] text-gray-300">
+                              Feedback recorded. New benchmark test case generated from real failure. Lesson queued in <strong>Pending Review</strong> until human approval.
                             </p>
                           </div>
                         </div>

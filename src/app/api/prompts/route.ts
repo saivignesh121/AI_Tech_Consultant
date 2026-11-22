@@ -131,6 +131,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Task 4.5: Release Gate Enforcer — Prompts cannot go live if score falls below last version
+    if (body.candidateScore !== undefined && body.baselineScore !== undefined) {
+      const { evaluatePromptReleaseGate } = await import("@/services/eval/releaseGate");
+      const gate = evaluatePromptReleaseGate(
+        key || "prompt_template",
+        Number(body.candidateScore),
+        Number(body.baselineScore)
+      );
+      if (!gate.allowed) {
+        return NextResponse.json(
+          {
+            error: `Blocked by Release Gate: prompt score (${gate.candidateScore}%) fell below baseline (${gate.baselineScore}%). Cannot go live.`,
+            releaseGate: gate,
+          },
+          { status: 422 }
+        );
+      }
+    }
+
     // Resolve target prompt record
     const isPromptUuid = typeof promptId === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(promptId);
     let targetPrompt = (promptId && isPromptUuid)

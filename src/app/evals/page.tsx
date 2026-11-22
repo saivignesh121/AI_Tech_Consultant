@@ -36,6 +36,8 @@ import {
   X,
   Check,
   Activity,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
 
 interface BenchmarkCaseItem {
@@ -75,7 +77,9 @@ interface RouterComparisonData {
 }
 
 export default function EvalLabPage() {
-  const [activeTab, setActiveTab] = useState<"jobs" | "models" | "local" | "judge" | "benchmark" | "router" | "prove-learned">("jobs");
+  const [activeTab, setActiveTab] = useState<
+    "jobs" | "models" | "local" | "judge" | "benchmark" | "router" | "release-gate" | "feedback-tests" | "prove-learned"
+  >("jobs");
 
   // --- 6 Eval Jobs State (Feature 4) ---
   const [evalJobsList, setEvalJobsList] = useState<any[]>([]);
@@ -189,6 +193,28 @@ export default function EvalLabPage() {
   } | null>(null);
   const [savingNote, setSavingNote] = useState(false);
 
+  // --- Task 4.4: Real Feedback Becomes New Tests State ---
+  const [feedbackTests, setFeedbackTests] = useState<any[]>([]);
+  const [loadingFeedbackTests, setLoadingFeedbackTests] = useState(false);
+  const [newFeedbackQuestion, setNewFeedbackQuestion] = useState("");
+  const [newFeedbackAnswer, setNewFeedbackAnswer] = useState("");
+  const [newFeedbackType, setNewFeedbackType] = useState<"thumbs_up" | "thumbs_down">("thumbs_down");
+  const [newFeedbackReason, setNewFeedbackReason] = useState("");
+  const [submittingLiveFeedback, setSubmittingLiveFeedback] = useState(false);
+
+  // --- Task 4.5: Release Gate Enforcer State ---
+  const [gateEntityType, setGateEntityType] = useState<"prompt" | "role" | "skill" | "model">("prompt");
+  const [gateEntityName, setGateEntityName] = useState("qa_consultant_system_prompt");
+  const [gateCandidateScore, setGateCandidateScore] = useState(98.2);
+  const [gateBaselineScore, setGateBaselineScore] = useState(96.5);
+  const [gateSimulateRegression, setGateSimulateRegression] = useState(false);
+  const [gateSimulateCategoryRegression, setGateSimulateCategoryRegression] = useState(false);
+  const [gateResult, setGateResult] = useState<any | null>(null);
+  const [evaluatingGate, setEvaluatingGate] = useState(false);
+  const [gateStandards, setGateStandards] = useState<any | null>(null);
+  const [gateRulesVsJudge, setGateRulesVsJudge] = useState<any[]>([]);
+  const [gateAntiSaturation, setGateAntiSaturation] = useState<any[]>([]);
+
   useEffect(() => {
     fetchEvalJobs();
     fetchOllamaStatus();
@@ -199,7 +225,105 @@ export default function EvalLabPage() {
     fetchLearningProof();
     fetchSideBySide();
     fetchReviewerNotes();
+    fetchFeedbackTests();
+    fetchReleaseGateStatus();
   }, []);
+
+  const fetchFeedbackTests = async () => {
+    setLoadingFeedbackTests(true);
+    try {
+      const res = await fetch("/api/chat/feedback");
+      const data = await res.json();
+      if (data.feedbackTests) setFeedbackTests(data.feedbackTests);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingFeedbackTests(false);
+    }
+  };
+
+  const handleCreateSyntheticFeedbackTest = async () => {
+    if (!newFeedbackQuestion.trim() || !newFeedbackAnswer.trim() || !newFeedbackReason.trim()) return;
+    setSubmittingLiveFeedback(true);
+    try {
+      const res = await fetch("/api/chat/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: newFeedbackQuestion.trim(),
+          aiAnswer: newFeedbackAnswer.trim(),
+          feedbackType: newFeedbackType,
+          reason: newFeedbackReason.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNewFeedbackQuestion("");
+        setNewFeedbackAnswer("");
+        setNewFeedbackReason("");
+        await fetchFeedbackTests();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSubmittingLiveFeedback(false);
+    }
+  };
+
+  const fetchReleaseGateStatus = async () => {
+    try {
+      const res = await fetch("/api/evals/release-gate");
+      const data = await res.json();
+      if (data.activeGate) setGateResult(data.activeGate);
+      if (data.scoringStandards) setGateStandards(data.scoringStandards);
+      if (data.rulesVsJudge) setGateRulesVsJudge(data.rulesVsJudge);
+      if (data.antiSaturation) setGateAntiSaturation(data.antiSaturation);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleRunReleaseGateCheck = async () => {
+    setEvaluatingGate(true);
+    try {
+      let cand = Number(gateCandidateScore);
+      let base = Number(gateBaselineScore);
+
+      let candidateCategoryScores: Record<string, number> | undefined;
+      let baselineCategoryScores: Record<string, number> | undefined;
+
+      if (gateSimulateRegression) {
+        cand = Number((base - 3.5).toFixed(2));
+      }
+
+      if (gateSimulateCategoryRegression) {
+        baselineCategoryScores = { "Safety & Escalation": 99.0, "Citations": 98.0 };
+        candidateCategoryScores = { "Safety & Escalation": 92.0, "Citations": 98.0 };
+      }
+
+      const res = await fetch("/api/evals/release-gate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entityType: gateEntityType,
+          entityName: gateEntityName,
+          candidateScore: cand,
+          baselineScore: base,
+          candidateCategoryScores,
+          baselineCategoryScores,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.gate) {
+        setGateResult(data.gate);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setEvaluatingGate(false);
+    }
+  };
 
   const fetchReviewerNotes = async () => {
     try {
@@ -591,7 +715,31 @@ export default function EvalLabPage() {
             }`}
           >
             <Zap className="h-4 w-4" />
-            <span>3-Tier Router &amp; Release Gate</span>
+            <span>3-Tier Router (Task 4.3)</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("release-gate")}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+              activeTab === "release-gate"
+                ? "border-indigo-500 text-indigo-400 font-semibold"
+                : "border-transparent text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            <Lock className="h-4 w-4" />
+            <span>Release Gate (Task 4.5)</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("feedback-tests")}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+              activeTab === "feedback-tests"
+                ? "border-indigo-500 text-indigo-400 font-semibold"
+                : "border-transparent text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            <MessageSquarePlus className="h-4 w-4" />
+            <span>Real Feedback Tests (Task 4.4)</span>
           </button>
 
           <button
@@ -2540,6 +2688,460 @@ export default function EvalLabPage() {
                     )}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ================= TAB: RELEASE GATE ENFORCER (Task 4.5) ================= */}
+        {activeTab === "release-gate" && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            {/* Header Banner */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <Lock className="h-5 w-5 text-indigo-400" />
+                  <span>Release Gate Blocking Enforcer (Task 4.5)</span>
+                </h3>
+                <p className="text-xs text-gray-400 mt-1 max-w-2xl leading-relaxed">
+                  Hard automated rule: A new prompt, role, skill or model cannot go live if any score falls below the last version. This strictly blocks regressions across all settings and code updates.
+                </p>
+              </div>
+
+              {gateResult && (
+                <div className={`px-4 py-2 rounded-xl border text-xs font-mono font-bold flex items-center gap-2 shadow-sm ${
+                  gateResult.allowed
+                    ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/40"
+                    : "bg-rose-950/60 text-rose-300 border-rose-500/40 animate-pulse"
+                }`}>
+                  {gateResult.allowed ? (
+                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                  ) : (
+                    <ShieldAlert className="h-4 w-4 text-rose-400" />
+                  )}
+                  <span>Status: {gateResult.status} ({gateResult.allowed ? "Eligible for Release" : "DEPLOYMENT BLOCKED"})</span>
+                </div>
+              )}
+            </div>
+
+            {/* Active Gate Scorecard */}
+            {gateResult && (
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs font-mono">
+                <div className="rounded-xl border border-gray-800 bg-[#071329] p-4">
+                  <span className="text-gray-400 block">Target Entity</span>
+                  <div className="text-base font-bold text-white mt-1 capitalize">
+                    {gateResult.entityType}: {gateResult.entityName}
+                  </div>
+                  <span className="text-[10px] text-gray-500 mt-1 block">Release candidate</span>
+                </div>
+
+                <div className="rounded-xl border border-gray-800 bg-[#071329] p-4">
+                  <span className="text-gray-400 block">Candidate Score</span>
+                  <div className={`text-xl font-bold mt-1 ${
+                    gateResult.candidateScore >= gateResult.baselineScore ? "text-emerald-400" : "text-rose-400"
+                  }`}>
+                    {gateResult.candidateScore}%
+                  </div>
+                  <span className="text-[10px] text-gray-500 mt-1 block">Benchmark pass rate</span>
+                </div>
+
+                <div className="rounded-xl border border-gray-800 bg-[#071329] p-4">
+                  <span className="text-gray-400 block">Active Baseline Score</span>
+                  <div className="text-xl font-bold text-gray-300 mt-1">
+                    {gateResult.baselineScore}%
+                  </div>
+                  <span className="text-[10px] text-gray-500 mt-1 block">Current production baseline</span>
+                </div>
+
+                <div className="rounded-xl border border-gray-800 bg-[#071329] p-4">
+                  <span className="text-gray-400 block">Quality Delta</span>
+                  <div className={`text-xl font-bold mt-1 ${
+                    gateResult.scoreDelta >= 0 ? "text-emerald-400" : "text-rose-400"
+                  }`}>
+                    {gateResult.scoreDelta >= 0 ? `+${gateResult.scoreDelta}%` : `${gateResult.scoreDelta}%`}
+                  </div>
+                  <span className="text-[10px] text-gray-500 mt-1 block">
+                    {gateResult.allowed ? "Zero regression" : "Regression detected!"}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Regression Warning Callout if Blocked */}
+            {gateResult && !gateResult.allowed && (
+              <div className="rounded-xl border border-rose-500/50 bg-rose-950/20 p-4 text-xs font-mono text-rose-300 space-y-1">
+                <div className="flex items-center gap-2 font-bold text-rose-400">
+                  <ShieldAlert className="h-4 w-4" />
+                  <span>REGRESSION DETECTED — RELEASE GATE HAS BLOCKED DEPLOYMENT</span>
+                </div>
+                <p className="text-gray-300 leading-relaxed font-sans">{gateResult.reason}</p>
+                {gateResult.regressedCategories && (
+                  <div className="pt-2 text-[11px] text-rose-300">
+                    <strong>Regressed Dimensions:</strong>
+                    <ul className="list-disc list-inside mt-1 space-y-0.5">
+                      {gateResult.regressedCategories.map((c: string, idx: number) => (
+                        <li key={idx}>{c}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Interactive Release Gate Simulator */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <Sliders className="h-5 w-5 text-indigo-400" />
+                  <h3 className="text-sm font-semibold text-white">Live Release Gate Simulator</h3>
+                </div>
+                <span className="text-xs text-gray-400 font-mono">Test Prompt, Role, Skill &amp; Model Gate Blocking</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
+                <div>
+                  <label className="block text-gray-400 mb-1 font-medium">Entity Type:</label>
+                  <select
+                    value={gateEntityType}
+                    onChange={(e: any) => setGateEntityType(e.target.value)}
+                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
+                  >
+                    <option value="prompt">Prompt (Settings Prompts)</option>
+                    <option value="role">Role (Settings Agent Roles)</option>
+                    <option value="skill">Skill (Knowledge Brain Skills)</option>
+                    <option value="model">Model per Step (Settings Routing)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-gray-400 mb-1 font-medium">Entity Name:</label>
+                  <input
+                    type="text"
+                    value={gateEntityName}
+                    onChange={(e) => setGateEntityName(e.target.value)}
+                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-white focus:outline-none focus:border-indigo-500 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-400 mb-1 font-medium">Candidate Score (%):</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={gateCandidateScore}
+                    onChange={(e) => setGateCandidateScore(Number(e.target.value))}
+                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-white focus:outline-none focus:border-indigo-500 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-400 mb-1 font-medium">Baseline Score (%):</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={gateBaselineScore}
+                    onChange={(e) => setGateBaselineScore(Number(e.target.value))}
+                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-white focus:outline-none focus:border-indigo-500 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4 pt-1 text-xs text-gray-300">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={gateSimulateRegression}
+                    onChange={(e) => {
+                      setGateSimulateRegression(e.target.checked);
+                      if (e.target.checked) setGateSimulateCategoryRegression(false);
+                    }}
+                    className="rounded border-gray-700 text-rose-600 focus:ring-0"
+                  />
+                  <span>Simulate Overall Score Regression (Candidate drops below baseline)</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={gateSimulateCategoryRegression}
+                    onChange={(e) => {
+                      setGateSimulateCategoryRegression(e.target.checked);
+                      if (e.target.checked) setGateSimulateRegression(false);
+                    }}
+                    className="rounded border-gray-700 text-amber-600 focus:ring-0"
+                  />
+                  <span>Simulate Subcategory Regression (Safety drops from 99% to 92%)</span>
+                </label>
+
+                <button
+                  onClick={handleRunReleaseGateCheck}
+                  disabled={evaluatingGate}
+                  className="ml-auto rounded-lg bg-indigo-600 hover:bg-indigo-500 px-5 py-2 text-xs font-semibold text-white transition disabled:opacity-40 shadow-sm"
+                >
+                  {evaluatingGate ? "Evaluating Gate..." : "Evaluate Release Gate"}
+                </button>
+              </div>
+            </div>
+
+            {/* Three Architectural Decisions (You Decide - Task 4.5) */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-gray-800 pb-2">
+                <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Scale className="h-4 w-4 text-cyan-400" />
+                  <span>The Three Architectural Decisions (Task 4.5 Governance)</span>
+                </h4>
+                <span className="text-xs text-gray-400 font-mono">Explicit Production Policies</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                {/* Decision 1 */}
+                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-3">
+                  <div className="flex items-center gap-2 text-cyan-300 font-bold text-xs uppercase tracking-wider">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500/20 text-[10px] font-bold">1</span>
+                    <span>How a &quot;Good&quot; Answer is Scored</span>
+                  </div>
+                  <p className="text-gray-300 leading-relaxed text-[11px]">
+                    Every task uses an explicit ground-truth formula rather than feeling:
+                  </p>
+                  <ul className="space-y-1.5 text-gray-400 text-[11px]">
+                    <li><strong className="text-white">tag_job:</strong> Exact category + JSON match (95% pass).</li>
+                    <li><strong className="text-white">find_facts:</strong> 40% citations + 40% facts + 20% no hallucination.</li>
+                    <li><strong className="text-white">write_reply:</strong> Grounding + [1] citations + persona + safety escalation.</li>
+                    <li><strong className="text-white">read_screenshot:</strong> 50% OCR token recall + 50% vision root cause.</li>
+                    <li><strong className="text-white">improve_skill:</strong> Master Judge critique incorporation &amp; non-regression.</li>
+                  </ul>
+                </div>
+
+                {/* Decision 2 */}
+                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-3">
+                  <div className="flex items-center gap-2 text-indigo-300 font-bold text-xs uppercase tracking-wider">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500/20 text-[10px] font-bold">2</span>
+                    <span>Rules vs. AI Judge Boundary</span>
+                  </div>
+                  <p className="text-gray-300 leading-relaxed text-[11px]">
+                    Deterministic separation between structural safety and semantic reasoning:
+                  </p>
+                  <div className="space-y-2 text-[11px]">
+                    <div className="rounded bg-indigo-950/40 p-2 border border-indigo-500/20">
+                      <strong className="text-indigo-300 block">Deterministic Rules ($0, &lt;1ms):</strong>
+                      <span className="text-gray-400">JSON schema, regex citations <code className="text-indigo-200 font-mono">\[\d+\]</code>, PII scrub, prompt injection shield (10 trick scenarios).</span>
+                    </div>
+                    <div className="rounded bg-purple-950/40 p-2 border border-purple-500/20">
+                      <strong className="text-purple-300 block">AI Judge (Claude Opus 5.5):</strong>
+                      <span className="text-gray-400">Semantic equivalence, consultative tone adherence, complex troubleshooting depth, and rubric grading with explanatory line.</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Decision 3 */}
+                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-3">
+                  <div className="flex items-center gap-2 text-emerald-300 font-bold text-xs uppercase tracking-wider">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 text-[10px] font-bold">3</span>
+                    <span>Anti-Saturation (Test Aging)</span>
+                  </div>
+                  <p className="text-gray-300 leading-relaxed text-[11px]">
+                    Stops benchmark from becoming too easy over time:
+                  </p>
+                  <ul className="space-y-1.5 text-gray-400 text-[11px]">
+                    <li><strong className="text-white">Live Feedback Ingestion (Task 4.4):</strong> Every thumbs-down critique automatically converts into a hard regression test.</li>
+                    <li><strong className="text-white">Adversarial Hard Traps:</strong> 10 prompt injections, typo traps, and subtle boundary edge-cases.</li>
+                    <li><strong className="text-white">Dynamic Difficulty Weighting:</strong> Tests models consistently pass are weighted 1.0x; newly ingested real failure cases carry 1.5x–2.0x weight.</li>
+                    <li><strong className="text-white">Immutable Versions:</strong> Frozen Git datasets prevent cherry-picking questions.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ================= TAB: REAL FEEDBACK BECOMES NEW TESTS (Task 4.4) ================= */}
+        {activeTab === "feedback-tests" && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            {/* Header Banner */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <MessageSquarePlus className="h-5 w-5 text-indigo-400" />
+                  <span>Real Feedback Becomes New Tests (Task 4.4)</span>
+                </h3>
+                <p className="text-xs text-gray-400 mt-1 max-w-2xl leading-relaxed">
+                  Every thumbs up or down with a reason on AI answers in the chat automatically converts into durable benchmark test cases, continuously hardening the Eval Lab against live customer failure modes.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="rounded-lg border border-indigo-500/20 bg-indigo-950/20 px-3 py-1.5 text-xs font-mono text-indigo-300 flex items-center gap-1.5">
+                  <Sparkles className="h-4 w-4 text-indigo-400" />
+                  <span>{feedbackTests.length} Total Feedback Tests</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Metrics Overview */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs font-mono">
+              <div className="rounded-xl border border-gray-800 bg-[#071329] p-4">
+                <span className="text-gray-400 block">Total Feedback Tests</span>
+                <div className="text-2xl font-bold text-white mt-1">{feedbackTests.length}</div>
+                <span className="text-[10px] text-gray-500 mt-1 block">Live benchmark cases</span>
+              </div>
+
+              <div className="rounded-xl border border-rose-500/30 bg-rose-950/20 p-4">
+                <span className="text-rose-300 block">Thumbs Down Regressions</span>
+                <div className="text-2xl font-bold text-rose-400 mt-1">
+                  {feedbackTests.filter((t) => t.feedbackType === "thumbs_down").length}
+                </div>
+                <span className="text-[10px] text-rose-400/80 mt-1 block">Weighted 1.5x - 2.0x in gate</span>
+              </div>
+
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4">
+                <span className="text-emerald-300 block">Thumbs Up Endorsements</span>
+                <div className="text-2xl font-bold text-emerald-400 mt-1">
+                  {feedbackTests.filter((t) => t.feedbackType === "thumbs_up").length}
+                </div>
+                <span className="text-[10px] text-emerald-400/80 mt-1 block">Verified positive examples</span>
+              </div>
+
+              <div className="rounded-xl border border-gray-800 bg-[#071329] p-4">
+                <span className="text-gray-400 block">Anti-Saturation Ratio</span>
+                <div className="text-2xl font-bold text-cyan-400 mt-1">
+                  {((feedbackTests.filter((t) => t.feedbackType === "thumbs_down").length / Math.max(1, feedbackTests.length)) * 100).toFixed(0)}%
+                </div>
+                <span className="text-[10px] text-gray-500 mt-1 block">Live failure rate capture</span>
+              </div>
+            </div>
+
+            {/* Live Feedback Test Cases Table */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+                <h4 className="text-sm font-semibold text-white">Active Tests Derived from Real Customer Feedback</h4>
+                <button
+                  onClick={fetchFeedbackTests}
+                  disabled={loadingFeedbackTests}
+                  className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-mono"
+                >
+                  <RotateCw className={`h-3.5 w-3.5 ${loadingFeedbackTests ? "animate-spin" : ""}`} />
+                  <span>Refresh Tests</span>
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {feedbackTests.map((t: any) => (
+                  <div
+                    key={t.id}
+                    className="p-4 rounded-xl border border-gray-800 bg-[#071329] space-y-2 hover:border-gray-700 transition"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-800/60 pb-2">
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
+                          t.feedbackType === "thumbs_down"
+                            ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                            : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                        }`}>
+                          {t.feedbackType === "thumbs_down" ? "👎 Thumbs Down (Regression Test)" : "👍 Thumbs Up (Verified Positive)"}
+                        </span>
+                        <span className="text-xs font-mono text-gray-400 font-bold">{t.id}</span>
+                        <span className="text-[11px] text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+                          {t.category}
+                        </span>
+                      </div>
+
+                      <div className="text-[11px] font-mono text-gray-500 flex items-center gap-2">
+                        <span>Weight: {t.weight || 1.0}x</span>
+                        <span>&bull;</span>
+                        <span>{new Date(t.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+
+                    <div className="text-xs space-y-1">
+                      <div className="text-white font-medium">
+                        <strong className="text-gray-400 font-normal">Customer Question: </strong>
+                        &ldquo;{t.question}&rdquo;
+                      </div>
+
+                      <div className="rounded bg-gray-950 p-2.5 text-xs text-indigo-200 border border-gray-800 space-y-1 font-sans">
+                        <strong className="text-[11px] uppercase tracking-wider text-indigo-400 font-mono block">
+                          Expected Answer (Incorporating Human Feedback):
+                        </strong>
+                        <p className="leading-relaxed">{t.expectedAnswer}</p>
+                      </div>
+
+                      <div className="rounded bg-amber-950/20 p-2 text-xs text-amber-200/90 border border-amber-500/20 font-sans">
+                        <strong className="text-[11px] uppercase tracking-wider text-amber-400 font-mono block">
+                          Human Feedback Critique / Reason:
+                        </strong>
+                        <p className="leading-relaxed">&ldquo;{t.feedbackReason}&rdquo;</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Interactive Feedback-to-Test Generator Sandbox */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 space-y-4">
+              <h4 className="text-sm font-semibold text-white">Live Feedback-to-Test Generator Sandbox</h4>
+              <p className="text-xs text-gray-400">
+                Simulate a real feedback critique from a customer chat interaction to watch it immediately synthesize into a durable benchmark test case.
+              </p>
+
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="block text-gray-400 mb-1 font-medium">Question Asked in Chat:</label>
+                  <input
+                    type="text"
+                    value={newFeedbackQuestion}
+                    onChange={(e) => setNewFeedbackQuestion(e.target.value)}
+                    placeholder="e.g., How do I renew my expired Let's Encrypt certificate behind Cloudflare?"
+                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-400 mb-1 font-medium">Original Flawed AI Answer:</label>
+                  <input
+                    type="text"
+                    value={newFeedbackAnswer}
+                    onChange={(e) => setNewFeedbackAnswer(e.target.value)}
+                    placeholder="e.g., Just turn off Cloudflare SSL and reboot your server."
+                    className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="w-full sm:w-48">
+                    <label className="block text-gray-400 mb-1 font-medium">Feedback Type:</label>
+                    <select
+                      value={newFeedbackType}
+                      onChange={(e: any) => setNewFeedbackType(e.target.value)}
+                      className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
+                    >
+                      <option value="thumbs_down">👎 Thumbs Down (Error / Weak)</option>
+                      <option value="thumbs_up">👍 Thumbs Up (Accurate / Good)</option>
+                    </select>
+                  </div>
+
+                  <div className="flex-1">
+                    <label className="block text-gray-400 mb-1 font-medium">Why (Feedback Critique &amp; Durable Rule):</label>
+                    <input
+                      type="text"
+                      value={newFeedbackReason}
+                      onChange={(e) => setNewFeedbackReason(e.target.value)}
+                      placeholder="e.g., Disabling SSL exposes plain traffic. The correct protocol is Cloudflare SSL Full (Strict) with ACME HTTP-01 challenge bypass."
+                      className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    onClick={handleCreateSyntheticFeedbackTest}
+                    disabled={submittingLiveFeedback || !newFeedbackQuestion.trim() || !newFeedbackReason.trim()}
+                    className="rounded-lg bg-indigo-600 hover:bg-indigo-500 px-5 py-2 text-xs font-semibold text-white transition disabled:opacity-40 shadow-sm flex items-center gap-2"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    <span>{submittingLiveFeedback ? "Converting to Test Case..." : "Generate Benchmark Test from Feedback"}</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>

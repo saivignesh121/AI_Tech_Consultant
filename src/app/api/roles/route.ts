@@ -73,6 +73,25 @@ export async function POST(req: NextRequest) {
 
     const isUuid = typeof id === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
+    // Task 4.5: Release Gate Enforcer — Roles cannot go live if score falls below last version
+    if (body.candidateScore !== undefined && body.baselineScore !== undefined) {
+      const { evaluateRoleReleaseGate } = await import("@/services/eval/releaseGate");
+      const gate = evaluateRoleReleaseGate(
+        name,
+        Number(body.candidateScore),
+        Number(body.baselineScore)
+      );
+      if (!gate.allowed) {
+        return NextResponse.json(
+          {
+            error: `Blocked by Release Gate: role score (${gate.candidateScore}%) fell below baseline (${gate.baselineScore}%). Cannot go live.`,
+            releaseGate: gate,
+          },
+          { status: 422 }
+        );
+      }
+    }
+
     if (id && isUuid) {
       // Update existing role
       const existing = await db

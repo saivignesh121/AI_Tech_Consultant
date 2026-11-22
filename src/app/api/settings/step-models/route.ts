@@ -99,6 +99,25 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Task 4.5: Release Gate Enforcer — Model routing cannot go live if score falls below last version
+    if (body.candidateScore !== undefined && body.baselineScore !== undefined) {
+      const { evaluateModelReleaseGate } = await import("@/services/eval/releaseGate");
+      const gate = evaluateModelReleaseGate(
+        "step_models_configuration",
+        Number(body.candidateScore),
+        Number(body.baselineScore)
+      );
+      if (!gate.allowed) {
+        return NextResponse.json(
+          {
+            error: `Blocked by Release Gate: step models benchmark score (${gate.candidateScore}%) fell below baseline (${gate.baselineScore}%). Cannot go live.`,
+            releaseGate: gate,
+          },
+          { status: 422 }
+        );
+      }
+    }
+
     // Persist to database
     await db
       .update(businesses)

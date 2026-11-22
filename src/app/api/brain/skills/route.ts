@@ -107,6 +107,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Task 4.5: Release Gate Enforcer — Skills cannot go live if score falls below last version
+    if (body.candidateScore !== undefined && body.baselineScore !== undefined) {
+      const { evaluateSkillReleaseGate } = await import("@/services/eval/releaseGate");
+      const gate = evaluateSkillReleaseGate(
+        name,
+        Number(body.candidateScore),
+        Number(body.baselineScore)
+      );
+      if (!gate.allowed) {
+        return NextResponse.json(
+          {
+            error: `Blocked by Release Gate: skill score (${gate.candidateScore}%) fell below baseline (${gate.baselineScore}%). Cannot go live.`,
+            releaseGate: gate,
+          },
+          { status: 422 }
+        );
+      }
+    }
+
     // If existing skill ID provided, save as a new version
     if (id) {
       const { skill, newVersion } = saveSkillVersion(tenant.businessId, id, {
