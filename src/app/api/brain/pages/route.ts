@@ -118,6 +118,8 @@ export async function GET(req: NextRequest) {
             heading: c.heading,
             content: c.content,
             chunkIndex: c.chunkIndex,
+            imageUrl: c.imageUrl,
+            imageCaption: c.imageCaption,
           })),
         };
       })

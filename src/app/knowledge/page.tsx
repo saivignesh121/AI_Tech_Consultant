@@ -29,7 +29,36 @@ import {
   Send,
   HelpCircle,
   Tag,
+  Image as ImageIcon,
+  Pause,
+  Play,
+  RefreshCw,
 } from "lucide-react";
+
+interface LiveCrawlProgress {
+  jobId: string;
+  status: "idle" | "running" | "paused" | "completed" | "interrupted" | "failed";
+  totalUrls: number;
+  processedUrls: number;
+  failedUrls: number;
+  skippedUrls: number;
+  progressPercent: number;
+  currentUrl: string | null;
+  imagesDiscovered: number;
+  chunksCreated: number;
+  elapsedSeconds: number;
+  estimatedSecondsLeft: number;
+  formattedTimeLeft: string;
+  recentActivity: Array<{
+    timestamp: string;
+    url: string;
+    status: "ok" | "skipped" | "retry" | "failed";
+    title?: string;
+    chunksCount?: number;
+    imagesCount?: number;
+    message?: string;
+  }>;
+}
 
 interface SitemapSource {
   id: string;
@@ -52,7 +81,14 @@ interface KnowledgePageItem {
   consecutiveFailures: number;
   lastCheckedAt: string;
   chunksCount: number;
-  chunks?: Array<{ id: string; heading: string; content: string; chunkIndex: number }>;
+  chunks?: Array<{
+    id: string;
+    heading: string;
+    content: string;
+    chunkIndex: number;
+    imageUrl?: string;
+    imageCaption?: string;
+  }>;
 }
 
 interface HybridSearchResult {
@@ -154,6 +190,10 @@ export default function KnowledgeBrainPage() {
   const [ingesting, setIngesting] = useState(false);
   const [ingestSuccessMsg, setIngestSuccessMsg] = useState("");
 
+  // --- Live Polite Crawl Progress State (Task 2.3) ---
+  const [crawlProgress, setCrawlProgress] = useState<LiveCrawlProgress | null>(null);
+  const [crawling, setCrawling] = useState(false);
+
   // --- Standalone Pages Tab State (Knowledge Type 2) ---
   const [pages, setPages] = useState<KnowledgePageItem[]>([]);
   const [selectedPage, setSelectedPage] = useState<KnowledgePageItem | null>(null);
@@ -210,8 +250,88 @@ export default function KnowledgeBrainPage() {
     fetchSkills();
     fetchEmailThreads();
     fetchHealth();
+    fetchCrawlProgress();
     executeSearch("How do I configure custom CNAME subdomains?");
+
+    const interval = setInterval(() => {
+      fetchCrawlProgress();
+    }, 3000);
+    return () => clearInterval(interval);
   }, []);
+
+  const fetchCrawlProgress = async () => {
+    try {
+      const res = await fetch("/api/brain/crawl");
+      const data = await res.json();
+      if (data.progress) {
+        setCrawlProgress(data.progress);
+        setCrawling(data.progress.status === "running");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleTriggerCrawl = async () => {
+    setCrawling(true);
+    try {
+      const res = await fetch("/api/brain/crawl", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "start" }),
+      });
+      const data = await res.json();
+      if (data.progress) setCrawlProgress(data.progress);
+      fetchPages();
+      fetchSitemaps();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handlePauseCrawl = async () => {
+    try {
+      const res = await fetch("/api/brain/crawl", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "pause" }),
+      });
+      const data = await res.json();
+      if (data.progress) setCrawlProgress(data.progress);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleResumeCrawl = async () => {
+    try {
+      const res = await fetch("/api/brain/crawl", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "resume" }),
+      });
+      const data = await res.json();
+      if (data.progress) setCrawlProgress(data.progress);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleSimulateBatchStep = async () => {
+    try {
+      const res = await fetch("/api/brain/crawl", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "step" }),
+      });
+      const data = await res.json();
+      if (data.progress) setCrawlProgress(data.progress);
+      fetchPages();
+      fetchSitemaps();
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const fetchSitemaps = async () => {
     setLoadingSources(true);
@@ -290,6 +410,7 @@ export default function KnowledgeBrainPage() {
         setIngestSuccessMsg(data.message || "Sitemaps confirmed and scheduled for polite crawling!");
         setPreviewSummary(null);
         fetchSitemaps();
+        await handleTriggerCrawl();
         setTimeout(() => setIngestSuccessMsg(""), 6000);
       }
     } catch (e) {
@@ -991,6 +1112,165 @@ export default function KnowledgeBrainPage() {
               )}
             </div>
 
+            {/* Live Polite Crawl Monitor & Image Understanding (Task 2.3) */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-gray-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-indigo-400" />
+                  <div>
+                    <h3 className="text-sm font-semibold text-white">Live Polite Ingestion Monitor (Task 2.3)</h3>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      Batching: 5 pages/batch &bull; Polite rate: 450 pages/hr with 8s pause &bull; Resumes halfway if interrupted.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`rounded px-2.5 py-1 text-xs font-mono font-bold uppercase flex items-center gap-1.5 border ${
+                      crawlProgress?.status === "running"
+                        ? "bg-emerald-950/40 text-emerald-300 border-emerald-500/40 animate-pulse"
+                        : crawlProgress?.status === "paused"
+                        ? "bg-amber-950/40 text-amber-300 border-amber-500/40"
+                        : crawlProgress?.status === "completed"
+                        ? "bg-indigo-950/40 text-indigo-300 border-indigo-500/40"
+                        : "bg-gray-900 text-gray-400 border-gray-800"
+                    }`}
+                  >
+                    <span className="h-2 w-2 rounded-full bg-current"></span>
+                    <span>Status: {crawlProgress?.status || "idle"}</span>
+                  </span>
+
+                  <button
+                    onClick={crawlProgress?.status === "running" ? handlePauseCrawl : handleResumeCrawl}
+                    className="flex items-center gap-1 rounded bg-gray-800 hover:bg-gray-700 px-2.5 py-1 text-xs text-gray-200 transition font-mono border border-gray-700"
+                  >
+                    {crawlProgress?.status === "running" ? (
+                      <>
+                        <Pause className="h-3 w-3 text-amber-400" />
+                        <span>Pause</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="h-3 w-3 text-emerald-400" />
+                        <span>Resume</span>
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={handleSimulateBatchStep}
+                    className="flex items-center gap-1 rounded bg-indigo-950/60 border border-indigo-500/30 hover:bg-indigo-900/60 px-2.5 py-1 text-xs text-indigo-300 transition font-mono"
+                  >
+                    <RefreshCw className="h-3 w-3" />
+                    <span>Next Batch Step</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Progress Bar & KPI Metrics */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div className="bg-gray-950/80 p-3 rounded-lg border border-gray-800">
+                  <span className="text-gray-400">Pages Processed:</span>
+                  <div className="text-xl font-bold text-white mt-1 font-mono">
+                    {crawlProgress?.processedUrls || 0} / {crawlProgress?.totalUrls || 0}
+                  </div>
+                  <span className="text-[10px] text-gray-500 mt-0.5 block">
+                    {crawlProgress?.skippedUrls || 0} skipped (already read)
+                  </span>
+                </div>
+
+                <div className="bg-gray-950/80 p-3 rounded-lg border border-gray-800">
+                  <span className="text-gray-400">Time Left (Polite 450/hr):</span>
+                  <div className="text-xl font-bold text-emerald-400 mt-1 font-mono">
+                    {crawlProgress?.formattedTimeLeft || "0 mins left"}
+                  </div>
+                  <span className="text-[10px] text-gray-500 mt-0.5 block">
+                    {crawlProgress?.elapsedSeconds || 0}s elapsed
+                  </span>
+                </div>
+
+                <div className="bg-gray-950/80 p-3 rounded-lg border border-gray-800">
+                  <span className="text-gray-400">Multimodal Screenshots:</span>
+                  <div className="text-xl font-bold text-purple-400 mt-1 font-mono">
+                    {crawlProgress?.imagesDiscovered || 0}
+                  </div>
+                  <span className="text-[10px] text-purple-300 mt-0.5 block">
+                    Visual descriptions grounded
+                  </span>
+                </div>
+
+                <div className="bg-gray-950/80 p-3 rounded-lg border border-gray-800">
+                  <span className="text-gray-400">Semantic Chunks:</span>
+                  <div className="text-xl font-bold text-sky-400 mt-1 font-mono">
+                    {crawlProgress?.chunksCreated || 0}
+                  </div>
+                  <span className="text-[10px] text-gray-500 mt-0.5 block">
+                    With attached image metadata
+                  </span>
+                </div>
+              </div>
+
+              {/* Progress Visual Bar */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs font-mono text-gray-400">
+                  <span>Crawl Completion</span>
+                  <span>{crawlProgress?.progressPercent || 0}%</span>
+                </div>
+                <div className="w-full bg-gray-900 rounded-full h-2.5 overflow-hidden border border-gray-800">
+                  <div
+                    className="bg-indigo-500 h-2.5 rounded-full transition-all duration-500"
+                    style={{ width: `${crawlProgress?.progressPercent || 0}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              {/* Current Page Indicator */}
+              {crawlProgress?.currentUrl && (
+                <div className="flex items-center gap-2 text-xs font-mono bg-gray-950 p-2.5 rounded-lg border border-gray-800 text-gray-300">
+                  <div className="h-2 w-2 rounded-full bg-indigo-400 animate-ping flex-shrink-0"></div>
+                  <span className="text-gray-500">Currently Reading:</span>
+                  <span className="text-indigo-300 truncate">{crawlProgress.currentUrl}</span>
+                </div>
+              )}
+
+              {/* Multimodal Screenshot Activity Stream */}
+              <div className="space-y-1.5 pt-1">
+                <span className="text-xs font-semibold text-gray-400 block">Recent Ingestion &amp; Screenshot Activity:</span>
+                <div className="space-y-1.5 max-h-40 overflow-y-auto text-xs font-mono">
+                  {crawlProgress?.recentActivity && crawlProgress.recentActivity.length > 0 ? (
+                    crawlProgress.recentActivity.slice(0, 5).map((act, i) => (
+                      <div
+                        key={i}
+                        className="bg-gray-950 border border-gray-800 p-2 rounded flex items-center justify-between gap-2"
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <span className="text-gray-500 text-[10px]">{act.timestamp}</span>
+                          <span
+                            className={`px-1.5 py-0.2 rounded text-[9px] uppercase font-bold ${
+                              act.status === "ok"
+                                ? "bg-emerald-950 text-emerald-400 border border-emerald-500/20"
+                                : act.status === "skipped"
+                                ? "bg-gray-900 text-gray-400 border border-gray-800"
+                                : "bg-red-950 text-red-400 border border-red-500/20"
+                            }`}
+                          >
+                            {act.status}
+                          </span>
+                          <span className="text-white truncate">{act.title || act.url}</span>
+                        </div>
+                        <span className="text-purple-300 text-[10px] flex-shrink-0">{act.message}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-gray-500 text-xs italic p-2 bg-gray-950 rounded border border-gray-800">
+                      Crawl monitor idle. Confirm sitemaps above or click &quot;Next Batch Step&quot; to initiate live polite reading.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* Ingested Sources Table */}
             <div className="rounded-xl border border-gray-800 bg-[#0E1322] overflow-hidden">
               <div className="p-4 border-b border-gray-800 flex items-center justify-between">
@@ -1184,6 +1464,21 @@ export default function KnowledgeBrainPage() {
                             <span>Chunk #{chunk.chunkIndex + 1} &bull; 1536-dim vector</span>
                           </div>
                           <p className="text-gray-300 font-sans leading-relaxed">{chunk.content}</p>
+
+                          {chunk.imageUrl && (
+                            <div className="mt-2.5 rounded-lg border border-purple-500/30 bg-purple-950/20 p-2.5 space-y-1.5">
+                              <div className="flex items-center gap-1.5 text-purple-300 font-semibold text-[10px] uppercase font-mono">
+                                <ImageIcon className="h-3.5 w-3.5 text-purple-400" />
+                                <span>Multimodal Screenshot Understood &amp; Grounded:</span>
+                              </div>
+                              <div className="text-[11px] text-gray-200 italic font-sans bg-gray-900/80 p-2 rounded border border-gray-800">
+                                {chunk.imageCaption || "Visual screenshot part of the answer."}
+                              </div>
+                              <div className="text-[10px] text-gray-500 font-mono truncate">
+                                Image URL: {chunk.imageUrl}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
