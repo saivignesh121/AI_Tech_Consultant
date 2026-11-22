@@ -24,6 +24,8 @@ import {
   CheckCircle2,
   Lock,
   AlertTriangle,
+  Menu,
+  X,
 } from "lucide-react";
 
 export type AppUserRole = "owner" | "admin" | "team" | "expert" | "member" | "customer";
@@ -56,6 +58,7 @@ export default function AppShell({
   const [allTenants, setAllTenants] = useState<TenantContext[]>([]);
   const [tenantDropdownOpen, setTenantDropdownOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [localOnlyMode, setLocalOnlyMode] = useState(false);
   const [switching, setSwitching] = useState(false);
   const [switchingRole, setSwitchingRole] = useState(false);
@@ -90,6 +93,9 @@ export default function AppShell({
         if (typeof data.localOnlyMode === "boolean") setLocalOnlyMode(data.localOnlyMode);
       })
       .catch(console.error);
+
+    // Close mobile menu on route change
+    setMobileMenuOpen(false);
 
     // Click outside listener
     function handleClickOutside(event: MouseEvent) {
@@ -253,14 +259,13 @@ export default function AppShell({
     requiredRole = "Business Owner (owner) or Admin (admin)";
   }
 
-  return (
-    <div className="flex min-h-screen bg-[#F6F9FF] text-[#0B1B3A] selection:bg-[#2563EB] selection:text-white font-sans">
-      {/* Sidebar */}
-      <aside className="w-64 border-r border-[#DCE6F5] bg-white flex flex-col justify-between p-4 flex-shrink-0 shadow-sm">
-        <div>
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 px-2 py-3 mb-6 border-b border-[#DCE6F5] group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-tr from-[#0284C7] to-[#2563EB] text-white font-serif text-xl font-bold shadow-sm group-hover:scale-105 transition">
+  const sidebarContent = (
+    <div className="flex flex-col justify-between h-full">
+      <div>
+        {/* Logo */}
+        <div className="flex items-center justify-between px-2 py-3 mb-6 border-b border-[#DCE6F5]">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-[#0284C7] to-[#2563EB] text-white font-serif text-xl font-bold shadow-sm group-hover:scale-105 transition">
               α
             </div>
             <div>
@@ -270,151 +275,199 @@ export default function AppShell({
               <span className="text-[10px] font-mono text-[#2563EB] font-semibold">Enterprise Operations</span>
             </div>
           </Link>
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="md:hidden p-1.5 rounded-lg text-[#7B8AA6] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
+            aria-label="Close Navigation"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
 
-          {/* Active Workspace Selector in Sidebar */}
-          <div className="relative mb-6" ref={tenantMenuRef}>
-            <button
-              onClick={() => setTenantDropdownOpen(!tenantDropdownOpen)}
-              className="w-full text-left rounded-xl border border-[#DCE6F5] bg-white p-2.5 hover:border-[#BFDBFE] transition flex items-center justify-between shadow-sm"
-            >
-              <div>
-                <span className="text-[10px] uppercase font-semibold text-[#7B8AA6] tracking-wider flex items-center gap-1.5">
-                  <Building2 className="h-3 w-3 text-[#2563EB]" />
-                  Active Workspace
+        {/* Active Workspace Selector in Sidebar */}
+        <div className="relative mb-6" ref={tenantMenuRef}>
+          <button
+            onClick={() => setTenantDropdownOpen(!tenantDropdownOpen)}
+            className="w-full text-left rounded-xl border border-[#DCE6F5] bg-white p-2.5 hover:border-[#BFDBFE] transition flex items-center justify-between shadow-sm"
+          >
+            <div>
+              <span className="text-[10px] uppercase font-semibold text-[#7B8AA6] tracking-wider flex items-center gap-1.5">
+                <Building2 className="h-3 w-3 text-[#2563EB]" />
+                Active Workspace
+              </span>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-sm font-medium text-[#0B1B3A] truncate max-w-[130px]">
+                  {currentTenant.businessName}
                 </span>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-sm font-medium text-[#0B1B3A] truncate max-w-[130px]">
-                    {currentTenant.businessName}
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-semibold text-emerald-700 border border-emerald-200">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                   </span>
-                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-1.5 py-0.2 text-[9px] font-medium text-emerald-700 border border-emerald-200">
-                    Isolated
-                  </span>
-                </div>
+                  Isolated
+                </span>
               </div>
-              <ChevronDown className="h-4 w-4 text-[#7B8AA6]" />
-            </button>
+            </div>
+            <ChevronDown className="h-4 w-4 text-[#7B8AA6]" />
+          </button>
 
-            {/* Dropdown Menu */}
-            {tenantDropdownOpen && (
-              <div className="absolute left-0 right-0 top-full mt-2 rounded-xl border border-[#DCE6F5] bg-white p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
-                <div className="text-[10px] font-semibold text-[#2563EB] px-2 py-1 uppercase tracking-wider">
-                  Switch Tenant Workspace
-                </div>
-                {allTenants.map((t) => {
-                  const isActive = t.businessSlug === currentTenant.businessSlug;
-                  return (
-                    <button
-                      key={t.businessSlug}
-                      onClick={() => switchTenant(t.businessSlug)}
-                      disabled={switching}
-                      className={`w-full flex items-center justify-between px-2.5 py-2 text-xs rounded-lg transition ${
-                        isActive
-                          ? "bg-[#EEF4FF] text-[#2563EB] font-medium border border-[#DCE6F5]"
-                          : "text-[#4A5B78] hover:bg-[#F6F9FF]"
-                      }`}
-                    >
-                      <div className="text-left truncate mr-2">
-                        <div className="font-semibold text-[#0B1B3A] truncate">{t.businessName}</div>
-                        <div className="text-[10px] text-[#7B8AA6] font-mono truncate">{t.businessSlug}</div>
-                      </div>
-                      {isActive && <Check className="h-4 w-4 text-[#2563EB] shrink-0" />}
-                    </button>
-                  );
-                })}
-                <div className="border-t border-[#DCE6F5] my-1 pt-1 space-y-1">
-                  <Link
-                    href="/signin"
-                    onClick={() => setTenantDropdownOpen(false)}
-                    className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-[#2563EB] hover:bg-[#EEF4FF] rounded-lg transition"
-                  >
-                    <Building2 className="h-3.5 w-3.5" />
-                    <span>Workspace Picker / Sign In</span>
-                  </Link>
-                  <Link
-                    href="/signup"
-                    onClick={() => setTenantDropdownOpen(false)}
-                    className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-emerald-700 hover:bg-emerald-50 rounded-lg transition"
-                  >
-                    <PlusCircle className="h-3.5 w-3.5" />
-                    <span>Create New Workspace</span>
-                  </Link>
-                </div>
+          {/* Dropdown Menu */}
+          {tenantDropdownOpen && (
+            <div className="absolute left-0 right-0 top-full mt-2 rounded-xl border border-[#DCE6F5] bg-white p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
+              <div className="text-[10px] font-semibold text-[#2563EB] px-2 py-1 uppercase tracking-wider">
+                Switch Tenant Workspace
               </div>
-            )}
-          </div>
-
-          {/* Navigation Links */}
-          <nav className="space-y-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive =
-                item.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(item.href);
-
-              return (
+              {allTenants.map((t) => {
+                const isActive = t.businessSlug === currentTenant.businessSlug;
+                return (
+                  <button
+                    key={t.businessSlug}
+                    onClick={() => switchTenant(t.businessSlug)}
+                    disabled={switching}
+                    className={`w-full flex items-center justify-between px-2.5 py-2 text-xs rounded-lg transition ${
+                      isActive
+                        ? "bg-[#EEF4FF] text-[#2563EB] font-medium border border-[#DCE6F5]"
+                        : "text-[#4A5B78] hover:bg-[#F6F9FF]"
+                    }`}
+                  >
+                    <div className="text-left truncate mr-2">
+                      <div className="font-semibold text-[#0B1B3A] truncate">{t.businessName}</div>
+                      <div className="text-[10px] text-[#7B8AA6] font-mono truncate">{t.businessSlug}</div>
+                    </div>
+                    {isActive && <Check className="h-4 w-4 text-[#2563EB] shrink-0" />}
+                  </button>
+                );
+              })}
+              <div className="border-t border-[#DCE6F5] my-1 pt-1 space-y-1">
                 <Link
-                  key={item.label}
-                  href={item.href}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition ${
-                    isActive
-                      ? "bg-[#EEF5FD] text-[#1D4ED8] border-l-4 border-[#1D4ED8] shadow-xs font-bold"
-                      : "text-[#4A5B78] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
-                  }`}
+                  href="/signin"
+                  onClick={() => setTenantDropdownOpen(false)}
+                  className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-[#2563EB] hover:bg-[#EEF4FF] rounded-lg transition"
                 >
-                  <Icon className="h-4 w-4" />
-                  <span>{item.label}</span>
+                  <Building2 className="h-3.5 w-3.5" />
+                  <span>Workspace Picker / Sign In</span>
                 </Link>
-              );
-            })}
-          </nav>
+                <Link
+                  href="/signup"
+                  onClick={() => setTenantDropdownOpen(false)}
+                  className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-emerald-700 hover:bg-emerald-50 rounded-lg transition"
+                >
+                  <PlusCircle className="h-3.5 w-3.5" />
+                  <span>Create New Workspace</span>
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Local-Only Mode Pill */}
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 shadow-sm">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-[#0B1B3A] font-semibold flex items-center gap-1.5">
-              <Server className="h-3.5 w-3.5 text-emerald-600" />
-              Local-Only Mode
-            </span>
-            <button
-              onClick={toggleLocalMode}
-              className={`text-[10px] rounded px-2 py-0.5 font-mono font-medium transition ${
-                localOnlyMode
-                  ? "bg-emerald-600 text-white shadow-sm"
-                  : "bg-white text-gray-500 border border-gray-200 hover:bg-gray-50"
-              }`}
-            >
-              {localOnlyMode ? "ON" : "OFF"}
-            </button>
-          </div>
-          <p className="text-[11px] text-[#4A5B78] leading-relaxed">
-            {localOnlyMode
-              ? "Local Ollama active (localhost:11434). Cloud APIs bypassed."
-              : "Running 14-model cloud router. Toggle to use laptop Ollama."}
-          </p>
+        {/* Navigation Links */}
+        <nav className="space-y-1">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive =
+              item.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(item.href);
+
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition ${
+                  isActive
+                    ? "bg-[#EEF5FD] text-[#1D4ED8] border-l-4 border-[#1D4ED8] shadow-xs font-bold"
+                    : "text-[#4A5B78] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Local-Only Mode Pill */}
+      <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-3 shadow-sm mt-4">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-xs text-[#0B1B3A] font-semibold flex items-center gap-1.5">
+            <Server className="h-3.5 w-3.5 text-emerald-600" />
+            Local-Only Mode
+          </span>
+          <button
+            onClick={toggleLocalMode}
+            className={`text-[10px] rounded px-2 py-0.5 font-mono font-medium transition ${
+              localOnlyMode
+                ? "bg-emerald-600 text-white shadow-sm"
+                : "bg-white text-gray-500 border border-gray-200 hover:bg-gray-50"
+            }`}
+          >
+            {localOnlyMode ? "ON" : "OFF"}
+          </button>
         </div>
+        <p className="text-[11px] text-[#4A5B78] leading-relaxed">
+          {localOnlyMode
+            ? "Local Ollama active (localhost:11434). Cloud APIs bypassed."
+            : "Running 14-model cloud router. Toggle to use laptop Ollama."}
+        </p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex min-h-screen bg-[#F6F9FF] text-[#0B1B3A] selection:bg-[#2563EB] selection:text-white font-sans relative">
+      {/* Mobile Drawer Backdrop & Sidebar */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          <div
+            className="fixed inset-0 bg-[#0B1B3A]/40 backdrop-blur-xs transition-opacity animate-in fade-in"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <aside className="relative w-72 max-w-[85vw] bg-white border-r border-[#DCE6F5] flex flex-col justify-between p-4 shadow-2xl z-10 animate-in slide-in-from-left duration-200">
+            {sidebarContent}
+          </aside>
+        </div>
+      )}
+
+      {/* Desktop Fixed Sidebar */}
+      <aside className="hidden md:flex w-64 border-r border-[#DCE6F5] bg-white flex-col justify-between p-4 flex-shrink-0 shadow-sm sticky top-0 h-screen overflow-y-auto">
+        {sidebarContent}
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto relative">
+        {/* Ambient Fluid Background Mesh */}
+        <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10 opacity-30">
+          <div className="absolute -top-32 -left-32 w-80 h-80 rounded-full bg-gradient-to-tr from-[#1D4ED8]/20 to-[#06B6D4]/20 blur-3xl animate-fluid-blob" />
+          <div className="absolute top-1/2 -right-32 w-80 h-80 rounded-full bg-gradient-to-bl from-[#7E22CE]/20 to-[#2563EB]/20 blur-3xl animate-fluid-blob" style={{ animationDelay: "-4s" }} />
+        </div>
+
         {/* Top Brand Accent Bar (Proteus Royal Blue to Violet/Purple Gradient) */}
         <div className="h-1.5 w-full bg-gradient-to-r from-[#1D4ED8] via-[#4338CA] to-[#7E22CE] flex-shrink-0" />
 
         {/* Top Header */}
-        <header className="h-16 border-b border-[#DCE6F5] px-8 flex items-center justify-between bg-white/95 backdrop-blur-xl sticky top-0 z-40 shadow-sm">
+        <header className="h-16 border-b border-[#DCE6F5] px-4 sm:px-8 flex items-center justify-between bg-white/95 backdrop-blur-xl sticky top-0 z-40 shadow-sm">
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-[#7B8AA6] font-medium">{currentTenant.businessName}</span>
-            <span className="text-[#C3D3EA]">/</span>
+            {/* Mobile Hamburger Menu Toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="md:hidden p-2 rounded-xl text-[#1D4ED8] hover:bg-[#EEF4FF] transition mr-1"
+              title="Open Navigation Menu"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <span className="text-[#7B8AA6] font-medium hidden sm:inline">{currentTenant.businessName}</span>
+            <span className="text-[#C3D3EA] hidden sm:inline">/</span>
             {breadcrumbs.map((bc, idx) => (
               <React.Fragment key={bc.label}>
                 {idx > 0 && <span className="text-[#C3D3EA]">/</span>}
                 {bc.href ? (
-                  <Link href={bc.href} className="text-[#4A5B78] hover:text-[#2563EB] transition">
+                  <Link href={bc.href} className="text-[#4A5B78] hover:text-[#2563EB] transition truncate max-w-[120px] sm:max-w-none">
                     {bc.label}
                   </Link>
                 ) : (
-                  <span className="font-semibold text-[#0B1B3A]">{bc.label}</span>
+                  <span className="font-semibold text-[#0B1B3A] truncate max-w-[140px] sm:max-w-none">{bc.label}</span>
                 )}
               </React.Fragment>
             ))}
@@ -424,7 +477,11 @@ export default function AppShell({
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="hidden md:inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 border border-emerald-200">
+            <span className="hidden md:inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 border border-emerald-200 relative">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
               Prompt Injection Shield Active
             </span>
@@ -597,7 +654,7 @@ export default function AppShell({
         </header>
 
         {/* Content Body with RBAC Guard */}
-        <div className="p-8 max-w-7xl w-full">
+        <div className="p-4 sm:p-6 md:p-8 max-w-7xl w-full">
           {accessDeniedReason ? (
             <div className="max-w-2xl mx-auto my-12 p-8 sm:p-10 rounded-3xl border-2 border-[#D0E2FB] bg-white shadow-xl shadow-blue-500/5 text-center space-y-6 animate-in fade-in">
               <div className="w-16 h-16 rounded-2xl bg-[#FEF2F2] border border-[#FCA5A5] text-[#DC2626] flex items-center justify-center mx-auto shadow-xs">

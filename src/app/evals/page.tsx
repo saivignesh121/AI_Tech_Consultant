@@ -650,7 +650,7 @@ export default function EvalLabPage() {
         </div>
 
         {/* Tab Selection in Rounded-Full Pills */}
-        <div className="flex flex-wrap gap-2.5 items-center pb-2 border-b border-[#DCE6F5]">
+        <div className="flex items-center gap-2.5 pb-2 border-b border-[#DCE6F5] overflow-x-auto no-scrollbar scroll-smooth flex-nowrap md:flex-wrap">
           <button
             onClick={() => setActiveTab("jobs")}
             className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition whitespace-nowrap shadow-xs ${
@@ -763,7 +763,7 @@ export default function EvalLabPage() {
         {/* ================= TAB 1: THE 6 EVAL JOBS (Feature 4 Step Suitability) ================= */}
         {activeTab === "jobs" && (
           <div className="space-y-6">
-            {/* Job Selector Pills */}
+            {/* Job Selector Pills in Rounded-Full Pills */}
             <div className="flex flex-wrap items-center gap-2 pb-2">
               {[
                 { id: "tag_job", label: "1. Tag the Job", icon: Zap },
@@ -779,10 +779,10 @@ export default function EvalLabPage() {
                   <button
                     key={job.id}
                     onClick={() => setSelectedEvalJobId(job.id)}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition border ${
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold transition whitespace-nowrap shadow-xs ${
                       isSelected
-                        ? "bg-indigo-600 text-white border-indigo-500 shadow-md"
-                        : "bg-[#F6F9FF] text-gray-400 border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-gray-200"
+                        ? "bg-[#1D4ED8] text-white font-bold shadow-sm"
+                        : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
                     }`}
                   >
                     <IconComponent className="h-3.5 w-3.5" />
@@ -805,147 +805,151 @@ export default function EvalLabPage() {
               return (
                 <div className="space-y-6">
                   {/* Job Overview Banner */}
-                  <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 shadow-sm space-y-1">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-base font-bold text-[#0B1B3A] flex items-center gap-2">
+                  <div className="rounded-3xl border border-[#DCE6F5] bg-white p-6 shadow-sm space-y-1.5 relative overflow-hidden">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <h2 className="text-lg font-extrabold text-[#0B1B3A] flex items-center gap-2">
                         <span>{currentJob.title}</span>
                       </h2>
-                      <span className="text-[11px] font-mono text-[#2563EB] bg-indigo-50 px-2.5 py-0.5 rounded border border-[#BFDBFE]">
+                      <span className="text-xs font-mono text-[#1D4ED8] bg-blue-50 px-3 py-1 rounded-full border border-blue-200 font-semibold self-start sm:self-auto">
                         Job: {currentJob.jobId}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-400">{currentJob.description}</p>
+                    <p className="text-xs text-[#4A5B78] leading-relaxed max-w-3xl">{currentJob.description}</p>
                   </div>
 
-                  {/* 4 Winner Scorecards */}
+                  {/* 4 Winner Scorecards with Proteus Pastel Tints and Luminous Conic Border Beam */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Recommended Pick */}
-                    <div className="rounded-xl border border-[#BFDBFE] bg-indigo-50 p-4 space-y-2">
-                      <div className="flex items-center justify-between text-[#2563EB]">
+                    {/* Recommended Pick (Ice Blue + Conic Border Beam) */}
+                    <div className="rounded-3xl border-2 border-[#D0E2FB] bg-[#EEF5FD] p-5 space-y-2.5 shadow-sm card-hover-elevate beam-border-card transition relative">
+                      <div className="flex items-center justify-between text-[#1D4ED8]">
                         <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-                          <Award className="h-4 w-4 text-[#2563EB]" />
+                          <Award className="h-4 w-4 text-[#1D4ED8]" />
                           <span>Recommended Pick</span>
                         </span>
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#1D4ED8] opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-[#1D4ED8]"></span>
+                        </span>
                       </div>
-                      <div className="text-sm font-bold text-slate-900 font-mono">
+                      <div className="text-base font-extrabold text-[#0B1B3A] font-mono">
                         {currentJob.recommendedModelId}
                       </div>
-                      <p className="text-[11px] text-indigo-200/90 leading-relaxed font-sans">
+                      <p className="text-xs text-[#334155] leading-relaxed font-sans font-medium">
                         {currentJob.recommendedReason}
                       </p>
                     </div>
 
-                    {/* Top Quality */}
-                    <div className="rounded-xl border border-emerald-500/40 bg-emerald-50 p-4 space-y-2">
-                      <div className="flex items-center justify-between text-emerald-300">
+                    {/* Top Quality (Mint / Soft Cyan) */}
+                    <div className="rounded-3xl border-2 border-[#BCECEF] bg-[#E6F8F9] p-5 space-y-2.5 shadow-sm card-hover-elevate transition">
+                      <div className="flex items-center justify-between text-teal-800">
                         <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-                          <Sparkles className="h-4 w-4 text-emerald-400" />
+                          <Sparkles className="h-4 w-4 text-teal-600" />
                           <span>Highest Quality</span>
                         </span>
                       </div>
-                      <div className="text-sm font-bold text-emerald-400 font-mono">
+                      <div className="text-base font-extrabold text-teal-950 font-mono">
                         {currentJob.bestQualityModelId}
                       </div>
-                      <p className="text-[11px] text-gray-400 leading-relaxed">
+                      <p className="text-xs text-[#334155] leading-relaxed font-sans">
                         Top benchmark accuracy across calibrated test scenarios for this step.
                       </p>
                     </div>
 
-                    {/* Best Budget ($0 / Ultra-cheap) */}
-                    <div className="rounded-xl border border-amber-500/40 bg-amber-950/20 p-4 space-y-2">
-                      <div className="flex items-center justify-between text-amber-300">
+                    {/* Best Budget ($0 / Ultra-cheap) (Warm Peach) */}
+                    <div className="rounded-3xl border-2 border-[#FFE2C2] bg-[#FFF4E8] p-5 space-y-2.5 shadow-sm card-hover-elevate transition">
+                      <div className="flex items-center justify-between text-amber-800">
                         <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-                          <DollarSign className="h-4 w-4 text-amber-400" />
+                          <DollarSign className="h-4 w-4 text-amber-600" />
                           <span>Best Budget ($0 Free)</span>
                         </span>
                       </div>
-                      <div className="text-sm font-bold text-amber-400 font-mono">
+                      <div className="text-base font-extrabold text-amber-950 font-mono">
                         {currentJob.bestBudgetModelId}
                       </div>
-                      <p className="text-[11px] text-gray-400 leading-relaxed">
+                      <p className="text-xs text-[#334155] leading-relaxed font-sans">
                         Lowest cost per 1M tokens ($0 for free OpenRouter or Laptop Ollama).
                       </p>
                     </div>
 
-                    {/* Lowest Latency */}
-                    <div className="rounded-xl border border-[#BFDBFE] bg-blue-50 p-4 space-y-2">
-                      <div className="flex items-center justify-between text-cyan-300">
+                    {/* Lowest Latency (Soft Lavender) */}
+                    <div className="rounded-3xl border-2 border-[#DDD6FE] bg-[#F5F3FF] p-5 space-y-2.5 shadow-sm card-hover-elevate transition">
+                      <div className="flex items-center justify-between text-purple-800">
                         <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-                          <Zap className="h-4 w-4 text-cyan-400" />
+                          <Zap className="h-4 w-4 text-purple-600" />
                           <span>Fastest Speed</span>
                         </span>
                       </div>
-                      <div className="text-sm font-bold text-cyan-400 font-mono">
+                      <div className="text-base font-extrabold text-purple-950 font-mono">
                         {currentJob.fastestModelId}
                       </div>
-                      <p className="text-[11px] text-gray-400 leading-relaxed">
+                      <p className="text-xs text-[#334155] leading-relaxed font-sans">
                         Lowest average and P95 latency for real-time customer streaming.
                       </p>
                     </div>
                   </div>
 
                   {/* Candidates Comparison Table */}
-                  <div className="rounded-xl border border-[#DCE6F5] bg-white overflow-hidden">
-                    <div className="p-4 border-b border-[#DCE6F5] flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-[#0B1B3A]">Candidate Models Comparison ({currentJob.candidates?.length} models tested)</h3>
-                      <span className="text-xs text-gray-400 font-mono">Measured with empirical numbers</span>
+                  <div className="rounded-3xl border border-[#DCE6F5] bg-white overflow-hidden shadow-sm">
+                    <div className="p-5 border-b border-[#DCE6F5] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <h3 className="text-sm font-bold text-[#0B1B3A]">Candidate Models Comparison ({currentJob.candidates?.length} models tested)</h3>
+                      <span className="text-xs text-[#7B8AA6] font-mono">Measured with empirical numbers</span>
                     </div>
 
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-xs">
-                        <thead className="bg-[#EEF4FF] border-b border-[#DCE6F5] text-[#4A5B78] uppercase font-semibold text-[10px] tracking-wider font-mono">
+                        <thead className="bg-[#EEF4FF] border-b border-[#DCE6F5] text-[#0B1B3A] uppercase font-bold text-[10px] tracking-wider font-mono">
                           <tr>
-                            <th className="px-4 py-3">Candidate Model</th>
-                            <th className="px-4 py-3">Provider</th>
-                            <th className="px-4 py-3 text-right">Quality Score</th>
-                            <th className="px-4 py-3 text-right">Avg Latency</th>
-                            <th className="px-4 py-3 text-right">P95 Latency</th>
-                            <th className="px-4 py-3 text-right">Cost / 100 Runs</th>
-                            <th className="px-4 py-3 text-center">Category Distinction</th>
+                            <th className="px-5 py-3.5">Candidate Model</th>
+                            <th className="px-5 py-3.5">Provider</th>
+                            <th className="px-5 py-3.5 text-right">Quality Score</th>
+                            <th className="px-5 py-3.5 text-right">Avg Latency</th>
+                            <th className="px-5 py-3.5 text-right">P95 Latency</th>
+                            <th className="px-5 py-3.5 text-right">Cost / 100 Runs</th>
+                            <th className="px-5 py-3.5 text-center">Category Distinction</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-800/60 font-mono">
+                        <tbody className="divide-y divide-[#E2E8F0] font-mono">
                           {currentJob.candidates?.map((c: any) => (
-                            <tr key={c.modelId} className="hover:bg-[#EEF4FF] transition">
-                              <td className="px-4 py-3 text-slate-900 font-medium">
+                            <tr key={c.modelId} className="hover:bg-[#EEF5FD] transition-colors">
+                              <td className="px-5 py-3.5 text-[#0B1B3A] font-semibold">
                                 <div className="flex items-center gap-2">
                                   <span>{c.displayName}</span>
                                   {c.isLocal && (
-                                    <span className="rounded bg-gray-800 text-gray-400 text-[9px] px-1.5 py-0.2">
+                                    <span className="rounded-md bg-slate-800 text-cyan-200 text-[9px] px-2 py-0.5 font-bold">
                                       LOCAL OLLAMA
                                     </span>
                                   )}
                                 </div>
-                                <div className="text-[10px] text-gray-500 mt-0.5">{c.modelId}</div>
+                                <div className="text-[10px] text-[#4A5B78] mt-0.5">{c.modelId}</div>
                               </td>
-                              <td className="px-4 py-3 text-gray-400 capitalize">{c.provider}</td>
-                              <td className="px-4 py-3 text-right font-bold text-emerald-400">
+                              <td className="px-5 py-3.5 text-[#334155] capitalize font-medium">{c.provider}</td>
+                              <td className="px-5 py-3.5 text-right font-extrabold text-emerald-700">
                                 {c.qualityScore.toFixed(1)}%
                               </td>
-                              <td className="px-4 py-3 text-right text-gray-300">{c.avgLatencyMs} ms</td>
-                              <td className="px-4 py-3 text-right text-amber-400">{c.p95LatencyMs} ms</td>
-                              <td className="px-4 py-3 text-right text-slate-900">
+                              <td className="px-5 py-3.5 text-right text-[#0B1B3A] font-bold">{c.avgLatencyMs} ms</td>
+                              <td className="px-5 py-3.5 text-right text-amber-700 font-bold">{c.p95LatencyMs} ms</td>
+                              <td className="px-5 py-3.5 text-right text-[#15803D] font-bold">
                                 {c.costPer100RunsUsd === 0 ? "$0.0000" : `$${c.costPer100RunsUsd.toFixed(6)}`}
                               </td>
-                              <td className="px-4 py-3 text-center">
-                                <div className="flex flex-wrap items-center justify-center gap-1">
+                              <td className="px-5 py-3.5 text-center">
+                                <div className="flex flex-wrap items-center justify-center gap-1.5">
                                   {c.isRecommended && (
-                                    <span className="rounded bg-indigo-500/20 text-[#2563EB] border border-[#BFDBFE] text-[9px] px-1.5 py-0.5 font-bold">
+                                    <span className="rounded-full bg-blue-100 text-[#1D4ED8] border border-blue-200 text-[10px] px-2.5 py-0.5 font-bold shadow-2xs">
                                       RECOMMENDED
                                     </span>
                                   )}
                                   {c.isBestQuality && (
-                                    <span className="rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px] px-1.5 py-0.5 font-bold">
+                                    <span className="rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] px-2.5 py-0.5 font-bold shadow-2xs">
                                       TOP QUALITY
                                     </span>
                                   )}
                                   {c.isBestBudget && (
-                                    <span className="rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[9px] px-1.5 py-0.5 font-bold">
+                                    <span className="rounded-full bg-amber-100 text-amber-800 border border-amber-200 text-[10px] px-2.5 py-0.5 font-bold shadow-2xs">
                                       $0 BUDGET
                                     </span>
                                   )}
                                   {c.isFastest && (
-                                    <span className="rounded bg-blue-100 text-cyan-300 border border-[#BFDBFE] text-[9px] px-1.5 py-0.5 font-bold">
+                                    <span className="rounded-full bg-purple-100 text-purple-800 border border-purple-200 text-[10px] px-2.5 py-0.5 font-bold shadow-2xs">
                                       FASTEST
                                     </span>
                                   )}
@@ -958,13 +962,13 @@ export default function EvalLabPage() {
                     </div>
                   </div>
 
-                  {/* Trade-Off & Engineering Rationale */}
-                  <div className="rounded-xl border border-[#BFDBFE] bg-white p-5 space-y-2">
-                    <h3 className="text-xs font-bold text-[#2563EB] uppercase tracking-wider flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4" />
+                  {/* Trade-Off & Engineering Rationale (Ice Blue Pastel Tint) */}
+                  <div className="rounded-3xl border-2 border-[#D0E2FB] bg-[#EEF5FD] p-6 space-y-2.5 shadow-sm card-hover-elevate transition">
+                    <h3 className="text-xs font-bold text-[#1D4ED8] uppercase tracking-wider flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-[#1D4ED8]" />
                       <span>Empirical Trade-off &amp; Engineering Rationale</span>
                     </h3>
-                    <p className="text-xs text-gray-300 leading-relaxed font-sans">
+                    <p className="text-xs text-[#334155] leading-relaxed font-sans font-medium">
                       {currentJob.tradeOffAnalysis}
                     </p>
                   </div>
@@ -1156,64 +1160,64 @@ export default function EvalLabPage() {
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-[#EEF4FF] border-b border-[#DCE6F5] text-[#4A5B78] uppercase font-semibold text-[10px] tracking-wider font-mono">
+                    <thead className="bg-[#EEF4FF] border-b border-[#DCE6F5] text-[#0B1B3A] uppercase font-bold text-[10px] tracking-wider font-mono">
                       <tr>
-                        <th className="px-4 py-3">Model Identifier</th>
-                        <th className="px-4 py-3">Where It Runs</th>
-                        <th className="px-4 py-3 text-right">Quality (Judge)</th>
-                        <th className="px-4 py-3 text-right">Avg / P95 Speed</th>
-                        <th className="px-4 py-3 text-right">Cost / 100 Runs</th>
-                        <th className="px-4 py-3">Download Size / Notes</th>
-                        <th className="px-4 py-3">Compare Against / Fallbacks</th>
+                        <th className="px-5 py-3.5">Model Identifier</th>
+                        <th className="px-5 py-3.5">Where It Runs</th>
+                        <th className="px-5 py-3.5 text-right">Quality (Judge)</th>
+                        <th className="px-5 py-3.5 text-right">Avg / P95 Speed</th>
+                        <th className="px-5 py-3.5 text-right">Cost / 100 Runs</th>
+                        <th className="px-5 py-3.5">Download Size / Notes</th>
+                        <th className="px-5 py-3.5">Compare Against / Fallbacks</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-800/60 font-mono">
+                    <tbody className="divide-y divide-[#E2E8F0] font-mono">
                       {matrix.map((m) => (
-                        <tr key={m.modelId} className="hover:bg-[#EEF4FF] transition">
-                          <td className="px-4 py-3 text-slate-900 font-medium">
+                        <tr key={m.modelId} className="hover:bg-[#EEF5FD] transition-colors">
+                          <td className="px-5 py-3.5 text-[#0B1B3A] font-semibold">
                             <div className="flex items-center gap-1.5">
                               <span>{m.displayName}</span>
                               {m.isLocal && (
-                                <span className="rounded bg-emerald-900/40 border border-emerald-500/30 text-emerald-300 text-[9px] px-1.5 py-0.2">
+                                <span className="rounded-full bg-emerald-100 border border-emerald-300 text-emerald-800 text-[9px] px-2 py-0.5 font-bold">
                                   LOCAL
                                 </span>
                               )}
                             </div>
-                            <div className="text-[10px] text-gray-500 mt-0.5">{m.modelId}</div>
+                            <div className="text-[10px] text-[#4A5B78] mt-0.5">{m.modelId}</div>
                           </td>
-                          <td className="px-4 py-3 text-gray-400 capitalize">
+                          <td className="px-5 py-3.5 text-[#334155] capitalize font-medium">
                             <div>{m.provider}</div>
                           </td>
-                          <td className="px-4 py-3 text-right font-bold text-emerald-400">
+                          <td className="px-5 py-3.5 text-right font-extrabold text-emerald-700">
                             {m.qualityScore.toFixed(1)}%
                           </td>
-                          <td className="px-4 py-3 text-right text-gray-300">
+                          <td className="px-5 py-3.5 text-right text-[#0B1B3A] font-bold">
                             <span>{m.avgLatencyMs}ms</span>
-                            <span className="text-gray-500 text-[10px] block">{m.p95LatencyMs}ms p95</span>
+                            <span className="text-amber-800 text-[10px] block font-semibold">{m.p95LatencyMs}ms p95</span>
                           </td>
-                          <td className="px-4 py-3 text-right text-slate-900">
-                            <span className="font-bold">
+                          <td className="px-5 py-3.5 text-right text-[#15803D] font-bold">
+                            <span>
                               {m.costPer100RunsUsd === 0 ? "$0.00" : `$${m.costPer100RunsUsd.toFixed(4)}`}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-gray-400 text-[11px] max-w-xs">
+                          <td className="px-5 py-3.5 text-[#334155] text-[11px] max-w-xs font-sans">
                             {m.downloadSizeGB && (
-                              <span className="rounded bg-gray-800 text-gray-300 px-1.5 py-0.5 text-[10px] mr-1">
+                              <span className="rounded bg-slate-100 border border-slate-300 text-slate-700 px-1.5 py-0.5 text-[10px] mr-1 font-mono font-semibold">
                                 {m.downloadSizeGB}
                               </span>
                             )}
-                            <span className="text-gray-400">{m.pricingNote || "Standard pricing"}</span>
+                            <span>{m.pricingNote || "Standard pricing"}</span>
                           </td>
-                          <td className="px-4 py-3 text-gray-300 text-[11px] max-w-xs">
+                          <td className="px-5 py-3.5 text-[#334155] text-[11px] max-w-xs font-sans">
                             {m.compareAgainst && m.compareAgainst.length > 0 && (
-                              <div className="text-[10px] text-[#2563EB]">
-                                <span className="text-gray-500">vs: </span>
+                              <div className="text-[10px] text-[#1D4ED8] font-medium">
+                                <span className="text-[#7B8AA6]">vs: </span>
                                 {m.compareAgainst.join(", ")}
                               </div>
                             )}
                             {m.fallbacks && m.fallbacks.length > 0 && (
-                              <div className="text-[10px] text-amber-300/90 mt-0.5">
-                                <span className="text-gray-500">Fallbacks: </span>
+                              <div className="text-[10px] text-amber-800 font-medium mt-0.5">
+                                <span className="text-[#7B8AA6]">Fallbacks: </span>
                                 {m.fallbacks.slice(0, 2).join(", ")}
                               </div>
                             )}

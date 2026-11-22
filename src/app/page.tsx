@@ -179,7 +179,7 @@ export default function HomePage() {
 
                 <Link
                   href={isAuthenticated ? "/chat" : "/signup?redirect=/chat"}
-                  className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-white hover:bg-blue-50 text-[#1D4ED8] font-bold text-sm sm:text-base transition-all duration-200 shadow-lg inline-flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-white hover:bg-blue-50 text-[#1D4ED8] font-bold text-sm sm:text-base transition-all duration-200 shadow-lg inline-flex items-center justify-center gap-2 animate-shimmer-sweep"
                 >
                   <Sparkles className="w-4 h-4 text-[#1D4ED8]" />
                   <span>Launch AI Consultant</span>
@@ -223,8 +223,8 @@ export default function HomePage() {
       {/* 2B. The 3 Pastel Tinted Product Cards (Exact Format from Example Screenshot 1) */}
       <section className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-          {/* Card 1: Mint / Soft Cyan Tint */}
-          <div className="bg-[#E6F8F9] border-2 border-[#BCECEF] rounded-3xl p-8 flex flex-col justify-between shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
+          {/* Card 1: Mint / Soft Cyan Tint (with Luminous Rotating Border Beam) */}
+          <div className="bg-[#E6F8F9] border-2 border-[#BCECEF] rounded-3xl p-8 flex flex-col justify-between shadow-md card-hover-elevate beam-border-card transition-all duration-200 relative">
             <div>
               <div className="flex items-center gap-2 text-cyan-600 font-bold text-xs uppercase tracking-wider">
                 <Sparkles className="w-4 h-4 text-cyan-600" />
@@ -248,7 +248,7 @@ export default function HomePage() {
           </div>
 
           {/* Card 2: Soft Ice Blue Tint */}
-          <div className="bg-[#EEF5FD] border-2 border-[#D0E2FB] rounded-3xl p-8 flex flex-col justify-between shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
+          <div className="bg-[#EEF5FD] border-2 border-[#D0E2FB] rounded-3xl p-8 flex flex-col justify-between shadow-md card-hover-elevate transition-all duration-200">
             <div>
               <div className="flex items-center gap-2 text-blue-600 font-bold text-xs uppercase tracking-wider">
                 <Brain className="w-4 h-4 text-blue-600" />
@@ -272,7 +272,7 @@ export default function HomePage() {
           </div>
 
           {/* Card 3: Warm Peach / Soft Cream Tint */}
-          <div className="bg-[#FFF4E8] border-2 border-[#FFE2C2] rounded-3xl p-8 flex flex-col justify-between shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
+          <div className="bg-[#FFF4E8] border-2 border-[#FFE2C2] rounded-3xl p-8 flex flex-col justify-between shadow-md card-hover-elevate transition-all duration-200">
             <div>
               <div className="flex items-center gap-2 text-amber-600 font-bold text-xs uppercase tracking-wider">
                 <Building2 className="w-4 h-4 text-amber-600" />
