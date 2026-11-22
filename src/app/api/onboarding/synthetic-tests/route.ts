@@ -12,11 +12,16 @@ export async function GET(req: NextRequest) {
     const count = parseInt(searchParams.get("count") || "10", 10);
 
     // Fetch ingested pages from DB
-    const pages = await db
-      .select()
-      .from(knowledgePages)
-      .where(eq(knowledgePages.businessId, tenant.businessId))
-      .limit(20);
+    let pages: any[] = [];
+    try {
+      pages = await db
+        .select()
+        .from(knowledgePages)
+        .where(eq(knowledgePages.businessId, tenant.businessId))
+        .limit(20);
+    } catch (_dbErr) {
+      pages = [];
+    }
 
     const formattedPages = pages.length > 0
       ? pages.map((p) => ({

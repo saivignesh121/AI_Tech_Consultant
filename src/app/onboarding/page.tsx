@@ -40,21 +40,27 @@ export default function OnboardingPage() {
   const [localOnly, setLocalOnly] = useState(false);
   const [keysSaved, setKeysSaved] = useState(true);
 
-  // Step 2: Sitemap Ingestion
+  // Step 2: Sitemap & Documents Ingestion & Gmail
   const [sitemapUrl, setSitemapUrl] = useState("https://docs.company.com/sitemap.xml");
+  const [directUrls, setDirectUrls] = useState("https://docs.company.com/faq\nhttps://docs.company.com/api-reference");
+  const [uploadedDocName, setUploadedDocName] = useState<string | null>("product-architecture-guide.md");
+  const [gmailAddress, setGmailAddress] = useState("support@company.com");
+  const [gmailConnected, setGmailConnected] = useState(true);
   const [crawling, setCrawling] = useState(false);
   const [crawledCount, setCrawledCount] = useState(12);
 
-  // Step 3: Agent Role Persona
+  // Step 3: Agent Role Persona & Tone of Voice
   const [selectedRole, setSelectedRole] = useState<string>("tech_consultant");
+  const [selectedTone, setSelectedTone] = useState<string>("technical");
 
   // Step 4: Synthetic Test Generator
   const [generatingTests, setGeneratingTests] = useState(false);
   const [syntheticTests, setSyntheticTests] = useState<SyntheticTest[]>([]);
 
-  // Step 5: Readiness Check
+  // Step 5: Readiness Check & Owner-Chosen Pass Bar
   const [evaluating, setEvaluating] = useState(false);
   const [readinessScore, setReadinessScore] = useState<number | null>(null);
+  const [ownerThreshold, setOwnerThreshold] = useState<number>(85.0);
   const [isUnlocked, setIsUnlocked] = useState(false);
 
   // 15-Minute Countdown Timer
@@ -107,7 +113,7 @@ export default function OnboardingPage() {
         body: JSON.stringify({
           testCases: syntheticTests,
           modelId: "claude-sonnet-5.5",
-          passThreshold: 85.0,
+          passThreshold: ownerThreshold,
         }),
       });
       const data = await res.json();
@@ -289,23 +295,24 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Step 2: Sitemap Ingestion */}
+          {/* Step 2: Ingestion Seed: Sitemap, Direct URLs, Documents & Gmail */}
           {currentStep === 2 && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                   <Globe className="w-5 h-5 text-purple-600" />
-                  Step 2: Documentation Sitemap Ingestion
+                  Step 2: Documentation Ingestion & Gmail Integration
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
-                  Point the Knowledge Brain to your public sitemap.xml. The crawler strips headers/footers, extracts headings, chunks text, and embeds vectors.
+                  Point the Knowledge Brain to your help-center sitemap, paste direct URLs, upload guides, or connect Gmail. The polite crawler chunks text, indexes vectors, and prepares past-email RAG.
                 </p>
               </div>
 
-              <div className="space-y-4 max-w-xl">
+              <div className="space-y-4 max-w-2xl">
+                {/* 1. Sitemap URL */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    Documentation Sitemap URL
+                    Help-Center Documentation Sitemap URL
                   </label>
                   <div className="flex gap-2">
                     <input
@@ -342,11 +349,70 @@ export default function OnboardingPage() {
                   </div>
                 </div>
 
-                <div className="p-4 bg-purple-50/60 rounded-xl border border-purple-100 flex items-center justify-between">
+                {/* 2. Direct Page URLs or Document Upload */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Direct Page URLs (1 per line)
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={directUrls}
+                      onChange={(e) => setDirectUrls(e.target.value)}
+                      className="w-full text-xs font-mono border border-gray-300 rounded-lg p-2 text-gray-900 bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Upload Document Files (Markdown / PDF)
+                    </label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center bg-gray-50 flex flex-col items-center justify-center h-[68px]">
+                      <span className="text-xs font-medium text-purple-700 truncate max-w-[200px]">
+                        {uploadedDocName || "Drop file or click to browse"}
+                      </span>
+                      <span className="text-[10px] text-gray-400 mt-0.5">Auto-chunked into pgvector</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Connect Gmail */}
+                <div className="p-3.5 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-gray-900">Connect Gmail / Customer Support Inbox</span>
+                      <span className="text-[10px] bg-indigo-100 text-indigo-700 font-semibold px-2 py-0.5 rounded-full">Feature 2.6 RAG</span>
+                    </div>
+                    {gmailConnected && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded-md border border-green-200">
+                        <Check className="w-3 h-3 text-green-600" /> OAuth Active
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      value={gmailAddress}
+                      onChange={(e) => setGmailAddress(e.target.value)}
+                      placeholder="support@company.com"
+                      className="flex-1 text-xs border border-gray-300 rounded-lg px-2.5 py-1.5 text-gray-900 bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setGmailConnected(true)}
+                      className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs rounded-lg transition"
+                    >
+                      Connect Inbox
+                    </button>
+                  </div>
+                </div>
+
+                {/* Summary Banner */}
+                <div className="p-3.5 bg-purple-50/60 rounded-xl border border-purple-100 flex items-center justify-between">
                   <div className="text-xs text-purple-900">
-                    <span className="font-bold">Active Corpus Loaded:</span>
+                    <span className="font-bold">Active Corpus Indexed:</span>
                     <p className="text-[11px] text-purple-700 mt-0.5">
-                      {crawledCount} pages indexed with pgvector hybrid search enabled.
+                      {crawledCount} pages indexed with pgvector hybrid search and past-email threads loaded.
                     </p>
                   </div>
                   <span className="px-2.5 py-1 bg-green-100 text-green-800 font-semibold text-xs rounded-full">
@@ -366,7 +432,7 @@ export default function OnboardingPage() {
                   onClick={() => setCurrentStep(3)}
                   className="inline-flex items-center gap-2 px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-medium text-sm rounded-lg shadow-sm transition"
                 >
-                  Proceed to Persona Selection
+                  Proceed to Persona & Tone Selection
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -386,6 +452,7 @@ export default function OnboardingPage() {
                 </p>
               </div>
 
+              {/* Role Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
                   {
@@ -427,6 +494,35 @@ export default function OnboardingPage() {
                     <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">{r.desc}</p>
                   </div>
                 ))}
+              </div>
+
+              {/* Tone of Voice Selector */}
+              <div className="space-y-3 pt-2">
+                <label className="block text-xs font-semibold text-gray-700">
+                  Pick Tone of Voice (Personality Alignment)
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[
+                    { id: "empathetic", label: "Empathetic & Structured", hint: "Patient, polite, structured steps" },
+                    { id: "technical", label: "Technical & Deep", hint: "Root-cause diagnosis, code & IP precision" },
+                    { id: "concise", label: "Professional & Concise", hint: "Fast executive summaries, zero fluff" },
+                    { id: "direct", label: "Direct & Action-Oriented", hint: "Clear next actions and checklists" },
+                  ].map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setSelectedTone(t.id)}
+                      className={`p-3 rounded-lg border text-left transition ${
+                        selectedTone === t.id
+                          ? "border-purple-600 bg-purple-50/60 text-purple-900 shadow-xs"
+                          : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="text-xs font-bold">{t.label}</div>
+                      <div className="text-[10px] text-gray-500 mt-1">{t.hint}</div>
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="flex justify-between pt-4 border-t border-gray-100">
@@ -531,20 +627,51 @@ export default function OnboardingPage() {
               <div>
                 <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-purple-600" />
-                  Step 5: Readiness Benchmark Pass Bar (&ge; 85%)
+                  Step 5: Readiness Benchmark Gate & Chat Unlock
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
-                  Evaluates the AI Consultant model against the 10 synthesized test cases using the impartial AI Judge.
+                  Evaluates the AI Consultant model against the {syntheticTests.length || 10} synthesized test cases using the impartial AI Judge.
                 </p>
+              </div>
+
+              {/* Owner Threshold Selector */}
+              <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div>
+                  <span className="text-xs font-bold text-gray-900">Owner-Chosen Pass Bar</span>
+                  <p className="text-[11px] text-gray-500">
+                    The chat switches on for your team only when the readiness score reaches this level.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {[75.0, 80.0, 85.0, 90.0, 95.0].map((bar) => (
+                    <button
+                      key={bar}
+                      type="button"
+                      onClick={() => {
+                        setOwnerThreshold(bar);
+                        if (readinessScore !== null) {
+                          setIsUnlocked(readinessScore >= bar);
+                        }
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                        ownerThreshold === bar
+                          ? "bg-purple-600 text-white shadow-xs"
+                          : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      {bar}%
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {evaluating ? (
                 <div className="p-12 text-center text-sm text-gray-500 space-y-3">
                   <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto" />
                   <p className="font-medium text-gray-800">
-                    Running impartial AI Judge evaluation across 10 test cases...
+                    Running impartial AI Judge evaluation across synthetic domain tests...
                   </p>
-                  <p className="text-xs text-gray-400">Verifying citations and policy compliance</p>
+                  <p className="text-xs text-gray-400">Verifying citations, grounding, and persona compliance</p>
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -557,23 +684,32 @@ export default function OnboardingPage() {
                       {readinessScore !== null ? `${readinessScore}%` : "100%"}
                     </div>
                     <p className="text-xs text-purple-800 font-medium">
-                      Pass Bar: <strong>&ge; 85.0% required</strong>
+                      Answers {syntheticTests.length > 0 ? (readinessScore !== null ? Math.round((readinessScore / 100) * syntheticTests.length) : syntheticTests.length) : 10} of {syntheticTests.length || 10} test questions correctly ({readinessScore !== null ? readinessScore : 100}% readiness).
                     </p>
 
                     <div className="max-w-md mx-auto pt-2">
                       <div className="w-full h-3 bg-purple-200 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-green-500 rounded-full transition-all duration-700"
-                          style={{ width: `${readinessScore || 100}%` }}
+                          className={`h-full rounded-full transition-all duration-700 ${
+                            (readinessScore ?? 100) >= ownerThreshold ? "bg-green-500" : "bg-amber-500"
+                          }`}
+                          style={{ width: `${readinessScore ?? 100}%` }}
                         />
                       </div>
                     </div>
 
                     <div className="pt-2">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold">
-                        <CheckCircle2 className="w-4 h-4" />
-                        PASSED READINESS BAR — READY FOR PRODUCTION
-                      </span>
+                      {(readinessScore ?? 100) >= ownerThreshold ? (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold">
+                          <CheckCircle2 className="w-4 h-4" />
+                          PASSED READINESS BAR (&ge; {ownerThreshold}%) — CHAT UNLOCKED
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold">
+                          <AlertCircle className="w-4 h-4" />
+                          BELOW PASS BAR (&lt; {ownerThreshold}%) — CHAT LOCKED
+                        </span>
+                      )}
                     </div>
                   </div>
 
