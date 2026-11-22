@@ -35,6 +35,7 @@ import {
   Sliders,
   X,
   Check,
+  Activity,
 } from "lucide-react";
 
 interface BenchmarkCaseItem {
@@ -140,15 +141,30 @@ export default function EvalLabPage() {
   const [sideBySideModelB, setSideBySideModelB] = useState("qwen/qwen3.8-max-0902");
   const [sideBySideCaseId, setSideBySideCaseId] = useState("step4-01");
 
-  // --- Router State ---
+  // --- Router State (Task 4.3) ---
   const [routerStats, setRouterStats] = useState<RouterComparisonData | null>(null);
   const [testPrompt, setTestPrompt] = useState("How do I configure custom CNAME subdomains with SSL?");
+  const [testTaskType, setTestTaskType] = useState("write_reply");
+  const [simulateQuickCheckFailed, setSimulateQuickCheckFailed] = useState(false);
+  const [simulateFreeBusy, setSimulateFreeBusy] = useState(false);
+  const [simulate100kPrompt, setSimulate100kPrompt] = useState(false);
   const [routingResult, setRoutingResult] = useState<{
-    selectedModelId: string;
+    job: string;
     complexity: string;
+    promptTokens: number;
+    tokenCountMethod: string;
+    selectedModelId: string;
     estimatedCostUsd: number;
     reason: string;
+    movedUp: boolean;
+    previousModelId?: string;
+    moveReason?: string;
+    fallbackUsed: boolean;
+    fallbackReason?: string;
+    haikuBypassedDueTo100kRule?: boolean;
   } | null>(null);
+  const [routingLogs, setRoutingLogs] = useState<any[]>([]);
+  const [routingTableData, setRoutingTableData] = useState<any | null>(null);
   const [routingLoading, setRoutingLoading] = useState(false);
 
   // --- Task 4.2: Step-by-Step Breakdown & Local-Only Quality Drop State ---
@@ -354,6 +370,8 @@ export default function EvalLabPage() {
       const res = await fetch("/api/evals/router");
       const data = await res.json();
       if (data.comparison) setRouterStats(data.comparison);
+      if (data.recentLogs) setRoutingLogs(data.recentLogs);
+      if (data.routingTable) setRoutingTableData(data.routingTable);
     } catch (e) {
       console.error(e);
     }
@@ -452,13 +470,26 @@ export default function EvalLabPage() {
     if (!testPrompt.trim() || routingLoading) return;
     setRoutingLoading(true);
     try {
+      let promptToSend = testPrompt;
+      if (simulate100kPrompt) {
+        // Generate > 100k token simulation string (~450,000 characters)
+        promptToSend = testPrompt + " [EXTENSIVE_DATA_BURST] " + "technical_specification_chunk ".repeat(25000);
+      }
+
       const res = await fetch("/api/evals/router", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: testPrompt, taskType: "write_reply" }),
+        body: JSON.stringify({
+          prompt: promptToSend,
+          taskType: testTaskType,
+          quickCheckFailed: simulateQuickCheckFailed,
+          quickCheckReason: simulateQuickCheckFailed ? "Confidence below 85% on verification check" : undefined,
+          freeModelBusy: simulateFreeBusy,
+        }),
       });
       const data = await res.json();
       if (data.decision) setRoutingResult(data.decision);
+      if (data.recentLogs) setRoutingLogs(data.recentLogs);
     } catch (e) {
       console.error(e);
     } finally {
@@ -2242,38 +2273,274 @@ export default function EvalLabPage() {
               </div>
             </div>
 
+            {/* 3-Step Router Architectural Blueprint (Task 4.3) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4 space-y-2">
+                <div className="flex items-center gap-2 text-cyan-400 font-semibold text-xs uppercase tracking-wider">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500/20 text-[10px] font-bold">1</span>
+                  <span>Count Tokens First (Free)</span>
+                </div>
+                <p className="text-xs text-gray-300">
+                  Counts tokens before sending: Claude free endpoint (<code className="text-cyan-300">/count_tokens</code>), Gemini free <code className="text-cyan-300">countTokens</code>, or ~4 chars/token for OpenRouter/Ollama.
+                </p>
+                <div className="rounded bg-rose-950/30 border border-rose-500/30 p-2 text-[11px] text-rose-300 font-mono">
+                  <strong>Strict Rule:</strong> Prompts &gt; 100,000 tokens NEVER go to Haiku 5.5 (prevents 5x price surge).
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4 space-y-2">
+                <div className="flex items-center gap-2 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500/20 text-[10px] font-bold">2</span>
+                  <span>Tag the Job & Complexity</span>
+                </div>
+                <p className="text-xs text-gray-300">
+                  Deterministic rules classify clear jobs (classify email = cheap; improve skill = Opus).
+                </p>
+                <div className="rounded bg-indigo-950/30 border border-indigo-500/30 p-2 text-[11px] text-indigo-300 font-mono">
+                  For unclear queries, cheap model (Haiku/Qwen Flash) returns JSON: <code className="text-white">&#123;task_type, complexity&#125;</code>.
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-4 space-y-2">
+                <div className="flex items-center gap-2 text-emerald-400 font-semibold text-xs uppercase tracking-wider">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 text-[10px] font-bold">3</span>
+                  <span>Pick from Routing Table</span>
+                </div>
+                <p className="text-xs text-gray-300">
+                  Selects the lowest-cost model that passed the bar in the Eval Lab.
+                </p>
+                <div className="rounded bg-emerald-950/30 border border-emerald-500/30 p-2 text-[11px] text-emerald-300 font-mono">
+                  Failed quick check &rarr; tries 1 model higher (<code className="text-emerald-200">movedUp</code>). Free model busy &rarr; tries next fallback.
+                </div>
+              </div>
+            </div>
+
             {/* Interactive Route Testing Sandbox */}
             <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 space-y-4">
-              <h3 className="text-sm font-semibold text-white">Live Router Test Sandbox</h3>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={testPrompt}
-                  onChange={(e) => setTestPrompt(e.target.value)}
-                  placeholder="Enter a customer query to test 3-tier routing..."
-                  className="flex-1 rounded-lg border border-gray-700 bg-gray-950 px-4 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
-                />
-                <button
-                  onClick={handleTestRoute}
-                  disabled={routingLoading}
-                  className="rounded-lg bg-indigo-600 hover:bg-indigo-500 px-5 py-2 text-xs font-semibold text-white transition disabled:opacity-40"
-                >
-                  {routingLoading ? "Evaluating..." : "Route Query"}
-                </button>
+              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <Sliders className="h-5 w-5 text-indigo-400" />
+                  <h3 className="text-sm font-semibold text-white">Live Router Test Sandbox</h3>
+                </div>
+                <span className="text-xs text-gray-400 font-mono">Real-Time Model & Cost Decision Engine</span>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex-1">
+                    <label className="block text-[11px] text-gray-400 font-medium mb-1">Customer Inquiry / Prompt:</label>
+                    <input
+                      type="text"
+                      value={testPrompt}
+                      onChange={(e) => setTestPrompt(e.target.value)}
+                      placeholder="Enter a customer query to test 3-tier routing..."
+                      className="w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-sans"
+                    />
+                  </div>
+
+                  <div className="w-full sm:w-48">
+                    <label className="block text-[11px] text-gray-400 font-medium mb-1">Task Type:</label>
+                    <select
+                      value={testTaskType}
+                      onChange={(e) => setTestTaskType(e.target.value)}
+                      className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    >
+                      <option value="write_reply">write_reply (Consultant Reply)</option>
+                      <option value="tag_job">tag_job (Router Tagging)</option>
+                      <option value="find_facts">find_facts (Knowledge Search)</option>
+                      <option value="read_screenshot">read_screenshot (Vision OCR)</option>
+                      <option value="improve_skill">improve_skill (Skill Synthesis)</option>
+                      <option value="judge_eval">judge_eval (Master Judge)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Simulation Condition Toggles */}
+                <div className="flex flex-wrap items-center gap-4 pt-1 text-xs text-gray-300">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={simulateQuickCheckFailed}
+                      onChange={(e) => setSimulateQuickCheckFailed(e.target.checked)}
+                      className="rounded border-gray-700 text-indigo-600 focus:ring-0"
+                    />
+                    <span>Fail Quick Check (Escalate 1 Model Higher)</span>
+                  </label>
+
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={simulateFreeBusy}
+                      onChange={(e) => setSimulateFreeBusy(e.target.checked)}
+                      className="rounded border-gray-700 text-amber-600 focus:ring-0"
+                    />
+                    <span>Free Model Busy / 429 (Try Next Fallback)</span>
+                  </label>
+
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={simulate100kPrompt}
+                      onChange={(e) => setSimulate100kPrompt(e.target.checked)}
+                      className="rounded border-gray-700 text-rose-600 focus:ring-0"
+                    />
+                    <span>Prompt &gt; 100k Tokens (Enforce Haiku Cap)</span>
+                  </label>
+
+                  <button
+                    onClick={handleTestRoute}
+                    disabled={routingLoading}
+                    className="ml-auto rounded-lg bg-indigo-600 hover:bg-indigo-500 px-5 py-2 text-xs font-semibold text-white transition disabled:opacity-40 shadow-sm"
+                  >
+                    {routingLoading ? "Evaluating Routing..." : "Route Model Call"}
+                  </button>
+                </div>
               </div>
 
               {routingResult && (
-                <div className="rounded-lg border border-indigo-500/30 bg-indigo-950/20 p-4 text-xs font-mono space-y-2">
-                  <div className="flex items-center justify-between text-indigo-300">
-                    <span className="font-bold">Selected Model: {routingResult.selectedModelId}</span>
-                    <span>Complexity: {routingResult.complexity}</span>
+                <div className="rounded-xl border border-indigo-500/30 bg-indigo-950/20 p-5 text-xs font-mono space-y-3 mt-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-indigo-500/20 pb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-400">Selected Model:</span>
+                      <span className="font-bold text-white text-sm bg-indigo-500/20 px-2 py-0.5 rounded border border-indigo-500/40">
+                        {routingResult.selectedModelId}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-400">Complexity:</span>
+                      <span className={`px-2 py-0.5 rounded font-bold uppercase text-[10px] ${
+                        routingResult.complexity === "high" ? "bg-rose-500/20 text-rose-300 border border-rose-500/30" :
+                        routingResult.complexity === "medium" ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" :
+                        "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                      }`}>
+                        {routingResult.complexity}
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-gray-400 text-[11px]">{routingResult.reason}</div>
-                  <div className="text-emerald-400 font-bold">
-                    Estimated Cost: ${routingResult.estimatedCostUsd.toFixed(6)}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px]">
+                    <div className="bg-gray-950/60 p-2.5 rounded border border-gray-800">
+                      <span className="text-gray-400 block">Prompt Tokens:</span>
+                      <div className="text-white font-bold mt-0.5">
+                        {routingResult.promptTokens.toLocaleString()} tokens
+                      </div>
+                      <span className="text-[10px] text-gray-500">{routingResult.tokenCountMethod}</span>
+                    </div>
+
+                    <div className="bg-gray-950/60 p-2.5 rounded border border-gray-800">
+                      <span className="text-gray-400 block">Estimated Cost:</span>
+                      <div className="text-emerald-400 font-bold mt-0.5">
+                        ${routingResult.estimatedCostUsd.toFixed(6)} USD
+                      </div>
+                      <span className="text-[10px] text-gray-500">Exact per 1M formula</span>
+                    </div>
+
+                    <div className="bg-gray-950/60 p-2.5 rounded border border-gray-800">
+                      <span className="text-gray-400 block">Escalation / Fallback:</span>
+                      <div className="mt-0.5 flex flex-wrap gap-1">
+                        {routingResult.movedUp && (
+                          <span className="rounded bg-rose-500/20 text-rose-300 px-1.5 py-0.5 text-[10px] font-bold border border-rose-500/40">
+                            Moved Up &uarr;
+                          </span>
+                        )}
+                        {routingResult.fallbackUsed && (
+                          <span className="rounded bg-amber-500/20 text-amber-300 px-1.5 py-0.5 text-[10px] font-bold border border-amber-500/40">
+                            Fallback Active
+                          </span>
+                        )}
+                        {routingResult.haikuBypassedDueTo100kRule && (
+                          <span className="rounded bg-cyan-500/20 text-cyan-300 px-1.5 py-0.5 text-[10px] font-bold border border-cyan-500/40">
+                            Haiku 100k Protected
+                          </span>
+                        )}
+                        {!routingResult.movedUp && !routingResult.fallbackUsed && !routingResult.haikuBypassedDueTo100kRule && (
+                          <span className="text-emerald-400 font-bold">Optimal Primary Route</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-gray-300 text-[11px] bg-indigo-950/40 p-2.5 rounded border border-indigo-500/20 font-sans leading-relaxed">
+                    <strong>Router Explanation:</strong> {routingResult.reason}
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Live Routing Decision Audit Logs Table */}
+            <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-emerald-400" />
+                  <div>
+                    <h3 className="text-sm font-semibold text-white">Live Routing Audit Log (Every Call Logged)</h3>
+                    <p className="text-xs text-gray-400">
+                      Telemetry tracking: job, token count, token counting method, model picked, cost, and escalation/fallback state.
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs font-mono text-gray-500">{routingLogs.length} logged decisions</span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-mono">
+                  <thead className="bg-gray-950/60 text-gray-400 border-b border-gray-800">
+                    <tr>
+                      <th className="py-2.5 px-3">Time</th>
+                      <th className="py-2.5 px-3">Job</th>
+                      <th className="py-2.5 px-3">Tokens</th>
+                      <th className="py-2.5 px-3">Counting Method</th>
+                      <th className="py-2.5 px-3">Model Picked</th>
+                      <th className="py-2.5 px-3">Cost ($)</th>
+                      <th className="py-2.5 px-3">Moved Up?</th>
+                      <th className="py-2.5 px-3">Fallback?</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-800/60 text-gray-300">
+                    {routingLogs.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="py-4 text-center text-gray-500 font-sans">
+                          No routing calls logged yet. Click &quot;Route Model Call&quot; above to log an event.
+                        </td>
+                      </tr>
+                    ) : (
+                      routingLogs.map((log: any) => (
+                        <tr key={log.id} className="hover:bg-gray-900/40 transition">
+                          <td className="py-2.5 px-3 text-gray-500 whitespace-nowrap">
+                            {new Date(log.timestamp).toLocaleTimeString()}
+                          </td>
+                          <td className="py-2.5 px-3 font-semibold text-indigo-300">{log.job}</td>
+                          <td className="py-2.5 px-3 text-gray-200">{log.promptTokens?.toLocaleString()}</td>
+                          <td className="py-2.5 px-3 text-[11px] text-gray-400">{log.tokenCountMethod}</td>
+                          <td className="py-2.5 px-3 font-bold text-white">{log.selectedModelId}</td>
+                          <td className="py-2.5 px-3 text-emerald-400 font-semibold">
+                            ${Number(log.estimatedCostUsd || 0).toFixed(6)}
+                          </td>
+                          <td className="py-2.5 px-3">
+                            {log.movedUp ? (
+                              <span className="rounded bg-rose-500/20 text-rose-300 px-1.5 py-0.5 text-[10px] font-bold">
+                                YES &uarr;
+                              </span>
+                            ) : (
+                              <span className="text-gray-500">NO</span>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-3">
+                            {log.fallbackUsed ? (
+                              <span className="rounded bg-amber-500/20 text-amber-300 px-1.5 py-0.5 text-[10px] font-bold">
+                                FALLBACK
+                              </span>
+                            ) : (
+                              <span className="text-gray-500">NO</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}

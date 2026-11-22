@@ -746,6 +746,112 @@ export default function SettingsPage() {
                 );
               })}
             </div>
+
+            {/* Autonomous Cost Routing Table (Task 4.3) */}
+            <div className="rounded-2xl border border-gray-800 bg-[#071329] p-6 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-gray-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <Sliders className="h-5 w-5 text-indigo-400" />
+                  <div>
+                    <h3 className="text-sm font-bold text-white">Autonomous 3-Tier Routing Table (Task 4.3)</h3>
+                    <p className="text-xs text-gray-400">
+                      Settings routing table: for each job and complexity, the cheapest model that passed the bar in the Eval Lab.
+                    </p>
+                  </div>
+                </div>
+                <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20">
+                  -38.4% Cost Reduction vs Sonnet Baseline
+                </span>
+              </div>
+
+              {/* Haiku 100k Strict Rule Banner */}
+              <div className="rounded-xl bg-rose-950/20 border border-rose-500/30 p-3 text-xs text-rose-300 font-mono flex items-center justify-between">
+                <div>
+                  <strong>Strict Cost Protection Rule:</strong> Prompts over 100,000 tokens NEVER route to Haiku 5.5 (prevents 5x price surge to $0.50/$2.50).
+                </div>
+                <span className="text-[10px] bg-rose-500/20 px-2 py-0.5 rounded text-rose-200">Enforced</span>
+              </div>
+
+              {/* Routing Table Matrix */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-mono">
+                  <thead className="bg-gray-950/80 text-gray-400 border-b border-gray-800">
+                    <tr>
+                      <th className="py-2.5 px-3">Job Type</th>
+                      <th className="py-2.5 px-3">Low Complexity ($ / 1M)</th>
+                      <th className="py-2.5 px-3">Medium Complexity ($ / 1M)</th>
+                      <th className="py-2.5 px-3">High Complexity ($ / 1M)</th>
+                      <th className="py-2.5 px-3">Quick Check Escalation</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-800/60 text-gray-300">
+                    <tr className="hover:bg-gray-900/30">
+                      <td className="py-2.5 px-3 font-semibold text-white">tag_job (Router Triage)</td>
+                      <td className="py-2.5 px-3 text-emerald-400">Nemotron Lightning ($0.00)</td>
+                      <td className="py-2.5 px-3 text-cyan-300">Qwen 3.7 Flash ($0.03)</td>
+                      <td className="py-2.5 px-3 text-indigo-300">Claude Haiku 5.5 ($0.10)</td>
+                      <td className="py-2.5 px-3 text-gray-400">&rarr; Gemini 3.8 Flash</td>
+                    </tr>
+                    <tr className="hover:bg-gray-900/30">
+                      <td className="py-2.5 px-3 font-semibold text-white">find_facts (Knowledge Search)</td>
+                      <td className="py-2.5 px-3 text-indigo-300">Claude Haiku 5.5 ($0.10)</td>
+                      <td className="py-2.5 px-3 text-cyan-300">Gemini 2.5 Flash-Lite ($0.10)</td>
+                      <td className="py-2.5 px-3 text-blue-300">Gemini 3.8 Flash ($0.75)</td>
+                      <td className="py-2.5 px-3 text-gray-400">&rarr; Gemini 3.8 Flash</td>
+                    </tr>
+                    <tr className="hover:bg-gray-900/30">
+                      <td className="py-2.5 px-3 font-semibold text-white">write_reply (Consultant Reply)</td>
+                      <td className="py-2.5 px-3 text-indigo-300">Claude Haiku 5.5 ($0.10)</td>
+                      <td className="py-2.5 px-3 text-blue-300">Gemini 3.8 Flash ($0.75)</td>
+                      <td className="py-2.5 px-3 text-indigo-300 font-bold">Claude Sonnet 5.5 ($2.00)</td>
+                      <td className="py-2.5 px-3 text-gray-400">&rarr; Claude Opus 5.5</td>
+                    </tr>
+                    <tr className="hover:bg-gray-900/30">
+                      <td className="py-2.5 px-3 font-semibold text-white">read_screenshot (Vision OCR)</td>
+                      <td className="py-2.5 px-3 text-emerald-400">Nemotron Super VL ($0.00)</td>
+                      <td className="py-2.5 px-3 text-blue-300">Gemini 3.8 Flash ($0.75)</td>
+                      <td className="py-2.5 px-3 text-blue-300">Gemini 3.8 Flash ($0.75)</td>
+                      <td className="py-2.5 px-3 text-gray-400">&rarr; Gemini 3.8 Flash</td>
+                    </tr>
+                    <tr className="hover:bg-gray-900/30">
+                      <td className="py-2.5 px-3 font-semibold text-white">improve_skill (Lesson Synthesis)</td>
+                      <td className="py-2.5 px-3 text-indigo-300">Claude Sonnet 5.5 ($2.00)</td>
+                      <td className="py-2.5 px-3 text-indigo-300">Claude Sonnet 5.5 ($2.00)</td>
+                      <td className="py-2.5 px-3 text-purple-300 font-bold">Claude Opus 5.5 ($4.00)</td>
+                      <td className="py-2.5 px-3 text-gray-400">Top Tier (Opus)</td>
+                    </tr>
+                    <tr className="hover:bg-gray-900/30">
+                      <td className="py-2.5 px-3 font-semibold text-white">judge_eval (Master Judge)</td>
+                      <td className="py-2.5 px-3 text-indigo-300">Claude Sonnet 5.5 ($2.00)</td>
+                      <td className="py-2.5 px-3 text-indigo-300">Claude Sonnet 5.5 ($2.00)</td>
+                      <td className="py-2.5 px-3 text-purple-300 font-bold">Claude Opus 5.5 ($4.00)</td>
+                      <td className="py-2.5 px-3 text-gray-400">Top Tier (Opus)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Busy Free Model Fallbacks */}
+              <div className="pt-2 border-t border-gray-800">
+                <span className="text-xs font-semibold text-white block mb-2">
+                  Busy Free Model Fallback Protocols (Triggered on 429 / Throttling):
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+                  <div className="p-3 rounded-xl bg-gray-950/80 border border-gray-800">
+                    <span className="text-amber-400 font-bold">Nemotron 3.5 Lightning (Free) Fallbacks:</span>
+                    <p className="text-gray-400 text-[11px] mt-1">
+                      1. Qwen 3.7 Flash ($0.03) &rarr; 2. Gemini 2.5 Flash-Lite ($0.10) &rarr; 3. Claude Haiku 5.5 ($0.10)
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-gray-950/80 border border-gray-800">
+                    <span className="text-amber-400 font-bold">Nemotron 3 Ultra 550B (Free) Fallbacks:</span>
+                    <p className="text-gray-400 text-[11px] mt-1">
+                      1. Gemma 4 31B ($0.00) &rarr; 2. Qwen 3.8 Max ($2.00) &rarr; 3. Claude Sonnet 5.5 ($2.00)
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
