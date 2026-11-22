@@ -39,6 +39,10 @@ interface MessageItem {
   citations?: CitationItem[];
   isEscalated?: boolean;
   escalationReason?: string | null;
+  isPastedThread?: boolean;
+  extractedCoreQuery?: string;
+  isTeachingTurn?: boolean;
+  teachingPhase?: "clarifying" | "confirmed";
   telemetry?: {
     latencyMs: number;
     inputTokens: number;
@@ -72,6 +76,7 @@ export default function ChatPage() {
   const [activeRoleSlug, setActiveRoleSlug] = useState("support-engineer");
   const [roles, setRoles] = useState<RoleOption[]>([]);
   const [sending, setSending] = useState(false);
+  const [showNewChatModal, setShowNewChatModal] = useState(false);
 
   // Teach / Correction Modal State
   const [teachModalOpen, setTeachModalOpen] = useState(false);
@@ -95,6 +100,7 @@ export default function ChatPage() {
       if (data.sessions && data.sessions.length > 0) {
         setSessions(data.sessions);
         setActiveSessionId(data.sessions[0].id);
+        setMode((data.sessions[0].mode as "ask" | "teach") || "ask");
         setMessages(data.sessions[0].messages || []);
       }
     } catch (e) {
@@ -114,15 +120,23 @@ export default function ChatPage() {
 
   const handleSelectSession = (session: ChatSessionItem) => {
     setActiveSessionId(session.id);
+    setMode((session.mode as "ask" | "teach") || "ask");
     setMessages(session.messages || []);
   };
 
-  const handleCreateNewSession = async () => {
+  // Task 3.1: Two Ways to Start a Chat ("Ask something" vs "Teach me")
+  const handleStartChat = async (chosenMode: "ask" | "teach") => {
+    setMode(chosenMode);
+    setShowNewChatModal(false);
     try {
+      const title =
+        chosenMode === "teach"
+          ? "Teaching & Rule Session"
+          : "Technical Consultation";
       const res = await fetch("/api/chat/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: "New Tech Consultation", mode }),
+        body: JSON.stringify({ title, mode: chosenMode }),
       });
       const data = await res.json();
       if (data.session) {
@@ -140,14 +154,14 @@ export default function ChatPage() {
     }
   };
 
-  const handleSendMessage = async () => {
-    if (!inputMessage.trim() || sending) return;
-    const userText = inputMessage;
+  const handleSendMessage = async (textOverride?: string) => {
+    const textToSend = textOverride || inputMessage;
+    if (!textToSend.trim() || sending) return;
     setInputMessage("");
     setAttachedImageName(null);
     setSending(true);
 
-    const newMsg: MessageItem = { sender: "user", content: userText };
+    const newMsg: MessageItem = { sender: "user", content: textToSend };
     setMessages((prev) => [...prev, newMsg]);
 
     try {
@@ -156,21 +170,32 @@ export default function ChatPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sessionId: activeSessionId,
-          message: userText,
+          message: textToSend,
           roleSlug: activeRoleSlug,
           mode,
         }),
       });
       const data = await res.json();
-      if (data.response) {
+      if (data.response || data.reply) {
+        const replyContent = data.reply || data.response?.reply;
         const consultantMsg: MessageItem = {
           sender: "consultant",
-          content: data.response.reply,
-          citations: data.response.citations,
-          isEscalated: data.response.isEscalated,
-          escalationReason: data.response.escalationReason,
-          telemetry: data.response.telemetry,
+          content: replyContent,
+          citations: data.response?.citations,
+          isEscalated: data.response?.isEscalated,
+          escalationReason: data.response?.escalationReason,
+          isPastedThread: data.isPastedThread,
+          extractedCoreQuery: data.extractedCoreQuery,
+          isTeachingTurn: data.teaching?.isTeachingTurn,
+          teachingPhase: data.teaching?.phase,
+          telemetry: data.response?.telemetry,
         };
+
+        // If inline teaching occurred, update active mode
+        if (data.mode === "teach") {
+          setMode("teach");
+        }
+
         setMessages((prev) => [...prev, consultantMsg]);
       }
     } catch (e) {
@@ -289,7 +314,7 @@ export default function ChatPage() {
                   Consultations
                 </span>
                 <button
-                  onClick={handleCreateNewSession}
+                  onClick={() => setShowNewChatModal(true)}
                   className="flex items-center gap-1 rounded bg-indigo-600 hover:bg-indigo-500 px-2 py-1 text-[11px] font-medium text-white transition shadow-sm"
                 >
                   <Plus className="h-3 w-3" />
@@ -309,7 +334,18 @@ export default function ChatPage() {
                         : "border-gray-800 bg-gray-900/40 hover:border-gray-700"
                     }`}
                   >
-                    <div className="text-xs font-semibold text-white truncate">{s.title}</div>
+                    <div className="flex items-center justify-between gap-1.5">
+                      <div className="text-xs font-semibold text-white truncate">{s.title}</div>
+                      <span
+                        className={`text-[9px] font-mono px-1.5 py-0.2 rounded uppercase font-bold shrink-0 ${
+                          s.mode === "teach"
+                            ? "bg-purple-950/60 text-purple-300 border border-purple-500/30"
+                            : "bg-indigo-950/60 text-indigo-300 border border-indigo-500/30"
+                        }`}
+                      >
+                        {s.mode === "teach" ? "Teach" : "Ask"}
+                      </span>
+                    </div>
                     <div className="flex items-center justify-between text-[10px] text-gray-500 font-mono mt-1.5">
                       <span>{s.messageCount || 0} messages</span>
                       <span>{new Date(s.createdAt).toLocaleDateString()}</span>
@@ -368,6 +404,108 @@ export default function ChatPage() {
 
             {/* Messages Thread */}
             <div className="flex-1 p-4 overflow-y-auto space-y-4">
+              {messages.length === 0 && (
+                <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-4">
+                  <div
+                    className={`h-12 w-12 rounded-2xl flex items-center justify-center ${
+                      mode === "teach"
+                        ? "bg-purple-950/60 text-purple-400 border border-purple-500/30"
+                        : "bg-indigo-950/60 text-indigo-400 border border-indigo-500/30"
+                    }`}
+                  >
+                    {mode === "teach" ? <GraduationCap className="h-6 w-6" /> : <Bot className="h-6 w-6" />}
+                  </div>
+
+                  <div className="max-w-md space-y-1">
+                    <h3 className="text-sm font-bold text-white">
+                      {mode === "teach" ? "Teach the Agent on Purpose" : `Ask ${currentRole.name} Something`}
+                    </h3>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      {mode === "teach"
+                        ? "Share a policy rule, correct an old answer, or demonstrate how to reply. The agent will ask clarifying questions back until it is sure it understood."
+                        : "Ask a technical question or paste a real customer email/chat thread. The agent isolates the real question and answers in the selected persona."}
+                    </p>
+                  </div>
+
+                  <div className="w-full max-w-md space-y-2 pt-2 text-left">
+                    <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider block text-center">
+                      Quick Start Prompts:
+                    </span>
+                    {mode === "teach" ? (
+                      <>
+                        <button
+                          onClick={() =>
+                            handleSendMessage(
+                              "Rule: For custom CNAME domain setups, always tell the user to disable Cloudflare orange cloud during verification."
+                            )
+                          }
+                          className="w-full rounded-lg border border-purple-500/30 bg-purple-950/20 hover:bg-purple-900/30 p-2.5 text-xs text-purple-200 transition text-left"
+                        >
+                          <span className="font-semibold block text-[11px] text-purple-300">Share a Rule:</span>
+                          &quot;For custom CNAME setups, always disable Cloudflare orange cloud during verification.&quot;
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleSendMessage(
+                              "This is wrong, the right answer is you must verify HMAC SHA-256 signatures with the shared secret."
+                            )
+                          }
+                          className="w-full rounded-lg border border-gray-800 bg-gray-900/40 hover:bg-gray-800 p-2.5 text-xs text-gray-300 transition text-left"
+                        >
+                          <span className="font-semibold block text-[11px] text-gray-400">Correct an Answer:</span>
+                          &quot;This is wrong, the right answer is verify HMAC SHA-256 signatures with secret.&quot;
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleSendMessage(
+                              "Here is how you should reply to DNS questions: always give the 3 steps first."
+                            )
+                          }
+                          className="w-full rounded-lg border border-gray-800 bg-gray-900/40 hover:bg-gray-800 p-2.5 text-xs text-gray-300 transition text-left"
+                        >
+                          <span className="font-semibold block text-[11px] text-gray-400">Show How to Reply:</span>
+                          &quot;For DNS questions, always give the 3 steps first.&quot;
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() =>
+                            handleSendMessage("How do I configure custom CNAME subdomains with SSL on Cloudflare?")
+                          }
+                          className="w-full rounded-lg border border-indigo-500/30 bg-indigo-950/20 hover:bg-indigo-900/30 p-2.5 text-xs text-indigo-200 transition text-left"
+                        >
+                          <span className="font-semibold block text-[11px] text-indigo-300">Technical Inquiry:</span>
+                          &quot;How do I configure custom CNAME subdomains with SSL on Cloudflare?&quot;
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleSendMessage(
+                              `From: client@acme.corp\nTo: support@example.com\nSubject: URGENT: SSL broken on custom domain\nHi team,\nWe migrated our subdomain over the weekend and customers are reporting a redirect loop error. How do we configure our Cloudflare SSL Full Strict mode so we do not get the redirect loop?\nThanks,\nJane Doe, Lead Engineer`
+                            )
+                          }
+                          className="w-full rounded-lg border border-gray-800 bg-gray-900/40 hover:bg-gray-800 p-2.5 text-xs text-gray-300 transition text-left font-mono"
+                        >
+                          <span className="font-semibold block text-[11px] text-gray-400 font-sans">
+                            Paste Long Customer Email:
+                          </span>
+                          &quot;From: client@acme.corp Subject: SSL broken on custom domain...&quot;
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleSendMessage("What are your enterprise subscription pricing tiers and quotation options?")
+                          }
+                          className="w-full rounded-lg border border-gray-800 bg-gray-900/40 hover:bg-gray-800 p-2.5 text-xs text-gray-300 transition text-left"
+                        >
+                          <span className="font-semibold block text-[11px] text-gray-400">Commercial Quote:</span>
+                          &quot;What are your enterprise subscription pricing tiers?&quot;
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {messages.map((m, idx) => (
                 <div key={idx} className={`flex flex-col ${m.sender === "user" ? "items-end" : "items-start"}`}>
                   {/* Human Escalation Alert Banner */}
@@ -377,8 +515,25 @@ export default function ChatPage() {
                       <div>
                         <strong className="text-red-200">Safety Valve Intercept: Escalated to Human Specialist</strong>
                         <p className="text-[11px] text-gray-300 mt-0.5">
-                          Detected reason: <code className="font-mono text-red-300 bg-red-950/60 px-1 py-0.2 rounded">{m.escalationReason || "Policy trigger"}</code>. Autonomous generation stopped; a human senior support engineer ticket was created.
+                          Detected reason:{" "}
+                          <code className="font-mono text-red-300 bg-red-950/60 px-1 py-0.2 rounded">
+                            {m.escalationReason || "Policy trigger"}
+                          </code>
+                          . Autonomous generation stopped; a human senior support engineer ticket was created.
                         </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Isolated Core Question Callout for Pasted Customer Emails */}
+                  {m.isPastedThread && m.extractedCoreQuery && (
+                    <div className="mb-2 w-full rounded-lg bg-indigo-950/50 border border-indigo-500/40 p-2.5 text-xs text-indigo-200 flex items-start gap-2 shadow-sm">
+                      <Sparkles className="h-4 w-4 text-indigo-400 mt-0.5 shrink-0" />
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-indigo-300 block tracking-wider">
+                          Isolated Core Question from Pasted Thread:
+                        </span>
+                        <span className="font-mono text-[11px]">&quot;{m.extractedCoreQuery}&quot;</span>
                       </div>
                     </div>
                   )}
@@ -390,7 +545,9 @@ export default function ChatPage() {
                         <Clock className="h-3 w-3" /> {m.telemetry.latencyMs}ms
                       </span>
                       <span>&bull;</span>
-                      <span>{m.telemetry.inputTokens}in / {m.telemetry.outputTokens}out</span>
+                      <span>
+                        {m.telemetry.inputTokens}in / {m.telemetry.outputTokens}out
+                      </span>
                       <span>&bull;</span>
                       <span className="text-emerald-400 font-semibold">${m.telemetry.costUsd.toFixed(6)}</span>
                     </div>
@@ -401,6 +558,8 @@ export default function ChatPage() {
                     className={`rounded-xl p-3.5 text-xs max-w-[90%] leading-relaxed ${
                       m.sender === "user"
                         ? "bg-indigo-600 text-white rounded-br-none"
+                        : m.isTeachingTurn
+                        ? "bg-purple-950/40 text-purple-100 border border-purple-500/40 rounded-bl-none whitespace-pre-wrap font-sans"
                         : "bg-gray-900/90 text-gray-200 border border-gray-800 rounded-bl-none whitespace-pre-wrap font-sans"
                     }`}
                   >
@@ -422,17 +581,19 @@ export default function ChatPage() {
                           >
                             <span className="font-bold">[{c.citationNumber}]</span>
                             {c.attributionBadge && (
-                              <span className={`px-1.5 py-0.2 rounded text-[9px] uppercase font-mono ${
-                                c.attributionBadge === "[instruction]"
-                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                  : c.attributionBadge === "[skill]"
-                                  ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
-                                  : c.attributionBadge === "[past_email]"
-                                  ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                                  : c.attributionBadge === "[page_url]"
-                                  ? "bg-sky-500/10 text-sky-400 border border-sky-500/20"
-                                  : "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
-                              }`}>
+                              <span
+                                className={`px-1.5 py-0.2 rounded text-[9px] uppercase font-mono ${
+                                  c.attributionBadge === "[instruction]"
+                                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                    : c.attributionBadge === "[skill]"
+                                    ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                                    : c.attributionBadge === "[past_email]"
+                                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                    : c.attributionBadge === "[page_url]"
+                                    ? "bg-sky-500/10 text-sky-400 border border-sky-500/20"
+                                    : "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
+                                }`}
+                              >
                                 {c.attributionBadge}
                               </span>
                             )}
@@ -442,10 +603,24 @@ export default function ChatPage() {
                         ))}
                       </div>
                     )}
+
+                    {/* Interactive Teaching Clarification Action Button */}
+                    {m.isTeachingTurn && m.teachingPhase === "clarifying" && (
+                      <div className="mt-3 pt-2.5 border-t border-purple-500/30 flex items-center justify-between gap-2">
+                        <span className="text-[10px] text-purple-300 font-mono">Apprentice Clarification Active</span>
+                        <button
+                          onClick={() => handleSendMessage("Yes, save this lesson")}
+                          className="flex items-center gap-1 rounded bg-purple-600 hover:bg-purple-500 px-3 py-1 text-[11px] font-semibold text-white shadow-sm transition"
+                        >
+                          <CheckCircle2 className="h-3 w-3" />
+                          <span>Confirm &amp; Save Lesson</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Consultant Action Footer: Teach / Correct Button */}
-                  {m.sender === "consultant" && (
+                  {m.sender === "consultant" && !m.isTeachingTurn && (
                     <div className="mt-1 flex items-center gap-2 text-[10px] text-gray-400">
                       <button
                         onClick={() => {
@@ -537,7 +712,7 @@ export default function ChatPage() {
               />
 
               <button
-                onClick={handleSendMessage}
+                onClick={() => handleSendMessage()}
                 disabled={!inputMessage.trim() || sending}
                 className="rounded-lg bg-indigo-600 hover:bg-indigo-500 p-2.5 text-white transition disabled:opacity-40 shadow-sm"
               >
@@ -678,6 +853,79 @@ export default function ChatPage() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* ================= TASK 3.1: TWO WAYS TO START A CHAT MODAL ================= */}
+        {showNewChatModal && (
+          <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="max-w-xl w-full rounded-2xl border border-gray-700 bg-[#0E1322] p-6 shadow-2xl space-y-5">
+              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+                <div>
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <Plus className="h-4 w-4 text-indigo-400" />
+                    <span>Start a New Consultation</span>
+                  </h3>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Task 3.1: Pick how you would like to interact with the Knowledge Brain
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowNewChatModal(false)}
+                  className="rounded p-1 text-gray-400 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Option A: Ask Something */}
+                <div
+                  onClick={() => handleStartChat("ask")}
+                  className="cursor-pointer rounded-xl border border-indigo-500/40 bg-gradient-to-br from-indigo-950/40 to-gray-950 p-5 space-y-3 hover:border-indigo-400 transition shadow-sm group text-left"
+                >
+                  <div className="h-10 w-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30 group-hover:scale-105 transition">
+                    <Bot className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white group-hover:text-indigo-300 transition">
+                      Ask something
+                    </h4>
+                    <p className="text-xs text-gray-400 mt-1 leading-relaxed">
+                      Ask a question or paste a customer&apos;s real inquiry or email. The agent isolates the real question and answers in your chosen role.
+                    </p>
+                  </div>
+                  <button className="w-full rounded-lg bg-indigo-600 hover:bg-indigo-500 py-2 text-xs font-semibold text-white shadow-sm transition">
+                    Start Ask Chat
+                  </button>
+                </div>
+
+                {/* Option B: Teach Me */}
+                <div
+                  onClick={() => handleStartChat("teach")}
+                  className="cursor-pointer rounded-xl border border-purple-500/40 bg-gradient-to-br from-purple-950/40 to-gray-950 p-5 space-y-3 hover:border-purple-400 transition shadow-sm group text-left"
+                >
+                  <div className="h-10 w-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center border border-purple-500/30 group-hover:scale-105 transition">
+                    <GraduationCap className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white group-hover:text-purple-300 transition">
+                      Teach me
+                    </h4>
+                    <p className="text-xs text-gray-400 mt-1 leading-relaxed">
+                      Teach the agent on purpose. Share a rule, correct an old answer, or demonstrate how to reply. The agent asks questions back until it is sure it understood.
+                    </p>
+                  </div>
+                  <button className="w-full rounded-lg bg-purple-600 hover:bg-purple-500 py-2 text-xs font-semibold text-white shadow-sm transition">
+                    Start Teaching Chat
+                  </button>
+                </div>
+              </div>
+
+              <div className="rounded-lg bg-gray-950 border border-gray-800 p-3 text-[11px] text-gray-400 flex items-center justify-between">
+                <span>💡 You can also teach inline inside any Ask chat by replying &quot;This is wrong, the right answer is...&quot;</span>
+              </div>
             </div>
           </div>
         )}

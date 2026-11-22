@@ -5,6 +5,7 @@ import { BUILTIN_ROLES, AgentRoleDefinition } from "./roles";
 import { calculateModelCost } from "../llm/pricing";
 import { getActiveInstructionsForRole } from "../brain/instructionsManager";
 import { pickSkillForQuery, getSkills } from "../brain/skillsManager";
+import { processTeachingTurn } from "./teachingDialog";
 
 export interface ConsultantResponse {
   answer: string;
@@ -19,6 +20,18 @@ export interface ConsultantResponse {
   isBlocked: boolean;
   activeSkillUsed?: string;
   activeInstructionsUsed?: string[];
+  isPastedThread?: boolean;
+  extractedCoreQuery?: string;
+  isTeachingTurn?: boolean;
+  teachingPhase?: "clarifying" | "confirmed";
+  clarifyingQuestions?: string[];
+  lessonDraft?: {
+    title: string;
+    category: string;
+    ruleText: string;
+    lessonMarkdown: string;
+  };
+  lessonId?: string;
   telemetry: {
     inputTokens: number;
     outputTokens: number;
@@ -54,6 +67,10 @@ export async function executeConsultantTurn(params: {
   userMessage: string;
   roleSlug: string;
   modelId?: string;
+  mode?: "ask" | "teach";
+  sessionId?: string;
+  authorEmail?: string;
+  conversationHistory?: Array<{ sender: string; content: string }>;
   roleDefinition?: AgentRoleDefinition;
   availableContexts?: Array<{
     id: string;
@@ -132,6 +149,44 @@ export async function executeConsultantTurn(params: {
   // 3. Parse Intent & Extract Core Question (Task 3.1)
   const parsed = parseCustomerInput(params.userMessage);
 
+  // 3a. Interactive Teaching Flow (Task 3.1 & Task 3.4)
+  // Triggered when session mode is 'teach', OR when user performs inline teaching ("This is wrong, the right answer is...")
+  if (params.mode === "teach" || parsed.mode === "teach") {
+    const teachingResult = await processTeachingTurn({
+      businessId: params.businessId,
+      sessionId: params.sessionId || "default-session",
+      userMessage: params.userMessage,
+      roleSlug: role.slug,
+      roleName: role.name,
+      authorEmail: params.authorEmail || "support-lead@example.com",
+      conversationHistory: params.conversationHistory || [],
+    });
+
+    return {
+      answer: teachingResult.reply,
+      reply: teachingResult.reply,
+      roleUsed: role.name,
+      modelUsed: modelId,
+      citations: [],
+      safety,
+      isUnknown: false,
+      isEscalated: false,
+      isBlocked: false,
+      isTeachingTurn: true,
+      teachingPhase: teachingResult.phase,
+      clarifyingQuestions: teachingResult.clarifyingQuestions,
+      lessonDraft: teachingResult.lessonDraft,
+      lessonId: teachingResult.lessonId,
+      telemetry: {
+        inputTokens: 350,
+        outputTokens: 120,
+        cachedTokens: 0,
+        costUsd: 0.0012,
+        latencyMs: Math.max(30, Date.now() - startTime),
+      },
+    };
+  }
+
   // 3b. Task 2.5: Role Scoped Instructions & Autonomous Skill Selection
   const activeInstructions = getActiveInstructionsForRole(params.businessId, role.slug);
   const availableSkills = getSkills(params.businessId);
@@ -208,6 +263,11 @@ export async function executeConsultantTurn(params: {
     answerContent = `[POLICY INSTRUCTION: ${matchingInstruction.title}]\n${matchingInstruction.ruleText}\n\n${answerContent}`;
   }
 
+  // Task 3.1: Pasted long customer email/chat thread annotation
+  if (parsed.isPastedThread) {
+    answerContent = `[Extracted Question: "${parsed.extractedCoreQuery}"]\n\n${answerContent}`;
+  }
+
   const inputTokens = 1200;
   const outputTokens = 250;
   const cachedTokens = 900;
@@ -225,6 +285,8 @@ export async function executeConsultantTurn(params: {
     isBlocked: false,
     activeSkillUsed: matchedSkill ? matchedSkill.name : undefined,
     activeInstructionsUsed: activeInstructions.map((i) => i.title),
+    isPastedThread: parsed.isPastedThread,
+    extractedCoreQuery: parsed.extractedCoreQuery,
     telemetry: {
       inputTokens,
       outputTokens,
