@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/auth";
-import { evaluateJobSuitability, EVAL_JOBS } from "@/services/eval/evalJobsMatrix";
+import {
+  evaluateJobSuitability,
+  EVAL_JOBS,
+  getModelStepBreakdownMatrix,
+  getLocalOnlyQualityDropReport,
+} from "@/services/eval/evalJobsMatrix";
 
 /**
- * Feature 4: The 6 Eval Jobs Matrix API
- * Returns empirical model evaluations job-by-job on Quality, Cost, and Speed.
+ * Feature 4 & Task 4.2: The 6 Eval Jobs & Step-by-Step Breakdown Matrix API
+ * Returns empirical model evaluations job-by-job on Quality, Cost, and Speed,
+ * and the Local-Only quality drop report.
  */
 export async function GET(req: NextRequest) {
   try {
@@ -14,10 +20,14 @@ export async function GET(req: NextRequest) {
     const localOnly = searchParams.get("localOnly") === "true";
 
     const evaluations = evaluateJobSuitability(jobId, localOnly);
+    const stepBreakdownMatrix = getModelStepBreakdownMatrix(localOnly);
+    const localOnlyQualityDrop = getLocalOnlyQualityDropReport();
 
     return NextResponse.json({
       success: true,
       evaluations,
+      stepBreakdownMatrix,
+      localOnlyQualityDrop,
       availableJobs: Object.values(EVAL_JOBS).map((j) => ({
         id: j.id,
         title: j.title,

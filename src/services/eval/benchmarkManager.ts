@@ -30,6 +30,8 @@ export interface BenchmarkCaseItem {
   expectedAction?: string;
 }
 
+export type BenchmarkCase = BenchmarkCaseItem;
+
 export interface BenchmarkDataset {
   version: string;
   name: string;

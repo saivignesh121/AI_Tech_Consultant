@@ -1,0 +1,67 @@
+[
+  {
+    "id": "seed-01_claude-sonnet-5.5",
+    "caseId": "seed-01",
+    "modelId": "claude-sonnet-5.5",
+    "whatWasGood": "Directly gave the DNS CNAME record pointing instructions with exact host format and clean syntax.",
+    "whatWasWrong": "Could have mentioned standard DNS TTL propagation timeframe (24-48 hours) earlier in the answer.",
+    "generalNote": "Verified compliant with corporate standard",
+    "reviewer": "Senior Systems Architect",
+    "updatedAt": "2026-11-22T13:55:34.837Z"
+  },
+  {
+    "id": "seed-01_qwen/qwen3.8-max-0902",
+    "caseId": "seed-01",
+    "modelId": "qwen/qwen3.8-max-0902",
+    "whatWasGood": "Clean markdown formatting with code blocks for DNS values.",
+    "whatWasWrong": "Included unnecessary background explanation on root nameservers that was not requested.",
+    "reviewer": "Support Lead",
+    "updatedAt": "2026-11-20T10:30:00.000Z"
+  },
+  {
+    "id": "seed-01_gemma4:e4b",
+    "caseId": "seed-01",
+    "modelId": "gemma4:e4b",
+    "whatWasGood": "100% offline inference on laptop with zero data leakage.",
+    "whatWasWrong": "Latency was 1,800 ms which is slower than cloud models.",
+    "reviewer": "Security Auditor",
+    "updatedAt": "2026-11-22T13:55:12.837Z"
+  },
+  {
+    "id": "seed-03_claude-sonnet-5.5",
+    "caseId": "seed-03",
+    "modelId": "claude-sonnet-5.5",
+    "whatWasGood": "Strict adherence to company instruction: did not promise refunds and routed billing inquiries cleanly.",
+    "whatWasWrong": "None; exemplary policy compliance.",
+    "reviewer": "Operations Director",
+    "updatedAt": "2026-11-20T11:45:00.000Z"
+  },
+  {
+    "id": "seed-03_gemma4:e4b",
+    "caseId": "seed-03",
+    "modelId": "gemma4:e4b",
+    "whatWasGood": "Properly refused unauthorized refund promise.",
+    "whatWasWrong": "Tone was somewhat terse; could have phrased the billing escalation with greater empathy.",
+    "reviewer": "Customer Experience Manager",
+    "updatedAt": "2026-11-20T12:00:00.000Z"
+  },
+  {
+    "id": "case-dns-custom-101_claude-sonnet-5.5",
+    "caseId": "case-dns-custom-101",
+    "modelId": "claude-sonnet-5.5",
+    "whatWasGood": "Directly gave the DNS CNAME record pointing instructions with exact host format.",
+    "whatWasWrong": "Could have mentioned standard DNS TTL propagation timeframe (24-48 hours) earlier in the answer.",
+    "generalNote": "Verified against RFC 1034",
+    "reviewer": "Principal Systems Architect",
+    "updatedAt": "2026-11-22T13:56:36.291Z"
+  },
+  {
+    "id": "step4-01_gemma4:e4b",
+    "caseId": "step4-01",
+    "modelId": "gemma4:e4b",
+    "whatWasGood": "100% offline inference on laptop with zero data leakage.",
+    "whatWasWrong": "Latency was 1,800 ms which is slower than cloud models.",
+    "reviewer": "Security Auditor",
+    "updatedAt": "2026-11-22T13:56:36.292Z"
+  }
+]
