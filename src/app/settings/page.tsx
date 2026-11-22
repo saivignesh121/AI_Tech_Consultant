@@ -29,6 +29,26 @@ interface ConnectionItem {
   lastTestedAt: string | null;
 }
 
+interface StepModelItem {
+  key: string;
+  label: string;
+  description: string;
+  selectedModel: string;
+  defaultModel: string;
+}
+
+interface ModelChoice {
+  id: string;
+  displayName: string;
+  provider: string;
+  inputPer1M: number;
+  outputPer1M: number;
+  supportsVision: boolean;
+  isFree: boolean;
+  isLocal: boolean;
+  primaryJob: string;
+}
+
 interface TelemetryLog {
   id: string;
   taskType: string;
@@ -62,7 +82,7 @@ interface FailedJobItem {
 }
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<"connections" | "telemetry" | "failed_jobs" | "workspace">("connections");
+  const [activeTab, setActiveTab] = useState<"connections" | "step_models" | "telemetry" | "failed_jobs" | "workspace">("connections");
 
   // --- Connections Tab State ---
   const [connections, setConnections] = useState<ConnectionItem[]>([]);
@@ -73,6 +93,13 @@ export default function SettingsPage() {
   const [testingProvider, setTestingProvider] = useState<string | null>(null);
   const [testResult, setTestResult] = useState<{ provider: string; message: string; latencyMs: number } | null>(null);
   const [localOnlyMode, setLocalOnlyMode] = useState(false);
+
+  // --- Step Models Tab State (Task 1.2: Pick model per step) ---
+  const [stepModels, setStepModels] = useState<StepModelItem[]>([]);
+  const [availableModels, setAvailableModels] = useState<ModelChoice[]>([]);
+  const [loadingStepModels, setLoadingStepModels] = useState(false);
+  const [savingStepModels, setSavingStepModels] = useState(false);
+  const [stepModelsToast, setStepModelsToast] = useState("");
 
   // --- Telemetry Tab State ---
   const [telemetryLogs, setTelemetryLogs] = useState<TelemetryLog[]>([]);
@@ -96,6 +123,7 @@ export default function SettingsPage() {
   useEffect(() => {
     fetchConnections();
     fetchLocalMode();
+    fetchStepModels();
     fetchTelemetry();
     fetchFailedJobs();
     fetch("/api/auth/context")
@@ -105,6 +133,44 @@ export default function SettingsPage() {
       })
       .catch(console.error);
   }, []);
+
+  const fetchStepModels = async () => {
+    setLoadingStepModels(true);
+    try {
+      const res = await fetch("/api/settings/step-models");
+      const data = await res.json();
+      if (data.steps) setStepModels(data.steps);
+      if (data.models) setAvailableModels(data.models);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingStepModels(false);
+    }
+  };
+
+  const handleSaveStepModels = async () => {
+    setSavingStepModels(true);
+    try {
+      const payload: Record<string, string> = {};
+      for (const s of stepModels) {
+        payload[s.key] = s.selectedModel;
+      }
+      const res = await fetch("/api/settings/step-models", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stepModels: payload }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStepModelsToast("Model per step configuration successfully saved!");
+        setTimeout(() => setStepModelsToast(""), 4000);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSavingStepModels(false);
+    }
+  };
 
   const fetchConnections = async () => {
     setLoadingConn(true);
@@ -314,12 +380,27 @@ export default function SettingsPage() {
             onClick={() => setActiveTab("connections")}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
               activeTab === "connections"
-                ? "border-indigo-500 text-indigo-400"
+                ? "border-cyan-400 text-cyan-400 font-semibold"
                 : "border-transparent text-gray-400 hover:text-gray-200"
             }`}
           >
             <Key className="h-4 w-4" />
             <span>The 5 Vault Connections</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab("step_models");
+              fetchStepModels();
+            }}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+              activeTab === "step_models"
+                ? "border-cyan-400 text-cyan-400 font-semibold"
+                : "border-transparent text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            <Zap className="h-4 w-4" />
+            <span>Model per Step Routing</span>
           </button>
 
           <button
@@ -517,7 +598,104 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* ================= TAB 2: MODEL TELEMETRY & COST LOGS (Task 1.5 & Task 4.3) ================= */}
+        {/* ================= TAB 2: MODEL PER STEP ROUTING (Task 1.2 & Feature 4) ================= */}
+        {activeTab === "step_models" && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-cyan-400" />
+                  <span>Model per Step Configuration (14 Supported Models)</span>
+                </h2>
+                <p className="text-xs text-gray-400 mt-1">
+                  Choose which model handles each operational step in your workspace. You can pick from Claude, Gemini, OpenRouter, and Laptop Ollama.
+                </p>
+              </div>
+
+              <button
+                onClick={handleSaveStepModels}
+                disabled={savingStepModels}
+                className="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold text-xs transition flex items-center gap-2 shadow-lg shadow-cyan-500/20 disabled:opacity-50 self-start sm:self-auto"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                <span>{savingStepModels ? "Saving Routing..." : "Save Step Models"}</span>
+              </button>
+            </div>
+
+            {stepModelsToast && (
+              <div className="p-3.5 rounded-xl bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 text-xs flex items-center gap-2 shadow-md">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-cyan-400" />
+                <span>{stepModelsToast}</span>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 gap-4">
+              {stepModels.map((step) => {
+                const currentModel = availableModels.find((m) => m.id === step.selectedModel);
+                const isVisionStep = step.key === "read_screenshot";
+
+                return (
+                  <div
+                    key={step.key}
+                    className="rounded-2xl border border-gray-800 bg-[#071329] p-5 space-y-4 hover:border-gray-700 transition"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-white">{step.label}</span>
+                          <span className="text-[10px] font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                            STEP: {step.key}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">{step.description}</p>
+                      </div>
+
+                      {currentModel && (
+                        <div className="flex items-center gap-2 text-[11px] font-mono shrink-0">
+                          <span className="px-2 py-0.5 rounded bg-gray-800 text-gray-300">
+                            {currentModel.provider.toUpperCase()}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded ${currentModel.isFree || currentModel.isLocal ? "bg-emerald-500/10 text-emerald-400" : "bg-cyan-500/10 text-cyan-300"}`}>
+                            {currentModel.isFree || currentModel.isLocal
+                              ? "FREE ($0.00)"
+                              : `$${currentModel.inputPer1M}/$${currentModel.outputPer1M} per 1M`}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-2">
+                      <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+                        Assigned Model:
+                      </label>
+                      <select
+                        value={step.selectedModel}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setStepModels((prev) =>
+                            prev.map((s) => (s.key === step.key ? { ...s, selectedModel: val } : s))
+                          );
+                        }}
+                        className="w-full rounded-xl border border-gray-700 bg-[#040f26] px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-400 font-sans"
+                      >
+                        {availableModels.map((m) => {
+                          const disabled = isVisionStep && !m.supportsVision;
+                          return (
+                            <option key={m.id} value={m.id} disabled={disabled}>
+                              {m.displayName} ({m.provider}) — {m.isFree || m.isLocal ? "FREE" : `$${m.inputPer1M}/$${m.outputPer1M}`} {m.supportsVision ? "• Vision Supported" : disabled ? "• (Vision Not Supported)" : ""}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ================= TAB 3: MODEL TELEMETRY & COST LOGS (Task 1.5 & Task 4.3) ================= */}
         {activeTab === "telemetry" && (
           <div className="space-y-6">
             {/* Telemetry Summary Cards */}

@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, integer, timestamp, uniqueIndex, text, boolean } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, integer, timestamp, uniqueIndex, text, boolean, jsonb } from "drizzle-orm/pg-core";
 
 export const businesses = pgTable("businesses", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -6,6 +6,7 @@ export const businesses = pgTable("businesses", {
   slug: varchar("slug", { length: 100 }).unique().notNull(),
   readinessScore: integer("readiness_score").default(0).notNull(),
   status: varchar("status", { length: 50 }).default("active").notNull(), // 'active' | 'suspended'
+  stepModels: jsonb("step_models").$type<Record<string, string>>().default({}).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
