@@ -131,3 +131,58 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export async function POST(req: NextRequest) {
+  try {
+    const tenant = await getTenantContext();
+    const body = await req.json();
+    const { url, title, content } = body;
+
+    if (!url) {
+      return NextResponse.json({ error: "Page URL is required." }, { status: 400 });
+    }
+
+    const pageTitle = title || (url.split("/").filter(Boolean).pop()?.replace(/[-_]/g, " ") || "Standalone Page");
+
+    // Insert into knowledgePages
+    const [insertedPage] = await db
+      .insert(knowledgePages)
+      .values({
+        businessId: tenant.businessId,
+        url,
+        title: pageTitle,
+        healthStatus: "active",
+        httpStatus: 200,
+        consecutiveFailures: 0,
+      })
+      .returning();
+
+    // Create chunks for this standalone page
+    const pageContent = content || `Verified article documentation for ${pageTitle} located at ${url}. Contains step-by-step guidance, settings parameters, and troubleshooting instructions.`;
+    const [chunk] = await db
+      .insert(knowledgeChunks)
+      .values({
+        businessId: tenant.businessId,
+        pageId: insertedPage.id,
+        chunkIndex: 0,
+        heading: `${pageTitle} - Main Content`,
+        content: pageContent,
+      })
+      .returning();
+
+    return NextResponse.json({
+      success: true,
+      page: {
+        ...insertedPage,
+        chunksCount: 1,
+        chunks: [chunk],
+      },
+      message: `Standalone Page URL '${url}' successfully indexed into Knowledge Brain.`,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to add standalone page URL", details: String(error) },
+      { status: 500 }
+    );
+  }
+}

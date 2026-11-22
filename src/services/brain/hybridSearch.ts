@@ -2,14 +2,36 @@ import { KnowledgeChunkItem } from "./chunker";
 
 /**
  * Hybrid Search & Reciprocal Rank Fusion (RRF) Engine
- * Task 2.7: Keyword search + Vector search combined with RRF re-ranking.
+ * Task 2.1 & Task 2.7: Keyword search + Vector search combined with RRF re-ranking.
  * Handles morphological variants ("custom" vs "customize") and minor typos.
+ * Attribution Rule: Every answer/result shows which type of knowledge it used:
+ * [sitemap], [page_url], [instruction], [skill], [past_email]
  */
+
+export type KnowledgeType = "sitemap" | "page_url" | "instruction" | "skill" | "past_email" | "email";
+
+export function getAttributionBadge(type: string): string {
+  switch (type) {
+    case "page_url":
+      return "[page_url]";
+    case "instruction":
+      return "[instruction]";
+    case "skill":
+      return "[skill]";
+    case "past_email":
+    case "email":
+      return "[past_email]";
+    case "sitemap":
+    default:
+      return "[sitemap]";
+  }
+}
 
 export interface ScoredSearchResult {
   chunk: KnowledgeChunkItem;
   pageUrl: string;
-  sourceType: "sitemap" | "page_url" | "instruction" | "skill" | "email";
+  sourceType: KnowledgeType;
+  attributionBadge: string;
   vectorScore: number;
   keywordScore: number;
   rrfScore: number;
@@ -26,12 +48,13 @@ export interface ScoredSearchResult {
 export interface CorpusItem {
   chunk: KnowledgeChunkItem;
   pageUrl: string;
-  sourceType: "sitemap" | "page_url" | "instruction" | "skill" | "email";
+  sourceType: KnowledgeType;
   simulatedVectorScore: number;
   healthStatus: "active" | "watch" | "quarantined" | "archived";
 }
 
-const DEFAULT_CORPUS: CorpusItem[] = [
+export const DEFAULT_CORPUS: CorpusItem[] = [
+  // 1. Sitemap (Knowledge Type 1)
   {
     chunk: {
       chunkIndex: 0,
@@ -43,6 +66,7 @@ const DEFAULT_CORPUS: CorpusItem[] = [
     simulatedVectorScore: 0.95,
     healthStatus: "active",
   },
+  // 2. Standalone Page URL (Knowledge Type 2)
   {
     chunk: {
       chunkIndex: 1,
@@ -50,24 +74,50 @@ const DEFAULT_CORPUS: CorpusItem[] = [
       content: "Verify HMAC SHA-256 signatures on incoming webhook deliveries using your shared signing secret.",
     },
     pageUrl: "https://support.example.com/articles/webhook-configuration",
-    sourceType: "sitemap",
+    sourceType: "page_url",
     simulatedVectorScore: 0.91,
     healthStatus: "active",
   },
+  // 3. Human Instruction (Knowledge Type 3)
   {
     chunk: {
       chunkIndex: 2,
-      heading: "PostgreSQL 18 Connection Limits & Pooling",
-      content: "Configure PgBouncer connection pooling and adjust max_connections to avoid database pool exhaustion under heavy traffic.",
+      heading: "Refund Escalation Policy",
+      content: "Never promise a refund. Send every refund question to the Billing team for human approval and review.",
     },
-    pageUrl: "https://support.example.com/articles/database-connection-limits",
-    sourceType: "sitemap",
-    simulatedVectorScore: 0.88,
+    pageUrl: "internal://instructions/refund-escalation",
+    sourceType: "instruction",
+    simulatedVectorScore: 0.94,
     healthStatus: "active",
   },
+  // 4. Standard Operating Procedure / Skill (Knowledge Type 4)
   {
     chunk: {
       chunkIndex: 3,
+      heading: "DNS & Custom CNAME Setup SOP",
+      content: "1. Log into your DNS provider. 2. Create CNAME app -> proxy.example.com. 3. Turn off orange cloud during validation. 4. Verify with dig.",
+    },
+    pageUrl: "internal://skills/dns-setup",
+    sourceType: "skill",
+    simulatedVectorScore: 0.92,
+    healthStatus: "active",
+  },
+  // 5. Past Email Thread (Knowledge Type 5)
+  {
+    chunk: {
+      chunkIndex: 4,
+      heading: "Re: Need assistance with CNAME setup for staging subdomain",
+      content: "Customer forgot to select Full (Strict) SSL mode in Cloudflare. Always remind customers to switch from Flexible to Full (Strict).",
+    },
+    pageUrl: "gmail://threads/thread-gmail-001",
+    sourceType: "past_email",
+    simulatedVectorScore: 0.89,
+    healthStatus: "active",
+  },
+  // Quarantined page (Must be filtered out)
+  {
+    chunk: {
+      chunkIndex: 5,
       heading: "Deprecated V1 API",
       content: "Legacy REST endpoint is no longer supported.",
     },
@@ -159,11 +209,13 @@ export function hybridSearchSimulate(
     const rrfScore = computeRRFScore(denseRank, sparseRank);
 
     const queryTokens = query.split(/\s+/).map(normalizeToken).filter((t) => t.length > 1);
+    const badge = getAttributionBadge(item.sourceType);
 
     return {
       chunk: item.chunk,
       pageUrl: item.pageUrl,
       sourceType: item.sourceType,
+      attributionBadge: badge,
       vectorScore: item.simulatedVectorScore,
       keywordScore: item.keywordScore,
       rrfScore: Number(rrfScore.toFixed(6)),

@@ -29,6 +29,7 @@ interface CitationItem {
   sourceTitle: string;
   url: string;
   snippet?: string;
+  attributionBadge?: string;
 }
 
 interface MessageItem {
@@ -420,6 +421,21 @@ export default function ChatPage() {
                             className="flex items-center gap-1.5 text-[11px] text-indigo-400 hover:underline font-mono truncate"
                           >
                             <span className="font-bold">[{c.citationNumber}]</span>
+                            {c.attributionBadge && (
+                              <span className={`px-1.5 py-0.2 rounded text-[9px] uppercase font-mono ${
+                                c.attributionBadge === "[instruction]"
+                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  : c.attributionBadge === "[skill]"
+                                  ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                                  : c.attributionBadge === "[past_email]"
+                                  ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                  : c.attributionBadge === "[page_url]"
+                                  ? "bg-sky-500/10 text-sky-400 border border-sky-500/20"
+                                  : "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
+                              }`}>
+                                {c.attributionBadge}
+                              </span>
+                            )}
                             <span>{c.sourceTitle}</span>
                             <ExternalLink className="h-2.5 w-2.5 flex-shrink-0" />
                           </a>
@@ -562,8 +578,14 @@ export default function ChatPage() {
                   <div className="space-y-2">
                     {recentCitations.map((c, i) => (
                       <div key={i} className="rounded-lg border border-gray-800 bg-gray-950 p-2.5 text-xs space-y-1">
-                        <div className="text-indigo-300 font-semibold font-mono text-[11px] truncate">
-                          [{c.citationNumber}] {c.sourceTitle}
+                        <div className="text-indigo-300 font-semibold font-mono text-[11px] truncate flex items-center gap-1.5">
+                          <span>[{c.citationNumber}]</span>
+                          {c.attributionBadge && (
+                            <span className="text-[9px] text-gray-400 bg-gray-900 px-1 rounded border border-gray-800">
+                              {c.attributionBadge}
+                            </span>
+                          )}
+                          <span>{c.sourceTitle}</span>
                         </div>
                         <div className="text-[10px] text-gray-500 font-mono truncate">{c.url}</div>
                       </div>
