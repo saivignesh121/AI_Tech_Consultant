@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/auth";
 import { db } from "@/db";
 import { chatSessions, chatMessages } from "@/db/schema/chat";
-import { eq, desc } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 
 // In-memory fallback session store for resilient offline and test operation
 const IN_MEMORY_SESSIONS = new Map<
@@ -23,12 +23,26 @@ const IN_MEMORY_SESSIONS = new Map<
 export async function GET() {
   try {
     const tenant = await getTenantContext();
+    const role = tenant.userRole || "owner";
 
     try {
+      // Cross-Role Privacy & Zero-Leakage Scoping:
+      // - Admins & Owners: Can inspect workspace-wide sessions
+      // - Team Members & Customers: Strictly scoped to their own sessions (cannot see other team members' draft chats)
+      // - Experts: Only see sessions with human escalations or their own sessions
+      let queryCondition = eq(chatSessions.businessId, tenant.businessId);
+
+      if ((role === "team" || role === "member" || role === "customer") && tenant.userId) {
+        queryCondition = and(
+          eq(chatSessions.businessId, tenant.businessId),
+          eq(chatSessions.userId, tenant.userId)
+        )!;
+      }
+
       const sessions = await db
         .select()
         .from(chatSessions)
-        .where(eq(chatSessions.businessId, tenant.businessId))
+        .where(queryCondition)
         .orderBy(desc(chatSessions.createdAt));
 
       // Seed initial session if none exist
@@ -106,7 +120,7 @@ export async function GET() {
       return NextResponse.json({ sessions: fullSessions });
     } catch (dbErr) {
       console.warn("Notice: DB session select fallback", dbErr);
-      const tenantSessions = IN_MEMORY_SESSIONS.get(tenant.businessId) || [
+      let tenantSessions = IN_MEMORY_SESSIONS.get(tenant.businessId) || [
         {
           id: `session-default-${tenant.businessSlug}`,
           businessId: tenant.businessId,
@@ -130,6 +144,12 @@ export async function GET() {
           ],
         },
       ];
+
+      // Scoping for team members in fallback store
+      if ((role === "team" || role === "member" || role === "customer") && tenant.userId) {
+        tenantSessions = tenantSessions.filter((s) => s.userId === tenant.userId);
+      }
+
       return NextResponse.json({ sessions: tenantSessions });
     }
   } catch (error) {

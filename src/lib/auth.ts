@@ -5,7 +5,7 @@ import { eq, and, gt } from "drizzle-orm";
 import * as argon2 from "argon2";
 import crypto from "crypto";
 
-export type UserRole = "owner" | "admin" | "team" | "expert" | "member";
+export type UserRole = "owner" | "admin" | "team" | "expert" | "member" | "customer";
 
 export interface TenantContext {
   businessId: string;

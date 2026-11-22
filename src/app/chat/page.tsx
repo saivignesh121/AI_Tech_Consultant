@@ -142,6 +142,7 @@ export default function ChatPage() {
 
   // Multimodal Attachment State
   const [attachedImageName, setAttachedImageName] = useState<string | null>(null);
+  const [currentUserRole, setCurrentUserRole] = useState<string>("owner");
 
   // Task 3.2: One-Click Citation Viewer Modal
   const [selectedCitation, setSelectedCitation] = useState<CitationItem | null>(null);
@@ -189,6 +190,14 @@ export default function ChatPage() {
     fetchSessions();
     fetchRoles();
     fetchLessons();
+    fetch("/api/auth/context")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.currentTenant?.userRole) {
+          setCurrentUserRole(d.currentTenant.userRole);
+        }
+      })
+      .catch(console.error);
   }, []);
 
   const fetchLessons = async () => {
@@ -810,20 +819,22 @@ export default function ChatPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLessonsModalOpen(true);
-                    fetchLessons();
-                  }}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-purple-500/40 bg-purple-950/40 hover:bg-purple-900/40 text-purple-300 text-[11px] font-semibold transition"
-                  title="Manage learned lessons, view Markdown files, or approve pending rules"
-                >
-                  <BookOpen className="h-3.5 w-3.5 text-purple-400" />
-                  <span>
-                    Lessons Memory ({allLessons.filter((l) => l.status === "approved" && l.isActive).length} active)
-                  </span>
-                </button>
+                {currentUserRole !== "customer" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLessonsModalOpen(true);
+                      fetchLessons();
+                    }}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-purple-500/40 bg-purple-950/40 hover:bg-purple-900/40 text-purple-300 text-[11px] font-semibold transition"
+                    title="Manage learned lessons, view Markdown files, or approve pending rules"
+                  >
+                    <BookOpen className="h-3.5 w-3.5 text-purple-400" />
+                    <span>
+                      Lessons Memory ({allLessons.filter((l) => l.status === "approved" && l.isActive).length} active)
+                    </span>
+                  </button>
+                )}
 
                 <span className="text-[10px] text-gray-400 flex items-center gap-1 font-mono">
                   <ShieldCheck className="h-3 w-3 text-cyan-400" />
@@ -1139,7 +1150,7 @@ export default function ChatPage() {
                   </div>
 
                   {/* Consultant Action Footer: Task 3.3 Trace Panel & Task 3.4 Comment Box */}
-                  {m.sender === "consultant" && !m.isTeachingTurn && (
+                  {m.sender === "consultant" && !m.isTeachingTurn && currentUserRole !== "customer" && (
                     <div className="mt-1.5 flex flex-col items-start gap-1.5 w-full">
                       {/* Action Button Row */}
                       <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-gray-400">

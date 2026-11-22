@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { role } = body;
 
-    const validRoles: UserRole[] = ["owner", "team", "expert", "admin"];
+    const validRoles: UserRole[] = ["owner", "team", "expert", "admin", "customer"];
     if (!role || !validRoles.includes(role)) {
       return NextResponse.json(
         { error: `Invalid role. Allowed roles: ${validRoles.join(", ")}` },

@@ -1,7 +1,8 @@
 import { evaluateMessageSafety, formatHumanEscalationNote, SafetyCheckResult } from "./safetyShield";
 import { parseCustomerInput } from "./intentClassifier";
 import { buildCitations, Citation, RetrievedContextItem } from "./citationMapper";
-import { BUILTIN_ROLES, AgentRoleDefinition } from "./roles";
+import { BUILTIN_ROLES, AgentRoleDefinition, canRoleSharePrice } from "./roles";
+import { maskPII } from "@/lib/pii";
 import { calculateModelCost } from "../llm/pricing";
 import { getActiveInstructionsForRole } from "../brain/instructionsManager";
 import { pickSkillForQuery, getSkills } from "../brain/skillsManager";
@@ -118,8 +119,13 @@ export async function executeConsultantTurn(params: {
     BUILTIN_ROLES.find((r) => r.slug === params.roleSlug) ||
     BUILTIN_ROLES[0];
 
+  // 0. PII Masking Layer (Privacy & Compliance Standard)
+  // Scrub credit card numbers, phone numbers, and SSNs before inference or logging
+  const { sanitized: piiSanitizedMessage, maskedCount: piiMaskedCount } = maskPII(params.userMessage);
+  const activeMessage = piiSanitizedMessage || params.userMessage;
+
   // 1. Safety Shield Evaluation (Task 3.6)
-  const safety = evaluateMessageSafety(params.userMessage);
+  const safety = evaluateMessageSafety(activeMessage);
 
   if (safety.isInjected) {
     const refusal = "I cannot fulfill this request as it violates our security and prompt safety guardrails.";
@@ -214,7 +220,7 @@ export async function executeConsultantTurn(params: {
   }
 
   // 3. Parse Intent & Extract Core Question (Task 3.1)
-  const parsed = parseCustomerInput(params.userMessage);
+  const parsed = parseCustomerInput(activeMessage);
 
   // 3a. Interactive Teaching Flow (Task 3.1 & Task 3.4)
   if (params.mode === "teach" || parsed.mode === "teach") {
@@ -362,19 +368,18 @@ export async function executeConsultantTurn(params: {
 
   // 5. Synthesize grounded answer adopting role tone & skill authorization (Task 1.4 & Task 3.2)
   let answerContent = "";
-  const isPricingInquiry = /price|pricing|cost|quote|quotation|tier|subscription|rate|how much/i.test(params.userMessage);
+  const isPricingInquiry = /price|pricing|cost|quote|quotation|tier|subscription|rate|how much|discount|deal|coupon/i.test(activeMessage);
   const coreFact = contexts.map((c, i) => `${c.content} [${i + 1}]`).join(" ");
 
   if (isPricingInquiry) {
-    // Only the AI Consultant is authorized to quote prices and suggest commercial tiers
-    const canSharePrice =
-      role.slug === "ai-consultant" ||
-      (Array.isArray(role.allowedSkills) && role.allowedSkills.includes("share_price"));
+    // Role Skill Fencing: Hardcoded logic guarantees that even if a prompt injection attempts
+    // to force the Support Engineer to offer discounts, the model runner rejects the share_price tool execution.
+    const canSharePrice = canRoleSharePrice(role.slug);
 
     if (canSharePrice) {
       answerContent = `Enterprise Pricing & Solution Quotation for: "${parsed.extractedCoreQuery}"\n\n• Standard Workspace Tier: $1,200/month (Includes pgvector hybrid search, 14-model intelligent router, dynamic citations, and 98.8% accuracy pass bar [1]).\n• Enterprise Autonomous Cluster: $3,500/month (Includes automated Opus 5.5 self-improve loops, dedicated pg-boss queues, and human escalation triage).\n\nBased on your scale, we recommend starting with the Standard Workspace Tier [1]. Shall we proceed with generating a custom quote or scheduling an architectural review?`;
     } else {
-      answerContent = `I am currently operating in the ${role.name} persona. Commercial tier pricing, tailored implementation quotes, and contract options are handled exclusively by our AI Consultant persona.\n\nPlease switch your active role to "AI Consultant" using the persona selector above to discuss pricing and next steps.`;
+      answerContent = `I am currently operating in the ${role.name} persona. Role Skill Fencing Policy: Commercial tier pricing, tailored implementation quotes, and discount requests are handled exclusively by our AI Consultant persona.\n\nPlease switch your active role to "AI Consultant" using the persona selector above to discuss pricing and next steps.`;
     }
   } else if (
     role.slug === "support-engineer" ||

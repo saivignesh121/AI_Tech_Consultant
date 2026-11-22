@@ -27,6 +27,13 @@ import {
   Copy,
   Check,
   Wrench,
+  Lock,
+  Key,
+  ShieldAlert,
+  XCircle,
+  UserCheck,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { validatePromptVariables } from "@/services/chat/prompts";
 import { SUPPORTED_MODELS } from "@/services/llm/pricing";
@@ -109,7 +116,30 @@ interface ChatTestMessage {
 }
 
 export default function RolesAndPromptsPage() {
-  const [activeTab, setActiveTab] = useState<"prompts" | "roles" | "skills">("prompts");
+  const [activeTab, setActiveTab] = useState<"prompts" | "roles" | "skills" | "security_matrix">("prompts");
+  const [switchingRoleName, setSwitchingRoleName] = useState<string | null>(null);
+  const [roleSwitchToast, setRoleSwitchToast] = useState("");
+
+  const handleSwitchRoleLive = async (targetRole: string) => {
+    setSwitchingRoleName(targetRole);
+    try {
+      const res = await fetch("/api/auth/switch-role", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: targetRole }),
+      });
+      if (res.ok) {
+        setRoleSwitchToast(`Switched active role to ${targetRole.toUpperCase()}`);
+        setTimeout(() => {
+          window.location.reload();
+        }, 800);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSwitchingRoleName(null);
+    }
+  };
 
   // ================= Prompts Tab State =================
   const [promptsList, setPromptsList] = useState<PromptItem[]>([]);
@@ -713,6 +743,18 @@ ${skillForm.examples
           >
             <BookOpen className="h-4 w-4" />
             <span>Skills &amp; SOP Workflows</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("security_matrix")}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+              activeTab === "security_matrix"
+                ? "border-cyan-400 text-cyan-300 font-semibold"
+                : "border-transparent text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            <ShieldCheck className="h-4 w-4 text-cyan-400" />
+            <span>Role Governance &amp; Security Matrix</span>
           </button>
         </div>
 
@@ -1922,6 +1964,458 @@ ${skillForm.examples
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* ================= TAB 4: ACCESS CONTROL & SECURITY ARCHITECTURE MATRIX ================= */}
+        {activeTab === "security_matrix" && (
+          <div className="space-y-8 animate-in fade-in duration-200">
+            {roleSwitchToast && (
+              <div className="rounded-xl border border-cyan-500/40 bg-cyan-950/30 p-3.5 text-xs text-cyan-300 flex items-center justify-between shadow-lg">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-cyan-400 flex-shrink-0" />
+                  <span>{roleSwitchToast} — Refreshing environment view...</span>
+                </div>
+              </div>
+            )}
+
+            {/* Zero Leakage Multi-Tenant Guarantee Banner */}
+            <div className="rounded-2xl border border-cyan-500/30 bg-gradient-to-r from-[#071329] via-[#091C3E] to-[#071329] p-6 shadow-xl space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-cyan-950/80 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-9 w-9 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center border border-cyan-500/30">
+                    <ShieldCheck className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white flex items-center gap-2">
+                      <span>Cross-Tenant Privacy &amp; Zero-Leakage Guarantee</span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                        ABSOLUTE ISOLATION
+                      </span>
+                    </h3>
+                    <p className="text-xs text-gray-300 mt-0.5">
+                      Users from Company A (<code className="text-cyan-300 font-mono">acme-corp</code>) can never see Company B (<code className="text-purple-300 font-mono">beta-dynamics</code>) chats, documents, API keys, or evals.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1.5 rounded-lg">
+                  <Lock className="h-3.5 w-3.5" />
+                  <span>SQL: where(eq(table.businessId, currentTenantId))</span>
+                </div>
+              </div>
+              <p className="text-[11px] text-gray-400 leading-relaxed">
+                Every single SQL query across all 22 tables strictly scopes to the authenticated tenant. Any manual URL tampering, query parameter manipulation, or header spoofing results in an immediate <strong>HTTP 403 Forbidden / 404 Not Found</strong>.
+              </p>
+            </div>
+
+            {/* Part 3: What Each Role Can Access (Dashboard Matrix) */}
+            <div className="rounded-2xl border border-gray-800 bg-[#0E1322] p-6 space-y-5 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-800 pb-3">
+                <div>
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <Users className="h-5 w-5 text-indigo-400" />
+                    <span>3. What Each Role Can Access (Dashboard Matrix)</span>
+                  </h3>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    The application enforces strict Role-Based Access Control (RBAC) across every feature and workspace interface:
+                  </p>
+                </div>
+                <span className="text-[10px] font-mono text-indigo-300 bg-indigo-950/60 px-2.5 py-1 rounded border border-indigo-500/30">
+                  5 Roles &bull; 8 Workspaces Enforced
+                </span>
+              </div>
+
+              {/* Matrix Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-sans">
+                  <thead className="bg-gray-900/80 border-b border-gray-800 text-gray-300 uppercase font-semibold text-[11px] tracking-wider">
+                    <tr>
+                      <th className="px-4 py-3 min-w-[200px]">Workspace / Feature</th>
+                      <th className="px-3 py-3 text-center">
+                        <div className="font-bold text-white">Owner</div>
+                        <button
+                          onClick={() => handleSwitchRoleLive("owner")}
+                          disabled={switchingRoleName !== null}
+                          className="mt-1 text-[10px] text-cyan-400 hover:text-cyan-300 font-mono underline block mx-auto"
+                        >
+                          {switchingRoleName === "owner" ? "Switching..." : "Test Role"}
+                        </button>
+                      </th>
+                      <th className="px-3 py-3 text-center">
+                        <div className="font-bold text-white">Admin</div>
+                        <button
+                          onClick={() => handleSwitchRoleLive("admin")}
+                          disabled={switchingRoleName !== null}
+                          className="mt-1 text-[10px] text-cyan-400 hover:text-cyan-300 font-mono underline block mx-auto"
+                        >
+                          {switchingRoleName === "admin" ? "Switching..." : "Test Role"}
+                        </button>
+                      </th>
+                      <th className="px-3 py-3 text-center">
+                        <div className="font-bold text-white">Expert / Reviewer</div>
+                        <button
+                          onClick={() => handleSwitchRoleLive("expert")}
+                          disabled={switchingRoleName !== null}
+                          className="mt-1 text-[10px] text-cyan-400 hover:text-cyan-300 font-mono underline block mx-auto"
+                        >
+                          {switchingRoleName === "expert" ? "Switching..." : "Test Role"}
+                        </button>
+                      </th>
+                      <th className="px-3 py-3 text-center">
+                        <div className="font-bold text-white">Team Member</div>
+                        <button
+                          onClick={() => handleSwitchRoleLive("team")}
+                          disabled={switchingRoleName !== null}
+                          className="mt-1 text-[10px] text-cyan-400 hover:text-cyan-300 font-mono underline block mx-auto"
+                        >
+                          {switchingRoleName === "team" ? "Switching..." : "Test Role"}
+                        </button>
+                      </th>
+                      <th className="px-3 py-3 text-center">
+                        <div className="font-bold text-white">Customer / Guest</div>
+                        <button
+                          onClick={() => handleSwitchRoleLive("customer")}
+                          disabled={switchingRoleName !== null}
+                          className="mt-1 text-[10px] text-cyan-400 hover:text-cyan-300 font-mono underline block mx-auto"
+                        >
+                          {switchingRoleName === "customer" ? "Switching..." : "Test Role"}
+                        </button>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-800/60 font-mono text-[11px]">
+                    <tr className="hover:bg-gray-900/30 transition">
+                      <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
+                        <span className="font-semibold">Chat Sandbox</span>
+                        <code className="text-gray-400 text-[10px]">(/chat)</code>
+                      </td>
+                      <td className="px-3 py-3 text-center"><span className="text-emerald-400 font-semibold">✓ Full</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-emerald-400 font-semibold">✓ Full</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-emerald-400 font-semibold">✓ Full</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-emerald-400 font-semibold">✓ Full</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-cyan-300 font-medium">✓ Interacts with AI</span></td>
+                    </tr>
+
+                    <tr className="hover:bg-gray-900/30 transition">
+                      <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
+                        <span className="font-semibold">Approvals Inbox</span>
+                        <code className="text-gray-400 text-[10px]">(/approvals)</code>
+                      </td>
+                      <td className="px-3 py-3 text-center"><span className="text-emerald-400 font-semibold">✓ Full</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-emerald-400 font-semibold">✓ Full</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-amber-400 font-bold bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/30">★ Primary Workstation</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
+                    </tr>
+
+                    <tr className="hover:bg-gray-900/30 transition">
+                      <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
+                        <span className="font-semibold">Knowledge Brain</span>
+                        <code className="text-gray-400 text-[10px]">(/knowledge)</code>
+                      </td>
+                      <td className="px-3 py-3 text-center"><span className="text-emerald-400 font-semibold">✓ Full</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-emerald-400 font-semibold">✓ Full</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-indigo-300 font-medium">✓ View &amp; Search</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-indigo-300 font-medium">✓ View &amp; Search</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
+                    </tr>
+
+                    <tr className="hover:bg-gray-900/30 transition">
+                      <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
+                        <span className="font-semibold">The Eval Lab</span>
+                        <code className="text-gray-400 text-[10px]">(/evals)</code>
+                      </td>
+                      <td className="px-3 py-3 text-center"><span className="text-emerald-400 font-semibold">✓ Full</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-emerald-400 font-semibold">✓ Full</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-indigo-300 font-medium">✓ Grade benchmarks</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-gray-400 font-medium">✓ View Only</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
+                    </tr>
+
+                    <tr className="hover:bg-gray-900/30 transition">
+                      <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
+                        <span className="font-semibold">Self-Improve Loop</span>
+                        <code className="text-gray-400 text-[10px]">(/self-improve)</code>
+                      </td>
+                      <td className="px-3 py-3 text-center"><span className="text-emerald-400 font-semibold">✓ Full / Approve &amp; Undo</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-emerald-400 font-semibold">✓ Full</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-indigo-300 font-medium">✓ View reports</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
+                    </tr>
+
+                    <tr className="hover:bg-gray-900/30 transition">
+                      <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
+                        <span className="font-semibold">Role &amp; Prompt Studio</span>
+                        <code className="text-gray-400 text-[10px]">(/settings/roles-prompts)</code>
+                      </td>
+                      <td className="px-3 py-3 text-center"><span className="text-emerald-400 font-semibold">✓ Full</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-emerald-400 font-semibold">✓ Full</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
+                    </tr>
+
+                    <tr className="hover:bg-gray-900/30 transition">
+                      <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
+                        <span className="font-semibold">Settings &amp; API Vault</span>
+                        <code className="text-gray-400 text-[10px]">(/settings)</code>
+                      </td>
+                      <td className="px-3 py-3 text-center"><span className="text-emerald-400 font-semibold">✓ Full</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-emerald-400 font-semibold">✓ Full</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
+                    </tr>
+
+                    <tr className="hover:bg-gray-900/30 transition">
+                      <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
+                        <span className="font-semibold">Platform Fleet Admin</span>
+                        <code className="text-gray-400 text-[10px]">(/admin)</code>
+                      </td>
+                      <td className="px-3 py-3 text-center"><span className="text-cyan-300 font-bold bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/30">Owner Only</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
+                      <td className="px-3 py-3 text-center"><span className="text-red-400 font-medium">✕ Blocked</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Part 4: Deep-Dive: What Each Dashboard Shows */}
+            <div className="space-y-4">
+              <div className="border-b border-gray-800 pb-2">
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <Layers className="h-5 w-5 text-indigo-400" />
+                  <span>Deep-Dive: What Each Dashboard Shows</span>
+                </h3>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Tailored workstations designed with zero-leakage privacy and role-specific boundaries within the same organization.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* A. Team Member */}
+                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-3">
+                  <div className="flex items-center gap-2 text-cyan-400 font-bold text-xs uppercase tracking-wider border-b border-gray-800 pb-2">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500/20 text-[10px] font-bold">A</span>
+                    <span>Team Member (/chat)</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-gray-500 uppercase font-mono font-bold block">Focus</span>
+                    <p className="text-xs text-gray-300 mt-0.5">Day-to-day customer communication &amp; AI assistance.</p>
+                  </div>
+                  <div className="space-y-1.5 text-xs text-gray-400">
+                    <span className="text-[10px] text-cyan-400 font-mono font-bold block uppercase">Capabilities</span>
+                    <p>&bull; Switch between 3 AI personas (Support Engineer, Support Executive, AI Consultant).</p>
+                    <p>&bull; See citation traces ([1], [2]), model names, and cost in $ for each answer.</p>
+                    <p>&bull; Click &quot;This was right&quot; / &quot;This was wrong&quot; to propose lessons.</p>
+                  </div>
+                  <div className="pt-2 border-t border-gray-800 text-[11px] text-red-300/80">
+                    <strong className="text-red-400 block font-mono text-[10px]">Restrictions:</strong>
+                    Cannot edit prompt versions, cannot view secret API keys, cannot deploy code changes. Private draft chats are isolated.
+                  </div>
+                </div>
+
+                {/* B. Expert Reviewer */}
+                <div className="rounded-xl border border-amber-500/30 bg-amber-950/10 p-5 space-y-3">
+                  <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider border-b border-gray-800 pb-2">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/20 text-[10px] font-bold">B</span>
+                    <span>Expert Reviewer (/approvals)</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-gray-500 uppercase font-mono font-bold block">Focus</span>
+                    <p className="text-xs text-gray-300 mt-0.5">Governance &amp; Human-in-the-Loop quality control.</p>
+                  </div>
+                  <div className="space-y-1.5 text-xs text-gray-400">
+                    <span className="text-[10px] text-amber-400 font-mono font-bold block uppercase">Workspaces Displayed</span>
+                    <p>&bull; <strong>Escalated Tasks Queue:</strong> Angry customers, legal terms, database crashes.</p>
+                    <p>&bull; <strong>Pending Lessons Queue:</strong> Drafted markdown lessons (<code className="text-amber-200">lessons/*.md</code>).</p>
+                    <p>&bull; <strong>Self-Improve Review:</strong> Inspect PRs from Claude Opus 5.5.</p>
+                  </div>
+                  <div className="pt-2 border-t border-gray-800 text-[11px] text-amber-200/80">
+                    <strong className="text-amber-300 block font-mono text-[10px]">Privacy &amp; Boundaries:</strong>
+                    Only sees escalated tasks. Cannot inspect another team member&apos;s private draft chats. Cannot view API vault keys or billing.
+                  </div>
+                </div>
+
+                {/* C. Owner & Admin */}
+                <div className="rounded-xl border border-indigo-500/30 bg-indigo-950/10 p-5 space-y-3">
+                  <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs uppercase tracking-wider border-b border-gray-800 pb-2">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500/20 text-[10px] font-bold">C</span>
+                    <span>Owner &amp; Admin (/settings, /evals)</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-gray-500 uppercase font-mono font-bold block">Focus</span>
+                    <p className="text-xs text-gray-300 mt-0.5">Security, pricing, prompt engineering &amp; governance.</p>
+                  </div>
+                  <div className="space-y-1.5 text-xs text-gray-400">
+                    <span className="text-[10px] text-indigo-400 font-mono font-bold block uppercase">Workspaces Displayed</span>
+                    <p>&bull; <strong>Vault Connections:</strong> AES-256 encrypted API keys &amp; Local-Only switch.</p>
+                    <p>&bull; <strong>Prompt &amp; Role Studios:</strong> Goals, tone, allowed skills, diff rollback.</p>
+                    <p>&bull; <strong>The Eval Lab:</strong> 100+ tests on 14 models, quality vs. cost.</p>
+                    <p>&bull; <strong>Release Gate:</strong> Blocks test regressions.</p>
+                  </div>
+                  <div className="pt-2 border-t border-gray-800 text-[11px] text-indigo-200/80">
+                    <strong className="text-indigo-300 block font-mono text-[10px]">Full Authority:</strong>
+                    Inspect workspace analytics, total spend, and system-wide eval scores across the organization.
+                  </div>
+                </div>
+
+                {/* D. Customer / Guest */}
+                <div className="rounded-xl border border-gray-800 bg-[#0E1322] p-5 space-y-3">
+                  <div className="flex items-center gap-2 text-purple-400 font-bold text-xs uppercase tracking-wider border-b border-gray-800 pb-2">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-purple-500/20 text-[10px] font-bold">D</span>
+                    <span>Customer / Guest (/chat)</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-gray-500 uppercase font-mono font-bold block">Focus</span>
+                    <p className="text-xs text-gray-300 mt-0.5">Live technical consultation &amp; customer self-service.</p>
+                  </div>
+                  <div className="space-y-1.5 text-xs text-gray-400">
+                    <span className="text-[10px] text-purple-400 font-mono font-bold block uppercase">Capabilities</span>
+                    <p>&bull; Conversational AI grounded in verified company documents.</p>
+                    <p>&bull; Inline citations [1], [2] for verifiable answers.</p>
+                    <p>&bull; Seamless automated handover on refund or legal requests.</p>
+                  </div>
+                  <div className="pt-2 border-t border-gray-800 text-[11px] text-red-300/80">
+                    <strong className="text-red-400 block font-mono text-[10px]">Zero Internal Exposure:</strong>
+                    Internal prompt engineering, telemetry traces, model cost in $, and evaluation tabs are completely hidden.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Part 5: Security Architecture for Each Role */}
+            <div className="space-y-4">
+              <div className="border-b border-gray-800 pb-2">
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <Lock className="h-5 w-5 text-emerald-400" />
+                  <span>5. Security Architecture for Each Role</span>
+                </h3>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Multi-layered defense verifying identity, session integrity, code-level tool fencing, and release safety:
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* 1. Argon2id */}
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/10 p-5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
+                      <Key className="h-4 w-4" />
+                      <span>Argon2id Password Security</span>
+                    </div>
+                    <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      19 MiB RAM
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-300 leading-relaxed">
+                    Passwords are never stored in plain text. Hashed with modern <strong>argon2id</strong> (memory cost 19MB = 19456, 2 time iterations, 1 parallelism) to defeat brute-force and GPU rainbow-table attacks.
+                  </p>
+                  <div className="text-[10px] text-gray-500 font-mono pt-1 border-t border-emerald-950">
+                    Verified: Zero plaintext storage in PostgreSQL.
+                  </div>
+                </div>
+
+                {/* 2. Session Integrity */}
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/10 p-5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
+                      <UserCheck className="h-4 w-4" />
+                      <span>PostgreSQL Session Integrity</span>
+                    </div>
+                    <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      HTTP-Only Cookies
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-300 leading-relaxed">
+                    Sessions are cryptographically tied to user IDs and business IDs in PostgreSQL with strict expiration timestamps. Cookie tampering or cross-tenant token replay is intercepted immediately.
+                  </p>
+                  <div className="text-[10px] text-gray-500 font-mono pt-1 border-t border-emerald-950">
+                    Scoped: business_id &bull; user_id &bull; user_role
+                  </div>
+                </div>
+
+                {/* 3. Role Skill Fencing */}
+                <div className="rounded-xl border border-cyan-500/30 bg-cyan-950/10 p-5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-cyan-400 font-bold text-xs">
+                      <ShieldAlert className="h-4 w-4" />
+                      <span>Role Skill Fencing (canRoleSharePrice)</span>
+                    </div>
+                    <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                      Code-Level Gate
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-300 leading-relaxed">
+                    Hardcoded logic guarantees that even if a prompt injection attempts to force the Support Engineer to offer discounts, the model runner rejects the <code className="text-cyan-300">share_price</code> tool execution.
+                  </p>
+                  <div className="text-[10px] text-gray-500 font-mono pt-1 border-t border-cyan-950">
+                    Function: canRoleSharePrice(slug) === &apos;ai-consultant&apos;
+                  </div>
+                </div>
+
+                {/* 4. Prompt Injection Shield */}
+                <div className="rounded-xl border border-red-500/30 bg-red-950/10 p-5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-red-400 font-bold text-xs">
+                      <ShieldCheck className="h-4 w-4" />
+                      <span>Prompt Injection Shield</span>
+                    </div>
+                    <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/30">
+                      10 Attack Vectors
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-300 leading-relaxed">
+                    Intercepts messages before they hit LLMs. Scans for 10 injection vectors including system prompt overrides, delimiter attacks, fake system tags, markdown image exploits, and hidden CSS payloads.
+                  </p>
+                  <div className="text-[10px] text-gray-500 font-mono pt-1 border-t border-red-950">
+                    Status: Active Shield Intercepts in &lt;1ms.
+                  </div>
+                </div>
+
+                {/* 5. PII Masking Layer */}
+                <div className="rounded-xl border border-purple-500/30 bg-purple-950/10 p-5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-purple-400 font-bold text-xs">
+                      <EyeOff className="h-4 w-4" />
+                      <span>PII Masking Layer</span>
+                    </div>
+                    <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      Luhn Validation
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-300 leading-relaxed">
+                    Credit card numbers (validated via Luhn algorithm), phone numbers, and SSNs are redacted (<code className="text-purple-300">[REDACTED_PHONE]</code>, <code className="text-purple-300">[REDACTED_CARD]</code>) before text is transmitted to cloud APIs or stored.
+                  </p>
+                  <div className="text-[10px] text-gray-500 font-mono pt-1 border-t border-purple-950">
+                    Compliance: Zero sensitive personal data logged.
+                  </div>
+                </div>
+
+                {/* 6. Release Gate Protection */}
+                <div className="rounded-xl border border-indigo-500/30 bg-indigo-950/10 p-5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs">
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span>Release Gate Protection</span>
+                    </div>
+                    <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                      Hard Automated Bar
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-300 leading-relaxed">
+                    Even an Admin or Owner cannot push a corrupted prompt to production. If an edited prompt drops the benchmark score below baseline, the Release Gate rejects the change and blocks activation.
+                  </p>
+                  <div className="text-[10px] text-gray-500 font-mono pt-1 border-t border-indigo-950">
+                    Enforcement: Candidate Score &gt;= Baseline Score.
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

@@ -26,7 +26,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
-export type AppUserRole = "owner" | "admin" | "team" | "expert" | "member";
+export type AppUserRole = "owner" | "admin" | "team" | "expert" | "member" | "customer";
 
 interface TenantContext {
   businessId: string;
@@ -181,26 +181,32 @@ export default function AppShell({
     { label: "15-Min Onboarding", href: "/onboarding", icon: Sparkles },
     { label: "Knowledge Brain", href: "/knowledge", icon: Brain },
     { label: "Ask & Teach Chat", href: "/chat", icon: MessageSquare },
-    { label: "Role & Prompt Studio", href: "/settings/roles-prompts", icon: Sparkles },
+    { label: "Role & Security Studio", href: "/settings/roles-prompts", icon: Sparkles },
     { label: "The Eval Lab", href: "/evals", icon: FlaskConical },
     { label: "Self-Improve Loop", href: "/self-improve", icon: RefreshCw },
     { label: "Approvals Inbox", href: "/approvals", icon: CheckCircle2 },
     { label: "Settings & Keys", href: "/settings", icon: Settings },
   ];
 
-  if (role === "team" || role === "member") {
+  if (role === "customer") {
+    navItems = [
+      { label: "Live AI Support", href: "/chat", icon: MessageSquare },
+    ];
+  } else if (role === "team" || role === "member") {
     navItems = [
       { label: "Dashboard Hub", href: "/", icon: LayoutDashboard },
       { label: "Ask & Teach Chat", href: "/chat", icon: MessageSquare },
-      { label: "Knowledge Brain", href: "/knowledge", icon: Brain },
+      { label: "Knowledge Brain (View)", href: "/knowledge", icon: Brain },
+      { label: "The Eval Lab (View)", href: "/evals", icon: FlaskConical },
     ];
   } else if (role === "expert") {
     navItems = [
       { label: "Dashboard Hub", href: "/", icon: LayoutDashboard },
       { label: "Approvals Inbox", href: "/approvals", icon: CheckCircle2 },
       { label: "Ask & Teach Chat", href: "/chat", icon: MessageSquare },
-      { label: "Knowledge Brain", href: "/knowledge", icon: Brain },
-      { label: "The Eval Lab", href: "/evals", icon: FlaskConical },
+      { label: "Knowledge Brain (View)", href: "/knowledge", icon: Brain },
+      { label: "The Eval Lab (Grade)", href: "/evals", icon: FlaskConical },
+      { label: "Self-Improve Reports", href: "/self-improve", icon: RefreshCw },
     ];
   } else if (role === "admin" || role === "owner") {
     navItems = [
@@ -208,7 +214,7 @@ export default function AppShell({
       { label: "15-Min Onboarding", href: "/onboarding", icon: Sparkles },
       { label: "Knowledge Brain", href: "/knowledge", icon: Brain },
       { label: "Ask & Teach Chat", href: "/chat", icon: MessageSquare },
-      { label: "Role & Prompt Studio", href: "/settings/roles-prompts", icon: Sparkles },
+      { label: "Role & Security Studio", href: "/settings/roles-prompts", icon: Sparkles },
       { label: "The Eval Lab", href: "/evals", icon: FlaskConical },
       { label: "Self-Improve Loop", href: "/self-improve", icon: RefreshCw },
       { label: "Approvals Inbox", href: "/approvals", icon: CheckCircle2 },
@@ -218,6 +224,7 @@ export default function AppShell({
   }
 
   // --- Granular Route Access Control Enforcement ---
+  const isCustomer = role === "customer";
   const isTeam = role === "team" || role === "member";
   const isExpert = role === "expert";
   const isAdmin = role === "admin";
@@ -226,17 +233,23 @@ export default function AppShell({
   let accessDeniedReason: string | null = null;
   let requiredRole: string | null = null;
 
-  if (pathname.startsWith("/admin") && !isAdmin && !isOwner) {
+  if (isCustomer && pathname !== "/chat" && pathname !== "/") {
+    accessDeniedReason = "Customer / Guest Access: As an external customer or guest, access is strictly limited to Live AI Consultation. Internal knowledge curation, evaluation labs, approval gates, and administrative settings are restricted.";
+    requiredRole = "Team Member, Expert, or Workspace Admin";
+  } else if (pathname.startsWith("/admin") && !isAdmin && !isOwner) {
     accessDeniedReason = "Platform Admin Fleet Access: Only the SaaS Operator or Workspace Admin can access the fleet governance dashboard.";
     requiredRole = "Platform Admin (admin) or Business Owner (owner)";
   } else if (pathname.startsWith("/approvals") && !isExpert && !isOwner && !isAdmin) {
-    accessDeniedReason = "Approvals Inbox Access: Only the Expert / Approver or Business Owner/Admin can review escalations, approve learned skills, and merge PRs.";
-    requiredRole = "Expert / Approver (expert) or Business Owner (owner)";
-  } else if (isTeam && (pathname.startsWith("/settings") || pathname.startsWith("/onboarding") || pathname.startsWith("/evals") || pathname.startsWith("/self-improve"))) {
-    accessDeniedReason = "Admin Privilege Required: As a Team Member (Support Specialist), you have access to Ask & Teach Chat and the Knowledge Base. Settings, API vault keys, prompt editing, and workspace onboarding are restricted to Business Owners and Admins.";
+    accessDeniedReason = "Approvals Inbox Access: Only the Expert Reviewer or Business Owner/Admin can review escalations, approve learned skills, and merge PRs. Blocked for Team Members and Customers.";
+    requiredRole = "Expert / Reviewer (expert) or Business Owner (owner)";
+  } else if (pathname.startsWith("/settings/roles-prompts") && !isAdmin && !isOwner) {
+    accessDeniedReason = "Role & Security Studio Access: Modifying agent system prompts, role definitions, or authorized skills requires Admin or Owner privileges.";
     requiredRole = "Business Owner (owner) or Admin (admin)";
-  } else if (isExpert && pathname.startsWith("/settings")) {
-    accessDeniedReason = "Admin Privilege Required: As an Expert / Approver, you have authority over escalations, lessons, and PRs. Modifying raw API vault keys or deleting the business is reserved for the Business Owner or Admin.";
+  } else if (pathname.startsWith("/settings") && !isAdmin && !isOwner) {
+    accessDeniedReason = "Settings & Vault Access: Modifying raw API vault keys, pricing routing, or business settings is reserved exclusively for Workspace Admins and Owners.";
+    requiredRole = "Business Owner (owner) or Admin (admin)";
+  } else if (isTeam && (pathname.startsWith("/self-improve") || pathname.startsWith("/onboarding"))) {
+    accessDeniedReason = "Admin Privilege Required: As a Team Member (Support Specialist), you have access to Chat, Knowledge Base (View), and Eval Lab (View Only). Self-improvement loop deployments and onboarding configurations are restricted.";
     requiredRole = "Business Owner (owner) or Admin (admin)";
   }
 
@@ -468,10 +481,11 @@ export default function AppShell({
                     </div>
                     <div className="grid grid-cols-2 gap-1.5">
                       {[
-                        { id: "owner", label: "Owner", sub: "Full Access" },
-                        { id: "team", label: "Team", sub: "Chat & Knowledge" },
-                        { id: "expert", label: "Expert", sub: "Approvals & Tasks" },
-                        { id: "admin", label: "Admin", sub: "Fleet Operator" },
+                        { id: "owner", label: "Owner", sub: "Full Workspace Access" },
+                        { id: "admin", label: "Admin", sub: "Workspace Admin" },
+                        { id: "expert", label: "Expert / Reviewer", sub: "Approvals & Tasks" },
+                        { id: "team", label: "Team Member", sub: "Chat & Knowledge" },
+                        { id: "customer", label: "Customer / Guest", sub: "Interacts with AI" },
                       ].map((r) => {
                         const isCurrent = currentTenant.userRole === r.id;
                         return (
