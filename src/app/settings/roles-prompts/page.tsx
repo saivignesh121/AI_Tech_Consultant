@@ -933,7 +933,7 @@ ${skillForm.examples
                       value={changeSummary}
                       onChange={(e) => setChangeSummary(e.target.value)}
                       placeholder="Summary of changes (e.g. Added citation grounding rule)"
-                      className="flex-1 rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="flex-1 rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                     />
 
                     <button
@@ -975,7 +975,7 @@ ${skillForm.examples
                   <select
                     value={simModel}
                     onChange={(e) => setSimModel(e.target.value)}
-                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none"
                   >
                     <option value="claude-sonnet-5.5">Claude Sonnet 5.5 ($2.00 / $10.00)</option>
                     <option value="claude-haiku-5.5">Claude Haiku 5.5 ($0.10 / $0.50)</option>
@@ -1099,7 +1099,7 @@ ${skillForm.examples
                       className={`rounded-lg px-3 py-1.5 text-xs font-medium transition whitespace-nowrap ${
                         selectedRoleId === r.id
                           ? "bg-indigo-600 text-white shadow"
-                          : "bg-white border border-[#DCE6F5] text-gray-400 hover:text-white"
+                          : "bg-white border border-[#DCE6F5] text-slate-500 hover:text-slate-900"
                       }`}
                     >
                       {r.name}
@@ -1121,7 +1121,7 @@ ${skillForm.examples
                         isBuiltin: false,
                       });
                     }}
-                    className="flex items-center gap-1 rounded-lg border border-dashed border-[#C3D3EA] bg-white px-3 py-1.5 text-xs text-gray-400 hover:text-white"
+                    className="flex items-center gap-1 rounded-lg border border-dashed border-[#C3D3EA] bg-white px-3 py-1.5 text-xs text-slate-500 hover:text-slate-900"
                   >
                     <Plus className="h-3 w-3" />
                     <span>New Role</span>
@@ -1146,7 +1146,7 @@ ${skillForm.examples
                         type="text"
                         value={roleForm.name}
                         onChange={(e) => setRoleForm({ ...roleForm, name: e.target.value })}
-                        className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                        className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                       />
                     </div>
 
@@ -1155,7 +1155,7 @@ ${skillForm.examples
                       <select
                         value={roleForm.modelId}
                         onChange={(e) => setRoleForm({ ...roleForm, modelId: e.target.value })}
-                        className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none"
+                        className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none"
                       >
                         {Object.values(SUPPORTED_MODELS).map((m) => (
                           <option key={m.id} value={m.id}>
@@ -1173,7 +1173,7 @@ ${skillForm.examples
                       value={roleForm.tone}
                       onChange={(e) => setRoleForm({ ...roleForm, tone: e.target.value })}
                       placeholder="e.g. Technical, precise, step-by-step, code-first"
-                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                     />
                   </div>
 
@@ -1184,7 +1184,7 @@ ${skillForm.examples
                       value={roleForm.goal}
                       onChange={(e) => setRoleForm({ ...roleForm, goal: e.target.value })}
                       placeholder="e.g. Provide technical step-by-step fixes..."
-                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                     />
                   </div>
 
@@ -1242,7 +1242,7 @@ ${skillForm.examples
                               className="mt-0.5 accent-cyan-400"
                             />
                             <div>
-                              <div className="font-semibold text-white flex items-center gap-1.5">
+                              <div className="font-semibold text-slate-900 flex items-center gap-1.5">
                                 <span>{sk.label}</span>
                                 {isPrice && (
                                   <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
@@ -1298,7 +1298,7 @@ ${skillForm.examples
                       value={roleForm.handoverRule || ""}
                       onChange={(e) => setRoleForm({ ...roleForm, handoverRule: e.target.value })}
                       placeholder="e.g. Escalate to human expert on angry customer sentiment > 0.8, legal threats, or refund disputes."
-                      className="w-full rounded-lg border border-[#C3D3EA] bg-white p-2.5 text-xs text-white focus:outline-none focus:border-cyan-400"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white p-2.5 text-xs text-slate-900 focus:outline-none focus:border-cyan-400"
                     />
                   </div>
 
@@ -1381,19 +1381,19 @@ ${skillForm.examples
                   <span className="text-gray-500 whitespace-nowrap">Try:</span>
                   <button
                     onClick={() => setTestInput("How do I configure custom webhook alerts?")}
-                    className="text-gray-400 hover:text-white rounded bg-[#EEF4FF] px-2 py-0.5 truncate max-w-[150px]"
+                    className="text-slate-500 hover:text-slate-900 rounded bg-[#EEF4FF] px-2 py-0.5 truncate max-w-[150px]"
                   >
                     Webhook alerts?
                   </button>
                   <button
                     onClick={() => setTestInput("I need quotation pricing for 50 users.")}
-                    className="text-gray-400 hover:text-white rounded bg-[#EEF4FF] px-2 py-0.5 truncate max-w-[150px]"
+                    className="text-slate-500 hover:text-slate-900 rounded bg-[#EEF4FF] px-2 py-0.5 truncate max-w-[150px]"
                   >
                     50-user quote?
                   </button>
                   <button
                     onClick={() => setTestInput("I am furious, give me a full refund right now!")}
-                    className="text-gray-400 hover:text-white rounded bg-[#EEF4FF] px-2 py-0.5 truncate max-w-[150px]"
+                    className="text-slate-500 hover:text-slate-900 rounded bg-[#EEF4FF] px-2 py-0.5 truncate max-w-[150px]"
                   >
                     Angry escalation test
                   </button>
@@ -1409,7 +1409,7 @@ ${skillForm.examples
                       if (e.key === "Enter") handleSendTestChat();
                     }}
                     placeholder={`Ask ${roleForm.name} a question...`}
-                    className="flex-1 rounded-lg border border-[#DCE6F5] bg-[#EEF4FF] px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                    className="flex-1 rounded-lg border border-[#DCE6F5] bg-[#EEF4FF] px-3 py-2 text-xs text-slate-900 placeholder-gray-500 focus:outline-none focus:border-indigo-500"
                   />
                   <button
                     onClick={handleSendTestChat}
@@ -1436,7 +1436,7 @@ ${skillForm.examples
                 </div>
                 <button
                   onClick={() => setSkillSuccessMsg("")}
-                  className="text-gray-400 hover:text-white text-xs"
+                  className="text-slate-500 hover:text-slate-900 text-xs"
                 >
                   &times;
                 </button>
@@ -1468,7 +1468,7 @@ ${skillForm.examples
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   onClick={handleNewSkillByHand}
-                  className="flex items-center gap-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 px-3 py-1.5 text-xs font-medium text-white transition border border-[#C3D3EA]"
+                  className="flex items-center gap-1.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition border border-[#C3D3EA]"
                 >
                   <Plus className="h-3.5 w-3.5 text-gray-300" />
                   <span>Write by Hand</span>
@@ -1508,7 +1508,7 @@ ${skillForm.examples
                       )}
                       <button
                         onClick={() => setMarkdownViewOpen(true)}
-                        className="flex items-center gap-1 text-[11px] font-mono text-gray-300 hover:text-white bg-[#EEF4FF] border border-[#DCE6F5] hover:border-[#C3D3EA] px-2.5 py-1 rounded transition"
+                        className="flex items-center gap-1 text-[11px] font-mono text-slate-600 hover:text-slate-900 bg-[#EEF4FF] border border-[#DCE6F5] hover:border-[#C3D3EA] px-2.5 py-1 rounded transition"
                       >
                         <FileText className="h-3 w-3 text-gray-400" />
                         <span>View .md</span>
@@ -1525,7 +1525,7 @@ ${skillForm.examples
                         value={skillForm.name}
                         onChange={(e) => setSkillForm({ ...skillForm, name: e.target.value })}
                         placeholder="e.g. DNS & Custom CNAME Setup"
-                        className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                        className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-gray-500 focus:outline-none focus:border-purple-500"
                       />
                     </div>
                     <div>
@@ -1535,7 +1535,7 @@ ${skillForm.examples
                         value={skillForm.slug}
                         onChange={(e) => setSkillForm({ ...skillForm, slug: e.target.value })}
                         placeholder="dns-cname-setup"
-                        className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 font-mono"
+                        className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-gray-500 focus:outline-none focus:border-purple-500 font-mono"
                       />
                     </div>
                   </div>
@@ -1547,7 +1547,7 @@ ${skillForm.examples
                       value={skillForm.description}
                       onChange={(e) => setSkillForm({ ...skillForm, description: e.target.value })}
                       placeholder="e.g. Configuring custom root domains and subdomains with Cloudflare DNS proxying."
-                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-gray-500 focus:outline-none focus:border-purple-500"
                     />
                   </div>
 
@@ -1637,7 +1637,7 @@ ${skillForm.examples
                             setSkillForm({ ...skillForm, examples: updated });
                           }}
                           placeholder="Example Customer Question (e.g. How do I configure my CNAME?)"
-                          className="w-full rounded border border-[#DCE6F5] bg-[#EEF4FF] px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-purple-500"
+                          className="w-full rounded border border-[#DCE6F5] bg-[#EEF4FF] px-3 py-1.5 text-xs text-slate-900 placeholder-gray-600 focus:outline-none focus:border-purple-500"
                         />
                         <textarea
                           rows={2}
@@ -1648,7 +1648,7 @@ ${skillForm.examples
                             setSkillForm({ ...skillForm, examples: updated });
                           }}
                           placeholder="Example Resolution Answer Grounded in this Skill..."
-                          className="w-full rounded border border-[#DCE6F5] bg-[#EEF4FF] px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-purple-500"
+                          className="w-full rounded border border-[#DCE6F5] bg-[#EEF4FF] px-3 py-1.5 text-xs text-slate-900 placeholder-gray-600 focus:outline-none focus:border-purple-500"
                         />
                       </div>
                     ))}
@@ -1661,7 +1661,7 @@ ${skillForm.examples
                       value={skillForm.changeNotes}
                       onChange={(e) => setSkillForm({ ...skillForm, changeNotes: e.target.value })}
                       placeholder="Change notes (e.g. Added Cloudflare orange-cloud proxy check)..."
-                      className="flex-1 rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                      className="flex-1 rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-slate-900 placeholder-gray-500 focus:outline-none focus:border-purple-500"
                     />
 
                     <button
@@ -1799,19 +1799,19 @@ ${skillForm.examples
                   <span className="text-gray-500 whitespace-nowrap">Try:</span>
                   <button
                     onClick={() => setSkillTestInput("How do I point my custom subdomain to the platform?")}
-                    className="text-gray-400 hover:text-white rounded bg-[#EEF4FF] px-2 py-0.5 truncate max-w-[150px]"
+                    className="text-slate-500 hover:text-slate-900 rounded bg-[#EEF4FF] px-2 py-0.5 truncate max-w-[150px]"
                   >
                     Custom subdomain?
                   </button>
                   <button
                     onClick={() => setSkillTestInput("Why is SSL verification failing on Cloudflare?")}
-                    className="text-gray-400 hover:text-white rounded bg-[#EEF4FF] px-2 py-0.5 truncate max-w-[150px]"
+                    className="text-slate-500 hover:text-slate-900 rounded bg-[#EEF4FF] px-2 py-0.5 truncate max-w-[150px]"
                   >
                     SSL verification fail?
                   </button>
                   <button
                     onClick={() => setSkillTestInput("How do I verify webhook signature HMAC SHA256?")}
-                    className="text-gray-400 hover:text-white rounded bg-[#EEF4FF] px-2 py-0.5 truncate max-w-[150px]"
+                    className="text-slate-500 hover:text-slate-900 rounded bg-[#EEF4FF] px-2 py-0.5 truncate max-w-[150px]"
                   >
                     Webhook 401 error?
                   </button>
@@ -1827,7 +1827,7 @@ ${skillForm.examples
                       if (e.key === "Enter") handleSendSkillTestChat();
                     }}
                     placeholder={`Test "${skillForm.name || "this skill"}" with a question...`}
-                    className="flex-1 rounded-lg border border-[#DCE6F5] bg-[#EEF4FF] px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                    className="flex-1 rounded-lg border border-[#DCE6F5] bg-[#EEF4FF] px-3 py-2 text-xs text-slate-900 placeholder-gray-500 focus:outline-none focus:border-purple-500"
                   />
                   <button
                     onClick={handleSendSkillTestChat}
@@ -1851,7 +1851,7 @@ ${skillForm.examples
                     </div>
                     <button
                       onClick={() => setDraftModalOpen(false)}
-                      className="text-gray-400 hover:text-white text-sm"
+                      className="text-slate-500 hover:text-slate-900 text-sm"
                     >
                       &times;
                     </button>
@@ -1869,7 +1869,7 @@ ${skillForm.examples
                         value={draftName}
                         onChange={(e) => setDraftName(e.target.value)}
                         placeholder="e.g. Stripe Webhook & Event Reconciliation"
-                        className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                        className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-gray-500 focus:outline-none focus:border-indigo-500"
                       />
                     </div>
 
@@ -1882,7 +1882,7 @@ ${skillForm.examples
                         value={draftDesc}
                         onChange={(e) => setDraftDesc(e.target.value)}
                         placeholder="e.g. Handling invoice payment failures, verifying Stripe secret signatures, and checking idempotency keys."
-                        className="w-full rounded-lg border border-[#C3D3EA] bg-white p-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                        className="w-full rounded-lg border border-[#C3D3EA] bg-white p-3 text-xs text-slate-900 placeholder-gray-500 focus:outline-none focus:border-indigo-500"
                       />
                     </div>
                   </div>
@@ -1922,7 +1922,7 @@ ${skillForm.examples
                     </div>
                     <button
                       onClick={() => setMarkdownViewOpen(false)}
-                      className="text-gray-400 hover:text-white text-sm"
+                      className="text-slate-500 hover:text-slate-900 text-sm"
                     >
                       &times;
                     </button>
@@ -2026,7 +2026,7 @@ ${skillForm.examples
                     <tr>
                       <th className="px-4 py-3 min-w-[200px]">Workspace / Feature</th>
                       <th className="px-3 py-3 text-center">
-                        <div className="font-bold text-white">Owner</div>
+                        <div className="font-bold text-slate-900">Owner</div>
                         <button
                           onClick={() => handleSwitchRoleLive("owner")}
                           disabled={switchingRoleName !== null}
@@ -2036,7 +2036,7 @@ ${skillForm.examples
                         </button>
                       </th>
                       <th className="px-3 py-3 text-center">
-                        <div className="font-bold text-white">Admin</div>
+                        <div className="font-bold text-slate-900">Admin</div>
                         <button
                           onClick={() => handleSwitchRoleLive("admin")}
                           disabled={switchingRoleName !== null}
@@ -2046,7 +2046,7 @@ ${skillForm.examples
                         </button>
                       </th>
                       <th className="px-3 py-3 text-center">
-                        <div className="font-bold text-white">Expert / Reviewer</div>
+                        <div className="font-bold text-slate-900">Expert / Reviewer</div>
                         <button
                           onClick={() => handleSwitchRoleLive("expert")}
                           disabled={switchingRoleName !== null}
@@ -2056,7 +2056,7 @@ ${skillForm.examples
                         </button>
                       </th>
                       <th className="px-3 py-3 text-center">
-                        <div className="font-bold text-white">Team Member</div>
+                        <div className="font-bold text-slate-900">Team Member</div>
                         <button
                           onClick={() => handleSwitchRoleLive("team")}
                           disabled={switchingRoleName !== null}
@@ -2066,7 +2066,7 @@ ${skillForm.examples
                         </button>
                       </th>
                       <th className="px-3 py-3 text-center">
-                        <div className="font-bold text-white">Customer / Guest</div>
+                        <div className="font-bold text-slate-900">Customer / Guest</div>
                         <button
                           onClick={() => handleSwitchRoleLive("customer")}
                           disabled={switchingRoleName !== null}
@@ -2079,7 +2079,7 @@ ${skillForm.examples
                   </thead>
                   <tbody className="divide-y divide-gray-800/60 font-mono text-[11px]">
                     <tr className="hover:bg-[#EEF4FF] transition">
-                      <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
+                      <td className="px-4 py-3 font-medium text-slate-900 font-sans flex items-center gap-2">
                         <span className="font-semibold">Chat Sandbox</span>
                         <code className="text-gray-400 text-[10px]">(/chat)</code>
                       </td>
@@ -2091,7 +2091,7 @@ ${skillForm.examples
                     </tr>
 
                     <tr className="hover:bg-[#EEF4FF] transition">
-                      <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
+                      <td className="px-4 py-3 font-medium text-slate-900 font-sans flex items-center gap-2">
                         <span className="font-semibold">Approvals Inbox</span>
                         <code className="text-gray-400 text-[10px]">(/approvals)</code>
                       </td>
@@ -2103,7 +2103,7 @@ ${skillForm.examples
                     </tr>
 
                     <tr className="hover:bg-[#EEF4FF] transition">
-                      <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
+                      <td className="px-4 py-3 font-medium text-slate-900 font-sans flex items-center gap-2">
                         <span className="font-semibold">Knowledge Brain</span>
                         <code className="text-gray-400 text-[10px]">(/knowledge)</code>
                       </td>
@@ -2115,7 +2115,7 @@ ${skillForm.examples
                     </tr>
 
                     <tr className="hover:bg-[#EEF4FF] transition">
-                      <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
+                      <td className="px-4 py-3 font-medium text-slate-900 font-sans flex items-center gap-2">
                         <span className="font-semibold">The Eval Lab</span>
                         <code className="text-gray-400 text-[10px]">(/evals)</code>
                       </td>
@@ -2127,7 +2127,7 @@ ${skillForm.examples
                     </tr>
 
                     <tr className="hover:bg-[#EEF4FF] transition">
-                      <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
+                      <td className="px-4 py-3 font-medium text-slate-900 font-sans flex items-center gap-2">
                         <span className="font-semibold">Self-Improve Loop</span>
                         <code className="text-gray-400 text-[10px]">(/self-improve)</code>
                       </td>
@@ -2139,7 +2139,7 @@ ${skillForm.examples
                     </tr>
 
                     <tr className="hover:bg-[#EEF4FF] transition">
-                      <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
+                      <td className="px-4 py-3 font-medium text-slate-900 font-sans flex items-center gap-2">
                         <span className="font-semibold">Role &amp; Prompt Studio</span>
                         <code className="text-gray-400 text-[10px]">(/settings/roles-prompts)</code>
                       </td>
@@ -2151,7 +2151,7 @@ ${skillForm.examples
                     </tr>
 
                     <tr className="hover:bg-[#EEF4FF] transition">
-                      <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
+                      <td className="px-4 py-3 font-medium text-slate-900 font-sans flex items-center gap-2">
                         <span className="font-semibold">Settings &amp; API Vault</span>
                         <code className="text-gray-400 text-[10px]">(/settings)</code>
                       </td>
@@ -2163,7 +2163,7 @@ ${skillForm.examples
                     </tr>
 
                     <tr className="hover:bg-[#EEF4FF] transition">
-                      <td className="px-4 py-3 font-medium text-white font-sans flex items-center gap-2">
+                      <td className="px-4 py-3 font-medium text-slate-900 font-sans flex items-center gap-2">
                         <span className="font-semibold">Platform Fleet Admin</span>
                         <code className="text-gray-400 text-[10px]">(/admin)</code>
                       </td>

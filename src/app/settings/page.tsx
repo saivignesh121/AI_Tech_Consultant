@@ -365,7 +365,7 @@ export default function SettingsPage() {
             <div className="flex items-center gap-2.5 rounded-xl border border-[#DCE6F5] bg-white p-2.5 px-3.5 shadow-sm">
               <Sliders className="h-4 w-4 text-cyan-400" />
               <div>
-                <div className="text-xs font-semibold text-white">View Mode</div>
+                <div className="text-xs font-semibold text-slate-900">View Mode</div>
                 <div className="text-[10px] text-gray-400">
                   {showAdvanced ? "All Developer & Queue Controls" : "Day One Essential Settings"}
                 </div>
@@ -387,7 +387,7 @@ export default function SettingsPage() {
             <div className="flex items-center gap-3 rounded-xl border border-[#DCE6F5] bg-white p-2.5 px-4 shadow-sm">
               <Server className="h-4 w-4 text-indigo-400" />
               <div>
-                <div className="text-xs font-semibold text-white">Local-Only Mode</div>
+                <div className="text-xs font-semibold text-slate-900">Local-Only Mode</div>
                 <div className="text-[10px] text-gray-400">Bypass paid APIs &rarr; Laptop Ollama</div>
               </div>
               <button
@@ -514,7 +514,7 @@ export default function SettingsPage() {
               <div className="rounded-xl border border-[#C3D3EA] bg-white/90 p-4 text-xs flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                  <span className="text-white font-medium">{testResult.message}</span>
+                  <span className="text-slate-900 font-medium">{testResult.message}</span>
                 </div>
                 <span className="font-mono text-gray-400 bg-gray-800 px-2 py-0.5 rounded text-[11px]">
                   Latency: {testResult.latencyMs}ms
@@ -547,7 +547,7 @@ export default function SettingsPage() {
                           {c.provider === "google" && "M"}
                         </div>
                         <div>
-                          <div className="text-sm font-semibold text-white flex items-center gap-2">
+                          <div className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                             {info.title}
                             {c.status === "active" && (
                               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-400 border border-emerald-500/20">
@@ -619,7 +619,7 @@ export default function SettingsPage() {
                               value={endpointInput}
                               onChange={(e) => setEndpointInput(e.target.value)}
                               placeholder="http://localhost:11434"
-                              className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs font-mono text-white focus:border-indigo-500 focus:outline-none"
+                              className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs font-mono text-slate-900 focus:border-indigo-500 focus:outline-none"
                             />
                           </div>
                         ) : (
@@ -630,7 +630,7 @@ export default function SettingsPage() {
                               value={keyInput}
                               onChange={(e) => setKeyInput(e.target.value)}
                               placeholder={info.placeholder}
-                              className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs font-mono text-white focus:border-indigo-500 focus:outline-none"
+                              className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs font-mono text-slate-900 focus:border-indigo-500 focus:outline-none"
                             />
                           </div>
                         )}
@@ -730,7 +730,7 @@ export default function SettingsPage() {
                             prev.map((s) => (s.key === step.key ? { ...s, selectedModel: val } : s))
                           );
                         }}
-                        className="w-full rounded-xl border border-[#C3D3EA] bg-white px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-400 font-sans"
+                        className="w-full rounded-xl border border-[#C3D3EA] bg-white px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-cyan-400 font-sans"
                       >
                         {availableModels.map((m) => {
                           const disabled = isVisionStep && !m.supportsVision;
@@ -786,42 +786,42 @@ export default function SettingsPage() {
                   </thead>
                   <tbody className="divide-y divide-gray-800/60 text-gray-300">
                     <tr className="hover:bg-[#EEF4FF]">
-                      <td className="py-2.5 px-3 font-semibold text-white">tag_job (Router Triage)</td>
+                      <td className="py-2.5 px-3 font-semibold text-slate-900">tag_job (Router Triage)</td>
                       <td className="py-2.5 px-3 text-emerald-400">Nemotron Lightning ($0.00)</td>
                       <td className="py-2.5 px-3 text-cyan-300">Qwen 3.7 Flash ($0.03)</td>
                       <td className="py-2.5 px-3 text-indigo-300">Claude Haiku 5.5 ($0.10)</td>
                       <td className="py-2.5 px-3 text-gray-400">&rarr; Gemini 3.8 Flash</td>
                     </tr>
                     <tr className="hover:bg-[#EEF4FF]">
-                      <td className="py-2.5 px-3 font-semibold text-white">find_facts (Knowledge Search)</td>
+                      <td className="py-2.5 px-3 font-semibold text-slate-900">find_facts (Knowledge Search)</td>
                       <td className="py-2.5 px-3 text-indigo-300">Claude Haiku 5.5 ($0.10)</td>
                       <td className="py-2.5 px-3 text-cyan-300">Gemini 2.5 Flash-Lite ($0.10)</td>
                       <td className="py-2.5 px-3 text-blue-300">Gemini 3.8 Flash ($0.75)</td>
                       <td className="py-2.5 px-3 text-gray-400">&rarr; Gemini 3.8 Flash</td>
                     </tr>
                     <tr className="hover:bg-[#EEF4FF]">
-                      <td className="py-2.5 px-3 font-semibold text-white">write_reply (Consultant Reply)</td>
+                      <td className="py-2.5 px-3 font-semibold text-slate-900">write_reply (Consultant Reply)</td>
                       <td className="py-2.5 px-3 text-indigo-300">Claude Haiku 5.5 ($0.10)</td>
                       <td className="py-2.5 px-3 text-blue-300">Gemini 3.8 Flash ($0.75)</td>
                       <td className="py-2.5 px-3 text-indigo-300 font-bold">Claude Sonnet 5.5 ($2.00)</td>
                       <td className="py-2.5 px-3 text-gray-400">&rarr; Claude Opus 5.5</td>
                     </tr>
                     <tr className="hover:bg-[#EEF4FF]">
-                      <td className="py-2.5 px-3 font-semibold text-white">read_screenshot (Vision OCR)</td>
+                      <td className="py-2.5 px-3 font-semibold text-slate-900">read_screenshot (Vision OCR)</td>
                       <td className="py-2.5 px-3 text-emerald-400">Nemotron Super VL ($0.00)</td>
                       <td className="py-2.5 px-3 text-blue-300">Gemini 3.8 Flash ($0.75)</td>
                       <td className="py-2.5 px-3 text-blue-300">Gemini 3.8 Flash ($0.75)</td>
                       <td className="py-2.5 px-3 text-gray-400">&rarr; Gemini 3.8 Flash</td>
                     </tr>
                     <tr className="hover:bg-[#EEF4FF]">
-                      <td className="py-2.5 px-3 font-semibold text-white">improve_skill (Lesson Synthesis)</td>
+                      <td className="py-2.5 px-3 font-semibold text-slate-900">improve_skill (Lesson Synthesis)</td>
                       <td className="py-2.5 px-3 text-indigo-300">Claude Sonnet 5.5 ($2.00)</td>
                       <td className="py-2.5 px-3 text-indigo-300">Claude Sonnet 5.5 ($2.00)</td>
                       <td className="py-2.5 px-3 text-purple-300 font-bold">Claude Opus 5.5 ($4.00)</td>
                       <td className="py-2.5 px-3 text-gray-400">Top Tier (Opus)</td>
                     </tr>
                     <tr className="hover:bg-[#EEF4FF]">
-                      <td className="py-2.5 px-3 font-semibold text-white">judge_eval (Master Judge)</td>
+                      <td className="py-2.5 px-3 font-semibold text-slate-900">judge_eval (Master Judge)</td>
                       <td className="py-2.5 px-3 text-indigo-300">Claude Sonnet 5.5 ($2.00)</td>
                       <td className="py-2.5 px-3 text-indigo-300">Claude Sonnet 5.5 ($2.00)</td>
                       <td className="py-2.5 px-3 text-purple-300 font-bold">Claude Opus 5.5 ($4.00)</td>
@@ -833,7 +833,7 @@ export default function SettingsPage() {
 
               {/* Busy Free Model Fallbacks */}
               <div className="pt-2 border-t border-[#DCE6F5]">
-                <span className="text-xs font-semibold text-white block mb-2">
+                <span className="text-xs font-semibold text-slate-900 block mb-2">
                   Busy Free Model Fallback Protocols (Triggered on 429 / Throttling):
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
@@ -866,7 +866,7 @@ export default function SettingsPage() {
                     <span>Total Model Spend</span>
                     <DollarSign className="h-4 w-4 text-emerald-400" />
                   </div>
-                  <div className="text-2xl font-bold text-white mt-2 font-mono">
+                  <div className="text-2xl font-bold text-slate-900 mt-2 font-mono">
                     ${telemetrySummary.totalSpendUsd.toFixed(6)}
                   </div>
                   <span className="text-[11px] text-emerald-400 mt-1 inline-block">Exact per 1M rates</span>
@@ -877,7 +877,7 @@ export default function SettingsPage() {
                     <span>Total Invocations</span>
                     <Zap className="h-4 w-4 text-indigo-400" />
                   </div>
-                  <div className="text-2xl font-bold text-white mt-2 font-mono">
+                  <div className="text-2xl font-bold text-slate-900 mt-2 font-mono">
                     {telemetrySummary.totalCalls} calls
                   </div>
                   <span className="text-[11px] text-gray-400 mt-1 inline-block">Logged with tokens & latency</span>
@@ -888,7 +888,7 @@ export default function SettingsPage() {
                     <span>Average Latency</span>
                     <Clock className="h-4 w-4 text-amber-400" />
                   </div>
-                  <div className="text-2xl font-bold text-white mt-2 font-mono">
+                  <div className="text-2xl font-bold text-slate-900 mt-2 font-mono">
                     {telemetrySummary.avgLatencyMs} ms
                   </div>
                   <span className="text-[11px] text-gray-400 mt-1 inline-block">End-to-end roundtrip</span>
@@ -931,7 +931,7 @@ export default function SettingsPage() {
 
               <button
                 onClick={() => fetchTelemetry(telemetryFilter)}
-                className="flex items-center gap-1.5 rounded-lg border border-[#C3D3EA] bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:text-white"
+                className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 shadow-xs"
               >
                 <RotateCw className="h-3 w-3" />
                 <span>Refresh Logs</span>
@@ -966,7 +966,7 @@ export default function SettingsPage() {
                             {log.taskType}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-white font-mono">{log.modelId}</td>
+                        <td className="px-4 py-3 text-slate-900 font-mono">{log.modelId}</td>
                         <td className="px-4 py-3 text-gray-400 font-mono text-[11px]">{log.roleId ? log.roleId.slice(0, 8) : "consultant"}</td>
                         <td className="px-4 py-3 text-gray-400 font-mono text-[11px]">{log.promptVersionId ? log.promptVersionId.slice(0, 8) : "v1"}</td>
                         <td className="px-4 py-3 text-right font-mono text-gray-300">
@@ -1017,7 +1017,7 @@ export default function SettingsPage() {
 
               <button
                 onClick={fetchFailedJobs}
-                className="flex items-center gap-1.5 rounded-lg border border-[#C3D3EA] bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:text-white"
+                className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 shadow-xs"
               >
                 <RotateCw className="h-3 w-3" />
                 <span>Refresh</span>
@@ -1042,7 +1042,7 @@ export default function SettingsPage() {
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2">
                         <AlertTriangle className="h-4 w-4 text-red-400" />
-                        <span className="text-sm font-semibold text-white">{job.queueName}</span>
+                        <span className="text-sm font-semibold text-slate-900">{job.queueName}</span>
                         <span className="rounded bg-red-500/10 text-red-400 text-[10px] px-2 py-0.5 font-mono border border-red-500/20">
                           Attempt #{job.retryCount + 1}
                         </span>
@@ -1089,7 +1089,7 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
                   <span className="text-gray-400">Workspace Identifier (Slug):</span>
-                  <div className="text-white font-mono font-medium mt-1">{currentTenantSlug}</div>
+                  <div className="text-slate-900 font-mono font-medium mt-1">{currentTenantSlug}</div>
                 </div>
                 <div>
                   <span className="text-gray-400">Tenant Isolation Status:</span>
@@ -1129,7 +1129,7 @@ export default function SettingsPage() {
                   </div>
 
                   <p className="text-xs text-gray-300 leading-relaxed">
-                    This will immediately purge all data belonging to <strong className="text-white">{currentTenantSlug}</strong>. To confirm, please type <code className="text-red-300 font-mono bg-red-950/60 px-1 py-0.5 rounded">{currentTenantSlug}</code> below:
+                    This will immediately purge all data belonging to <strong className="text-slate-900">{currentTenantSlug}</strong>. To confirm, please type <code className="text-red-300 font-mono bg-red-950/60 px-1 py-0.5 rounded">{currentTenantSlug}</code> below:
                   </p>
 
                   <input
@@ -1137,7 +1137,7 @@ export default function SettingsPage() {
                     value={confirmSlugInput}
                     onChange={(e) => setConfirmSlugInput(e.target.value)}
                     placeholder={currentTenantSlug}
-                    className="w-full rounded-lg border border-red-500/40 bg-white px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-red-500"
+                    className="w-full rounded-lg border border-red-500/40 bg-white px-3 py-2 text-xs font-mono text-slate-900 focus:outline-none focus:border-red-500"
                   />
 
                   <div className="flex justify-end gap-2 pt-2">
@@ -1146,7 +1146,7 @@ export default function SettingsPage() {
                         setDeleteModalOpen(false);
                         setConfirmSlugInput("");
                       }}
-                      className="rounded-lg border border-[#C3D3EA] bg-gray-800 px-4 py-2 text-xs text-gray-300 hover:text-white"
+                      className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 shadow-xs"
                     >
                       Cancel
                     </button>

@@ -1173,14 +1173,14 @@ export default function KnowledgeBrainPage() {
                 <button
                   type="button"
                   onClick={() => handleSitemapsInputChange("https://docs.stripe.com/sitemap.xml")}
-                  className="rounded bg-gray-800/80 hover:bg-gray-700 px-2.5 py-1 text-gray-300 font-mono text-[11px]"
+                  className="rounded bg-white border border-slate-200 hover:bg-slate-50 px-2.5 py-1 text-slate-700 shadow-xs font-mono text-[11px]"
                 >
                   Stripe Docs
                 </button>
                 <button
                   type="button"
                   onClick={() => handleSitemapsInputChange("https://docs.github.com/sitemap.xml")}
-                  className="rounded bg-gray-800/80 hover:bg-gray-700 px-2.5 py-1 text-gray-300 font-mono text-[11px]"
+                  className="rounded bg-white border border-slate-200 hover:bg-slate-50 px-2.5 py-1 text-slate-700 shadow-xs font-mono text-[11px]"
                 >
                   GitHub Docs
                 </button>
@@ -1196,7 +1196,7 @@ export default function KnowledgeBrainPage() {
                   value={sitemapsInput}
                   onChange={(e) => handleSitemapsInputChange(e.target.value)}
                   placeholder="https://example.com/sitemap.xml&#10;https://example.com/sitemap_index.xml"
-                  className="w-full rounded-lg border border-[#C3D3EA] bg-white px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 font-mono"
+                  className="w-full rounded-lg border border-[#C3D3EA] bg-white px-4 py-2.5 text-xs text-slate-900 placeholder-gray-500 focus:outline-none focus:border-indigo-500 font-mono"
                 />
 
                 {/* Live URL Validation Feedback List (Task 2.2: Check each URL when it is entered) */}
@@ -1235,7 +1235,7 @@ export default function KnowledgeBrainPage() {
                       ingesting ||
                       urlValidationChecks.filter((u) => u.valid).length === 0
                     }
-                    className="flex items-center gap-2 rounded-lg bg-gray-800 hover:bg-gray-700 border border-[#C3D3EA] px-4 py-2.5 text-xs font-semibold text-white transition disabled:opacity-40"
+                    className="flex items-center gap-2 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-700 shadow-xs transition disabled:opacity-40"
                   >
                     <Search className="h-4 w-4 text-cyan-400" />
                     <span>{ingesting ? "Analyzing Sitemaps..." : "Analyze Sitemaps (Pre-Flight Plan)"}</span>
@@ -1290,7 +1290,7 @@ export default function KnowledgeBrainPage() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setPreviewSummary(null)}
-                        className="rounded-lg border border-[#C3D3EA] bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:text-white"
+                        className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 shadow-xs"
                       >
                         Cancel
                       </button>
@@ -1439,7 +1439,7 @@ export default function KnowledgeBrainPage() {
                             key={idx}
                             className="bg-[#F1F6FF]/90 border border-[#DCE6F5] p-2.5 rounded space-y-1"
                           >
-                            <div className="flex items-center justify-between text-white text-[11px]">
+                            <div className="flex items-center justify-between text-slate-900 text-[11px] font-semibold">
                               <span className="truncate max-w-lg text-amber-200 font-semibold">{dup.url}</span>
                               <span className="text-[10px] bg-amber-950 text-amber-300 px-2 py-0.5 rounded border border-amber-500/30">
                                 Found in {dup.occurrences} sitemaps
@@ -1470,7 +1470,7 @@ export default function KnowledgeBrainPage() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => setPreviewSummary(null)}
-                        className="rounded-lg border border-[#C3D3EA] bg-gray-800 px-4 py-2 text-xs text-gray-300 hover:text-white"
+                        className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 shadow-xs"
                       >
                         Cancel
                       </button>
@@ -1548,7 +1548,7 @@ export default function KnowledgeBrainPage() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                 <div className="bg-[#F6F9FF] p-3 rounded-lg border border-[#DCE6F5]">
                   <span className="text-gray-400">Pages Processed:</span>
-                  <div className="text-xl font-bold text-white mt-1 font-mono">
+                  <div className="text-xl font-bold text-slate-900 mt-1 font-mono">
                     {crawlProgress?.processedUrls || 0} / {crawlProgress?.totalUrls || 0}
                   </div>
                   <span className="text-[10px] text-gray-500 mt-0.5 block">
@@ -1633,7 +1633,7 @@ export default function KnowledgeBrainPage() {
                           >
                             {act.status}
                           </span>
-                          <span className="text-white truncate">{act.title || act.url}</span>
+                          <span className="text-slate-900 font-semibold truncate">{act.title || act.url}</span>
                         </div>
                         <span className="text-purple-300 text-[10px] flex-shrink-0">{act.message}</span>
                       </div>
@@ -1670,7 +1670,7 @@ export default function KnowledgeBrainPage() {
                 <tbody className="divide-y divide-gray-800/60 font-mono">
                   {sources.map((s) => (
                     <tr key={s.id} className="hover:bg-[#EEF4FF] transition">
-                      <td className="px-4 py-3 text-white truncate max-w-sm">{s.rootUrl}</td>
+                      <td className="px-4 py-3 text-slate-900 font-medium truncate max-w-sm">{s.rootUrl}</td>
                       <td className="px-4 py-3 text-gray-400">{s.crawlSchedule}</td>
                       <td className="px-4 py-3 text-right text-gray-300">{s.pageCount}</td>
                       <td className="px-4 py-3 text-right text-purple-400">{s.chunkCount}</td>
@@ -1721,7 +1721,7 @@ export default function KnowledgeBrainPage() {
                       value={singlePageUrl}
                       onChange={(e) => setSinglePageUrl(e.target.value)}
                       placeholder="https://example.com/standalone-article"
-                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-gray-500 focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                   <div>
@@ -1731,7 +1731,7 @@ export default function KnowledgeBrainPage() {
                       value={singlePageTitle}
                       onChange={(e) => setSinglePageTitle(e.target.value)}
                       placeholder="e.g. Setting up Custom Webhooks"
-                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-gray-500 focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                 </div>
@@ -1743,7 +1743,7 @@ export default function KnowledgeBrainPage() {
                     value={singlePageContent}
                     onChange={(e) => setSinglePageContent(e.target.value)}
                     placeholder="Paste article body or documentation text to index immediately..."
-                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-gray-500 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
@@ -1751,7 +1751,7 @@ export default function KnowledgeBrainPage() {
                   <button
                     type="submit"
                     disabled={addingSinglePage || !singlePageUrl.trim()}
-                    className="flex items-center gap-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 px-4 py-2 text-xs font-semibold text-white transition disabled:opacity-50"
+                    className="flex items-center gap-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 px-4 py-2 text-xs font-semibold text-slate-900 transition disabled:opacity-50"
                   >
                     <Plus className="h-3.5 w-3.5" />
                     <span>{addingSinglePage ? "Indexing Page..." : "Index Standalone Page"}</span>
@@ -1774,7 +1774,7 @@ export default function KnowledgeBrainPage() {
                   value={pageSearchFilter}
                   onChange={(e) => setPageSearchFilter(e.target.value)}
                   placeholder="Filter pages by title or URL..."
-                  className="w-full rounded-lg border border-[#DCE6F5] bg-white px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full rounded-lg border border-[#DCE6F5] bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                 />
 
                 <div className="space-y-2 max-h-[520px] overflow-y-auto">
@@ -1895,7 +1895,7 @@ export default function KnowledgeBrainPage() {
                         setNewInstRuleText("");
                         setNewInstRole("all");
                       }}
-                      className="text-xs text-gray-400 hover:text-white px-2 py-0.5 rounded bg-gray-800"
+                      className="text-xs text-gray-400 hover:text-slate-900 px-2 py-0.5 rounded bg-gray-800"
                     >
                       Cancel Edit
                     </button>
@@ -1923,7 +1923,7 @@ export default function KnowledgeBrainPage() {
                       value={newInstTitle}
                       onChange={(e) => setNewInstTitle(e.target.value)}
                       placeholder="e.g. Refund Policy Guidance"
-                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-gray-500 focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                   <div>
@@ -1931,7 +1931,7 @@ export default function KnowledgeBrainPage() {
                     <select
                       value={newInstRole}
                       onChange={(e) => setNewInstRole(e.target.value)}
-                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                     >
                       <option value="all">All Roles</option>
                       <option value="support-engineer">Support Engineer only</option>
@@ -1949,7 +1949,7 @@ export default function KnowledgeBrainPage() {
                     value={newInstRuleText}
                     onChange={(e) => setNewInstRuleText(e.target.value)}
                     placeholder="Never promise a refund. Send every refund question to the Billing team for human approval."
-                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-gray-500 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
@@ -2110,7 +2110,7 @@ export default function KnowledgeBrainPage() {
                           : "border-[#DCE6F5] bg-white hover:bg-[#F6F9FF] hover:border-blue-200"
                       }`}
                     >
-                      <div className="text-xs font-semibold text-white">{s.name}</div>
+                      <div className="text-xs font-semibold text-slate-900">{s.name}</div>
                       <div className="text-[10px] text-gray-400 line-clamp-2 mt-1">{s.description}</div>
                       <span className="mt-2 inline-block rounded bg-purple-500/10 text-purple-400 text-[9px] font-mono px-1.5 py-0.2 border border-purple-500/20">
                         {s.slug}
@@ -2197,7 +2197,7 @@ export default function KnowledgeBrainPage() {
                   <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
                   <span>{notesSuccessMsg}</span>
                 </div>
-                <button onClick={() => setNotesSuccessMsg("")} className="text-gray-400 hover:text-white text-xs">
+                <button onClick={() => setNotesSuccessMsg("")} className="text-gray-400 hover:text-slate-900 text-xs">
                   &times;
                 </button>
               </div>
@@ -2228,7 +2228,7 @@ export default function KnowledgeBrainPage() {
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <div className="text-xs font-semibold text-white truncate max-w-[80%]">{t.subject}</div>
+                        <div className="text-xs font-semibold text-slate-900 truncate max-w-[80%]">{t.subject}</div>
                         <span className="text-[10px] text-gray-500 font-mono">
                           {t.messages ? `${t.messages.length} msg` : "1 msg"}
                         </span>
@@ -2290,7 +2290,7 @@ export default function KnowledgeBrainPage() {
                                 setMessageNoteInputs({ ...messageNoteInputs, [m.id]: e.target.value })
                               }
                               placeholder="Write note on this specific message (e.g. This reply was too long. For DNS questions, always give the 3 steps first)..."
-                              className="flex-1 rounded border border-[#DCE6F5] bg-[#EEF4FF] px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500"
+                              className="flex-1 rounded border border-[#DCE6F5] bg-[#EEF4FF] px-3 py-1.5 text-xs text-slate-900 placeholder-gray-600 focus:outline-none focus:border-amber-500"
                             />
                             <button
                               type="button"
@@ -2348,7 +2348,7 @@ export default function KnowledgeBrainPage() {
                         value={threadNotes}
                         onChange={(e) => setThreadNotes(e.target.value)}
                         placeholder="e.g. This reply was too long. For DNS questions, always give the 3 steps first."
-                        className="w-full rounded-lg border border-[#C3D3EA] bg-white p-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 font-sans"
+                        className="w-full rounded-lg border border-[#C3D3EA] bg-white p-3 text-xs text-slate-900 placeholder-gray-500 focus:outline-none focus:border-amber-500 font-sans"
                       />
 
                       <div className="flex justify-end gap-2">
@@ -2441,7 +2441,7 @@ export default function KnowledgeBrainPage() {
                             </button>
                             <button
                               onClick={() => handleRejectProposal(prop.id)}
-                              className="rounded-lg bg-gray-800 hover:bg-gray-700 px-3 py-2 text-xs font-medium text-gray-400 hover:text-white transition"
+                              className="rounded-lg bg-white border border-slate-200 hover:bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 shadow-xs transition"
                             >
                               Reject
                             </button>
@@ -2451,7 +2451,7 @@ export default function KnowledgeBrainPage() {
                         {prop.status === "approved" && (
                           <Link
                             href="/settings/roles-prompts?tab=skills"
-                            className="flex items-center gap-1.5 text-xs font-mono text-purple-300 hover:text-white bg-purple-950/50 border border-purple-500/30 px-3 py-1.5 rounded-lg transition"
+                            className="flex items-center gap-1.5 text-xs font-mono text-purple-300 hover:text-slate-900 bg-purple-950/50 border border-purple-500/30 px-3 py-1.5 rounded-lg transition"
                           >
                             <Wrench className="h-3.5 w-3.5" />
                             <span>View &amp; Edit in Settings</span>
@@ -2522,7 +2522,7 @@ export default function KnowledgeBrainPage() {
                     <span className="text-[10px] uppercase font-mono font-bold text-amber-400 block tracking-wider">
                       1. The Human Note
                     </span>
-                    <p className="text-xs font-semibold text-white">
+                    <p className="text-xs font-semibold text-slate-900">
                       &quot;{demonstration.originatingNote}&quot;
                     </p>
                     <p className="text-[11px] text-gray-400">
@@ -2535,7 +2535,7 @@ export default function KnowledgeBrainPage() {
                     <span className="text-[10px] uppercase font-mono font-bold text-purple-400 block tracking-wider">
                       2. The Skill Change It Caused
                     </span>
-                    <p className="text-xs font-semibold text-white">
+                    <p className="text-xs font-semibold text-slate-900">
                       Updated: {demonstration.skillName || "DNS & Custom CNAME Setup"}
                     </p>
                     <p className="text-[11px] text-gray-300 leading-relaxed">
@@ -2548,7 +2548,7 @@ export default function KnowledgeBrainPage() {
                     <span className="text-[10px] uppercase font-mono font-bold text-emerald-400 block tracking-wider">
                       3. Operational Impact
                     </span>
-                    <p className="text-xs font-semibold text-white">
+                    <p className="text-xs font-semibold text-slate-900">
                       Adherence to Human Preference
                     </p>
                     <p className="text-[11px] text-gray-300 leading-relaxed">
@@ -2592,7 +2592,7 @@ export default function KnowledgeBrainPage() {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <Database className="h-4 w-4 text-indigo-400" />
-                  <span className="text-xs font-semibold text-white uppercase tracking-wider">
+                  <span className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
                     Hybrid Semantic &amp; Keyword Search Engine
                   </span>
                 </div>
@@ -2608,7 +2608,7 @@ export default function KnowledgeBrainPage() {
                       className={`px-3 py-1 rounded font-medium transition ${
                         searchMode === "hybrid"
                           ? "bg-indigo-600 text-white shadow-sm"
-                          : "text-gray-400 hover:text-white"
+                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                       }`}
                     >
                       Hybrid (RRF)
@@ -2621,7 +2621,7 @@ export default function KnowledgeBrainPage() {
                       className={`px-3 py-1 rounded font-medium transition ${
                         searchMode === "vector_only"
                           ? "bg-purple-600 text-white shadow-sm"
-                          : "text-gray-400 hover:text-white"
+                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                       }`}
                     >
                       Meaning-Only (Vector)
@@ -2634,7 +2634,7 @@ export default function KnowledgeBrainPage() {
                       className={`px-3 py-1 rounded font-medium transition ${
                         searchMode === "keyword_only"
                           ? "bg-amber-600 text-white shadow-sm"
-                          : "text-gray-400 hover:text-white"
+                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                       }`}
                     >
                       Keyword-Only (BM25)
@@ -2672,7 +2672,7 @@ export default function KnowledgeBrainPage() {
                     if (e.key === "Enter") executeSearch(searchQuery);
                   }}
                   placeholder="Enter a technical question, code snippet, or policy query..."
-                  className="flex-1 rounded-lg border border-[#C3D3EA] bg-white px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                  className="flex-1 rounded-lg border border-[#C3D3EA] bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-gray-500 focus:outline-none focus:border-indigo-500"
                 />
                 <button
                   onClick={() => executeSearch(searchQuery)}
@@ -2702,7 +2702,7 @@ export default function KnowledgeBrainPage() {
                       setSearchQuery(q);
                       executeSearch(q);
                     }}
-                    className="rounded bg-gray-800/80 hover:bg-gray-700 px-2.5 py-1 text-gray-300 font-mono text-[11px] border border-[#C3D3EA]"
+                    className="rounded bg-white border border-slate-200 hover:bg-slate-50 px-2.5 py-1 text-slate-700 shadow-xs font-mono text-[11px] border border-[#C3D3EA]"
                   >
                     1. Canonical: &quot;custom domain setup&quot;
                   </button>
@@ -2787,7 +2787,7 @@ export default function KnowledgeBrainPage() {
                     </span>
                     <button
                       onClick={() => setShowBenchmarkDetails(!showBenchmarkDetails)}
-                      className="rounded border border-[#C3D3EA] bg-gray-800 px-2.5 py-1 text-xs text-gray-300 hover:text-white"
+                      className="rounded border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-700 hover:bg-slate-50 shadow-xs"
                     >
                       {showBenchmarkDetails ? "Hide Breakdown" : "View Breakdown"}
                     </button>
@@ -2816,7 +2816,7 @@ export default function KnowledgeBrainPage() {
 
                   <div className="rounded-lg border border-[#DCE6F5] bg-[#F1F6FF] p-3">
                     <span className="text-gray-400">Benchmark Test Suite</span>
-                    <div className="text-xl font-bold text-white mt-1">{evalBenchmark.totalQueries} Queries</div>
+                    <div className="text-xl font-bold text-slate-900 mt-1">{evalBenchmark.totalQueries} Queries</div>
                     <span className="text-[10px] text-gray-500">Technical, Typos &amp; Stems</span>
                   </div>
                 </div>
@@ -2833,7 +2833,7 @@ export default function KnowledgeBrainPage() {
                       {evalBenchmark.benchmarkDetails.map((item: any, idx: number) => (
                         <div key={idx} className="py-2.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                           <div className="space-y-0.5">
-                            <div className="font-mono text-white text-[11px]">&quot;{item.query}&quot;</div>
+                            <div className="font-mono text-slate-900 text-[11px]">&quot;{item.query}&quot;</div>
                             <div className="text-[10px] text-gray-500 font-mono truncate max-w-md">
                               Target: {item.expectedTargetUrl}
                             </div>
@@ -2949,7 +2949,7 @@ export default function KnowledgeBrainPage() {
                     </div>
                     <button
                       onClick={() => setShowApiModal(false)}
-                      className="rounded p-1 text-gray-400 hover:text-white"
+                      className="rounded p-1 text-gray-400 hover:text-slate-900"
                     >
                       &times;
                     </button>
@@ -2957,7 +2957,7 @@ export default function KnowledgeBrainPage() {
 
                   <div className="space-y-4 text-xs">
                     <div>
-                      <span className="font-semibold text-white">HTTP POST Endpoint:</span>
+                      <span className="font-semibold text-slate-900">HTTP POST Endpoint:</span>
                       <div className="mt-1 flex items-center justify-between rounded-lg bg-white border border-[#DCE6F5] px-3 py-2 font-mono text-gray-300">
                         <span>POST /api/brain/query</span>
                         <span className="text-[10px] text-emerald-400 uppercase font-bold">Multi-Tenant Scoped</span>
@@ -2965,7 +2965,7 @@ export default function KnowledgeBrainPage() {
                     </div>
 
                     <div>
-                      <div className="flex items-center justify-between text-xs font-semibold text-white mb-1">
+                      <div className="flex items-center justify-between text-xs font-semibold text-slate-900 mb-1">
                         <span>Ready-to-Run cURL Request:</span>
                         <button
                           onClick={() => {
@@ -2994,7 +2994,7 @@ export default function KnowledgeBrainPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <span className="font-semibold text-white">Request JSON Payload:</span>
+                        <span className="font-semibold text-slate-900">Request JSON Payload:</span>
                         <pre className="mt-1 rounded-lg bg-white border border-[#DCE6F5] p-3 font-mono text-[11px] text-gray-300 overflow-x-auto">
 {`{
   "query": string, // required
@@ -3005,7 +3005,7 @@ export default function KnowledgeBrainPage() {
                         </pre>
                       </div>
                       <div>
-                        <span className="font-semibold text-white">Knowledge Attribution Badges:</span>
+                        <span className="font-semibold text-slate-900">Knowledge Attribution Badges:</span>
                         <ul className="mt-1 space-y-1 rounded-lg bg-white border border-[#DCE6F5] p-3 font-mono text-[11px] text-gray-300">
                           <li><span className="text-indigo-400 font-bold">[sitemap]</span> : Sitemap XML Article</li>
                           <li><span className="text-sky-400 font-bold">[page_url]</span> : Standalone Web Page</li>
@@ -3033,7 +3033,7 @@ export default function KnowledgeBrainPage() {
                   <div className="flex justify-end pt-2 border-t border-[#DCE6F5]">
                     <button
                       onClick={() => setShowApiModal(false)}
-                      className="rounded-lg bg-gray-800 hover:bg-gray-700 px-4 py-2 text-xs font-semibold text-white transition"
+                      className="rounded-lg bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs transition"
                     >
                       Close Window
                     </button>
@@ -3056,7 +3056,7 @@ export default function KnowledgeBrainPage() {
                     fetchHealth();
                     fetchPages();
                   }}
-                  className="flex items-center gap-1.5 rounded-lg border border-[#C3D3EA] bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:text-white"
+                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 shadow-xs"
                 >
                   <RotateCw className="h-3 w-3" />
                   <span>Refresh Health</span>
@@ -3210,7 +3210,7 @@ export default function KnowledgeBrainPage() {
               {/* Setting 1: Recheck Schedule */}
               <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                     <Calendar className="h-4 w-4 text-indigo-400" />
                     <span>Recheck Schedule</span>
                   </div>
@@ -3239,7 +3239,7 @@ export default function KnowledgeBrainPage() {
                           : "border-[#DCE6F5] bg-[#F1F6FF]/50 text-gray-400 hover:border-[#C3D3EA]"
                       }`}
                     >
-                      <div className="font-semibold text-white flex items-center justify-between">
+                      <div className="font-semibold text-slate-900 flex items-center justify-between">
                         <span>{s.label}</span>
                         {healthPolicy.recheckSchedule === s.id && (
                           <Check className="h-3.5 w-3.5 text-indigo-400" />
@@ -3254,7 +3254,7 @@ export default function KnowledgeBrainPage() {
               {/* Setting 2: URL Health Action Policy (Threshold X & Action Rule) */}
               <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                     <Sliders className="h-4 w-4 text-emerald-400" />
                     <span>URL Health Action Rules</span>
                   </div>
@@ -3369,7 +3369,7 @@ export default function KnowledgeBrainPage() {
                       {pendingUrlsList.map((item, idx) => (
                         <tr key={idx} className="hover:bg-[#EEF4FF]">
                           <td className="px-3.5 py-2.5 font-sans">
-                            <div className="font-medium text-white truncate max-w-sm">{item.title || "Help Page"}</div>
+                            <div className="font-medium text-slate-900 truncate max-w-sm">{item.title || "Help Page"}</div>
                             <div className="text-xs text-indigo-400 font-mono truncate max-w-md">{item.url}</div>
                           </td>
                           <td className="px-3.5 py-2.5 text-center font-bold text-amber-400">
@@ -3478,7 +3478,7 @@ export default function KnowledgeBrainPage() {
                           <div className="flex items-center gap-4">
                             <div className="text-right text-[11px] font-mono">
                               <span className="text-gray-400">Processed: </span>
-                              <span className="text-white font-bold">{run.pagesProcessed}</span>
+                              <span className="text-slate-900 font-bold">{run.pagesProcessed}</span>
                               <span className="text-gray-600 mx-1">|</span>
                               <span className="text-gray-400">Embedded: </span>
                               <span className="text-indigo-400 font-bold">{run.pagesEmbedded}</span>
@@ -3594,7 +3594,7 @@ export default function KnowledgeBrainPage() {
                         {/* Total URLs Fetched Bottom Footer (Task 2.4 requirement) */}
                         <div className="px-4 py-2.5 bg-[#EEF4FF] border-t border-[#DCE6F5] flex items-center justify-between text-xs font-mono">
                           <span className="text-gray-400">
-                            Total URLs Fetched: <strong className="text-white">{run.totalUrlsFetched} URLs</strong>
+                            Total URLs Fetched: <strong className="text-slate-900">{run.totalUrlsFetched} URLs</strong>
                           </span>
                           <span className="text-gray-500 text-[11px]">
                             {run.pagesProcessed} Processed &bull; {run.pagesEmbedded} Embedded &bull; {run.pagesFailed} Failed &bull; {run.duplicateUrlsSkipped} Duplicates Skipped
@@ -3646,7 +3646,7 @@ export default function KnowledgeBrainPage() {
                       {archivedPagesList.map((page) => (
                         <tr key={page.id} className="hover:bg-[#EEF4FF]/50">
                           <td className="px-3.5 py-2.5 font-sans">
-                            <div className="font-semibold text-white truncate max-w-sm">{page.title}</div>
+                            <div className="font-semibold text-slate-900 truncate max-w-sm">{page.title}</div>
                             <div className="text-xs text-indigo-400 font-mono truncate max-w-md">{page.url}</div>
                           </td>
                           <td className="px-3.5 py-2.5">

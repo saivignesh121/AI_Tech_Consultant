@@ -331,7 +331,7 @@ export default function ApprovalsPage() {
           <button
             onClick={fetchApprovals}
             disabled={loading}
-            className="p-2.5 rounded-xl border border-[#C3D3EA] bg-white text-gray-300 hover:text-white hover:border-cyan-400 transition flex items-center gap-2 self-start md:self-auto"
+            className="p-2.5 rounded-xl border border-[#C3D3EA] bg-white text-slate-600 hover:text-slate-900 hover:border-cyan-400 transition flex items-center gap-2 self-start md:self-auto"
           >
             <RotateCw className={`h-4 w-4 ${loading ? "animate-spin text-cyan-400" : ""}`} />
             <span className="text-xs font-medium">Refresh</span>
@@ -434,7 +434,7 @@ export default function ApprovalsPage() {
             {escalations.length === 0 && !loading && (
               <div className="p-8 text-center rounded-2xl border border-[#DCE6F5] bg-white text-gray-400">
                 <CheckCircle2 className="h-8 w-8 text-emerald-400 mx-auto mb-2" />
-                <div className="font-semibold text-white">No Pending Escalations</div>
+                <div className="font-semibold text-slate-900">No Pending Escalations</div>
                 <p className="text-xs text-gray-500 mt-1">
                   Questions flagged with high sentiment urgency, refund requests, or legal triggers will appear here for expert resolution.
                 </p>
@@ -472,7 +472,7 @@ export default function ApprovalsPage() {
                           {item.isResolved ? "RESOLVED" : "NEEDS HUMAN ANSWER"}
                         </span>
                       </div>
-                      <p className="text-sm font-medium text-white pt-1">
+                      <p className="text-sm font-medium text-slate-900 pt-1">
                         &quot;{item.content}&quot;
                       </p>
                       {item.escalationReason && (
@@ -515,12 +515,12 @@ export default function ApprovalsPage() {
                         value={expertReplyInput}
                         onChange={(e) => setExpertReplyInput(e.target.value)}
                         placeholder="Provide the exact verified solution, procedure, or policy details..."
-                        className="w-full h-24 rounded-lg border border-[#C3D3EA] bg-white p-3 text-xs text-white focus:outline-none focus:border-cyan-400 font-sans"
+                        className="w-full h-24 rounded-lg border border-[#C3D3EA] bg-white p-3 text-xs text-slate-900 focus:outline-none focus:border-cyan-400 font-sans"
                       />
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => setResolvingId(null)}
-                          className="px-3 py-1.5 rounded-lg border border-[#C3D3EA] text-xs text-gray-400 hover:text-white"
+                          className="px-3 py-1.5 rounded-lg border border-[#C3D3EA] text-xs text-slate-500 hover:text-slate-900"
                         >
                           Cancel
                         </button>
@@ -547,7 +547,7 @@ export default function ApprovalsPage() {
             {lessons.length === 0 && !loading && (
               <div className="p-8 text-center rounded-2xl border border-[#DCE6F5] bg-white text-gray-400">
                 <Sparkles className="h-8 w-8 text-cyan-400 mx-auto mb-2" />
-                <div className="font-semibold text-white">No Pending Lessons</div>
+                <div className="font-semibold text-slate-900">No Pending Lessons</div>
                 <p className="text-xs text-gray-500 mt-1">
                   When support staff corrects the AI consultant during chat, autonomous lessons are proposed here for human approver sign-off.
                 </p>
@@ -639,7 +639,7 @@ export default function ApprovalsPage() {
                             setEditMarkdown(lesson.lessonMarkdown);
                           }
                         }}
-                        className="p-1 rounded bg-[#EEF4FF] border border-[#DCE6F5] hover:text-white text-gray-400 transition"
+                        className="p-1 rounded bg-[#EEF4FF] border border-[#DCE6F5] hover:text-slate-900 text-gray-400 transition"
                         title="Edit lesson markdown and metadata"
                       >
                         <Edit2 className="h-3.5 w-3.5" />
@@ -685,7 +685,7 @@ export default function ApprovalsPage() {
                           type="text"
                           value={editTitle}
                           onChange={(e) => setEditTitle(e.target.value)}
-                          className="w-full rounded bg-[#EEF4FF] border border-[#C3D3EA] p-2 text-xs text-white"
+                          className="w-full rounded bg-[#EEF4FF] border border-[#C3D3EA] p-2 text-xs text-slate-900"
                         />
                       </div>
                       <div>
@@ -694,7 +694,7 @@ export default function ApprovalsPage() {
                           type="text"
                           value={editCategory}
                           onChange={(e) => setEditCategory(e.target.value)}
-                          className="w-full rounded bg-[#EEF4FF] border border-[#C3D3EA] p-2 text-xs text-white"
+                          className="w-full rounded bg-[#EEF4FF] border border-[#C3D3EA] p-2 text-xs text-slate-900"
                         />
                       </div>
                       <div>
@@ -703,14 +703,14 @@ export default function ApprovalsPage() {
                           rows={6}
                           value={editMarkdown}
                           onChange={(e) => setEditMarkdown(e.target.value)}
-                          className="w-full rounded bg-[#EEF4FF] border border-[#C3D3EA] p-2.5 text-xs font-mono text-white"
+                          className="w-full rounded bg-[#EEF4FF] border border-[#C3D3EA] p-2.5 text-xs font-mono text-slate-900"
                         />
                       </div>
                       <div className="flex justify-end gap-2">
                         <button
                           type="button"
                           onClick={() => setEditingLessonId(null)}
-                          className="px-3 py-1.5 rounded border border-[#C3D3EA] text-xs text-gray-400 hover:text-white"
+                          className="px-3 py-1.5 rounded border border-[#C3D3EA] text-xs text-slate-500 hover:text-slate-900"
                         >
                           Cancel
                         </button>
@@ -767,7 +767,7 @@ export default function ApprovalsPage() {
             {prs.length === 0 && !loading && (
               <div className="p-8 text-center rounded-2xl border border-[#DCE6F5] bg-white text-gray-400">
                 <GitPullRequest className="h-8 w-8 text-purple-400 mx-auto mb-2" />
-                <div className="font-semibold text-white">No Self-Improvement Runs</div>
+                <div className="font-semibold text-slate-900">No Self-Improvement Runs</div>
                 <p className="text-xs text-gray-500 mt-1">
                   Automated benchmark patches and prompt optimization runs will generate branch PRs here for final merge approval.
                 </p>
@@ -831,7 +831,7 @@ export default function ApprovalsPage() {
             {skillProposals.length === 0 && !loading && (
               <div className="p-8 text-center rounded-2xl border border-[#DCE6F5] bg-white text-gray-400">
                 <CheckCircle2 className="h-8 w-8 text-purple-400 mx-auto mb-2" />
-                <div className="font-semibold text-white">No Pending Skill Improvements</div>
+                <div className="font-semibold text-slate-900">No Pending Skill Improvements</div>
                 <p className="text-xs text-gray-500 mt-1">
                   Human teaching notes added on past email threads will be analyzed by Claude Opus 5.5 to propose SOP improvements here.
                 </p>
@@ -926,7 +926,7 @@ export default function ApprovalsPage() {
                   <div className="flex justify-end pt-1">
                     <Link
                       href="/settings/roles-prompts?tab=skills"
-                      className="flex items-center gap-1.5 text-xs font-mono text-purple-300 hover:text-white bg-purple-950/50 border border-purple-500/30 px-3 py-1.5 rounded-lg transition"
+                      className="flex items-center gap-1.5 text-xs font-mono text-purple-300 hover:text-slate-900 bg-purple-950/50 border border-purple-500/30 px-3 py-1.5 rounded-lg transition"
                     >
                       <Wrench className="h-3.5 w-3.5" />
                       <span>View &amp; Edit in Settings</span>

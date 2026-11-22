@@ -822,7 +822,7 @@ export default function EvalLabPage() {
                           <span>Recommended Pick</span>
                         </span>
                       </div>
-                      <div className="text-sm font-bold text-white font-mono">
+                      <div className="text-sm font-bold text-slate-900 font-mono">
                         {currentJob.recommendedModelId}
                       </div>
                       <p className="text-[11px] text-indigo-200/90 leading-relaxed font-sans">
@@ -902,7 +902,7 @@ export default function EvalLabPage() {
                         <tbody className="divide-y divide-gray-800/60 font-mono">
                           {currentJob.candidates?.map((c: any) => (
                             <tr key={c.modelId} className="hover:bg-[#EEF4FF] transition">
-                              <td className="px-4 py-3 text-white font-medium">
+                              <td className="px-4 py-3 text-slate-900 font-medium">
                                 <div className="flex items-center gap-2">
                                   <span>{c.displayName}</span>
                                   {c.isLocal && (
@@ -919,7 +919,7 @@ export default function EvalLabPage() {
                               </td>
                               <td className="px-4 py-3 text-right text-gray-300">{c.avgLatencyMs} ms</td>
                               <td className="px-4 py-3 text-right text-amber-400">{c.p95LatencyMs} ms</td>
-                              <td className="px-4 py-3 text-right text-white">
+                              <td className="px-4 py-3 text-right text-slate-900">
                                 {c.costPer100RunsUsd === 0 ? "$0.0000" : `$${c.costPer100RunsUsd.toFixed(6)}`}
                               </td>
                               <td className="px-4 py-3 text-center">
@@ -992,7 +992,7 @@ export default function EvalLabPage() {
                     className={`px-3 py-1.5 rounded-md transition ${
                       matrixViewMode === "overall"
                         ? "bg-indigo-600 text-white shadow"
-                        : "text-gray-400 hover:text-white"
+                        : "text-slate-500 hover:text-slate-900"
                     }`}
                   >
                     Overall (14 Models)
@@ -1002,7 +1002,7 @@ export default function EvalLabPage() {
                     className={`px-3 py-1.5 rounded-md transition ${
                       matrixViewMode === "steps"
                         ? "bg-indigo-600 text-white shadow"
-                        : "text-gray-400 hover:text-white"
+                        : "text-slate-500 hover:text-slate-900"
                     }`}
                   >
                     Step-by-Step Breakdown (6 Steps)
@@ -1093,7 +1093,7 @@ export default function EvalLabPage() {
                             { stepTitle: "6. Master Judge", cloudModel: "claude-opus-5.5", localModel: "gemma4:e4b", cloudQualityScore: 99.4, localQualityScore: 85.0, qualityDrop: -14.4, whereQualityHolds: "Binary pass vs clear policy violation detection", whereQualityDrops: "Fine-grained calibration on borderline partial answers" },
                           ]).map((s: any, idx: number) => (
                             <tr key={idx} className="hover:bg-[#EEF4FF]">
-                              <td className="px-3 py-2 text-white font-medium">{s.stepTitle}</td>
+                              <td className="px-3 py-2 text-slate-900 font-medium">{s.stepTitle}</td>
                               <td className="px-3 py-2 text-[#2563EB]">{s.cloudModel}</td>
                               <td className="px-3 py-2 text-emerald-300">{s.localModel}</td>
                               <td className="px-3 py-2 text-right text-gray-300">{s.cloudQualityScore}%</td>
@@ -1165,7 +1165,7 @@ export default function EvalLabPage() {
                     <tbody className="divide-y divide-gray-800/60 font-mono">
                       {matrix.map((m) => (
                         <tr key={m.modelId} className="hover:bg-[#EEF4FF] transition">
-                          <td className="px-4 py-3 text-white font-medium">
+                          <td className="px-4 py-3 text-slate-900 font-medium">
                             <div className="flex items-center gap-1.5">
                               <span>{m.displayName}</span>
                               {m.isLocal && (
@@ -1186,7 +1186,7 @@ export default function EvalLabPage() {
                             <span>{m.avgLatencyMs}ms</span>
                             <span className="text-gray-500 text-[10px] block">{m.p95LatencyMs}ms p95</span>
                           </td>
-                          <td className="px-4 py-3 text-right text-white">
+                          <td className="px-4 py-3 text-right text-slate-900">
                             <span className="font-bold">
                               {m.costPer100RunsUsd === 0 ? "$0.00" : `$${m.costPer100RunsUsd.toFixed(4)}`}
                             </span>
@@ -1242,7 +1242,7 @@ export default function EvalLabPage() {
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition border ${
                         stepFilter === s.id
                           ? "bg-indigo-600 text-white border-indigo-500 shadow-sm"
-                          : "bg-[#F6F9FF] text-gray-400 border-[#DCE6F5] hover:text-white"
+                          : "bg-[#F6F9FF] text-gray-400 border-[#DCE6F5] hover:text-slate-900"
                       }`}
                     >
                       {s.label}
@@ -1291,7 +1291,7 @@ export default function EvalLabPage() {
                           .filter((e) => stepFilter === "all" || e.stepId === stepFilter)
                           .map((entry, idx) => (
                             <tr key={`${entry.modelId}_${entry.stepId}_${idx}`} className="hover:bg-[#EEF4FF] transition">
-                              <td className="px-4 py-3 text-white font-medium">
+                              <td className="px-4 py-3 text-slate-900 font-medium">
                                 <div className="flex items-center gap-1.5">
                                   <span>{entry.displayName}</span>
                                   {entry.isLocal && (
@@ -1308,7 +1308,7 @@ export default function EvalLabPage() {
                               <td className="px-4 py-3 text-right font-bold text-emerald-400">
                                 {entry.qualityScore > 0 ? `${entry.qualityScore.toFixed(1)}%` : "N/A (No Vision)"}
                               </td>
-                              <td className="px-4 py-3 text-right text-white">
+                              <td className="px-4 py-3 text-right text-slate-900">
                                 {entry.costPer100RunsUsd === 0 ? "$0.000000" : `$${entry.costPer100RunsUsd.toFixed(6)}`}
                               </td>
                               <td className="px-4 py-3 text-right text-gray-300">
@@ -1367,7 +1367,7 @@ export default function EvalLabPage() {
 
               <button
                 onClick={fetchOllamaStatus}
-                className="flex items-center gap-2 rounded-lg bg-gray-800 hover:bg-gray-700 px-3.5 py-2 text-xs font-semibold text-white transition border border-[#C3D3EA]"
+                className="flex items-center gap-2 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs transition border border-[#C3D3EA]"
               >
                 <RotateCw className="h-3.5 w-3.5" />
                 <span>Check Status</span>
@@ -1457,7 +1457,7 @@ export default function EvalLabPage() {
 
             {/* Terminal Command Quick Reference */}
             <div className="rounded-xl border border-[#DCE6F5] bg-white p-5 space-y-3 font-mono text-xs">
-              <div className="flex items-center gap-2 text-white font-bold">
+              <div className="flex items-center gap-2 text-slate-900 font-bold">
                 <Terminal className="h-4 w-4 text-[#2563EB]" />
                 <span>Laptop Ollama CLI Management Guide</span>
               </div>
@@ -1495,7 +1495,7 @@ export default function EvalLabPage() {
                   <select
                     value={localTestModel}
                     onChange={(e) => setLocalTestModel(e.target.value)}
-                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none"
                   >
                     <option value="gemma4:e4b">gemma4:e4b (~7-10 GB, Vision)</option>
                     <option value="qwen3.5:4b">qwen3.5:4b (~3-4 GB, 4-bit)</option>
@@ -1509,7 +1509,7 @@ export default function EvalLabPage() {
                     value={localTestPrompt}
                     onChange={(e) => setLocalTestPrompt(e.target.value)}
                     placeholder="Enter private prompt for on-device execution..."
-                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
               </div>
@@ -1555,7 +1555,7 @@ export default function EvalLabPage() {
                       setBenchmarkVersion(e.target.value);
                       fetchBenchmarkCases(selectedCategory, e.target.value);
                     }}
-                    className="rounded-lg border border-[#C3D3EA] bg-white px-3 py-1.5 text-xs text-white focus:outline-none"
+                    className="rounded-lg border border-[#C3D3EA] bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none"
                   >
                     <option value="2.0.0">v2.0.0 (Production 180 Suite)</option>
                     <option value="1.0.0">v1.0.0 (Step 4 Seed - 20 Cases)</option>
@@ -1567,7 +1567,7 @@ export default function EvalLabPage() {
                   <select
                     value={benchmarkModel}
                     onChange={(e) => setBenchmarkModel(e.target.value)}
-                    className="rounded-lg border border-[#C3D3EA] bg-white px-3 py-1.5 text-xs text-white focus:outline-none"
+                    className="rounded-lg border border-[#C3D3EA] bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none"
                   >
                     <option value="claude-sonnet-5.5">Claude Sonnet 5.5</option>
                     <option value="claude-opus-5.5">Claude Opus 5.5 (Master Judge)</option>
@@ -1586,7 +1586,7 @@ export default function EvalLabPage() {
                       setSelectedCategory(e.target.value);
                       fetchBenchmarkCases(e.target.value, benchmarkVersion);
                     }}
-                    className="rounded-lg border border-[#C3D3EA] bg-white px-3 py-1.5 text-xs text-white focus:outline-none"
+                    className="rounded-lg border border-[#C3D3EA] bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none"
                   >
                     <option value="all">All Available Cases</option>
                     <option value="knowledge">Knowledge Brain</option>
@@ -1601,7 +1601,7 @@ export default function EvalLabPage() {
                 <button
                   onClick={handleRunBatchBenchmark}
                   disabled={runningBenchmark || running14ModelsBenchmark}
-                  className="flex items-center gap-2 rounded-lg bg-gray-800 hover:bg-gray-700 px-4 py-2.5 text-xs font-semibold text-white transition disabled:opacity-40 border border-[#C3D3EA]"
+                  className="flex items-center gap-2 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-700 shadow-xs transition disabled:opacity-40 border border-[#C3D3EA]"
                 >
                   <Play className={`h-4 w-4 ${runningBenchmark ? "animate-spin" : ""}`} />
                   <span>{runningBenchmark ? "Evaluating..." : `Run Single Model (${benchmarkModel.split("-")[0]})`}</span>
@@ -1639,7 +1639,7 @@ export default function EvalLabPage() {
                         <select
                           value={selectedBenchmarkModelFilter}
                           onChange={(e) => setSelectedBenchmarkModelFilter(e.target.value)}
-                          className="rounded-lg border border-[#BFDBFE] bg-white px-3 py-1 text-xs text-white focus:outline-none font-mono"
+                          className="rounded-lg border border-[#BFDBFE] bg-white px-3 py-1 text-xs text-slate-900 focus:outline-none font-mono"
                         >
                           <option value="all">All Models Combined</option>
                           {multiModelBenchmarkData.modelSummaries.map((m: any) => (
@@ -1666,7 +1666,7 @@ export default function EvalLabPage() {
                               : "bg-[#F1F6FF]/70 border-[#DCE6F5] hover:border-[#C3D3EA] hover:bg-[#F6F9FF]"
                           }`}
                         >
-                          <div className="text-[11px] font-bold text-white truncate">{m.displayName}</div>
+                          <div className="text-[11px] font-bold text-slate-900 truncate">{m.displayName}</div>
                           <div className="text-base font-bold text-emerald-400 mt-1">{m.qualityScore}%</div>
                           <div className="text-[10px] text-gray-400 flex items-center justify-between mt-1 pt-1 border-t border-[#DCE6F5]">
                             <span>{m.avgLatencyMs}ms</span>
@@ -1759,7 +1759,7 @@ export default function EvalLabPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                               <div className="space-y-1">
                                 <span className="text-[10px] uppercase font-semibold text-gray-500">Question:</span>
-                                <div className="p-2.5 rounded bg-white border border-[#DCE6F5] text-white font-sans leading-relaxed">
+                                <div className="p-2.5 rounded bg-white border border-[#DCE6F5] text-slate-900 font-sans leading-relaxed">
                                   {item.question}
                                 </div>
                               </div>
@@ -1893,7 +1893,7 @@ export default function EvalLabPage() {
                   </div>
                   <div>
                     <span className="text-gray-400">Passed Tests:</span>
-                    <div className="text-2xl font-bold text-white mt-1">
+                    <div className="text-2xl font-bold text-slate-900 mt-1">
                       {benchmarkResult.passedCount} tests
                     </div>
                   </div>
@@ -1943,7 +1943,7 @@ export default function EvalLabPage() {
                                 {c.category}
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-white max-w-sm truncate">{c.question}</td>
+                            <td className="px-4 py-3 text-slate-900 max-w-sm truncate">{c.question}</td>
                             <td className="px-4 py-3 text-gray-400 max-w-md truncate">{c.expectedAnswer}</td>
                             <td className="px-4 py-3 text-center whitespace-nowrap">
                               <button
@@ -2005,7 +2005,7 @@ export default function EvalLabPage() {
                       setSelectedJudgeModel(e.target.value);
                       handleRecalibrateJudge(e.target.value);
                     }}
-                    className="rounded-lg border border-[#C3D3EA] bg-white px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
+                    className="rounded-lg border border-[#C3D3EA] bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 font-mono"
                   >
                     <option value="claude-opus-5.5">Claude Opus 5.5 (Master Judge Default)</option>
                     <option value="nvidia/nemotron-3-ultra-550b-a55b:free">Nemotron 3 Ultra 550B (Second-Opinion Judge)</option>
@@ -2099,7 +2099,7 @@ export default function EvalLabPage() {
                             </span>
                           </td>
                           <td className="px-4 py-3 text-gray-300 font-sans truncate max-w-xs">{c.question}</td>
-                          <td className="px-4 py-3 text-right text-white font-bold whitespace-nowrap">
+                          <td className="px-4 py-3 text-right text-slate-900 font-bold whitespace-nowrap">
                             {c.humanGrade}
                           </td>
                           <td className="px-4 py-3 text-right text-emerald-400 font-bold whitespace-nowrap">
@@ -2154,7 +2154,7 @@ export default function EvalLabPage() {
                       setSideBySideCaseId(e.target.value);
                       fetchSideBySide(e.target.value, sideBySideModelA, sideBySideModelB);
                     }}
-                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                   >
                     <option value="step4-01">step4-01: Custom CNAME subdomains with SSL</option>
                     <option value="step4-02">step4-02: SSL Handshake Error 525 (Cloudflare)</option>
@@ -2178,7 +2178,7 @@ export default function EvalLabPage() {
                       setSideBySideModelA(e.target.value);
                       fetchSideBySide(sideBySideCaseId, e.target.value, sideBySideModelB);
                     }}
-                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                   >
                     <option value="claude-sonnet-5.5">Claude Sonnet 5.5 ($2 / $10)</option>
                     <option value="claude-opus-5.5">Claude Opus 5.5 ($4 / $20)</option>
@@ -2195,7 +2195,7 @@ export default function EvalLabPage() {
                       setSideBySideModelB(e.target.value);
                       fetchSideBySide(sideBySideCaseId, sideBySideModelA, e.target.value);
                     }}
-                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                   >
                     <option value="qwen/qwen3.8-max-0902">Qwen 3.8 Max ($2 / $6)</option>
                     <option value="nvidia/nemotron-3-ultra-550b-a55b:free">Nemotron 3 Ultra ($0 Free)</option>
@@ -2237,7 +2237,7 @@ export default function EvalLabPage() {
                     <div className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">
                       Tested Question ({sideBySideResult.category}):
                     </div>
-                    <div className="text-white font-medium">&ldquo;{sideBySideResult.question}&rdquo;</div>
+                    <div className="text-slate-900 font-medium">&ldquo;{sideBySideResult.question}&rdquo;</div>
                     <div className="text-gray-400 text-[11px] pt-1 border-t border-[#DCE6F5]">
                       <strong>Expected Ground Truth:</strong> {sideBySideResult.expectedAnswer}
                     </div>
@@ -2444,7 +2444,7 @@ export default function EvalLabPage() {
                   Deterministic rules classify clear jobs (classify email = cheap; improve skill = Opus).
                 </p>
                 <div className="rounded bg-indigo-50 border border-[#BFDBFE] p-2 text-[11px] text-[#2563EB] font-mono">
-                  For unclear queries, cheap model (Haiku/Qwen Flash) returns JSON: <code className="text-white">&#123;task_type, complexity&#125;</code>.
+                  For unclear queries, cheap model (Haiku/Qwen Flash) returns JSON: <code className="text-slate-900">&#123;task_type, complexity&#125;</code>.
                 </div>
               </div>
 
@@ -2481,7 +2481,7 @@ export default function EvalLabPage() {
                       value={testPrompt}
                       onChange={(e) => setTestPrompt(e.target.value)}
                       placeholder="Enter a customer query to test 3-tier routing..."
-                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-sans"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 font-sans"
                     />
                   </div>
 
@@ -2490,7 +2490,7 @@ export default function EvalLabPage() {
                     <select
                       value={testTaskType}
                       onChange={(e) => setTestTaskType(e.target.value)}
-                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                     >
                       <option value="write_reply">write_reply (Consultant Reply)</option>
                       <option value="tag_job">tag_job (Router Tagging)</option>
@@ -2569,7 +2569,7 @@ export default function EvalLabPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px]">
                     <div className="bg-[#F6F9FF] p-2.5 rounded border border-[#DCE6F5]">
                       <span className="text-gray-400 block">Prompt Tokens:</span>
-                      <div className="text-white font-bold mt-0.5">
+                      <div className="text-slate-900 font-bold mt-0.5">
                         {routingResult.promptTokens.toLocaleString()} tokens
                       </div>
                       <span className="text-[10px] text-gray-500">{routingResult.tokenCountMethod}</span>
@@ -2660,7 +2660,7 @@ export default function EvalLabPage() {
                           <td className="py-2.5 px-3 font-semibold text-[#2563EB]">{log.job}</td>
                           <td className="py-2.5 px-3 text-gray-200">{log.promptTokens?.toLocaleString()}</td>
                           <td className="py-2.5 px-3 text-[11px] text-gray-400">{log.tokenCountMethod}</td>
-                          <td className="py-2.5 px-3 font-bold text-white">{log.selectedModelId}</td>
+                          <td className="py-2.5 px-3 font-bold text-slate-900">{log.selectedModelId}</td>
                           <td className="py-2.5 px-3 text-emerald-400 font-semibold">
                             ${Number(log.estimatedCostUsd || 0).toFixed(6)}
                           </td>
@@ -2728,7 +2728,7 @@ export default function EvalLabPage() {
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs font-mono">
                 <div className="rounded-xl border border-[#DCE6F5] bg-white p-4">
                   <span className="text-gray-400 block">Target Entity</span>
-                  <div className="text-base font-bold text-white mt-1 capitalize">
+                  <div className="text-base font-bold text-slate-900 mt-1 capitalize">
                     {gateResult.entityType}: {gateResult.entityName}
                   </div>
                   <span className="text-[10px] text-gray-500 mt-1 block">Release candidate</span>
@@ -2803,7 +2803,7 @@ export default function EvalLabPage() {
                   <select
                     value={gateEntityType}
                     onChange={(e: any) => setGateEntityType(e.target.value)}
-                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-slate-900 focus:outline-none focus:border-indigo-500"
                   >
                     <option value="prompt">Prompt (Settings Prompts)</option>
                     <option value="role">Role (Settings Agent Roles)</option>
@@ -2818,7 +2818,7 @@ export default function EvalLabPage() {
                     type="text"
                     value={gateEntityName}
                     onChange={(e) => setGateEntityName(e.target.value)}
-                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-white focus:outline-none focus:border-indigo-500 font-mono"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-slate-900 focus:outline-none focus:border-indigo-500 font-mono"
                   />
                 </div>
 
@@ -2829,7 +2829,7 @@ export default function EvalLabPage() {
                     step="0.1"
                     value={gateCandidateScore}
                     onChange={(e) => setGateCandidateScore(Number(e.target.value))}
-                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-white focus:outline-none focus:border-indigo-500 font-mono"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-slate-900 focus:outline-none focus:border-indigo-500 font-mono"
                   />
                 </div>
 
@@ -2840,7 +2840,7 @@ export default function EvalLabPage() {
                     step="0.1"
                     value={gateBaselineScore}
                     onChange={(e) => setGateBaselineScore(Number(e.target.value))}
-                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-white focus:outline-none focus:border-indigo-500 font-mono"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-slate-900 focus:outline-none focus:border-indigo-500 font-mono"
                   />
                 </div>
               </div>
@@ -2903,11 +2903,11 @@ export default function EvalLabPage() {
                     Every task uses an explicit ground-truth formula rather than feeling:
                   </p>
                   <ul className="space-y-1.5 text-gray-400 text-[11px]">
-                    <li><strong className="text-white">tag_job:</strong> Exact category + JSON match (95% pass).</li>
-                    <li><strong className="text-white">find_facts:</strong> 40% citations + 40% facts + 20% no hallucination.</li>
-                    <li><strong className="text-white">write_reply:</strong> Grounding + [1] citations + persona + safety escalation.</li>
-                    <li><strong className="text-white">read_screenshot:</strong> 50% OCR token recall + 50% vision root cause.</li>
-                    <li><strong className="text-white">improve_skill:</strong> Master Judge critique incorporation &amp; non-regression.</li>
+                    <li><strong className="text-slate-900">tag_job:</strong> Exact category + JSON match (95% pass).</li>
+                    <li><strong className="text-slate-900">find_facts:</strong> 40% citations + 40% facts + 20% no hallucination.</li>
+                    <li><strong className="text-slate-900">write_reply:</strong> Grounding + [1] citations + persona + safety escalation.</li>
+                    <li><strong className="text-slate-900">read_screenshot:</strong> 50% OCR token recall + 50% vision root cause.</li>
+                    <li><strong className="text-slate-900">improve_skill:</strong> Master Judge critique incorporation &amp; non-regression.</li>
                   </ul>
                 </div>
 
@@ -2942,10 +2942,10 @@ export default function EvalLabPage() {
                     Stops benchmark from becoming too easy over time:
                   </p>
                   <ul className="space-y-1.5 text-gray-400 text-[11px]">
-                    <li><strong className="text-white">Live Feedback Ingestion:</strong> Every thumbs-down critique automatically converts into a hard regression test.</li>
-                    <li><strong className="text-white">Adversarial Hard Traps:</strong> 10 prompt injections, typo traps, and subtle boundary edge-cases.</li>
-                    <li><strong className="text-white">Dynamic Difficulty Weighting:</strong> Tests models consistently pass are weighted 1.0x; newly ingested real failure cases carry 1.5x–2.0x weight.</li>
-                    <li><strong className="text-white">Immutable Versions:</strong> Frozen Git datasets prevent cherry-picking questions.</li>
+                    <li><strong className="text-slate-900">Live Feedback Ingestion:</strong> Every thumbs-down critique automatically converts into a hard regression test.</li>
+                    <li><strong className="text-slate-900">Adversarial Hard Traps:</strong> 10 prompt injections, typo traps, and subtle boundary edge-cases.</li>
+                    <li><strong className="text-slate-900">Dynamic Difficulty Weighting:</strong> Tests models consistently pass are weighted 1.0x; newly ingested real failure cases carry 1.5x–2.0x weight.</li>
+                    <li><strong className="text-slate-900">Immutable Versions:</strong> Frozen Git datasets prevent cherry-picking questions.</li>
                   </ul>
                 </div>
               </div>
@@ -2980,7 +2980,7 @@ export default function EvalLabPage() {
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs font-mono">
               <div className="rounded-xl border border-[#DCE6F5] bg-white p-4">
                 <span className="text-gray-400 block">Total Feedback Tests</span>
-                <div className="text-2xl font-bold text-white mt-1">{feedbackTests.length}</div>
+                <div className="text-2xl font-bold text-slate-900 mt-1">{feedbackTests.length}</div>
                 <span className="text-[10px] text-gray-500 mt-1 block">Live benchmark cases</span>
               </div>
 
@@ -3052,7 +3052,7 @@ export default function EvalLabPage() {
                     </div>
 
                     <div className="text-xs space-y-1">
-                      <div className="text-white font-medium">
+                      <div className="text-slate-900 font-medium">
                         <strong className="text-gray-400 font-normal">Customer Question: </strong>
                         &ldquo;{t.question}&rdquo;
                       </div>
@@ -3091,7 +3091,7 @@ export default function EvalLabPage() {
                     value={newFeedbackQuestion}
                     onChange={(e) => setNewFeedbackQuestion(e.target.value)}
                     placeholder="e.g., How do I renew my expired Let's Encrypt certificate behind Cloudflare?"
-                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-slate-900 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
@@ -3102,7 +3102,7 @@ export default function EvalLabPage() {
                     value={newFeedbackAnswer}
                     onChange={(e) => setNewFeedbackAnswer(e.target.value)}
                     placeholder="e.g., Just turn off Cloudflare SSL and reboot your server."
-                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-slate-900 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
@@ -3112,7 +3112,7 @@ export default function EvalLabPage() {
                     <select
                       value={newFeedbackType}
                       onChange={(e: any) => setNewFeedbackType(e.target.value)}
-                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-slate-900 focus:outline-none focus:border-indigo-500"
                     >
                       <option value="thumbs_down">👎 Thumbs Down (Error / Weak)</option>
                       <option value="thumbs_up">👍 Thumbs Up (Accurate / Good)</option>
@@ -3126,7 +3126,7 @@ export default function EvalLabPage() {
                       value={newFeedbackReason}
                       onChange={(e) => setNewFeedbackReason(e.target.value)}
                       placeholder="e.g., Disabling SSL exposes plain traffic. The correct protocol is Cloudflare SSL Full (Strict) with ACME HTTP-01 challenge bypass."
-                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full rounded-lg border border-[#C3D3EA] bg-white px-3 py-2 text-slate-900 focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                 </div>
@@ -3172,7 +3172,7 @@ export default function EvalLabPage() {
                       setSelectedScenarioId(e.target.value);
                       fetchLearningProof(e.target.value);
                     }}
-                    className="rounded-lg border border-[#C3D3EA] bg-white px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                    className="rounded-lg border border-[#C3D3EA] bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-emerald-500"
                   >
                     {(scenariosList.length > 0 ? scenariosList : [
                       { id: "dns-acme-ssl", title: "DNS Cloudflare Orange Cloud vs ACME SSL" },
@@ -3208,7 +3208,7 @@ export default function EvalLabPage() {
                         {learningProof.learnedStatus === "verified_learned" ? "✓ Learning Verified" : "Evaluated"}
                       </span>
                       <span className="text-xs text-gray-400 font-mono">
-                        Target Lesson: <strong className="text-white">{learningProof.lessonTitle}</strong>
+                        Target Lesson: <strong className="text-slate-900">{learningProof.lessonTitle}</strong>
                       </span>
                     </div>
                     <p className="text-sm text-gray-200 font-medium">
@@ -3364,7 +3364,7 @@ export default function EvalLabPage() {
                 </div>
                 <button
                   onClick={() => setNoteModal(null)}
-                  className="rounded-lg p-1 text-gray-400 hover:text-white hover:bg-[#EEF4FF]"
+                  className="rounded-lg p-1 text-slate-500 hover:text-slate-900 hover:bg-[#EEF4FF]"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -3380,7 +3380,7 @@ export default function EvalLabPage() {
                     value={noteModal.whatWasGood}
                     onChange={(e) => setNoteModal({ ...noteModal, whatWasGood: e.target.value })}
                     placeholder="e.g. Directly answered the DNS setup with exact CNAME value and authoritative tone."
-                    className="w-full rounded-lg border border-[#C3D3EA] bg-white p-3 text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none font-sans"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white p-3 text-slate-900 placeholder-gray-500 focus:border-emerald-500 focus:outline-none font-sans"
                   />
                 </div>
 
@@ -3393,7 +3393,7 @@ export default function EvalLabPage() {
                     value={noteModal.whatWasWrong}
                     onChange={(e) => setNoteModal({ ...noteModal, whatWasWrong: e.target.value })}
                     placeholder="e.g. Reply was too long; for DNS questions, always give the 3 steps first."
-                    className="w-full rounded-lg border border-[#C3D3EA] bg-white p-3 text-white placeholder-gray-500 focus:border-amber-500 focus:outline-none font-sans"
+                    className="w-full rounded-lg border border-[#C3D3EA] bg-white p-3 text-slate-900 placeholder-gray-500 focus:border-amber-500 focus:outline-none font-sans"
                   />
                 </div>
 
@@ -3405,7 +3405,7 @@ export default function EvalLabPage() {
                       value={noteModal.generalNote || ""}
                       onChange={(e) => setNoteModal({ ...noteModal, generalNote: e.target.value })}
                       placeholder="e.g. Suitable for production FAQ"
-                      className="w-full rounded-lg border border-[#DCE6F5] bg-white px-3 py-2 text-white placeholder-gray-600 focus:border-indigo-500 focus:outline-none"
+                      className="w-full rounded-lg border border-[#DCE6F5] bg-white px-3 py-2 text-slate-900 placeholder-gray-600 focus:border-indigo-500 focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
@@ -3415,7 +3415,7 @@ export default function EvalLabPage() {
                       value={noteModal.reviewer}
                       onChange={(e) => setNoteModal({ ...noteModal, reviewer: e.target.value })}
                       placeholder="e.g. Senior Tech Lead"
-                      className="w-full rounded-lg border border-[#DCE6F5] bg-white px-3 py-2 text-white placeholder-gray-600 focus:border-indigo-500 focus:outline-none"
+                      className="w-full rounded-lg border border-[#DCE6F5] bg-white px-3 py-2 text-slate-900 placeholder-gray-600 focus:border-indigo-500 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -3425,7 +3425,7 @@ export default function EvalLabPage() {
                 <button
                   type="button"
                   onClick={() => setNoteModal(null)}
-                  className="px-4 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white hover:bg-[#EEF4FF] transition"
+                  className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-900 hover:bg-[#EEF4FF] transition"
                 >
                   Cancel
                 </button>

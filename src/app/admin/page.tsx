@@ -156,7 +156,7 @@ export default function AdminPage() {
             <button
               onClick={fetchAdminData}
               disabled={loading}
-              className="p-2 rounded-xl border border-[#C3D3EA] bg-white text-gray-300 hover:text-white hover:border-cyan-400 transition"
+              className="p-2 rounded-xl border border-[#C3D3EA] bg-white text-slate-600 hover:text-slate-900 hover:border-cyan-400 transition"
               title="Refresh Fleet"
             >
               <RotateCw className={`h-4 w-4 ${loading ? "animate-spin text-cyan-400" : ""}`} />
@@ -190,7 +190,7 @@ export default function AdminPage() {
               <Lock className="h-6 w-6" />
             </div>
             <div className="space-y-1">
-              <div className="text-sm font-bold text-white flex items-center gap-2">
+              <div className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <span>Strict Zero-Leakage Guarantee (Step 2 Architecture)</span>
                 <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                   Enforced
@@ -284,7 +284,7 @@ export default function AdminPage() {
                   return (
                     <tr key={biz.id} className="hover:bg-[#EEF4FF]/30 transition">
                       <td className="py-3.5 px-4">
-                        <div className="font-bold text-white text-sm">{biz.name}</div>
+                        <div className="font-bold text-slate-900 text-sm">{biz.name}</div>
                         <div className="font-mono text-gray-400 text-[11px]">{biz.slug}</div>
                       </td>
 

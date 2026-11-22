@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  /* Aurora Light Tokens (Single Source of Truth) */
-  --bg-page: #F6F9FF;
+  /* 2-Color Design System: Deep Charcoal/Slate + Modern Royal Blue Accent */
+  --bg-page: #F8FAFC;
   --surface: #FFFFFF;
-  --surface-subtle: #EEF4FF;
-  --border: #DCE6F5;
-  --border-strong: #C3D3EA;
-  --text: #0B1B3A;
-  --text-2: #4A5B78;
-  --text-muted: #7B8AA6;
+  --surface-subtle: #F1F5F9;
+  --border: #E2E8F0;
+  --border-strong: #CBD5E1;
+  --text: #0F172A;
+  --text-2: #334155;
+  --text-muted: #64748B;
   --primary: #2563EB;
   --primary-hover: #1D4ED8;
-  --primary-soft: #EAF2FF;
+  --primary-soft: #EFF6FF;
   --indigo: #4F46E5;
   --cyan: #06B6D4;
   --brand-gradient: linear-gradient(135deg, #0284C7, #2563EB);
