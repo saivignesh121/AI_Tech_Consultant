@@ -7,6 +7,8 @@ import { chatMessages, chatTraces, chatSessions } from "@/db/schema/chat";
 import { lessons } from "@/db/schema/chat";
 import { knowledgePages, knowledgeChunks } from "@/db/schema/knowledge";
 import { modelCallLogs } from "@/db/schema/telemetry";
+import { agentRoles } from "@/db/schema/prompts";
+import { BUILTIN_ROLES, AgentRoleDefinition } from "@/services/chat/roles";
 import { eq, and } from "drizzle-orm";
 
 /**
@@ -162,11 +164,42 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Resolve role definition: builtin or custom created in role editor
+    let roleDef: AgentRoleDefinition | undefined = BUILTIN_ROLES.find((r) => r.slug === roleSlug);
+    if (!roleDef) {
+      const [customRoleRow] = await db
+        .select()
+        .from(agentRoles)
+        .where(
+          and(
+            eq(agentRoles.businessId, tenant.businessId),
+            eq(agentRoles.slug, roleSlug)
+          )
+        )
+        .limit(1);
+
+      if (customRoleRow) {
+        roleDef = {
+          name: customRoleRow.name,
+          slug: customRoleRow.slug,
+          goal: customRoleRow.goal,
+          tone: customRoleRow.tone,
+          systemPrompt: customRoleRow.systemPrompt,
+          modelId: customRoleRow.modelId,
+          allowedSkills: customRoleRow.allowedSkills || [],
+          knowledgeSources: customRoleRow.knowledgeSources || [],
+          handoverRule: customRoleRow.handoverRule,
+          isBuiltin: customRoleRow.isBuiltin,
+        };
+      }
+    }
+
     const response = await executeConsultantTurn({
       businessId: tenant.businessId,
       userMessage: message,
       roleSlug,
-      modelId,
+      modelId: roleDef?.modelId || modelId,
+      roleDefinition: roleDef,
       availableContexts: activeContexts,
     });
 

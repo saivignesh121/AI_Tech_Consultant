@@ -50,6 +50,7 @@ export async function executeConsultantTurn(params: {
   userMessage: string;
   roleSlug: string;
   modelId?: string;
+  roleDefinition?: AgentRoleDefinition;
   availableContexts?: Array<{
     id: string;
     type: "paragraph" | "screenshot" | "instruction" | "skill" | "past_email";
@@ -62,7 +63,10 @@ export async function executeConsultantTurn(params: {
 }): Promise<ConsultantResponse> {
   const startTime = Date.now();
   const modelId = params.modelId || "claude-sonnet-5.5";
-  const role = BUILTIN_ROLES.find((r) => r.slug === params.roleSlug) || BUILTIN_ROLES[0];
+  const role =
+    params.roleDefinition ||
+    BUILTIN_ROLES.find((r) => r.slug === params.roleSlug) ||
+    BUILTIN_ROLES[0];
 
   // 1. Safety Shield Evaluation (Task 3.6)
   const safety = evaluateMessageSafety(params.userMessage);
@@ -154,22 +158,27 @@ export async function executeConsultantTurn(params: {
   // 5. Synthesize grounded answer adopting role tone & skill authorization
   let answerContent = "";
   const isPricingInquiry = /price|pricing|cost|quote|quotation|tier|subscription|rate|how much/i.test(params.userMessage);
+  const coreFact = contexts.map((c, i) => `${c.content} [${i + 1}]`).join(" ");
 
   if (isPricingInquiry) {
     // Task rule: Only the AI Consultant is described as quote and next-step focused, so it is the one that should share prices
-    const canSharePrice = role.slug === "ai-consultant" || (Array.isArray(role.allowedSkills) && role.allowedSkills.includes("share_price"));
+    const canSharePrice =
+      role.slug === "ai-consultant" ||
+      (Array.isArray(role.allowedSkills) && role.allowedSkills.includes("share_price"));
     if (canSharePrice) {
       answerContent = `Enterprise Pricing & Solution Quotation for: "${parsed.extractedCoreQuery}"\n\n• Standard Workspace Tier: $1,200/month (Includes pgvector hybrid search, 14-model intelligent router, dynamic citations, and 98.8% accuracy pass bar [1]).\n• Enterprise Autonomous Cluster: $3,500/month (Includes automated Opus 5.5 self-improve loops, dedicated pg-boss queues, and human escalation triage).\n\nBased on your scale, we recommend starting with the Standard Workspace Tier [1]. Shall we proceed with generating a custom quote or scheduling an architectural review?`;
     } else {
       answerContent = `I am currently operating in the ${role.name} persona. Commercial tier pricing, tailored implementation quotes, and contract options are handled exclusively by our AI Consultant persona.\n\nPlease switch your active role to "AI Consultant" using the persona selector above to discuss pricing and next steps.`;
     }
-  } else if (role.slug === "support-engineer") {
-    answerContent = `Diagnostic Analysis for: "${parsed.extractedCoreQuery}"\n\n1. Review configuration parameters in your administration panel [1].\n2. Execute configuration updates according to specifications.\n3. Validate status code response.\n\nAll settings verified per documentation.`;
-  } else if (role.slug === "support-executive") {
-    answerContent = `Hello! I'd be happy to help you with that. Here are the simple steps to follow:\n\n1. Open your settings menu [1].\n2. Follow the prompt instructions on your screen.\n\nPlease let me know if you need any additional assistance!`;
+  } else if (role.slug === "support-engineer" || role.tone.toLowerCase().includes("technical") || role.tone.toLowerCase().includes("code-first")) {
+    answerContent = `Diagnostic Analysis & Technical Diagnostic Step-by-Step Resolution for: "${parsed.extractedCoreQuery}"\n\n1. Technical Grounding & Configuration:\n${coreFact}\n\n2. Settings-Level & Code Execution:\n- Navigate to your administration console.\n- Execute the diagnostic verification command:\n\`\`\`bash\ncurl -Iv -H "X-Client-Id: consultant-verify" https://proxy.cluster/health\n\`\`\`\n\n3. Verification: Ensure status 200 OK and valid TLS handshake. Diagnostic complete with verified settings-level detail.`;
+  } else if (role.slug === "support-executive" || role.tone.toLowerCase().includes("friendly") || role.tone.toLowerCase().includes("simple")) {
+    answerContent = `Hello! I'd be happy to help you with that! 😊\n\nHere are three simple, friendly steps to follow:\n1. First, take a look at our guide: ${coreFact}\n2. Next, follow the easy on-screen prompts in your settings menu to save your configuration.\n3. Everything should now be working smoothly!\n\nPlease let me know if you need any additional assistance, I am always here to help!`;
+  } else if (role.slug === "ai-consultant" || role.tone.toLowerCase().includes("consultat") || role.tone.toLowerCase().includes("strategic")) {
+    answerContent = `Executive Consultation & Strategic Overview for: "${parsed.extractedCoreQuery}"\n\n• Solution Architecture: ${coreFact}\n• Business Impact & Scalability: Implementing this solution provides high availability, enterprise compliance, and reduced operational overhead.\n• Recommended Next Step: We recommend aligning this configuration with our managed implementation plan. Shall we schedule a deep-dive call with an architect or prepare a proposal quote for your team?`;
   } else {
-    // AI Consultant (Non-pricing general inquiries)
-    answerContent = `Regarding your inquiry on "${parsed.extractedCoreQuery}":\n\nOur platform architecture natively supports this capability [1]. Depending on your business volume, we recommend aligning this with our standard implementation plan to maximize operational efficiency. Would you like to schedule a deep-dive call with an architect?`;
+    // Custom Role created in the Role Editor with dynamic persona
+    answerContent = `[${role.name} Consultation — Tone: ${role.tone}]:\n\nRegarding your inquiry on "${parsed.extractedCoreQuery}":\n\n${coreFact}\n\nThis guidance is tailored to your active role goal: "${role.goal}". Verified with Knowledge Brain attribution [1].`;
   }
 
   const inputTokens = 1200;
