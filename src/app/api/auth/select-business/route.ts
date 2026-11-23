@@ -1,16 +1,57 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { db } from "@/db";
 import { businesses, memberships } from "@/db/schema/business";
 import { createSession } from "@/lib/auth";
 import { eq, and } from "drizzle-orm";
+import { createHmac, timingSafeEqual } from "node:crypto";
+
+// The pending_login cookie is issued by /api/auth/login only for the
+// multi-business picker. It carries the user id + expiry, signed with
+// the existing ENCRYPTION_KEY. It is not a session and grants no tenant
+// access by itself. Missing key => fail closed (no default/hardcoded key).
+function verifyPendingLogin(value?: string): string | null {
+  const key = process.env.ENCRYPTION_KEY;
+  if (!key || !value) return null;
+
+  const parts = value.split(".");
+  if (parts.length !== 3) return null;
+  const [userId, expiresAtRaw, signatureHex] = parts;
+  if (!userId || !/^\d+$/.test(expiresAtRaw)) return null;
+
+  const expiresAt = Number(expiresAtRaw);
+  if (!Number.isSafeInteger(expiresAt) || expiresAt <= Date.now()) return null;
+
+  const expected = createHmac("sha256", key)
+    .update(`${userId}.${expiresAtRaw}`)
+    .digest("hex");
+  const provided = Buffer.from(signatureHex, "hex");
+  const expectedBuf = Buffer.from(expected, "hex");
+  if (
+    provided.length !== expectedBuf.length ||
+    !timingSafeEqual(provided, expectedBuf)
+  ) {
+    return null;
+  }
+
+  return userId;
+}
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { userId, businessId } = body;
+    const { businessId } = body;
 
-    if (!userId || !businessId) {
-      return NextResponse.json({ error: "userId and businessId are required." }, { status: 400 });
+    if (!businessId) {
+      return NextResponse.json({ error: "businessId is required." }, { status: 400 });
+    }
+
+    // Identity comes only from the verified pending_login cookie. The
+    // client-supplied userId in the body is deliberately ignored.
+    const cookieStore = await cookies();
+    const userId = verifyPendingLogin(cookieStore.get("pending_login")?.value);
+    if (!userId) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
 
     // Verify user membership in the requested business
@@ -112,10 +153,15 @@ export async function POST(req: NextRequest) {
       expires: expiresAt,
     });
 
+    // The pending_login credential is single-use: clear it on success so it
+    // cannot be replayed to mint another session for this user.
+    response.cookies.delete("pending_login");
+
     return response;
   } catch (error) {
+    console.error("Failed to select business:", error);
     return NextResponse.json(
-      { error: "Failed to select business", details: String(error) },
+      { error: "Failed to select business" },
       { status: 500 }
     );
   }

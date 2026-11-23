@@ -9,6 +9,21 @@ import {
   clearFailedLogin,
 } from "@/lib/auth";
 import { eq } from "drizzle-orm";
+import { createHmac } from "node:crypto";
+
+// Short-lived, scoped token for the multi-business picker. It is not a
+// session and grants no tenant access on its own.
+const PENDING_LOGIN_TTL_SECONDS = 5 * 60;
+
+function signPendingLogin(userId: string): string {
+  const key = process.env.ENCRYPTION_KEY;
+  if (!key) {
+    throw new Error("ENCRYPTION_KEY is not configured");
+  }
+  const payload = `${userId}.${Date.now() + PENDING_LOGIN_TTL_SECONDS * 1000}`;
+  const signature = createHmac("sha256", key).update(payload).digest("hex");
+  return `${payload}.${signature}`;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -188,7 +203,8 @@ export async function POST(req: NextRequest) {
       return response;
     } else {
       // Multiple businesses: Prompt user to choose workspace
-      return NextResponse.json({
+      const pendingLogin = signPendingLogin(user.id);
+      const response = NextResponse.json({
         success: true,
         requiresBusinessChoice: true,
         user: {
@@ -199,6 +215,17 @@ export async function POST(req: NextRequest) {
         businesses: userMemberships,
         message: "Multiple workspaces found. Please select which business to open.",
       });
+      const isSecure = process.env.COOKIE_SECURE === "true";
+
+      response.cookies.set("pending_login", pendingLogin, {
+        path: "/",
+        httpOnly: true,
+        secure: isSecure,
+        sameSite: "lax",
+        maxAge: PENDING_LOGIN_TTL_SECONDS,
+      });
+
+      return response;
     }
   } catch (error) {
     console.error("Login failed:", error);
