@@ -1,4 +1,13 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+vi.mock("@/lib/auth", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/auth")>();
+  return {
+    ...actual,
+    getTenantContext: async () => actual.DEFAULT_TENANT,
+  };
+});
+
 import { parseCustomerInput } from "../src/services/chat/intentClassifier";
 import { executeConsultantTurn } from "../src/services/chat/agentLoop";
 import { processTeachingTurn } from "../src/services/chat/teachingDialog";

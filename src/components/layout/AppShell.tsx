@@ -61,7 +61,6 @@ export default function AppShell({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [localOnlyMode, setLocalOnlyMode] = useState(false);
   const [switching, setSwitching] = useState(false);
-  const [switchingRole, setSwitchingRole] = useState(false);
 
   const userMenuRef = useRef<HTMLDivElement>(null);
   const tenantMenuRef = useRef<HTMLDivElement>(null);
@@ -128,27 +127,6 @@ export default function AppShell({
       console.error(e);
     } finally {
       setSwitching(false);
-    }
-  };
-
-  const switchRole = async (role: AppUserRole) => {
-    setSwitchingRole(true);
-    try {
-      const res = await fetch("/api/auth/switch-role", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setCurrentTenant(data.activeTenant);
-        setUserMenuOpen(false);
-        window.location.reload();
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setSwitchingRole(false);
     }
   };
 
@@ -533,43 +511,6 @@ export default function AppShell({
                     </div>
                   </div>
 
-                  {/* Role Switcher Section for Live Localhost RBAC Testing */}
-                  <div className="pb-2.5 mb-2 border-b border-[#DCE6F5]">
-                    <div className="text-[10px] uppercase font-semibold text-[#2563EB] tracking-wider mb-2 flex items-center gap-1.5">
-                      <ShieldCheck className="h-3 w-3 text-[#2563EB]" />
-                      <span>Switch Role (RBAC Testing)</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {[
-                        { id: "owner", label: "Owner", sub: "Full Workspace Access" },
-                        { id: "admin", label: "Admin", sub: "Workspace Admin" },
-                        { id: "expert", label: "Expert / Reviewer", sub: "Approvals & Tasks" },
-                        { id: "team", label: "Team Member", sub: "Chat & Knowledge" },
-                        { id: "customer", label: "Customer / Guest", sub: "Interacts with AI" },
-                      ].map((r) => {
-                        const isCurrent = currentTenant.userRole === r.id;
-                        return (
-                          <button
-                            key={r.id}
-                            onClick={() => switchRole(r.id as AppUserRole)}
-                            disabled={switchingRole}
-                            className={`p-2 rounded-lg text-left transition border ${
-                              isCurrent
-                                ? "bg-[#EEF4FF] border-[#2563EB] text-[#2563EB]"
-                                : "border-[#DCE6F5] bg-white text-[#4A5B78] hover:border-[#BFDBFE] hover:bg-[#F6F9FF]"
-                            }`}
-                          >
-                            <div className="text-xs font-bold flex items-center justify-between">
-                              <span>{r.label}</span>
-                              {isCurrent && <Check className="h-3 w-3 text-[#2563EB]" />}
-                            </div>
-                            <div className="text-[9px] text-[#7B8AA6] truncate mt-0.5">{r.sub}</div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
                   {/* Navigation Links */}
                   <div className="space-y-1">
                     <Link
@@ -689,12 +630,6 @@ export default function AppShell({
                   Return to Dashboard
                 </Link>
 
-                <button
-                  onClick={() => switchRole("owner")}
-                  className="px-6 py-2.5 rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white font-semibold text-xs transition shadow-sm"
-                >
-                  Switch to Owner (Test Mode)
-                </button>
               </div>
             </div>
           ) : (

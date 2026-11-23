@@ -117,30 +117,6 @@ interface ChatTestMessage {
 
 export default function RolesAndPromptsPage() {
   const [activeTab, setActiveTab] = useState<"prompts" | "roles" | "skills" | "security_matrix">("prompts");
-  const [switchingRoleName, setSwitchingRoleName] = useState<string | null>(null);
-  const [roleSwitchToast, setRoleSwitchToast] = useState("");
-
-  const handleSwitchRoleLive = async (targetRole: string) => {
-    setSwitchingRoleName(targetRole);
-    try {
-      const res = await fetch("/api/auth/switch-role", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: targetRole }),
-      });
-      if (res.ok) {
-        setRoleSwitchToast(`Switched active role to ${targetRole.toUpperCase()}`);
-        setTimeout(() => {
-          window.location.reload();
-        }, 800);
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setSwitchingRoleName(null);
-    }
-  };
-
   // ================= Prompts Tab State =================
   const [promptsList, setPromptsList] = useState<PromptItem[]>([]);
   const [selectedPromptKey, setSelectedPromptKey] = useState<string>("master_system");
@@ -1978,15 +1954,6 @@ ${skillForm.examples
         {/* ================= TAB 4: ACCESS CONTROL & SECURITY ARCHITECTURE MATRIX ================= */}
         {activeTab === "security_matrix" && (
           <div className="space-y-8 animate-in fade-in duration-200">
-            {roleSwitchToast && (
-              <div className="rounded-xl border border-[#BFDBFE] bg-blue-50 p-3.5 text-xs text-cyan-300 flex items-center justify-between shadow-lg">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-cyan-400 flex-shrink-0" />
-                  <span>{roleSwitchToast} — Refreshing environment view...</span>
-                </div>
-              </div>
-            )}
-
             {/* Zero Leakage Multi-Tenant Guarantee Banner */}
             <div className="rounded-2xl border border-[#BFDBFE] bg-gradient-to-r from-[#071329] via-[#091C3E] to-[#071329] p-6 shadow-xl space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#DCE6F5]/80 pb-3">
@@ -2041,53 +2008,18 @@ ${skillForm.examples
                       <th className="px-4 py-3 min-w-[200px]">Workspace / Feature</th>
                       <th className="px-3 py-3 text-center">
                         <div className="font-bold text-slate-900">Owner</div>
-                        <button
-                          onClick={() => handleSwitchRoleLive("owner")}
-                          disabled={switchingRoleName !== null}
-                          className="mt-1 text-[10px] text-cyan-400 hover:text-cyan-300 font-mono underline block mx-auto"
-                        >
-                          {switchingRoleName === "owner" ? "Switching..." : "Test Role"}
-                        </button>
                       </th>
                       <th className="px-3 py-3 text-center">
                         <div className="font-bold text-slate-900">Admin</div>
-                        <button
-                          onClick={() => handleSwitchRoleLive("admin")}
-                          disabled={switchingRoleName !== null}
-                          className="mt-1 text-[10px] text-cyan-400 hover:text-cyan-300 font-mono underline block mx-auto"
-                        >
-                          {switchingRoleName === "admin" ? "Switching..." : "Test Role"}
-                        </button>
                       </th>
                       <th className="px-3 py-3 text-center">
                         <div className="font-bold text-slate-900">Expert / Reviewer</div>
-                        <button
-                          onClick={() => handleSwitchRoleLive("expert")}
-                          disabled={switchingRoleName !== null}
-                          className="mt-1 text-[10px] text-cyan-400 hover:text-cyan-300 font-mono underline block mx-auto"
-                        >
-                          {switchingRoleName === "expert" ? "Switching..." : "Test Role"}
-                        </button>
                       </th>
                       <th className="px-3 py-3 text-center">
                         <div className="font-bold text-slate-900">Team Member</div>
-                        <button
-                          onClick={() => handleSwitchRoleLive("team")}
-                          disabled={switchingRoleName !== null}
-                          className="mt-1 text-[10px] text-cyan-400 hover:text-cyan-300 font-mono underline block mx-auto"
-                        >
-                          {switchingRoleName === "team" ? "Switching..." : "Test Role"}
-                        </button>
                       </th>
                       <th className="px-3 py-3 text-center">
                         <div className="font-bold text-slate-900">Customer / Guest</div>
-                        <button
-                          onClick={() => handleSwitchRoleLive("customer")}
-                          disabled={switchingRoleName !== null}
-                          className="mt-1 text-[10px] text-cyan-400 hover:text-cyan-300 font-mono underline block mx-auto"
-                        >
-                          {switchingRoleName === "customer" ? "Switching..." : "Test Role"}
-                        </button>
                       </th>
                     </tr>
                   </thead>

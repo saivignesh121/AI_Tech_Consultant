@@ -1,4 +1,13 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+vi.mock("@/lib/auth", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/auth")>();
+  return {
+    ...actual,
+    getTenantContext: async () => actual.DEFAULT_TENANT,
+  };
+});
+
 import { generateSyntheticTestSet } from "../src/services/onboarding/syntheticTestGenerator";
 import { evaluateBusinessReadiness } from "../src/services/onboarding/readinessEvaluator";
 import { OnboardingStopwatch } from "../src/services/onboarding/stopwatchTimer";

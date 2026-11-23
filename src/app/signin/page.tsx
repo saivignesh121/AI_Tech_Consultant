@@ -4,7 +4,6 @@ import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
-  Sparkles,
   Building2,
   ShieldCheck,
   ArrowRight,
@@ -12,7 +11,11 @@ import {
   Lock,
   Mail,
   AlertTriangle,
-  ChevronRight,
+  ChevronDown,
+  Eye,
+  EyeOff,
+  UserCheck,
+  FlaskConical,
 } from "lucide-react";
 
 interface BusinessChoice {
@@ -26,39 +29,23 @@ function SignInContent() {
   const searchParams = useSearchParams();
   const redirectParam = searchParams.get("redirect") || "";
 
-  const [email, setEmail] = useState("alex@acme.com");
-  const [password, setPassword] = useState("AcmePass123!");
+  // Authentication inputs - strictly blank by default
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [selectedDemo, setSelectedDemo] = useState("acme");
-  const [activeSession, setActiveSession] = useState<{
-    userEmail: string;
-    businessName: string;
-    userRole: string;
-  } | null>(null);
+
+  // Demo accounts drawer toggle - collapsed by default for clean enterprise privacy
+  const [showDemoDrawer, setShowDemoDrawer] = useState(false);
+  const [selectedDemo, setSelectedDemo] = useState<string | null>(null);
 
   // Multi-Business Picker Modal State
   const [businessPickerOpen, setBusinessPickerOpen] = useState(false);
   const [businessChoices, setBusinessChoices] = useState<BusinessChoice[]>([]);
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Check if user is already authenticated
-    fetch("/api/auth/context")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.currentTenant && d.currentTenant.userEmail) {
-          setActiveSession({
-            userEmail: d.currentTenant.userEmail,
-            businessName: d.currentTenant.businessName,
-            userRole: d.currentTenant.userRole,
-          });
-        }
-      })
-      .catch(console.error);
-  }, []);
-
-  // Fast demo credential pre-fills
+  // Demo credential selectors (only activated if reviewer explicitly opens the drawer and clicks)
   const selectDemoAccount = (account: "acme" | "beta" | "multi") => {
     setSelectedDemo(account);
     setErrorMsg("");
@@ -77,19 +64,29 @@ function SignInContent() {
   const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setErrorMsg("");
+
+    if (!email.trim()) {
+      setErrorMsg("Please enter your work email address.");
+      return;
+    }
+    if (!password) {
+      setErrorMsg("Please enter your password.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
 
       const data = await res.json();
 
       if (!res.ok || data.error) {
-        setErrorMsg(data.error || "Authentication failed. Please verify credentials.");
+        setErrorMsg(data.error || "Invalid email or password. Please verify credentials.");
       } else if (data.requiresBusinessChoice) {
         // Multi-Tenant User: Display Business Picker
         setBusinessChoices(data.businesses || []);
@@ -133,17 +130,17 @@ function SignInContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F9FF] text-[#0B1B3A] flex flex-col justify-center items-center px-4 py-8 font-sans selection:bg-blue-100 selection:text-blue-900 relative overflow-hidden">
-      {/* Background Ambient Glow (faint radial blue/cyan gradient) */}
+    <div className="min-h-screen bg-[#F6F9FF] text-[#0B1B3A] flex flex-col justify-center items-center px-4 py-12 font-sans selection:bg-blue-100 selection:text-blue-900 relative overflow-hidden">
+      {/* Background Ambient Glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-blue-500/10 blur-[140px] rounded-full" />
         <div className="absolute bottom-1/4 right-1/4 w-[450px] h-[300px] bg-indigo-500/8 blur-[130px] rounded-full" />
       </div>
 
-      <div className="relative max-w-md w-full space-y-6 z-10">
-        {/* Brand Header */}
-        <div className="text-center space-y-3">
-          <Link href="/" className="inline-flex items-center gap-2 group">
+      <div className="relative max-w-md w-full space-y-5 z-10">
+        {/* Clean Brand Header */}
+        <div className="text-center space-y-2">
+          <Link href="/" className="inline-flex items-center gap-2.5 group">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#0284C7] to-[#2563EB] text-white font-serif text-2xl font-bold shadow-sm group-hover:brightness-105 transition">
               α
             </div>
@@ -151,16 +148,16 @@ function SignInContent() {
               AI Technologies &amp; Consulting
             </span>
           </Link>
-          <p className="text-xs text-[#4A5B78] max-w-sm mx-auto">
-            Sign in to access your tenant-isolated Knowledge Brain, Agent Studios, and live chat.
+          <p className="text-xs text-[#4A5B78]">
+            Sign in to your enterprise workspace
           </p>
         </div>
 
-        {/* Tab Toggle: Sign In vs Register (Sign Up) in --surface-subtle with white active pill */}
+        {/* Tab Toggle: Sign In vs Create Workspace */}
         <div className="flex rounded-xl bg-[#EEF4FF] p-1 border border-[#DCE6F5] shadow-inner">
           <Link
             href={redirectParam ? `/signin?redirect=${encodeURIComponent(redirectParam)}` : "/signin"}
-            className="flex-1 py-2 text-center text-xs font-bold rounded-lg bg-white text-[#2563EB] shadow-sm transition"
+            className="flex-1 py-2 text-center text-xs font-bold rounded-lg bg-white text-[#2563EB] shadow-xs transition"
           >
             Sign In
           </Link>
@@ -172,95 +169,8 @@ function SignInContent() {
           </Link>
         </div>
 
-        {/* Active Session Banner: white card with blue accent */}
-        {activeSession && (
-          <div className="p-3.5 rounded-xl bg-white border border-[#DCE6F5] border-l-4 border-l-[#2563EB] shadow-sm flex items-center justify-between">
-            <div>
-              <div className="text-xs text-[#4A5B78]">
-                Active session: <strong className="text-[#0B1B3A]">{activeSession.userEmail}</strong>
-              </div>
-              <div className="text-[11px] text-[#2563EB] font-medium mt-0.5">
-                {activeSession.businessName} &bull; <span className="capitalize">{activeSession.userRole}</span>
-              </div>
-            </div>
-            <Link
-              href={redirectParam || "/"}
-              className="px-3 py-1.5 bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 text-white font-bold rounded-lg text-xs transition flex items-center gap-1 shadow-sm shrink-0"
-            >
-              <span>{redirectParam ? "Proceed" : "Go to Dashboard"}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        )}
-
-        {/* Demo Logins Quick-Select Selector */}
-        <div className="space-y-2">
-          <div className="text-[11px] font-semibold text-[#7B8AA6] uppercase tracking-wider text-center">
-            Demo Tenant Quick-Select (Argon2 Verified)
-          </div>
-
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => selectDemoAccount("acme")}
-              className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between ${
-                selectedDemo === "acme"
-                  ? "border-[#2563EB] bg-[#EEF4FF] shadow-xs"
-                  : "border-[#DCE6F5] bg-white hover:border-blue-200"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded">
-                  Acme
-                </span>
-                {selectedDemo === "acme" && <Check className="w-3.5 h-3.5 text-[#2563EB]" />}
-              </div>
-              <div className="text-xs font-semibold text-[#0B1B3A] mt-1.5 truncate">Alex Turner</div>
-              <div className="text-[10px] text-[#7B8AA6]">Owner (1 Biz)</div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => selectDemoAccount("beta")}
-              className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between ${
-                selectedDemo === "beta"
-                  ? "border-[#2563EB] bg-[#EEF4FF] shadow-xs"
-                  : "border-[#DCE6F5] bg-white hover:border-blue-200"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-purple-700 bg-purple-50 border border-purple-200 px-1.5 py-0.5 rounded">
-                  Beta
-                </span>
-                {selectedDemo === "beta" && <Check className="w-3.5 h-3.5 text-[#2563EB]" />}
-              </div>
-              <div className="text-xs font-semibold text-[#0B1B3A] mt-1.5 truncate">Sarah Chen</div>
-              <div className="text-[10px] text-[#7B8AA6]">Owner (1 Biz)</div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => selectDemoAccount("multi")}
-              className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between ${
-                selectedDemo === "multi"
-                  ? "border-[#2563EB] bg-[#EEF4FF] shadow-xs"
-                  : "border-[#DCE6F5] bg-white hover:border-blue-200"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
-                  Multi
-                </span>
-                {selectedDemo === "multi" && <Check className="w-3.5 h-3.5 text-[#2563EB]" />}
-              </div>
-              <div className="text-xs font-semibold text-[#0B1B3A] mt-1.5 truncate">Morgan Lee</div>
-              <div className="text-[10px] text-[#7B8AA6]">Multi-Biz Picker</div>
-            </button>
-          </div>
-        </div>
-
-        {/* Credentials Form */}
-        <div className="rounded-2xl border border-[#DCE6F5] bg-white p-6 shadow-md space-y-4">
+        {/* Main Credentials Form Card */}
+        <div className="rounded-2xl border border-[#DCE6F5] bg-white p-6 sm:p-8 shadow-md space-y-5">
           {errorMsg && (
             <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
@@ -268,35 +178,65 @@ function SignInContent() {
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} autoComplete="off" className="space-y-4">
+            {/* Decoy inputs to absorb browser autofill */}
+            <input type="text" name="decoy_username" style={{ display: "none" }} tabIndex={-1} />
+            <input type="password" name="decoy_password" style={{ display: "none" }} tabIndex={-1} />
+
             <div>
-              <label className="block text-xs font-medium text-[#4A5B78] mb-1">Work Email</label>
+              <label className="block text-xs font-medium text-[#4A5B78] mb-1.5">Work Email</label>
               <div className="relative rounded-lg shadow-xs">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#7B8AA6]">
                   <Mail className="h-4 w-4" />
                 </div>
                 <input
                   type="email"
+                  name="enterprise_work_email"
                   required
+                  autoComplete="off"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 text-sm bg-white border border-[#C3D3EA] rounded-lg text-[#0B1B3A] placeholder-[#94A3B8] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/20"
+                  placeholder="name@company.com"
+                  className="block w-full pl-10 pr-3 py-2.5 text-sm bg-white border border-[#C3D3EA] rounded-lg text-[#0B1B3A] placeholder-[#94A3B8] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#4A5B78] mb-1">Password</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-medium text-[#4A5B78]">Password</label>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-[11px] text-[#2563EB] hover:text-[#1D4ED8] flex items-center gap-1 cursor-pointer"
+                >
+                  {showPassword ? (
+                    <>
+                      <EyeOff className="w-3.5 h-3.5" />
+                      <span>Hide</span>
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>Show</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
               <div className="relative rounded-lg shadow-xs">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#7B8AA6]">
                   <Lock className="h-4 w-4" />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
+                  name="enterprise_user_password"
                   required
+                  autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 text-sm bg-white border border-[#C3D3EA] rounded-lg text-[#0B1B3A] placeholder-[#94A3B8] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/20"
+                  placeholder="Enter your password"
+                  className="block w-full pl-10 pr-10 py-2.5 text-sm bg-white border border-[#C3D3EA] rounded-lg text-[#0B1B3A] placeholder-[#94A3B8] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
             </div>
@@ -304,32 +244,130 @@ function SignInContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 px-4 py-3 text-sm font-bold text-white transition shadow-md shadow-blue-500/20 disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 px-4 py-3 text-sm font-bold text-white transition shadow-md shadow-blue-500/20 disabled:opacity-50 cursor-pointer"
             >
-              <span>{loading ? "Verifying Credentials..." : "Sign In to Workspace"}</span>
+              <span>{loading ? "Signing In..." : "Sign In to Workspace"}</span>
               <ArrowRight className="h-4 w-4" />
             </button>
           </form>
 
-          <div className="mt-4 pt-4 border-t border-[#DCE6F5] text-center">
+          <div className="pt-2 text-center">
             <p className="text-xs text-[#4A5B78]">
-              Need to register a new company?{" "}
+              New company?{" "}
               <Link
                 href={redirectParam ? `/signup?redirect=${encodeURIComponent(redirectParam)}` : "/signup"}
                 className="font-semibold text-[#2563EB] hover:text-[#1D4ED8] transition"
               >
-                Create new business workspace &rarr;
+                Create new workspace &rarr;
               </Link>
             </p>
           </div>
         </div>
 
-        {/* Security Isolation Callout */}
-        <div className="rounded-xl border border-[#DCE6F5] bg-white p-3.5 flex items-start gap-3 shadow-xs">
-          <ShieldCheck className="h-5 w-5 text-[#2563EB] flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-[#4A5B78] leading-relaxed">
-            <strong className="text-[#0B1B3A]">Strict Multi-Tenant Guarantee:</strong> Passwords checked against Argon2id hashes. Every session is stored in PostgreSQL with <code className="text-[#2563EB] font-mono bg-blue-50 px-1 py-0.5 rounded">business_id</code> scoping. Rate-limited to prevent brute force attacks.
-          </p>
+        {/* Collapsible Evaluation / Test Credentials Drawer (Hidden by default for privacy) */}
+        <div className="rounded-xl border border-[#DCE6F5] bg-white overflow-hidden shadow-xs">
+          <button
+            type="button"
+            onClick={() => setShowDemoDrawer(!showDemoDrawer)}
+            className="w-full px-4 py-3 text-left flex items-center justify-between text-xs font-semibold text-[#4A5B78] hover:text-[#0B1B3A] hover:bg-[#F6F9FF] transition cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <FlaskConical className="w-3.5 h-3.5 text-[#2563EB]" />
+              <span>Evaluation Test Profiles (Roles &amp; Access Fencing)</span>
+            </div>
+            <ChevronDown className={`w-4 h-4 text-[#7B8AA6] transition-transform duration-200 ${showDemoDrawer ? "rotate-180" : ""}`} />
+          </button>
+
+          {showDemoDrawer && (
+            <div className="px-4 pb-4 pt-2 border-t border-[#DCE6F5] bg-[#F6F9FF]/60 space-y-3 animate-in fade-in duration-150">
+              <p className="text-[11px] text-[#4A5B78] leading-relaxed">
+                Click a test persona below to auto-fill verified credentials. Each persona validates strict tenant isolation and role permissions:
+              </p>
+
+              <div className="grid grid-cols-1 gap-2">
+                {/* Acme - Alex Turner */}
+                <button
+                  type="button"
+                  onClick={() => selectDemoAccount("acme")}
+                  className={`p-3 rounded-xl border text-left transition flex items-center justify-between ${
+                    selectedDemo === "acme"
+                      ? "border-[#2563EB] bg-white shadow-xs"
+                      : "border-[#DCE6F5] bg-white hover:border-blue-200"
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded">
+                        Acme Corp
+                      </span>
+                      <span className="text-xs font-bold text-[#0B1B3A]">Alex Turner</span>
+                      <span className="text-[10px] font-medium text-[#2563EB] bg-[#EEF4FF] px-1.5 py-0.2 rounded">Owner / Admin</span>
+                    </div>
+                    <p className="text-[11px] text-[#4A5B78] mt-1 leading-snug">
+                      Full access to Acme&apos;s isolated knowledge base, agent roles, evals, and fleet admin. Cannot view Beta Dynamics data.
+                    </p>
+                  </div>
+                  {selectedDemo === "acme" && <Check className="w-4 h-4 text-[#2563EB] shrink-0 ml-2" />}
+                </button>
+
+                {/* Beta - Sarah Chen */}
+                <button
+                  type="button"
+                  onClick={() => selectDemoAccount("beta")}
+                  className={`p-3 rounded-xl border text-left transition flex items-center justify-between ${
+                    selectedDemo === "beta"
+                      ? "border-[#2563EB] bg-white shadow-xs"
+                      : "border-[#DCE6F5] bg-white hover:border-blue-200"
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-purple-700 bg-purple-50 border border-purple-200 px-1.5 py-0.5 rounded">
+                        Beta Tech
+                      </span>
+                      <span className="text-xs font-bold text-[#0B1B3A]">Sarah Chen</span>
+                      <span className="text-[10px] font-medium text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded">Owner / Admin</span>
+                    </div>
+                    <p className="text-[11px] text-[#4A5B78] mt-1 leading-snug">
+                      Separate isolated tenant. Verifies that Company B cannot view or access Company A&apos;s chats, API keys, or documents.
+                    </p>
+                  </div>
+                  {selectedDemo === "beta" && <Check className="w-4 h-4 text-[#2563EB] shrink-0 ml-2" />}
+                </button>
+
+                {/* Multi - Morgan Lee */}
+                <button
+                  type="button"
+                  onClick={() => selectDemoAccount("multi")}
+                  className={`p-3 rounded-xl border text-left transition flex items-center justify-between ${
+                    selectedDemo === "multi"
+                      ? "border-[#2563EB] bg-white shadow-xs"
+                      : "border-[#DCE6F5] bg-white hover:border-blue-200"
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                        Cross-Tenant
+                      </span>
+                      <span className="text-xs font-bold text-[#0B1B3A]">Morgan Lee</span>
+                      <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded">Consultant</span>
+                    </div>
+                    <p className="text-[11px] text-[#4A5B78] mt-1 leading-snug">
+                      Member of both Acme and Beta. Demonstrates the secure multi-workspace picker modal upon login.
+                    </p>
+                  </div>
+                  {selectedDemo === "multi" && <Check className="w-4 h-4 text-[#2563EB] shrink-0 ml-2" />}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Clean 1-Line Trust Badge */}
+        <div className="flex items-center justify-center gap-2 text-xs text-[#7B8AA6] pt-1">
+          <ShieldCheck className="w-3.5 h-3.5 text-[#15803D]" />
+          <span>Strict Zero-Leakage isolation &bull; Argon2id password security</span>
         </div>
       </div>
 
@@ -355,7 +393,7 @@ function SignInContent() {
                   key={b.businessId}
                   onClick={() => handleSelectBusinessWorkspace(b.businessId)}
                   disabled={loading}
-                  className="w-full p-3.5 rounded-xl border border-[#DCE6F5] hover:border-[#2563EB] bg-white hover:bg-[#EEF4FF] text-left transition flex items-center justify-between group shadow-xs"
+                  className="w-full p-3.5 rounded-xl border border-[#DCE6F5] hover:border-[#2563EB] bg-white hover:bg-[#EEF4FF] text-left transition flex items-center justify-between group shadow-xs cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-lg bg-blue-50 text-[#2563EB] font-bold text-xs flex items-center justify-center border border-blue-200">
@@ -379,7 +417,7 @@ function SignInContent() {
               <button
                 type="button"
                 onClick={() => setBusinessPickerOpen(false)}
-                className="px-4 py-2 text-xs font-semibold text-[#4A5B78] hover:text-[#0B1B3A] transition"
+                className="px-4 py-2 text-xs font-semibold text-[#4A5B78] hover:text-[#0B1B3A] transition cursor-pointer"
               >
                 Cancel
               </button>

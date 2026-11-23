@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
-import { getTenantContext, DEMO_BUSINESSES } from "@/lib/auth";
+import { getTenantContext, UnauthorizedError, DEMO_BUSINESSES, type TenantContext } from "@/lib/auth";
 import { db } from "@/db";
 import { businesses, memberships } from "@/db/schema/business";
 import { eq } from "drizzle-orm";
 
 export async function GET() {
-  const currentTenant = await getTenantContext();
+  let currentTenant: TenantContext;
+  try {
+    currentTenant = await getTenantContext();
+  } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    }
+    console.error("Failed to resolve tenant context:", error);
+    return NextResponse.json({ error: "internal_error" }, { status: 500 });
+  }
 
   const demoList = Object.values(DEMO_BUSINESSES).map((t) => ({
     businessId: t.businessId,
