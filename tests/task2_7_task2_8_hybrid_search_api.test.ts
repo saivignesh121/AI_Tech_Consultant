@@ -1,4 +1,13 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+
+vi.mock("@/lib/auth", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/auth")>();
+  return {
+    ...actual,
+    getTenantContext: async () => actual.DEFAULT_TENANT,
+  };
+});
+
 import {
   hybridSearchSimulate,
   executeVectorOnlySearch,

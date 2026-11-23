@@ -135,86 +135,72 @@ export function resetAllRateLimits(): void {
   loginRateLimits.clear();
 }
 
+export class UnauthorizedError extends Error {
+  constructor(message = "Unauthorized") {
+    super(message);
+    this.name = "UnauthorizedError";
+  }
+}
+
 /**
- * Resolves the authenticated business tenant context.
- * 1. Checks HttpOnly session cookie from Postgres `sessions` table.
- * 2. Checks active_tenant_slug cookie (for fast demo workspace switching).
- * 3. Falls back to default demo tenant.
+ * Resolves the authenticated business tenant context from the HttpOnly
+ * session cookie backed by the Postgres `sessions` table.
+ * Fails closed: without a valid session this throws `UnauthorizedError`
+ * instead of falling back to a demo tenant.
  */
 export async function getTenantContext(): Promise<TenantContext> {
-  try {
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get("session_token")?.value;
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get("session_token")?.value;
 
-    // 1. Try PostgreSQL Session Lookup
-    if (sessionToken) {
-      try {
-        const now = new Date();
-        const activeSessions = await db
-          .select({
-            sessionId: sessions.id,
-            userId: sessions.userId,
-            businessId: sessions.businessId,
-            businessName: businesses.name,
-            businessSlug: businesses.slug,
-            userEmail: users.email,
-            userRole: memberships.role,
-          })
-          .from(sessions)
-          .innerJoin(businesses, eq(sessions.businessId, businesses.id))
-          .innerJoin(users, eq(sessions.userId, users.id))
-          .leftJoin(
-            memberships,
-            and(
-              eq(memberships.userId, sessions.userId),
-              eq(memberships.businessId, sessions.businessId)
-            )
-          )
-          .where(and(eq(sessions.id, sessionToken), gt(sessions.expiresAt, now)))
-          .limit(1);
-
-        if (activeSessions.length > 0) {
-          const row = activeSessions[0];
-          const testRole = cookieStore.get("active_test_role")?.value as UserRole | undefined;
-          const finalRole = (testRole && ["owner", "admin", "team", "expert", "member"].includes(testRole))
-            ? testRole
-            : ((row.userRole as UserRole) || "team");
-
-          return {
-            businessId: row.businessId,
-            businessName: row.businessName,
-            businessSlug: row.businessSlug,
-            userId: row.userId,
-            userEmail: row.userEmail,
-            userRole: finalRole,
-          };
-        }
-      } catch (dbErr) {
-        // Fall through to cookie / demo lookup if DB is momentarily unreachable
-        console.error("Session lookup fallback:", dbErr);
-      }
-    }
-
-    // 2. Demo workspace cookie lookup
-    const slug = cookieStore.get("active_tenant_slug")?.value;
-    let baseContext = DEFAULT_TENANT;
-    if (slug && DEMO_BUSINESSES[slug]) {
-      baseContext = DEMO_BUSINESSES[slug];
-    }
-
-    // 3. Check for role override cookie (for developer/tester testing on localhost)
-    const testRole = cookieStore.get("active_test_role")?.value as UserRole | undefined;
-    if (testRole && ["owner", "admin", "team", "expert", "member"].includes(testRole)) {
-      return {
-        ...baseContext,
-        userRole: testRole,
-      };
-    }
-
-    return baseContext;
-  } catch {
-    // If called outside request context (e.g. in standalone scripts or tests)
+  if (!sessionToken) {
+    throw new UnauthorizedError("Unauthorized: no valid session");
   }
 
-  return DEFAULT_TENANT;
+  try {
+    const now = new Date();
+    const activeSessions = await db
+      .select({
+        sessionId: sessions.id,
+        userId: sessions.userId,
+        businessId: sessions.businessId,
+        businessName: businesses.name,
+        businessSlug: businesses.slug,
+        userEmail: users.email,
+        userRole: memberships.role,
+      })
+      .from(sessions)
+      .innerJoin(businesses, eq(sessions.businessId, businesses.id))
+      .innerJoin(users, eq(sessions.userId, users.id))
+      .leftJoin(
+        memberships,
+        and(
+          eq(memberships.userId, sessions.userId),
+          eq(memberships.businessId, sessions.businessId)
+        )
+      )
+      .where(and(eq(sessions.id, sessionToken), gt(sessions.expiresAt, now)))
+      .limit(1);
+
+    if (activeSessions.length > 0) {
+      const row = activeSessions[0];
+      const testRole = cookieStore.get("active_test_role")?.value as UserRole | undefined;
+      const finalRole = (testRole && ["owner", "admin", "team", "expert", "member"].includes(testRole))
+        ? testRole
+        : ((row.userRole as UserRole) || "team");
+
+      return {
+        businessId: row.businessId,
+        businessName: row.businessName,
+        businessSlug: row.businessSlug,
+        userId: row.userId,
+        userEmail: row.userEmail,
+        userRole: finalRole,
+      };
+    }
+  } catch (dbErr) {
+    // A session-store failure must never grant access. Fail closed below.
+    console.error("Session lookup failed:", dbErr);
+  }
+
+  throw new UnauthorizedError("Unauthorized: invalid or expired session");
 }
