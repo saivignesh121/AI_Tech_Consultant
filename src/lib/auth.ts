@@ -183,10 +183,6 @@ export async function getTenantContext(): Promise<TenantContext> {
 
     if (activeSessions.length > 0) {
       const row = activeSessions[0];
-      const testRole = cookieStore.get("active_test_role")?.value as UserRole | undefined;
-      const finalRole = (testRole && ["owner", "admin", "team", "expert", "member"].includes(testRole))
-        ? testRole
-        : ((row.userRole as UserRole) || "team");
 
       return {
         businessId: row.businessId,
@@ -194,7 +190,7 @@ export async function getTenantContext(): Promise<TenantContext> {
         businessSlug: row.businessSlug,
         userId: row.userId,
         userEmail: row.userEmail,
-        userRole: finalRole,
+        userRole: (row.userRole as UserRole) || "team",
       };
     }
   } catch (dbErr) {

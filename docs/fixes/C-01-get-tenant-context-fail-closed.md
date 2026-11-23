@@ -62,6 +62,9 @@ credential produced the highest privilege level.
 - The valid-session branch is unchanged, including the existing
   `active_test_role` override (`src/lib/auth.ts:184-198`). That override is
   C-02 and is deliberately untouched.
+  > **Superseded by C-02/C-03:** the `active_test_role` override was removed by
+  > the later C-02/C-03 change; see
+  > `docs/fixes/C-02-C-03-role-override-and-switch-role.md`.
 
 Files changed:
 
@@ -127,6 +130,8 @@ No dependency was added. The function signature is unchanged
   callers because it no longer receives the Acme owner, but the endpoint
   itself is unchanged: it still has no login requirement and no elevation
   guard. C-03 is not fixed.
+  > **Superseded by C-02/C-03:** the `switch-role` endpoint has been deleted
+  > entirely; see `docs/fixes/C-02-C-03-role-override-and-switch-role.md`.
 - `createSession` still swallows insert errors (C-05, `src/lib/auth.ts:59-75`),
   and a session-store outage is now reported as "invalid or expired session"
   rather than `503`. C-05 is not fixed.
@@ -149,6 +154,8 @@ No dependency was added. The function signature is unchanged
 - `src/app/api/auth/switch-role/route.ts:39-41`: when the database update
   fails, the route logs a warning and still returns `{ success: true }`, so a
   role switch can be reported as successful while nothing was written.
+  > **Superseded by C-02/C-03:** this route no longer exists; see
+  > `docs/fixes/C-02-C-03-role-override-and-switch-role.md`.
 - `src/app/api/business/delete/route.ts:56` and
   `src/app/api/auth/switch-tenant/route.ts:34`: still return
   `details: String(error)` to clients (H-05 residue).
