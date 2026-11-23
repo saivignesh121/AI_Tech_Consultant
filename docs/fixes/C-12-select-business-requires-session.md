@@ -27,11 +27,21 @@ Root cause: identity was taken from client-controlled input instead of being der
 Files changed:
 
 - `src/app/api/auth/login/route.ts` — added `signPendingLogin()` (HMAC-SHA256 over `<userId>.<expiryMs>` using `process.env.ENCRYPTION_KEY`, throwing if unset) and set the signed `pending_login` cookie in the multi-business branch only (`httpOnly`, `sameSite: lax`, `secure` when `COOKIE_SECURE=true`, `maxAge: 300`).
-- `src/app/api/auth/select-business/route.ts` — added `verifyPendingLogin()` (split/parse, expiry check, timing-safe HMAC comparison, null when `ENCRYPTION_KEY` is unset), reads identity from the cookie, ignores body `userId`, keeps the membership check, and now returns a fixed 500 body with `console.error` server-side. Response shape and all cookie names are unchanged.
-- `tests/c12_select_business_requires_session.test.ts` (new) — 5 tests, all DB access mocked.
+- `src/app/api/auth/select-business/route.ts` — added `verifyPendingLogin()` (split/parse, expiry check, timing-safe HMAC comparison, null when `ENCRYPTION_KEY` is unset), reads identity from the cookie, ignores body `userId`, keeps the membership check, and now returns a fixed 500 body with `console.error` server-side. On the success path it also calls `response.cookies.delete("pending_login")` so the credential is single-use (see below). The JSON response shape and the names of the session cookies are unchanged.
+- `tests/c12_select_business_requires_session.test.ts` (new) — 6 tests (A–F), all DB access mocked.
 - `docs/fixes/C-12-select-business-requires-session.md` (new) — this document.
 
 Note: `src/lib/crypto.ts:8` reads `process.env.ENCRYPTION_KEY || DEFAULT_KEY` (hardcoded fallback, `<REDACTED>`). That helper was **not** reused, because the approved design forbids default keys and requires fail-closed behavior. Both routes read `process.env.ENCRYPTION_KEY` directly and reject when it is absent.
+
+## Follow-up: `pending_login` is single-use
+
+Verifying the signature was not enough: a valid `pending_login` cookie stayed usable for its full 5-minute window, so a successful selection could be replayed to mint another session for the same user without re-authenticating. On the success path only, `src/app/api/auth/select-business/route.ts:158` now calls:
+
+```ts
+response.cookies.delete("pending_login");
+```
+
+That emits `pending_login=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`, clearing the short-lived credential in the browser. It sits after all five session cookies are set and immediately before `return response`. The 401 path is unchanged — an invalid cookie is still rejected, and no deletion is attempted there. Test F covers this behavior.
 
 ## Evidence — Step 1 (read-only confirmation)
 
@@ -98,21 +108,26 @@ Number of calls: 1
 Exit code: 1
 ```
 
-Tests A–D fail on current code as required (E fails too). Test B choice: **body `userId` is ignored**, not rejected — `createSession` must be called for the cookie's user (A), never the body's user (B).
+Tests A–D fail on current code as required (E fails too). Test B choice: **body `userId` is ignored**, not rejected — `createSession` must be called for the cookie's user (A), never the body's user (B). Test F was added with the single-use follow-up above; on unfixed code it fails at `expect(cleared).toBeDefined()` because a successful response emits no `pending_login` Set-Cookie to clear it.
 
 ## Verification
 
-- `npx vitest run tests/c12_select_business_requires_session.test.ts` → **5 passed / 5**:
+- `npx vitest run tests/c12_select_business_requires_session.test.ts --reporter=verbose` → **6 passed / 6**, one per test A–F:
 
 ```
  RUN  v3.2.7 /Users/sanjanakolu/Desktop/vignesh/AI_Tech_Consultant
 
- ✓ tests/c12_select_business_requires_session.test.ts (5 tests) 5ms
+ ✓ tests/c12_select_business_requires_session.test.ts > C-12 select-business requires a verified pending_login cookie > A: returns 401 and does not create a session with no pending_login cookie 2ms
+ ✓ tests/c12_select_business_requires_session.test.ts > C-12 select-business requires a verified pending_login cookie > B: ignores body userId and creates the session for the cookie's user 2ms
+ ✓ tests/c12_select_business_requires_session.test.ts > C-12 select-business requires a verified pending_login cookie > C: returns 401 for a tampered pending_login signature 0ms
+ ✓ tests/c12_select_business_requires_session.test.ts > C-12 select-business requires a verified pending_login cookie > D: returns 401 for an expired pending_login cookie 0ms
+ ✓ tests/c12_select_business_requires_session.test.ts > C-12 select-business requires a verified pending_login cookie > E: fails closed with 401 when ENCRYPTION_KEY is unset 0ms
+ ✓ tests/c12_select_business_requires_session.test.ts > C-12 select-business requires a verified pending_login cookie > F: clears the pending_login cookie on success so it cannot be replayed 0ms
 
  Test Files  1 passed (1)
-      Tests  5 passed (5)
-   Start at  19:55:36
-   Duration  424ms (transform 29ms, setup 0ms, collect 212ms, tests 5ms, environment 0ms, prepare 36ms)
+      Tests  6 passed (6)
+   Start at  20:09:21
+   Duration  347ms (transform 26ms, setup 0ms, collect 177ms, tests 5ms, environment 0ms, prepare 36ms)
 ```
 
 - `npm run typecheck` → clean (full output):
@@ -122,7 +137,7 @@ Tests A–D fail on current code as required (E fails too). Test B choice: **bod
 > tsc --noEmit
 ```
 
-- `npx vitest run` → summary:
+- `npx vitest run` → summary (run before test F was added; counts below predate the single-use follow-up, which is verified by the targeted six-test run above):
 
 ```
  Test Files  1 failed | 41 passed (42)
@@ -131,7 +146,7 @@ Tests A–D fail on current code as required (E fails too). Test B choice: **bod
    Duration  3.23s
 ```
 
-The only failure is the pre-existing, known `tests/task2_3_polite_crawler.test.ts` idempotency test (`expected +0 to be 1`, line 96). All other tests, including the 5 new C-12 tests, pass.
+The only failure is the pre-existing, known `tests/task2_3_polite_crawler.test.ts` idempotency test (`expected +0 to be 1`, line 96). All other tests, including the 5 C-12 tests that existed at that point, pass. Test F was added later and passes in the targeted run above.
 
 - Not verified: no live HTTP request and no database/Vercel/production access was performed (per rules). The `pending_login` cookie was validated only through the mocked unit tests and typecheck.
 
