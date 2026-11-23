@@ -8,6 +8,13 @@
       "when": 1795268708268,
       "tag": "0000_hard_newton_destine",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795446500763,
+      "tag": "0001_futuristic_quicksilver",
+      "breakpoints": true
     }
   ]
 }
