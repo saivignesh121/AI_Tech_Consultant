@@ -46,6 +46,12 @@ belongs to the later memberships-query block, not to the tenant resolution.
 - Wraps just the `getTenantContext()` call in try/catch.
 - Returns `NextResponse.json({ error: "unauthorized" }, { status: 401 })` for
   `UnauthorizedError` — a fixed body with no session, tenant, or stack details.
+- That 401 also covers a **session-store failure**, not just a missing cookie:
+  `getTenantContext()` logs a failed session lookup and then throws
+  `UnauthorizedError("Unauthorized: invalid or expired session")`
+  (`src/lib/auth.ts:198,201`), which takes the same 401 branch. An invalid or
+  expired session token does likewise. Only non-`UnauthorizedError` failures
+  (e.g. `cookies()` throwing outside request scope) reach the 500 branch.
 - Logs other errors server-side and returns
   `NextResponse.json({ error: "internal_error" }, { status: 500 })`, so no
   internal detail reaches the client.
@@ -100,7 +106,10 @@ change.
 `src/components/layout/AppShell.tsx:70-86` does not check `res.ok`, but the new
 401 has a JSON body, so `res.json()` succeeds, `data.currentTenant` is absent,
 and the existing branch at `:76-82` redirects to
-`/signup?redirect=...` for non-public routes. A 401 is therefore handled as a
+`/signup?redirect=<encoded pathname>` for non-public routes — the redirect
+target is **`/signup?redirect=...`, not `/signin`**. The `/signin` occurrences
+in AppShell are only the explicit sign-out handler at `:139` and the navigation
+links at `:321/:329/:562/:571`. A 401 is therefore handled as a
 redirect, not silently swallowed. The other six `/api/auth/context` callers
 guard on `d.currentTenant?...` and are unaffected. Changing AppShell was not
 required and was not done.
@@ -121,7 +130,9 @@ required and was not done.
   The remaining 41 callers catch the `UnauthorizedError` inside their handler
   and return their generic 500 (some with `details: String(error)` — H-05).
   They should all return 401 through a shared `requireSession()` guard in a
-  separate C-09 change, which would exceed the three-file limit for this fix:
+  separate C-09 change, which would exceed the three-file limit for this fix.
+  The 41 paths below are the contents of `/tmp/c09-followup.txt`, i.e.
+  `grep -L "UnauthorizedError" $(cat /tmp/c09-all.txt)`:
 
   - `src/app/api/admin/businesses/route.ts`
   - `src/app/api/approvals/route.ts`
