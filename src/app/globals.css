@@ -358,3 +358,50 @@
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }
+
+/* 8. Super-Cool Orbiting & Radar Physics for Hero Neural Core */
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spinReverseSlow {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes orbitBob1 {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  50% { transform: translateY(-10px) translateX(6px); }
+}
+
+@keyframes orbitBob2 {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  50% { transform: translateY(8px) translateX(-8px); }
+}
+
+@keyframes orbitBob3 {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  50% { transform: translateY(-7px) translateX(-6px); }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 24s linear infinite;
+}
+
+.animate-spin-reverse-slow {
+  animation: spinReverseSlow 32s linear infinite;
+}
+
+.animate-orbit-1 {
+  animation: orbitBob1 5s ease-in-out infinite;
+}
+
+.animate-orbit-2 {
+  animation: orbitBob2 6s ease-in-out infinite;
+}
+
+.animate-orbit-3 {
+  animation: orbitBob3 5.5s ease-in-out infinite;
+}
+
