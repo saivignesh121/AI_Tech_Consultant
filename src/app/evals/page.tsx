@@ -1021,7 +1021,8 @@ export default function EvalLabPage() {
                 {/* Local-Only Mode Master Switch Toggle */}
                 <button
                   onClick={handleToggleLocalOnly}
-                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition border ${
+                  disabled={process.env.NODE_ENV !== "development"}
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition border disabled:opacity-50 ${
                     localOnly
                       ? "bg-emerald-600/90 text-white border-emerald-500 shadow-md"
                       : "bg-white text-[#4A5B78] border-[#C3D3EA] hover:bg-[#EEF4FF]"
@@ -1029,13 +1030,20 @@ export default function EvalLabPage() {
                   title="Toggle Local-Only Mode: run purely with laptop Ollama models, bypassing paid cloud APIs"
                 >
                   <Server className="h-3.5 w-3.5" />
-                  <span>Local-Only Switch: {localOnly ? "ON (Ollama $0)" : "OFF"}</span>
+                  <span>
+                    Local-Only Switch: {localOnly && ollamaStatus?.isRunning ? "ON (Ollama $0)" : "OFF"}
+                  </span>
                 </button>
               </div>
+              {process.env.NODE_ENV !== "development" && (
+                <p className="text-xs text-amber-600 mt-2">
+                  Local Ollama only works when running locally.
+                </p>
+              )}
             </div>
 
             {/* Local-Only Mode Quality Drop & Analysis Banner */}
-            {localOnly && (
+            {localOnly && ollamaStatus?.isRunning && (
               <div className="space-y-4">
                 <div className="rounded-xl border border-emerald-500/40 bg-emerald-50 p-5 space-y-4">
                   <div className="flex items-center justify-between border-b border-emerald-500/30 pb-3">

@@ -35,19 +35,19 @@ export default function OnboardingPage() {
   const [timerActive, setTimerActive] = useState<boolean>(true);
 
   // Step 1: Vault Keys
-  const [claudeKey, setClaudeKey] = useState("sk-ant-live-demo-token-masked");
-  const [geminiKey, setGeminiKey] = useState("AIzaSy-demo-gemini-vault-token-live");
+  const [claudeKey, setClaudeKey] = useState("");
+  const [geminiKey, setGeminiKey] = useState("");
   const [localOnly, setLocalOnly] = useState(false);
-  const [keysSaved, setKeysSaved] = useState(true);
+  const [maxUnlockedStep, setMaxUnlockedStep] = useState(1);
 
   // Step 2: Sitemap & Documents Ingestion & Gmail
-  const [sitemapUrl, setSitemapUrl] = useState("https://docs.company.com/sitemap.xml");
-  const [directUrls, setDirectUrls] = useState("https://docs.company.com/faq\nhttps://docs.company.com/api-reference");
-  const [uploadedDocName, setUploadedDocName] = useState<string | null>("product-architecture-guide.md");
-  const [gmailAddress, setGmailAddress] = useState("support@company.com");
-  const [gmailConnected, setGmailConnected] = useState(true);
+  const [sitemapUrl, setSitemapUrl] = useState("");
+  const [directUrls, setDirectUrls] = useState("");
+  const [uploadedDocName, setUploadedDocName] = useState<string | null>(null);
+  const [gmailAddress, setGmailAddress] = useState("");
+  const [gmailConnected, setGmailConnected] = useState(false);
   const [crawling, setCrawling] = useState(false);
-  const [crawledCount, setCrawledCount] = useState(12);
+  const [crawledCount, setCrawledCount] = useState(0);
 
   // Step 3: Agent Role Persona & Tone of Voice
   const [selectedRole, setSelectedRole] = useState<string>("tech_consultant");
@@ -55,6 +55,9 @@ export default function OnboardingPage() {
 
   // Step 4: Synthetic Test Generator
   const [generatingTests, setGeneratingTests] = useState(false);
+  const [verifyingSetup, setVerifyingSetup] = useState(false);
+  const [connectingInbox, setConnectingInbox] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [syntheticTests, setSyntheticTests] = useState<SyntheticTest[]>([]);
 
   // Step 5: Readiness Check & Owner-Chosen Pass Bar
@@ -65,15 +68,6 @@ export default function OnboardingPage() {
 
   // 15-Minute Countdown Timer
   useEffect(() => {
-    fetch("/api/auth/context")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.currentTenant?.businessSlug) {
-          setSitemapUrl(`https://docs.${d.currentTenant.businessSlug}.com/sitemap.xml`);
-        }
-      })
-      .catch(console.error);
-
     let interval: NodeJS.Timeout;
     if (timerActive) {
       interval = setInterval(() => {
@@ -90,21 +84,59 @@ export default function OnboardingPage() {
   const timeFormatted = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 
   async function handleGenerateTests() {
+    setActionError(null);
     setGeneratingTests(true);
     try {
       const res = await fetch("/api/onboarding/synthetic-tests?count=10");
       const data = await res.json();
-      if (data.cases) {
+      if (!res.ok) {
+        setActionError(data.error || "Could not generate synthetic tests.");
+        return;
+      }
+      if (data.cases && data.cases.length > 0) {
         setSyntheticTests(data.cases);
+        setMaxUnlockedStep((prev) => Math.max(prev, 5));
       }
     } catch (err) {
-      console.error("Failed to generate tests", err);
+      console.error("Failed to generate tests:", err instanceof Error ? err.name : "UNKNOWN");
+      setActionError("Network error generating synthetic tests.");
     } finally {
       setGeneratingTests(false);
     }
   }
 
+  async function handleVerifyAndProceed() {
+    setActionError(null);
+    setVerifyingSetup(true);
+    try {
+      const keys = [
+        { provider: "anthropic", apiKey: claudeKey, label: "Anthropic Claude" },
+        { provider: "gemini", apiKey: geminiKey, label: "Google Gemini" },
+      ];
+      for (const { provider, apiKey, label } of keys) {
+        const res = await fetch("/api/settings/connections", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ provider, apiKey }),
+        });
+        const data = await res.json();
+        if (!res.ok || data.success !== true) {
+          setActionError(data.error || `Could not save the ${label} key.`);
+          return;
+        }
+      }
+      setMaxUnlockedStep(2);
+      setCurrentStep(2);
+    } catch (err) {
+      console.error("Setup verification failed:", err instanceof Error ? err.name : "UNKNOWN");
+      setActionError("Network error during setup verification.");
+    } finally {
+      setVerifyingSetup(false);
+    }
+  }
+
   async function handleRunReadiness() {
+    setActionError(null);
     setEvaluating(true);
     try {
       const res = await fetch("/api/onboarding/readiness", {
@@ -117,6 +149,10 @@ export default function OnboardingPage() {
         }),
       });
       const data = await res.json();
+      if (!res.ok) {
+        setActionError(data.error || "Could not run the readiness benchmark.");
+        return;
+      }
       if (data.result) {
         setReadinessScore(data.result.readinessScore);
         setIsUnlocked(data.result.isChatUnlocked);
@@ -125,7 +161,8 @@ export default function OnboardingPage() {
         }
       }
     } catch (err) {
-      console.error("Failed to run readiness evaluation", err);
+      console.error("Failed to run readiness evaluation:", err instanceof Error ? err.name : "UNKNOWN");
+      setActionError("Network error running the readiness benchmark.");
     } finally {
       setEvaluating(false);
     }
@@ -180,7 +217,8 @@ export default function OnboardingPage() {
                 <button
                   key={s.num}
                   onClick={() => setCurrentStep(s.num)}
-                  className={`flex items-center gap-2.5 p-3 rounded-2xl text-left transition ${
+                  disabled={s.num > maxUnlockedStep}
+                  className={`flex items-center gap-2.5 p-3 rounded-2xl text-left transition disabled:opacity-40 disabled:cursor-not-allowed ${
                     isCurrent
                       ? "bg-[#EEF4FF] text-[#1D4ED8] font-bold border border-[#BFDBFE] shadow-xs"
                       : isPast
@@ -213,6 +251,11 @@ export default function OnboardingPage() {
 
         {/* Step Content Container */}
         <div className="bg-white rounded-xl border border-[#DCE6F5] p-6 md:p-8 shadow-sm space-y-6">
+          {actionError && (
+            <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+              {actionError}
+            </div>
+          )}
           {/* Step 1: Vault Keys */}
           {currentStep === 1 && (
             <div className="space-y-6">
@@ -256,42 +299,35 @@ export default function OnboardingPage() {
                     <Laptop className="w-5 h-5 text-[#2563EB]" />
                     <div>
                       <span className="text-xs font-bold text-[#0B1B3A]">
-                        Local-Only Mode (Laptop Ollama)
+                        Local-Only Mode (Laptop Ollama) — Optional
                       </span>
                       <p className="text-[11px] text-[#4A5B78]">
                         Bypasses all cloud APIs; runs purely offline via <code>localhost:11434</code> (100% Free).
                       </p>
+                      {process.env.NODE_ENV !== "development" && (
+                        <p className="text-[11px] text-amber-600 mt-1">
+                          Local Ollama only works when running locally.
+                        </p>
+                      )}
                     </div>
                   </div>
                   <input
                     type="checkbox"
                     checked={localOnly}
                     onChange={(e) => setLocalOnly(e.target.checked)}
-                    className="w-4 h-4 text-[#2563EB] rounded border-[#C3D3EA]"
+                    disabled={process.env.NODE_ENV !== "development"}
+                    className="w-4 h-4 text-[#2563EB] rounded border-[#C3D3EA] disabled:opacity-50"
                   />
                 </div>
               </div>
 
               <div className="flex justify-end pt-4 border-t border-[#DCE6F5]">
                 <button
-                  onClick={async () => {
-                    await fetch("/api/settings/connections", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ provider: "claude", apiKey: claudeKey }),
-                    });
-                    if (localOnly) {
-                      await fetch("/api/settings/local-mode", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ enabled: true }),
-                      });
-                    }
-                    setCurrentStep(2);
-                  }}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 text-white font-semibold text-sm rounded-xl shadow-md shadow-blue-500/20 transition"
+                  onClick={handleVerifyAndProceed}
+                  disabled={verifyingSetup}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 text-white font-semibold text-sm rounded-xl shadow-md shadow-blue-500/20 transition disabled:opacity-50"
                 >
-                  Verify &amp; Proceed to Ingestion
+                  {verifyingSetup ? "Verifying..." : "Verify & Proceed to Ingestion"}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -322,11 +358,13 @@ export default function OnboardingPage() {
                       type="url"
                       value={sitemapUrl}
                       onChange={(e) => setSitemapUrl(e.target.value)}
-                      className="flex-1 text-sm border border-[#C3D3EA] rounded-lg px-3 py-2 text-[#0B1B3A] bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] focus:outline-none"
+                      placeholder="https://your-domain.com/sitemap.xml"
+                      className="flex-1 text-sm border border-[#C3D3EA] rounded-lg px-3 py-2 text-[#0B1B3A] bg-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] focus:outline-none"
                     />
                     <button
                       type="button"
                       onClick={async () => {
+                        setActionError(null);
                         setCrawling(true);
                         try {
                           const res = await fetch("/api/brain/sitemaps", {
@@ -335,16 +373,25 @@ export default function OnboardingPage() {
                             body: JSON.stringify({ sitemapUrl }),
                           });
                           const data = await res.json();
+                          if (!res.ok) {
+                            setActionError(data.error || "Crawl failed. Please try again.");
+                            return;
+                          }
                           if (data.summary) {
-                            setCrawledCount(data.summary.discoveredUrlsCount || 24);
+                            const pages = data.summary.uniqueUrls || 0;
+                            setCrawledCount(pages);
+                            if (pages > 0) {
+                              setMaxUnlockedStep((prev) => Math.max(prev, 3));
+                            }
                           }
                         } catch (err) {
-                          console.error(err);
+                          console.error("Crawl request failed:", err instanceof Error ? err.name : "UNKNOWN");
+                          setActionError("Network error during crawl. Please try again.");
                         } finally {
                           setCrawling(false);
                         }
                       }}
-                      disabled={crawling}
+                      disabled={crawling || !sitemapUrl.trim()}
                       className="px-4 py-2 bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 text-white font-semibold text-xs rounded-lg transition shadow-xs"
                     >
                       {crawling ? "Crawling..." : "Crawl & Ingest"}
@@ -362,7 +409,8 @@ export default function OnboardingPage() {
                       rows={2}
                       value={directUrls}
                       onChange={(e) => setDirectUrls(e.target.value)}
-                      className="w-full text-xs font-mono border border-[#C3D3EA] rounded-lg p-2 text-[#0B1B3A] bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] focus:outline-none"
+                      placeholder="One page URL per line"
+                      className="w-full text-xs font-mono border border-[#C3D3EA] rounded-lg p-2 text-[#0B1B3A] bg-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] focus:outline-none"
                     />
                   </div>
 
@@ -383,7 +431,7 @@ export default function OnboardingPage() {
                 <div className="p-3.5 bg-[#F6F9FF] rounded-xl border border-[#DCE6F5]">
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-[#0B1B3A]">Connect Gmail / Customer Support Inbox</span>
+                      <span className="text-xs font-bold text-[#0B1B3A]">Connect Gmail / Customer Support Inbox (Optional)</span>
                       <span className="text-[10px] bg-blue-50 text-blue-700 font-semibold px-2 py-0.5 rounded-full border border-blue-200">Feature 2.6 RAG</span>
                     </div>
                     {gmailConnected && (
@@ -397,15 +445,31 @@ export default function OnboardingPage() {
                       type="email"
                       value={gmailAddress}
                       onChange={(e) => setGmailAddress(e.target.value)}
-                      placeholder="support@company.com"
-                      className="flex-1 text-xs border border-[#C3D3EA] rounded-lg px-2.5 py-1.5 text-[#0B1B3A] bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] focus:outline-none"
+                      placeholder="you@company.com"
+                      className="flex-1 text-xs border border-[#C3D3EA] rounded-lg px-2.5 py-1.5 text-[#0B1B3A] bg-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] focus:outline-none"
                     />
                     <button
                       type="button"
-                      onClick={() => setGmailConnected(true)}
-                      className="px-3 py-1.5 bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 text-white font-medium text-xs rounded-lg transition shadow-xs"
+                      onClick={async () => {
+                        setActionError(null);
+                        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gmailAddress.trim())) {
+                          setActionError("Enter a valid inbox email address first.");
+                          return;
+                        }
+                        setConnectingInbox(true);
+                        try {
+                          setGmailConnected(true);
+                        } catch (err) {
+                          console.error("Inbox connection failed:", err instanceof Error ? err.name : "UNKNOWN");
+                          setActionError("Could not connect inbox.");
+                        } finally {
+                          setConnectingInbox(false);
+                        }
+                      }}
+                      disabled={connectingInbox || !gmailAddress.trim()}
+                      className="px-3 py-1.5 bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 text-white font-medium text-xs rounded-lg transition shadow-xs disabled:opacity-50"
                     >
-                      Connect Inbox
+                      {connectingInbox ? "Connecting..." : "Connect Inbox"}
                     </button>
                   </div>
                 </div>
@@ -415,11 +479,13 @@ export default function OnboardingPage() {
                   <div className="text-xs text-[#0B1B3A]">
                     <span className="font-bold">Active Corpus Indexed:</span>
                     <p className="text-[11px] text-[#4A5B78] mt-0.5">
-                      {crawledCount} pages indexed with pgvector hybrid search and past-email threads loaded.
+                      {crawledCount > 0
+                        ? `${crawledCount} pages indexed with pgvector hybrid search and past-email threads loaded.`
+                        : "0 pages — not crawled yet."}
                     </p>
                   </div>
-                  <span className="px-2.5 py-1 bg-emerald-50 text-[#15803D] font-semibold text-xs rounded-full border border-emerald-200">
-                    Ingested &amp; Ready
+                  <span className={`px-2.5 py-1 font-semibold text-xs rounded-full border ${crawledCount > 0 ? "bg-emerald-50 text-[#15803D] border-emerald-200" : "bg-slate-50 text-slate-500 border-slate-200"}`}>
+                    {crawledCount > 0 ? "Ingested & Ready" : "Not crawled yet"}
                   </span>
                 </div>
               </div>
@@ -433,7 +499,8 @@ export default function OnboardingPage() {
                 </button>
                 <button
                   onClick={() => setCurrentStep(3)}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 text-white font-semibold text-sm rounded-xl shadow-md shadow-blue-500/20 transition"
+                  disabled={crawledCount === 0}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 text-white font-semibold text-sm rounded-xl shadow-md shadow-blue-500/20 transition disabled:opacity-50"
                 >
                   Proceed to Persona &amp; Tone Selection
                   <ArrowRight className="w-4 h-4" />
@@ -538,14 +605,16 @@ export default function OnboardingPage() {
                 </button>
                 <button
                   onClick={() => {
+                    setMaxUnlockedStep(4);
                     setCurrentStep(4);
                     if (syntheticTests.length === 0) {
                       handleGenerateTests();
                     }
                   }}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 text-white font-semibold text-sm rounded-xl shadow-md shadow-blue-500/20 transition"
+                  disabled={generatingTests}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 text-white font-semibold text-sm rounded-xl shadow-md shadow-blue-500/20 transition disabled:opacity-50"
                 >
-                  Generate 10 Synthetic Tests
+                  {generatingTests ? "Generating..." : "Generate 10 Synthetic Tests"}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -611,14 +680,16 @@ export default function OnboardingPage() {
                 </button>
                 <button
                   onClick={() => {
+                    setMaxUnlockedStep(5);
                     setCurrentStep(5);
                     if (readinessScore === null) {
                       handleRunReadiness();
                     }
                   }}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 text-white font-semibold text-sm rounded-xl shadow-md shadow-blue-500/20 transition"
+                  disabled={evaluating}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#0284C7] to-[#2563EB] hover:brightness-105 text-white font-semibold text-sm rounded-xl shadow-md shadow-blue-500/20 transition disabled:opacity-50"
                 >
-                  Execute Readiness Benchmark
+                  {evaluating ? "Running..." : "Execute Readiness Benchmark"}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>

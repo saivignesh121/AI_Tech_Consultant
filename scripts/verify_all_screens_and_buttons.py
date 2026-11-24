@@ -121,11 +121,11 @@ def main():
     st, res = make_req("/api/settings/connections")
     check("GET /api/settings/connections", st == 200 and "connections" in res)
 
-    st, res = make_req("/api/settings/connections", method="POST", data={"provider": "claude", "apiKey": "sk-ant-test-key-mock"})
+    st, res = make_req("/api/settings/connections", method="POST", data={"provider": "anthropic", "apiKey": "sk-ant-test-key-mock"})
     check("POST /api/settings/connections (Save Key)", st == 200 and res.get("success"))
 
-    st, res = make_req("/api/settings/connections/test", method="POST", data={"provider": "claude"})
-    check("POST /api/settings/connections/test (Test Ping)", st == 200 and res.get("success"), f"Latency: {res.get('latencyMs')}ms")
+    st, res = make_req("/api/settings/connections", method="PATCH", data={"provider": "anthropic"})
+    check("PATCH /api/settings/connections (Retest Key)", st == 200 and res.get("success"), f"Status: {res.get('status')}")
 
     st, res = make_req("/api/settings/local-mode", method="POST", data={"enabled": True})
     check("POST /api/settings/local-mode (Toggle Local)", st == 200 and res.get("success"))

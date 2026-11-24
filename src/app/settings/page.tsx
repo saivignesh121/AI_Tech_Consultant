@@ -24,12 +24,11 @@ import {
 } from "lucide-react";
 
 interface ConnectionItem {
-  provider: string;
-  endpointUrl: string | null;
-  status: "active" | "error" | "untested";
-  maskedApiKey: string | null;
-  hasKey: boolean;
-  lastTestedAt: string | null;
+  provider: "anthropic" | "gemini";
+  connected: boolean;
+  last4: string | null;
+  status: "active" | "rejected" | "unchecked";
+  validatedAt: string | null;
 }
 
 interface StepModelItem {
@@ -95,9 +94,11 @@ export default function SettingsPage() {
   const [loadingConn, setLoadingConn] = useState(true);
   const [editingProvider, setEditingProvider] = useState<string | null>(null);
   const [keyInput, setKeyInput] = useState("");
-  const [endpointInput, setEndpointInput] = useState("");
   const [testingProvider, setTestingProvider] = useState<string | null>(null);
-  const [testResult, setTestResult] = useState<{ provider: string; message: string; latencyMs: number } | null>(null);
+  const [savingProvider, setSavingProvider] = useState<string | null>(null);
+  const [testResult, setTestResult] = useState<{ provider: string; message: string } | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [canManageKeys, setCanManageKeys] = useState(false);
   const [localOnlyMode, setLocalOnlyMode] = useState(false);
 
   // --- Step Models Tab State (Task 1.2: Pick model per step) ---
@@ -136,6 +137,8 @@ export default function SettingsPage() {
       .then((r) => r.json())
       .then((d) => {
         if (d.currentTenant?.businessSlug) setCurrentTenantSlug(d.currentTenant.businessSlug);
+        const role = d.currentTenant?.userRole;
+        setCanManageKeys(role === "owner" || role === "admin");
       })
       .catch(console.error);
   }, []);
@@ -212,47 +215,69 @@ export default function SettingsPage() {
   };
 
   const saveConnection = async (provider: string) => {
+    setActionError(null);
+    setSavingProvider(provider);
     try {
       const res = await fetch("/api/settings/connections", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          provider,
-          apiKey: keyInput || undefined,
-          endpointUrl: endpointInput || undefined,
-        }),
+        body: JSON.stringify({ provider, apiKey: keyInput }),
       });
-      if (res.ok) {
-        setEditingProvider(null);
-        setKeyInput("");
-        setEndpointInput("");
-        fetchConnections();
+      const data = await res.json();
+      if (!res.ok || data.success !== true) {
+        setActionError(data.error || "Could not save the AI key.");
+        return;
       }
-    } catch (e) {
-      console.error(e);
+      setEditingProvider(null);
+      setKeyInput("");
+      fetchConnections();
+    } catch {
+      setActionError("Network error saving the AI key.");
+    } finally {
+      setSavingProvider(null);
     }
   };
 
-  const testConnection = async (provider: string, endpointUrl?: string | null) => {
+  const retestConnection = async (provider: string) => {
     setTestingProvider(provider);
     setTestResult(null);
     try {
-      const res = await fetch("/api/settings/connections/test", {
-        method: "POST",
+      const res = await fetch("/api/settings/connections", {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ provider, endpointUrl }),
+        body: JSON.stringify({ provider }),
       });
       const data = await res.json();
       setTestResult({
         provider,
-        message: data.message || (data.success ? "Connection Verified" : "Connection Failed"),
-        latencyMs: data.latencyMs || 0,
+        message: data.success
+          ? `Key status: ${data.status}`
+          : data.error || "Connection Failed",
       });
       fetchConnections();
-    } catch (e) {
-      console.error(e);
+    } catch {
+      setTestResult({ provider, message: "Network error testing the AI key." });
     } finally {
       setTestingProvider(null);
+    }
+  };
+
+  const removeConnection = async (provider: string) => {
+    setActionError(null);
+    try {
+      const res = await fetch("/api/settings/connections", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.success !== true) {
+        setActionError(data.error || "Could not remove the AI key.");
+        return;
+      }
+      fetchConnections();
+    } catch {
+      setActionError("Network error removing the AI key.");
     }
   };
 
@@ -321,7 +346,7 @@ export default function SettingsPage() {
   };
 
   const providerLabels: Record<string, { title: string; desc: string; placeholder: string }> = {
-    claude: {
+    anthropic: {
       title: "Anthropic Claude API",
       desc: "Powers Claude Opus 5.5, Sonnet 5.5, and Haiku 5.5 with dynamic prompt caching.",
       placeholder: "sk-ant-api03-••••••••••••••••••••••••",
@@ -391,13 +416,14 @@ export default function SettingsPage() {
                 <span className="font-semibold text-white">Local-Only Mode:</span>
                 <button
                   onClick={toggleLocalMode}
-                  className={`text-[11px] font-mono font-bold rounded-full px-3 py-1 transition ${
+                  disabled={process.env.NODE_ENV !== "development"}
+                  className={`text-[11px] font-mono font-bold rounded-full px-3 py-1 transition disabled:opacity-50 ${
                     localOnlyMode
                       ? "bg-emerald-400 text-emerald-950 shadow-xs"
                       : "bg-white/20 text-white hover:bg-white/30"
                   }`}
                 >
-                  {localOnlyMode ? "ACTIVE (LOCAL)" : "OFF"}
+                  {localOnlyMode && process.env.NODE_ENV === "development" ? "ACTIVE (LOCAL)" : "OFF"}
                 </button>
               </div>
             </div>
@@ -407,17 +433,19 @@ export default function SettingsPage() {
         {/* Tab Navigation */}
         <div className="flex flex-wrap border-b border-[#DCE6F5] gap-2 items-center pb-2">
           {/* Day One Tabs */}
-          <button
-            onClick={() => setActiveTab("connections")}
-            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition ${
-              activeTab === "connections"
-                ? "bg-[#1D4ED8] text-white shadow-sm"
-                : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
-            }`}
-          >
-            <Key className="h-3.5 w-3.5" />
-            <span>The 5 Vault Connections</span>
-          </button>
+          {canManageKeys && (
+            <button
+              onClick={() => setActiveTab("connections")}
+              className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-full transition ${
+                activeTab === "connections"
+                  ? "bg-[#1D4ED8] text-white shadow-sm"
+                  : "bg-white text-[#4A5B78] border border-[#DCE6F5] hover:bg-[#EEF4FF] hover:text-[#0B1B3A]"
+              }`}
+            >
+              <Key className="h-3.5 w-3.5" />
+              <span>AI Provider Keys</span>
+            </button>
+          )}
 
           <button
             onClick={() => {
@@ -500,8 +528,13 @@ export default function SettingsPage() {
           )}
         </div>
 
-        {/* ================= TAB 1: THE 5 CONNECTIONS (Task 1.2) ================= */}
-        {activeTab === "connections" && (
+        {/* ================= TAB 1: AI PROVIDER KEYS ================= */}
+        {activeTab === "connections" && !canManageKeys && (
+          <div className="rounded-3xl border border-[#DCE6F5] bg-white p-6 text-xs text-[#4A5B78]">
+            Only workspace owners and admins can manage AI keys.
+          </div>
+        )}
+        {activeTab === "connections" && canManageKeys && (
           <div className="space-y-6">
             <div className="rounded-3xl border-2 border-[#D0E2FB] bg-[#EEF5FD] p-6 text-xs text-[#334155] flex items-start gap-3 shadow-sm">
               <Key className="h-5 w-5 text-[#1D4ED8] mt-0.5 flex-shrink-0" />
@@ -510,15 +543,16 @@ export default function SettingsPage() {
               </div>
             </div>
 
+            {actionError && (
+              <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-4 text-xs text-red-700">
+                {actionError}
+              </div>
+            )}
+
             {testResult && (
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-xs flex items-center justify-between shadow-xs">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                  <span className="text-[#0B1B3A] font-semibold">{testResult.message}</span>
-                </div>
-                <span className="font-mono text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full text-[11px] font-bold">
-                  Latency: {testResult.latencyMs}ms
-                </span>
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-xs flex items-center gap-2 shadow-xs">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                <span className="text-[#0B1B3A] font-semibold">{testResult.message}</span>
               </div>
             )}
 
@@ -531,6 +565,7 @@ export default function SettingsPage() {
                 };
                 const isEditing = editingProvider === c.provider;
                 const isTesting = testingProvider === c.provider;
+                const isSaving = savingProvider === c.provider;
 
                 return (
                   <div
@@ -540,11 +575,8 @@ export default function SettingsPage() {
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <div className="flex items-center gap-3.5">
                         <div className="h-11 w-11 rounded-2xl bg-[#EEF5FD] border border-[#D0E2FB] flex items-center justify-center font-bold text-base text-[#1D4ED8] shadow-xs">
-                          {c.provider === "claude" && "C"}
+                          {c.provider === "anthropic" && "C"}
                           {c.provider === "gemini" && "G"}
-                          {c.provider === "openrouter" && "OR"}
-                          {c.provider === "ollama" && "O"}
-                          {c.provider === "google" && "M"}
                         </div>
                         <div>
                           <div className="text-base font-bold text-[#0B1B3A] flex items-center gap-2">
@@ -554,14 +586,14 @@ export default function SettingsPage() {
                                 <CheckCircle2 className="h-3 w-3" /> Active
                               </span>
                             )}
-                            {c.status === "error" && (
+                            {c.status === "rejected" && (
                               <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-600 border border-red-200 font-mono">
-                                <AlertTriangle className="h-3 w-3" /> Error
+                                <AlertTriangle className="h-3 w-3" /> Rejected
                               </span>
                             )}
-                            {c.status === "untested" && (
+                            {c.status === "unchecked" && (
                               <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-semibold text-[#7B8AA6] font-mono">
-                                Untested
+                                Unchecked
                               </span>
                             )}
                           </div>
@@ -571,12 +603,12 @@ export default function SettingsPage() {
 
                       <div className="flex items-center gap-2 shrink-0">
                         <button
-                          onClick={() => testConnection(c.provider, c.endpointUrl)}
-                          disabled={isTesting}
+                          onClick={() => retestConnection(c.provider)}
+                          disabled={isTesting || isSaving || !c.connected}
                           className="flex items-center gap-1.5 rounded-full border border-blue-200 bg-[#EEF4FF] hover:bg-blue-100 px-4 py-2 text-xs font-semibold text-[#1D4ED8] transition disabled:opacity-50 shadow-xs"
                         >
                           <RotateCw className={`h-3.5 w-3.5 ${isTesting ? "animate-spin text-[#1D4ED8]" : ""}`} />
-                          <span>{isTesting ? "Testing..." : "Test Connection"}</span>
+                          <span>{isTesting ? "Testing..." : "Test Again"}</span>
                         </button>
 
                         <button
@@ -586,13 +618,23 @@ export default function SettingsPage() {
                             } else {
                               setEditingProvider(c.provider);
                               setKeyInput("");
-                              setEndpointInput(c.endpointUrl || "");
                             }
                           }}
-                          className="rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] px-5 py-2 text-xs font-semibold text-white transition shadow-sm"
+                          disabled={isTesting || isSaving}
+                          className="rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] px-5 py-2 text-xs font-semibold text-white transition shadow-sm disabled:opacity-50"
                         >
-                          {isEditing ? "Cancel" : "Edit Key"}
+                          {isEditing ? "Cancel" : c.connected ? "Replace" : "Add Key"}
                         </button>
+
+                        {c.connected && (
+                          <button
+                            onClick={() => removeConnection(c.provider)}
+                            disabled={isTesting || isSaving}
+                            className="rounded-full border border-red-200 bg-red-50 hover:bg-red-100 px-4 py-2 text-xs font-semibold text-red-600 transition disabled:opacity-50"
+                          >
+                            Remove
+                          </button>
+                        )}
                       </div>
                     </div>
 
@@ -601,46 +643,37 @@ export default function SettingsPage() {
                       <div className="rounded-2xl border border-[#DCE6F5] bg-[#F8FAFC] p-3.5 flex items-center justify-between font-mono text-xs text-[#0B1B3A]">
                         <div className="flex items-center gap-2 truncate">
                           <Key className="h-3.5 w-3.5 text-[#1D4ED8] flex-shrink-0" />
-                          <span className="truncate">{c.maskedApiKey || c.endpointUrl || "No key configured"}</span>
+                          <span className="truncate">
+                            {c.last4 ? `••••••••${c.last4}` : "No key configured"}
+                          </span>
                         </div>
-                        {c.lastTestedAt && (
+                        {c.validatedAt && (
                           <span className="text-[10px] text-[#7B8AA6] font-sans shrink-0 ml-2">
-                            Tested {new Date(c.lastTestedAt).toLocaleTimeString()}
+                            Validated {new Date(c.validatedAt).toLocaleTimeString()}
                           </span>
                         )}
                       </div>
                     ) : (
                       <div className="space-y-3 pt-3 border-t border-[#DCE6F5]">
-                        {c.provider === "ollama" ? (
-                          <div>
-                            <label className="block text-xs font-semibold text-[#0B1B3A] mb-1">Ollama Server URL</label>
-                            <input
-                              type="text"
-                              value={endpointInput}
-                              onChange={(e) => setEndpointInput(e.target.value)}
-                              placeholder="http://localhost:11434"
-                              className="w-full rounded-xl border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs font-mono text-[#0B1B3A] focus:border-[#1D4ED8] focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
-                            />
-                          </div>
-                        ) : (
-                          <div>
-                            <label className="block text-xs font-semibold text-[#0B1B3A] mb-1">Enter API Key</label>
-                            <input
-                              type="password"
-                              value={keyInput}
-                              onChange={(e) => setKeyInput(e.target.value)}
-                              placeholder={info.placeholder}
-                              className="w-full rounded-xl border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs font-mono text-[#0B1B3A] focus:border-[#1D4ED8] focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
-                            />
-                          </div>
-                        )}
+                        <div>
+                          <label className="block text-xs font-semibold text-[#0B1B3A] mb-1">Enter API Key</label>
+                          <input
+                            type="password"
+                            value={keyInput}
+                            onChange={(e) => setKeyInput(e.target.value)}
+                            placeholder={info.placeholder}
+                            disabled={isSaving}
+                            className="w-full rounded-xl border border-[#C3D3EA] bg-white px-3.5 py-2 text-xs font-mono text-[#0B1B3A] focus:border-[#1D4ED8] focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:opacity-50"
+                          />
+                        </div>
 
                         <div className="flex justify-end gap-2">
                           <button
                             onClick={() => saveConnection(c.provider)}
-                            className="rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] px-6 py-2 text-xs font-semibold text-white transition shadow-sm"
+                            disabled={isSaving || !keyInput.trim()}
+                            className="rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] px-6 py-2 text-xs font-semibold text-white transition shadow-sm disabled:opacity-50"
                           >
-                            Save Encrypted Credential
+                            {isSaving ? "Saving..." : "Save Encrypted Credential"}
                           </button>
                         </div>
                       </div>

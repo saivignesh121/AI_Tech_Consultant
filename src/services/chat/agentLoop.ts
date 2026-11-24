@@ -282,7 +282,10 @@ export async function executeConsultantTurn(params: {
   const approvedLessons = await getApprovedLessonsForQuery(params.businessId, parsed.extractedCoreQuery);
 
   // 4. Knowledge Base Grounding & "I Don't Know" Line (Task 3.2)
-  const contexts = params.availableContexts !== undefined ? params.availableContexts : DEFAULT_MOCK_CONTEXTS;
+  // Demo/mock grounding is never used in production; production answers
+  // may only cite contexts supplied from stored knowledge chunks.
+  const contexts = params.availableContexts ??
+    (process.env.NODE_ENV === "production" ? [] : DEFAULT_MOCK_CONTEXTS);
   const { citations, formattedContext } = buildCitations(contexts);
 
   // Calculate maximum relevance score
@@ -322,7 +325,10 @@ export async function executeConsultantTurn(params: {
       }
     }
 
-    const unknownAnswer = `I do not have verified documentation or instructions for this inquiry in the Knowledge Brain (confidence: ${maxRelevance.toFixed(2)}, below calibrated threshold ${threshold.toFixed(2)}). An expert task has been created for our human specialists to review. Once resolved, the verified resolution will flow back into our permanent Knowledge Brain.`;
+    let unknownAnswer = `I do not have verified documentation or instructions for this inquiry in the Knowledge Brain (confidence: ${maxRelevance.toFixed(2)}, below calibrated threshold ${threshold.toFixed(2)}). An expert task has been created for our human specialists to review. Once resolved, the verified resolution will flow back into our permanent Knowledge Brain.`;
+    if (parsed.isPastedThread) {
+      unknownAnswer = `[Extracted Question: "${parsed.extractedCoreQuery}"]\n\n${unknownAnswer}`;
+    }
     const latencyMs = Math.max(25, Date.now() - startTime);
 
     return {
@@ -340,6 +346,8 @@ export async function executeConsultantTurn(params: {
       activeSkillUsed: matchedSkill ? matchedSkill.name : undefined,
       activeInstructionsUsed: activeInstructions.map((i) => i.title),
       activeLessonsUsed: [],
+      isPastedThread: parsed.isPastedThread,
+      extractedCoreQuery: parsed.extractedCoreQuery,
       trace: {
         modelId,
         knowledgeUsed: [],

@@ -47,6 +47,7 @@ export interface Citation {
   sourceUrl?: string;
   url?: string; // alias
   snippet: string;
+  verified?: boolean; // true only for contexts backed by a stored knowledge chunk
   paragraphText?: string;
   imageUrl?: string;
   imageCaption?: string;
@@ -97,6 +98,7 @@ export function buildCitations(
       sourceUrl: item.sourceUrl,
       url: item.sourceUrl,
       snippet: item.content.slice(0, 200) + (item.content.length > 200 ? "..." : ""),
+      verified: /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(item.id) && /^https?:\/\//.test(item.sourceUrl || ""),
       paragraphText: item.content,
       imageUrl: item.imageUrl,
       imageCaption: item.imageCaption,

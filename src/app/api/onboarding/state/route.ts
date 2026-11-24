@@ -8,7 +8,7 @@ export async function GET() {
   try {
     const tenant = await getTenantContext();
 
-    let step1Done = true;
+    let step1Done = false;
     let step2Done = false;
     let step3Done = false;
 
@@ -17,7 +17,7 @@ export async function GET() {
       const conns = await db
         .select()
         .from(apiConnections)
-        .where(eq(apiConnections.businessId, tenant.businessId));
+        .where(eq(apiConnections.workspaceId, tenant.businessId));
 
       // Check knowledge sources
       const sources = await db
@@ -31,14 +31,16 @@ export async function GET() {
         .from(agentRoles)
         .where(eq(agentRoles.businessId, tenant.businessId));
 
-      step1Done = conns.some((c) => c.status === "active") || true;
+      step1Done =
+        conns.some((c) => c.provider === "claude" && c.status === "active") &&
+        conns.some((c) => c.provider === "gemini" && c.status === "active");
       step2Done = sources.length > 0;
       step3Done = roles.length > 0;
     } catch (_dbErr) {
-      // Graceful fallback for test/mock sandboxes without Postgres running
-      step1Done = true;
-      step2Done = true;
-      step3Done = true;
+      // Fail closed: no step is complete when state cannot be verified.
+      step1Done = false;
+      step2Done = false;
+      step3Done = false;
     }
 
     return NextResponse.json({

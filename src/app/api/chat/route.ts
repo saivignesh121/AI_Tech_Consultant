@@ -9,6 +9,13 @@ import { knowledgePages, knowledgeChunks } from "@/db/schema/knowledge";
 import { modelCallLogs } from "@/db/schema/telemetry";
 import { agentRoles } from "@/db/schema/prompts";
 import { BUILTIN_ROLES, AgentRoleDefinition } from "@/services/chat/roles";
+import {
+  callWorkspaceModel,
+  AiKeyMissingError,
+  AiKeyRejectedError,
+  AiRateLimitedError,
+  AiProviderError,
+} from "@/services/ai/workspaceProvider";
 import { eq, and } from "drizzle-orm";
 
 /**
@@ -173,25 +180,9 @@ export async function POST(req: NextRequest) {
         console.warn("Notice: DB chunks fallback", err);
       }
 
-      if (!activeContexts || activeContexts.length === 0) {
-        // Isolated tenant-scoped default context
-        activeContexts = [
-          {
-            id: `chunk-${tenant.businessSlug}-1`,
-            type: "paragraph" as const,
-            title: `${tenant.businessName} CNAME & Custom Domain Setup`,
-            sourceUrl: `https://support.${tenant.businessSlug}.com/articles/custom-cname-setup`,
-            content: `To configure your custom domain on ${tenant.businessName}, point your CNAME record to proxy.${tenant.businessSlug}.com. Verify Cloudflare SSL/TLS Full Strict mode.`,
-          },
-          {
-            id: `chunk-${tenant.businessSlug}-2`,
-            type: "paragraph" as const,
-            title: `${tenant.businessName} Webhook & API Limits`,
-            sourceUrl: `https://support.${tenant.businessSlug}.com/articles/webhook-configuration`,
-            content: `All webhook deliveries for ${tenant.businessName} require HMAC SHA-256 validation. Rate limits are 100 requests per second.`,
-          },
-        ];
-      }
+      // No stored chunks => no grounded citations. Never synthesize a
+      // source URL from the tenant slug and present it as verified.
+      activeContexts = [];
     }
 
     // Resolve role definition: builtin or custom created in role editor
@@ -242,6 +233,32 @@ export async function POST(req: NextRequest) {
       availableContexts: activeContexts,
       confidenceThreshold: body.confidenceThreshold,
     });
+
+    // The reply comes only from this workspace's own AI key.
+    let providerReply: string;
+    try {
+      providerReply = await callWorkspaceModel(
+        tenant.businessId,
+        "anthropic",
+        message
+      );
+    } catch (err) {
+      if (err instanceof AiKeyMissingError) {
+        return NextResponse.json({ error: err.message }, { status: 400 });
+      }
+      if (err instanceof AiKeyRejectedError) {
+        return NextResponse.json({ error: err.message }, { status: 403 });
+      }
+      if (err instanceof AiRateLimitedError) {
+        return NextResponse.json({ error: err.message }, { status: 429 });
+      }
+      if (err instanceof AiProviderError) {
+        return NextResponse.json({ error: err.message }, { status: 502 });
+      }
+      throw err;
+    }
+    response.reply = providerReply;
+    response.answer = providerReply;
 
     // Record Messages & Telemetry with resilient database fallback
     let savedMsgId = `msg-${Date.now()}`;

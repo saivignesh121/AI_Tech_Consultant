@@ -1,10 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { maskPII } from "../src/lib/pii";
-import { encryptCredential, decryptCredential, maskApiKey } from "../src/lib/crypto";
+import { encryptSecret, decryptSecret, maskApiKey } from "../src/lib/crypto";
 import { calculateModelCost, SUPPORTED_MODELS } from "../src/services/llm/pricing";
 import { simulatePromptCachingSavings } from "../src/services/chat/cachingSimulator";
 import { validatePromptVariables } from "../src/services/chat/prompts";
 import { BUILTIN_ROLES } from "../src/services/chat/roles";
+
+process.env.ENCRYPTION_KEY ??= "a".repeat(64);
 
 describe("Feature 1: Workspace, Security, Telemetry & Multi-Tenancy", () => {
   describe("Task 1.5: PII Masking Engine", () => {
@@ -39,12 +41,13 @@ describe("Feature 1: Workspace, Security, Telemetry & Multi-Tenancy", () => {
   describe("Task 1.2: AES-256 Key Encryption & Masking", () => {
     it("should encrypt and decrypt API keys with zero loss", () => {
       const originalKey = "sk-ant-api03-abcdef1234567890-testkey";
-      const encrypted = encryptCredential(originalKey);
+      const encrypted = encryptSecret(originalKey);
 
-      expect(encrypted).not.toEqual(originalKey);
-      expect(encrypted.split(":")).toHaveLength(3); // iv:tag:ciphertext
+      expect(encrypted.ciphertext).not.toEqual(originalKey);
+      expect(encrypted.iv).toHaveLength(24);
+      expect(encrypted.last4).toEqual(originalKey.slice(-4));
 
-      const decrypted = decryptCredential(encrypted);
+      const decrypted = decryptSecret(encrypted);
       expect(decrypted).toEqual(originalKey);
     });
 

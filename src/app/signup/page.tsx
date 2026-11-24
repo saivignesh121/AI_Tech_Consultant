@@ -104,13 +104,10 @@ function SignUpContent() {
         setCountdown(60);
         setOtpCode("");
         setStep("enter_otp");
-        const notice = data.isRealSmtp
-          ? `✓ 6-digit verification code sent to ${email.trim()}! Please check your inbox or spam.`
-          : `Verification code dispatched! Enter the 6-digit code received in your email.`;
-        setOtpNotification(notice);
+        setOtpNotification("Verification code sent. Please check your inbox or spam.");
       }
     } catch (err) {
-      console.error(err);
+      console.error("OTP send failed:", err instanceof Error ? err.name : "UNKNOWN");
       setErrorMsg("Network error communicating with email dispatch service.");
     } finally {
       setSendingOtp(false);
@@ -174,7 +171,7 @@ function SignUpContent() {
         }, 800);
       }
     } catch (err) {
-      console.error(err);
+      console.error("OTP verification failed:", err instanceof Error ? err.name : "UNKNOWN");
       setErrorMsg("Network error occurred during workspace registration.");
     } finally {
       setVerifying(false);

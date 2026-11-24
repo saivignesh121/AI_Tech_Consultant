@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getTenantContext } from "@/lib/auth";
+import { getTenantContext, UnauthorizedError } from "@/lib/auth";
 import { db } from "@/db";
 import { knowledgePages } from "@/db/schema/knowledge";
 import { updateUrlHealthStatus } from "@/services/brain/healthTracker";
@@ -31,6 +31,9 @@ export async function GET() {
       },
     });
   } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.json(
       { error: "Failed to fetch health summary", details: String(error) },
       { status: 500 }
@@ -94,6 +97,9 @@ export async function POST(req: NextRequest) {
       message: `URL lifecycle transitioned from ${page.healthStatus} -> ${healthUpdate.newStatus}`,
     });
   } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.json(
       { error: "Failed to update page health", details: String(error) },
       { status: 500 }

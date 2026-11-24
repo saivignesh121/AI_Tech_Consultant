@@ -1,12 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { DEMO_BUSINESSES } from "../src/lib/auth";
-import { encryptCredential, decryptCredential, maskApiKey } from "../src/lib/crypto";
+import { encryptSecret, decryptSecret, maskApiKey } from "../src/lib/crypto";
 import { maskPII } from "../src/lib/pii";
 import { DEFAULT_PROMPTS, validatePromptVariables } from "../src/services/chat/prompts";
 import { BUILTIN_ROLES } from "../src/services/chat/roles";
 import { simulatePromptCachingSavings } from "../src/services/chat/cachingSimulator";
 import { calculateModelCost } from "../src/services/llm/pricing";
 import { checkPromptInjection } from "../src/services/chat/safetyShield";
+
+process.env.ENCRYPTION_KEY ??= "a".repeat(64);
 
 describe("Milestone 1 (Feature 1: Workspace and Settings) End-to-End Suite", () => {
   // =========================================================================
@@ -81,14 +83,13 @@ describe("Milestone 1 (Feature 1: Workspace and Settings) End-to-End Suite", () 
   describe("Task 1.2: The 5 Connections & Security Vault", () => {
     it("should encrypt credentials at rest with AES-256-GCM and mask for UI", () => {
       const originalKey = "sk-ant-api03-abcdef1234567890-prod-key";
-      const encrypted = encryptCredential(originalKey);
+      const encrypted = encryptSecret(originalKey);
 
-      expect(encrypted).not.toEqual(originalKey);
-      // Format: iv:authTag:ciphertext
-      const parts = encrypted.split(":");
-      expect(parts).toHaveLength(3);
+      expect(encrypted.ciphertext).not.toEqual(originalKey);
+      expect(encrypted.iv).toHaveLength(24);
+      expect(encrypted.last4).toEqual(originalKey.slice(-4));
 
-      const decrypted = decryptCredential(encrypted);
+      const decrypted = decryptSecret(encrypted);
       expect(decrypted).toEqual(originalKey);
 
       const masked = maskApiKey(originalKey);

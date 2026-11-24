@@ -71,23 +71,8 @@ export async function GET() {
           sessionId: initialSession.id,
           businessId: tenant.businessId,
           sender: "consultant",
-          content: `To configure custom CNAME subdomains with SSL:\n\n1. Point your DNS CNAME record to \`proxy.${tenant.businessSlug}.com\` [1].\n2. Set Cloudflare SSL/TLS encryption mode to **Full (Strict)** [2].\n3. Turn OFF the orange cloud proxy during initial certificate issuance to allow ACME challenge validation.\n\nAll verified against verified documentation.`,
-          citations: [
-            {
-              id: "c1",
-              type: "paragraph",
-              title: "Custom CNAME Subdomains & SSL Setup",
-              url: `https://support.${tenant.businessSlug}.com/articles/custom-cname-setup`,
-              snippet: "Point DNS CNAME record to proxy cluster.",
-            },
-            {
-              id: "c2",
-              type: "paragraph",
-              title: "Cloudflare Flexible vs Full Strict SSL",
-              url: `https://support.${tenant.businessSlug}.com/articles/ssl-cloudflare-handshake`,
-              snippet: "Set Cloudflare SSL/TLS mode to Full Strict.",
-            },
-          ],
+          content: "Ask a question to get answers grounded in your crawled documentation.",
+          citations: [],
           isEscalated: false,
         });
 

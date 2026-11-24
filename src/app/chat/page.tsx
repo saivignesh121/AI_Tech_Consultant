@@ -42,6 +42,7 @@ interface CitationItem {
   url?: string;
   sourceUrl?: string;
   snippet?: string;
+  verified?: boolean;
   paragraphText?: string;
   attributionBadge?: string;
   imageUrl?: string;
@@ -674,6 +675,7 @@ export default function ChatPage() {
   const recentCitations = messages
     .filter((m) => m.sender === "consultant" && m.citations && m.citations.length > 0)
     .flatMap((m) => m.citations || [])
+    .filter((c) => c.verified === true)
     .slice(-4);
 
   return (
@@ -990,14 +992,14 @@ export default function ChatPage() {
                     {m.content}
 
                     {/* Citations block with One-Click Inspection */}
-                    {m.citations && m.citations.length > 0 && (
+                    {m.citations && m.citations.some((c) => c.verified === true) && (
                       <div className="mt-3 pt-2.5 border-t border-slate-200 space-y-1.5">
                         <span className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider flex items-center gap-1">
                           <BookOpen className="h-3 w-3 text-blue-600" />
                           <span>Verified Sources (Click to inspect paragraph or screenshot):</span>
                         </span>
                         <div className="flex flex-wrap gap-1.5">
-                          {m.citations.map((c, cIdx) => {
+                          {m.citations.filter((c) => c.verified === true).map((c, cIdx) => {
                             const num = c.citationNumber || c.citationIndex || cIdx + 1;
                             const badge = c.attributionBadge || "[sitemap]";
                             return (
@@ -1528,7 +1530,7 @@ export default function ChatPage() {
                           )}
                           <span className="truncate">{c.sourceTitle || c.title}</span>
                         </div>
-                        <div className="text-[10px] text-slate-500 font-mono truncate">{c.url || c.sourceUrl}</div>
+                        <div className="text-[10px] text-slate-500 font-mono truncate">{c.url || c.sourceUrl || "Unverified source"}</div>
                         <div className="text-[10px] text-blue-600 font-medium">Click to inspect exact paragraph &rarr;</div>
                       </div>
                     ))}
@@ -1721,7 +1723,7 @@ export default function ChatPage() {
                       )}
                     </div>
                     <p className="text-[11px] text-slate-500 font-mono mt-0.5">
-                      {selectedCitation.url || selectedCitation.sourceUrl || "Knowledge Brain Verified Document"}
+                      {selectedCitation.url || selectedCitation.sourceUrl || "Unverified source"}
                     </p>
                   </div>
                 </div>

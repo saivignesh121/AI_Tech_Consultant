@@ -81,17 +81,25 @@ export const apiConnections = pgTable(
   "api_connections",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    businessId: uuid("business_id")
+    workspaceId: uuid("workspace_id")
       .references(() => businesses.id, { onDelete: "cascade" })
       .notNull(),
-    provider: varchar("provider", { length: 50 }).notNull(), // 'claude' | 'gemini' | 'openrouter' | 'ollama' | 'google'
-    encryptedApiKey: text("encrypted_api_key"),
+    provider: varchar("provider", { length: 50 }).notNull(), // legacy: 'claude' | 'gemini' | 'openrouter' | 'ollama' | 'google'
+    encryptedApiKey: text("encrypted_api_key"), // legacy envelope; nullable during migration
     endpointUrl: varchar("endpoint_url", { length: 255 }),
-    status: varchar("status", { length: 50 }).default("untested").notNull(), // 'active' | 'error' | 'untested'
+    keyVersion: varchar("key_version", { length: 50 }).default("1").notNull(),
+    iv: varchar("iv", { length: 24 }),
+    authTag: varchar("auth_tag", { length: 32 }),
+    ciphertext: text("ciphertext"),
+    last4: varchar("last4", { length: 4 }),
+    status: varchar("status", { length: 50 }).default("unchecked").notNull(), // 'active' | 'rejected' | 'unchecked'
+    validatedAt: timestamp("validated_at", { withTimezone: true }),
+    createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
     lastTestedAt: timestamp("last_tested_at", { withTimezone: true }),
   },
   (table) => [
-    uniqueIndex("uq_api_conn_business_provider").on(table.businessId, table.provider),
+    uniqueIndex("uq_api_conn_workspace_provider").on(table.workspaceId, table.provider),
   ]
 );
 

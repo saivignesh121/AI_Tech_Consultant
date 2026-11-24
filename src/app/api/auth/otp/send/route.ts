@@ -58,19 +58,23 @@ export async function POST(req: NextRequest) {
       businessName,
     });
 
+    if (!emailResult.success) {
+      console.error("[OTP] Email dispatch failed:", emailResult.error || "UNKNOWN");
+      return NextResponse.json(
+        { error: "Could not send verification email. Please try again." },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
-      message: emailResult.isRealSmtp
-        ? `Real verification email dispatched to ${cleanEmail}. Please check your inbox or spam folder.`
-        : `Verification code generated for ${cleanEmail}. Check terminal or enter demo code 123456.`,
-      emailResult,
-      previewUrl: emailResult.previewUrl || null,
-      isRealSmtp: Boolean(emailResult.isRealSmtp),
-      // Never expose the OTP code in response when real SMTP is configured
-      devPreviewOtp: emailResult.isRealSmtp ? undefined : otpCode,
+      message: "Verification email sent. Please check your inbox.",
     });
   } catch (err) {
-    console.error("Failed to generate and dispatch OTP:", err);
+    console.error(
+      "Failed to generate and dispatch OTP:",
+      err instanceof Error ? err.name : "UNKNOWN"
+    );
     return NextResponse.json(
       { error: "Failed to send verification email. Please try again." },
       { status: 500 }

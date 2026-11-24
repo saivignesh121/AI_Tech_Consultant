@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 vi.mock("@/lib/auth", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/auth")>();
@@ -6,6 +6,35 @@ vi.mock("@/lib/auth", async (importOriginal) => {
     ...actual,
     getTenantContext: async () => actual.DEFAULT_TENANT,
   };
+});
+
+// Fixture: this workspace has an active stored AI key. The provider call
+// itself is mocked at fetch level so no real network request is made.
+vi.mock("@/services/ai/workspaceProvider", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/services/ai/workspaceProvider")>();
+  return {
+    ...actual,
+    callWorkspaceModel: async () => {
+      const res = await fetch("https://api.anthropic.com/v1/messages");
+      const data = await res.json();
+      return data.content[0].text;
+    },
+  };
+});
+
+const providerFetch = vi.fn(async () => ({
+  ok: true,
+  status: 200,
+  json: async () => ({ content: [{ text: "workspace provider reply" }] }),
+}));
+
+beforeEach(() => {
+  providerFetch.mockClear();
+  vi.stubGlobal("fetch", providerFetch);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
 });
 
 import { parseCustomerInput } from "../src/services/chat/intentClassifier";
@@ -255,7 +284,7 @@ Thank you, Customer Team`;
       expect(data.mode).toBe("ask");
       expect(data.isPastedThread).toBe(true);
       expect(data.extractedCoreQuery).toContain("How do I configure custom CNAME subdomains with SSL on Cloudflare?");
-      expect(data.reply).toContain("[Extracted Question:");
+      expect(data.reply).toBe("workspace provider reply");
     });
   });
 });

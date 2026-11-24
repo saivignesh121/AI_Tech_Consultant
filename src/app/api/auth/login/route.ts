@@ -17,8 +17,8 @@ const PENDING_LOGIN_TTL_SECONDS = 5 * 60;
 
 function signPendingLogin(userId: string): string {
   const key = process.env.ENCRYPTION_KEY;
-  if (!key) {
-    throw new Error("ENCRYPTION_KEY is not configured");
+  if (!key || !/^[0-9a-fA-F]{64}$/.test(key)) {
+    throw new Error("ENCRYPTION_KEY must be 64 hex characters");
   }
   const payload = `${userId}.${Date.now() + PENDING_LOGIN_TTL_SECONDS * 1000}`;
   const signature = createHmac("sha256", key).update(payload).digest("hex");

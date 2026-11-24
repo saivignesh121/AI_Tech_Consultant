@@ -49,7 +49,7 @@ export function getOnboardingInputRequirements(): OnboardingRequirementsBreakdow
       },
       {
         field: "Documentation Seed",
-        description: "Either one public sitemap URL (e.g. https://docs.company.com/sitemap.xml) OR uploaded files (Markdown/PDF).",
+        description: "Either one public sitemap URL or uploaded files (Markdown/PDF).",
         category: "knowledge_seed",
         required: true,
       },

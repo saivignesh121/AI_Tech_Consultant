@@ -12,7 +12,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 // access by itself. Missing key => fail closed (no default/hardcoded key).
 function verifyPendingLogin(value?: string): string | null {
   const key = process.env.ENCRYPTION_KEY;
-  if (!key || !value) return null;
+  if (!key || !/^[0-9a-fA-F]{64}$/.test(key) || !value) return null;
 
   const parts = value.split(".");
   if (parts.length !== 3) return null;

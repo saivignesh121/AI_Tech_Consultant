@@ -1,9 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { encryptCredential, decryptCredential, maskApiKey } from "../src/lib/crypto";
+import { encryptSecret, decryptSecret, maskApiKey } from "../src/lib/crypto";
 import { maskPII } from "../src/lib/pii";
 import { SUPPORTED_MODELS } from "../src/services/llm/pricing";
 import { DEFAULT_STEP_MODELS } from "../src/services/llm/stepModels";
 import { routeModelCall } from "../src/services/llm/router";
+
+process.env.ENCRYPTION_KEY ??= "a".repeat(64);
 
 describe("Task 1.2: Keys, Local Models, Connections & Step Routing", () => {
   const REQUIRED_PROVIDERS = ["claude", "gemini", "openrouter", "ollama", "google"];
@@ -39,12 +41,13 @@ describe("Task 1.2: Keys, Local Models, Connections & Step Routing", () => {
   describe("2. AES-256 Encryption & Zero-Leakage Masking", () => {
     it("encrypts secrets with AES-256-GCM and never displays full plaintext again", () => {
       const secret = "sk-ant-api03-very-secret-production-claude-key-998877";
-      const encrypted = encryptCredential(secret);
+      const encrypted = encryptSecret(secret);
 
-      expect(encrypted).not.toEqual(secret);
-      expect(encrypted.split(":")).toHaveLength(3); // iv : authTag : ciphertext
+      expect(encrypted.ciphertext).not.toEqual(secret);
+      expect(encrypted.iv).toHaveLength(24);
+      expect(encrypted.last4).toEqual(secret.slice(-4));
 
-      const decrypted = decryptCredential(encrypted);
+      const decrypted = decryptSecret(encrypted);
       expect(decrypted).toEqual(secret);
 
       const masked = maskApiKey(secret);

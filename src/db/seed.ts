@@ -5,7 +5,7 @@ import { modelCallLogs } from "./schema/telemetry";
 import { knowledgeSources, knowledgePages, knowledgeChunks } from "./schema/knowledge";
 import { DEFAULT_PROMPTS } from "../services/chat/prompts";
 import { BUILTIN_ROLES } from "../services/chat/roles";
-import { encryptCredential } from "../lib/crypto";
+import { encryptSecret } from "../lib/crypto";
 import { DEMO_BUSINESSES, hashPassword } from "../lib/auth";
 import { eq, and } from "drizzle-orm";
 
@@ -92,14 +92,14 @@ export async function seedDatabase() {
       const existingConn = await db
         .select()
         .from(apiConnections)
-        .where(eq(apiConnections.businessId, tenant.businessId))
+        .where(eq(apiConnections.workspaceId, tenant.businessId))
         .then((rows) => rows.find((r) => r.provider === p.provider));
 
       if (!existingConn) {
         await db.insert(apiConnections).values({
-          businessId: tenant.businessId,
+          workspaceId: tenant.businessId,
           provider: p.provider,
-          encryptedApiKey: p.key ? encryptCredential(p.key) : null,
+          encryptedApiKey: p.key ? JSON.stringify(encryptSecret(p.key)) : null,
           endpointUrl: p.endpoint,
           status: p.provider === "claude" || p.provider === "ollama" ? "active" : "untested",
         });

@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
       });
     }
   } catch (err) {
-    console.error("OTP verification error:", err);
+    console.error("OTP verification error:", err instanceof Error ? err.name : "UNKNOWN");
     return NextResponse.json(
       { error: "Failed to verify OTP code." },
       { status: 500 }

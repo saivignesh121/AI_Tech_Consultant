@@ -2,6 +2,13 @@ import nodemailer from "nodemailer";
 import * as dotenv from "dotenv";
 dotenv.config();
 
+function errorCode(err: unknown): string {
+  if (err && typeof err === "object" && "code" in err) {
+    return String((err as { code?: unknown }).code ?? "UNKNOWN");
+  }
+  return err instanceof Error ? err.name : "UNKNOWN";
+}
+
 export interface SmtpConfig {
   host?: string;
   port?: number;
@@ -43,7 +50,7 @@ export async function sendOtpEmail(params: SendOtpParams): Promise<SendEmailResu
     smtpFrom = smtpUser ? `"AI Technologies & Consulting" <${smtpUser}>` : '"AI Technologies & Consulting" <no-reply@aitechconsults.com>';
   }
 
-  const subject = `Your Verification Code: ${otpCode} — AI Technologies & Consulting`;
+  const subject = "Your verification code";
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -111,56 +118,46 @@ export async function sendOtpEmail(params: SendOtpParams): Promise<SendEmailResu
       console.log(`[Email Dispatch] Real SMTP OTP dispatched to ${toEmail}: messageId=${info.messageId}`);
       return { success: true, messageId: info.messageId, isRealSmtp: true };
     } catch (err) {
-      console.error("[Email Dispatch] SMTP transport failed, falling back to sandbox logger/test account:", err);
+      console.error("[Email Dispatch] SMTP send failed:", errorCode(err));
+      return { success: false, error: "SMTP_SEND_FAILED" };
     }
   }
 
-  // 3. Fallback: Try Ethereal live test account
-  try {
-    const testAccount = await nodemailer.createTestAccount();
-    const testTransporter = nodemailer.createTransport({
-      host: "smtp.ethereal.email",
-      port: 587,
-      secure: false,
-      auth: {
-        user: testAccount.user,
-        pass: testAccount.pass,
-      },
-    });
+  // 3. Ethereal is allowed only for explicit local development opt-in.
+  if (process.env.NODE_ENV === "development" && process.env.ALLOW_TEST_EMAIL === "true") {
+    try {
+      const testAccount = await nodemailer.createTestAccount();
+      const testTransporter = nodemailer.createTransport({
+        host: "smtp.ethereal.email",
+        port: 587,
+        secure: false,
+        auth: {
+          user: testAccount.user,
+          pass: testAccount.pass,
+        },
+      });
 
-    const info = await testTransporter.sendMail({
-      from: smtpFrom,
-      to: toEmail,
-      subject,
-      text: textContent,
-      html: htmlContent,
-    });
+      const info = await testTransporter.sendMail({
+        from: smtpFrom,
+        to: toEmail,
+        subject,
+        text: textContent,
+        html: htmlContent,
+      });
 
-    const previewUrl = nodemailer.getTestMessageUrl(info) || undefined;
-    console.log(`[Email Dispatch] Ethereal test email dispatched for ${toEmail}: ${previewUrl}`);
-    return {
-      success: true,
-      messageId: info.messageId,
-      previewUrl,
-      isRealSmtp: false,
-    };
-  } catch (etherealErr) {
-    console.warn("[Email Dispatch] Ethereal service skipped/offline:", etherealErr);
+      const previewUrl = nodemailer.getTestMessageUrl(info) || undefined;
+      return {
+        success: true,
+        messageId: info.messageId,
+        previewUrl,
+        isRealSmtp: false,
+      };
+    } catch (etherealErr) {
+      console.error("[Email Dispatch] Ethereal send failed:", errorCode(etherealErr));
+      return { success: false, error: "TEST_EMAIL_SEND_FAILED" };
+    }
   }
 
-  // 4. Secure Development Telemetry Log
-  console.log(`\n======================================================`);
-  console.log(`📧 [EMAIL SERVICE] OUTBOUND OTP DISPATCH`);
-  console.log(`Recipient:   ${toEmail}`);
-  console.log(`OTP Code:    ${otpCode}`);
-  console.log(`Purpose:     ${purpose}`);
-  console.log(`Expires In:  10 Minutes`);
-  console.log(`Notice:      Configure SMTP_USER & SMTP_PASS in .env for direct inbox delivery.`);
-  console.log(`======================================================\n`);
-
-  return {
-    success: true,
-    messageId: `dev-msg-${Date.now()}-${Math.random().toString(36).substring(7)}`,
-    isRealSmtp: false,
-  };
+  // No real transport configured (or a real send failed outside development).
+  return { success: false, error: "EMAIL_NOT_CONFIGURED" };
 }

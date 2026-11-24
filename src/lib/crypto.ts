@@ -1,58 +1,86 @@
 import crypto from "crypto";
 
-// 32-byte key for AES-256-GCM
-const DEFAULT_KEY = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+// AES-256-GCM with a fresh 12-byte IV per record and a version tag stored
+// alongside the ciphertext so keys can be rotated.
 const ALGORITHM = "aes-256-gcm";
 
 function getEncryptionKey(): Buffer {
-  const hexKey = process.env.ENCRYPTION_KEY || DEFAULT_KEY;
-  return Buffer.from(hexKey.slice(0, 64), "hex");
+  const hexKey = process.env.ENCRYPTION_KEY;
+  if (!hexKey || !/^[0-9a-fA-F]{64}$/.test(hexKey)) {
+    throw new Error("ENCRYPTION_KEY must be set to 64 hex characters");
+  }
+  return Buffer.from(hexKey, "hex");
 }
 
-export interface EncryptedData {
-  encrypted: string;
+function getKeyVersion(): string {
+  return process.env.ENCRYPTION_KEY_VERSION || "1";
+}
+
+export interface EncryptedSecret {
+  keyVersion: string;
   iv: string;
-  tag: string;
+  authTag: string;
+  ciphertext: string;
+  last4: string;
 }
 
-/**
- * Encrypts sensitive credentials using AES-256-GCM.
- */
-export function encryptCredential(plainText: string): string {
-  if (!plainText) return "";
+/** Encrypt a secret into a versioned envelope. Never logs the plaintext. */
+export function encryptSecret(plainText: string): EncryptedSecret {
+  if (!plainText) {
+    throw new Error("Cannot encrypt an empty secret");
+  }
   const key = getEncryptionKey();
-  const iv = crypto.randomBytes(12); // 96-bit IV recommended for GCM
+  const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
+  const ciphertext =
+    cipher.update(plainText, "utf8", "hex") + cipher.final("hex");
 
-  let encrypted = cipher.update(plainText, "utf8", "hex");
-  encrypted += cipher.final("hex");
-  const tag = cipher.getAuthTag().toString("hex");
-
-  // Format: iv:tag:encrypted
-  return `${iv.toString("hex")}:${tag}:${encrypted}`;
+  return {
+    keyVersion: getKeyVersion(),
+    iv: iv.toString("hex"),
+    authTag: cipher.getAuthTag().toString("hex"),
+    ciphertext,
+    last4: plainText.slice(-4),
+  };
 }
 
-/**
- * Decrypts AES-256-GCM encrypted credentials.
- */
-export function decryptCredential(cipherPackage: string): string {
-  if (!cipherPackage) return "";
-  const parts = cipherPackage.split(":");
-  if (parts.length !== 3) {
-    throw new Error("Invalid encrypted credential format");
+function decodeSecret(value: EncryptedSecret | string): EncryptedSecret {
+  if (typeof value !== "string") return value;
+
+  // Legacy rows stored "iv:tag:ciphertext" under key version 1.
+  if (!value.startsWith("{")) {
+    const [iv, authTag, ciphertext] = value.split(":");
+    if (!iv || !authTag || !ciphertext) {
+      throw new Error("Invalid encrypted secret format");
+    }
+    return { keyVersion: "1", iv, authTag, ciphertext, last4: "" };
   }
 
-  const [ivHex, tagHex, encryptedHex] = parts;
+  const parsed = JSON.parse(value) as EncryptedSecret;
+  if (!parsed.iv || !parsed.authTag || !parsed.ciphertext || !parsed.keyVersion) {
+    throw new Error("Invalid encrypted secret format");
+  }
+  return parsed;
+}
+
+/** Decrypt a versioned envelope (or a legacy string). Never logs the secret. */
+export function decryptSecret(value: EncryptedSecret | string): string {
+  const record = decodeSecret(value);
+  if (record.keyVersion !== getKeyVersion()) {
+    throw new Error("Encryption key version mismatch");
+  }
+
   const key = getEncryptionKey();
-  const iv = Buffer.from(ivHex, "hex");
-  const tag = Buffer.from(tagHex, "hex");
-
-  const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
-  decipher.setAuthTag(tag);
-
-  let decrypted = decipher.update(encryptedHex, "hex", "utf8");
-  decrypted += decipher.final("utf8");
-  return decrypted;
+  const decipher = crypto.createDecipheriv(
+    ALGORITHM,
+    key,
+    Buffer.from(record.iv, "hex")
+  );
+  decipher.setAuthTag(Buffer.from(record.authTag, "hex"));
+  return (
+    decipher.update(record.ciphertext, "hex", "utf8") +
+    decipher.final("utf8")
+  );
 }
 
 /**
